@@ -11,7 +11,7 @@ import {
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
-import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import { archiveOutline,bookmarkOutline, heartOutline,  mailOutline,  paperPlaneOutline,  trashOutline,  warningOutline, warningSharp, home, bookmark, cart, people, person } from 'ionicons/icons';
 import './Menu.css';
 
 interface AppPage {
@@ -23,37 +23,37 @@ interface AppPage {
 
 const appPages: AppPage[] = [
   {
-    title: 'Inbox',
-    url: '/folder/Inbox',
+    title: 'Inicio',
+    url: '/folder/Inicio',
     iosIcon: mailOutline,
-    mdIcon: mailSharp
+    mdIcon: home
   },
   {
-    title: 'Outbox',
-    url: '/folder/Outbox',
+    title: 'Reportes',
+    url: '/folder/Reportes',
     iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp
+    mdIcon: bookmark
   },
   {
-    title: 'Favorites',
-    url: '/folder/Favorites',
+    title: 'Pedidos',
+    url: '/folder/Pedidos',
     iosIcon: heartOutline,
-    mdIcon: heartSharp
+    mdIcon: cart
   },
   {
-    title: 'Archived',
-    url: '/folder/Archived',
+    title: 'Clientes',
+    url: '/folder/Customer',
     iosIcon: archiveOutline,
-    mdIcon: archiveSharp
+    mdIcon: people
   },
   {
-    title: 'Trash',
-    url: '/folder/Trash',
+    title: 'Usuarios',
+    url: '/folder/Usuarios',
     iosIcon: trashOutline,
-    mdIcon: trashSharp
+    mdIcon: person
   },
   {
-    title: 'Spam',
+    title: 'Cerrar sesión',
     url: '/folder/Spam',
     iosIcon: warningOutline,
     mdIcon: warningSharp
@@ -69,8 +69,8 @@ const Menu: React.FC = () => {
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Inbox</IonListHeader>
-          <IonNote>hi@ionicframework.com</IonNote>
+          <IonListHeader>Admin Mayorista</IonListHeader>
+          <IonNote></IonNote>
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
