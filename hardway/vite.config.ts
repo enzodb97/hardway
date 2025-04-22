@@ -1,5 +1,4 @@
 /// <reference types="vitest" />
-
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
@@ -10,6 +9,16 @@ export default defineConfig({
     react(),
     legacy()
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.webtest.net',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false // Solo si usas SSL autofirmado
+      }
+    }
+  },
   test: {
     globals: true,
     environment: 'jsdom',

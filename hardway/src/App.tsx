@@ -3,6 +3,10 @@ import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
 import Menu from './components/Menu';
 import Page from './pages/Page';
+import { useAuth } from './context/AuthContext';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import PrivateRoute from './components/PrivateRoute';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -37,17 +41,35 @@ import './theme/variables.css';
 setupIonicReact();
 
 const App: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <IonApp>
       <IonReactRouter>
-        <IonSplitPane contentId="main">
+        <IonSplitPane contentId="main" when={isAuthenticated}>
           <Menu />
           <IonRouterOutlet id="main">
-            <Route path="/" exact={true}>
-              <Redirect to="/folder/Inbox" />
+            {/* Rutas públicas */}
+            <Route exact path="/login">
+              <Login />
             </Route>
-            <Route path="/folder/:name" exact={true}>
+
+            {/* Rutas privadas */}
+            <PrivateRoute exact path="/dashboard">
+              <Dashboard />
+            </PrivateRoute>
+            
+            <PrivateRoute exact path="/folder/:name">
               <Page />
+            </PrivateRoute>
+
+            {/* Redirecciones */}
+            <Route exact path="/">
+              {isAuthenticated ? (
+                <Redirect to="/dashboard" />
+              ) : (
+                <Redirect to="/login" />
+              )}
             </Route>
           </IonRouterOutlet>
         </IonSplitPane>

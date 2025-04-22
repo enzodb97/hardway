@@ -1,0 +1,169 @@
+/* Login.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Poppins:wght@400;600&display=swap');
+
+/* Estructura principal - Fondo amarillo */
+.login-content {
+  --background: #FFD700 !important; /* Amarillo vibrante */
+  min-height: 100vh;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 20px;
+}
+
+/* Corrección del scroll de Ionic */
+ion-content::part(scroll) {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  position: static !important;
+  height: 100% !important;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Contenedor del formulario - Blanco con sombra */
+.form-container {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  padding: 2.5rem;
+  position: relative;
+}
+
+/* Título principal */
+.brand-title {
+  font-family: 'Montserrat', sans-serif;
+  color: #000000;
+  font-size: 2.8rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+}
+
+/* Sección del formulario */
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-family: 'Poppins', sans-serif;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.form-instruction {
+  font-family: 'Poppins', sans-serif;
+  color: #666;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+/* Campos de entrada */
+.input-group {
+  margin-bottom: 1.8rem;
+}
+
+.input-label {
+  font-family: 'Poppins', sans-serif;
+  color: #444;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+  display: block;
+}
+
+.custom-input {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  transition: all 0.3s ease;
+  color: black;
+}
+
+.custom-input:focus {
+  border-color: #2c3e50;
+  box-shadow: 0 0 0 3px rgba(44,62,80,0.1);
+  outline: none;
+}
+
+/* Botón principal */
+.primary-button {
+  width: 100%;
+  padding: 16px;
+  background: #feaf00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.primary-button:hover {
+  background: #1a2633;
+  transform: translateY(-2px);
+}
+
+/* Sección de recuperación */
+.password-section {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #eee;
+}
+
+.password-link {
+  font-family: 'Poppins', sans-serif;
+  color: black;
+  text-decoration: none;
+}
+
+.password-link span {
+  color: #feaf00;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Mensaje de error */
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 1rem 0;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.brand-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px; /* Espacio entre ícono y texto */
+  font-family: 'Montserrat', sans-serif;
+  color: #2c3e50;
+  font-size: 2.8rem;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+}
+
+.brand-logo {
+  width: 50px; /* Ajusta según necesidad */
+  height: 50px;
+  object-fit: contain;
+}

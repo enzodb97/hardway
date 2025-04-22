@@ -1,0 +1,20 @@
+.login-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    text-align: center;
+  }
+  
+  .error-message {
+    color: var(--ion-color-danger);
+    margin: 1rem 0;
+  }
+  
+  .forgot-password {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+  }
+  
+  .forgot-password a {
+    color: var(--ion-color-medium);
+    text-decoration: none;
+  }
