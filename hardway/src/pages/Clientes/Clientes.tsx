@@ -13,13 +13,13 @@ import {
   IonButton,
   IonIcon,
 } from "@ionic/react";
-import { add, pencil } from "ionicons/icons";
+import { add, pencil, trash } from "ionicons/icons";
 import { useState } from "react";
 import { useClientes } from "../../context/ClientesContext";
 import "./Clientes.css";
 
 const Clientes: React.FC = () => {
-  const { clientes } = useClientes();
+  const { clientes, eliminarCliente } = useClientes();
   const [busqueda, setBusqueda] = useState("");
 
   const clientesFiltrados = clientes.filter(
@@ -28,6 +28,12 @@ const Clientes: React.FC = () => {
       cliente.email.toLowerCase().includes(busqueda.toLowerCase()) ||
       cliente.numeroCliente.includes(busqueda)
   );
+
+  const handleEliminar = (id: number) => {
+    if (window.confirm("¿Está seguro que desea eliminar este cliente?")) {
+      eliminarCliente(id);
+    }
+  };
 
   return (
     <IonPage className="clientes-page">
@@ -71,14 +77,22 @@ const Clientes: React.FC = () => {
                 <IonCol>{cliente.numeroCliente}</IonCol>
                 <IonCol>{cliente.localidad}</IonCol>
                 <IonCol>
-                  <IonButton
-                    fill="clear"
-                    routerLink={`/alta-cliente/${cliente.id}`}
-                    routerDirection="forward"
-                    className="edit-btn"
-                  >
-                    <IonIcon slot="icon-only" icon={pencil} color="primary" />
-                  </IonButton>
+                  <div className="action-buttons">
+                    <IonButton
+                      fill="clear"
+                      routerLink={`/alta-cliente/${cliente.id}`}
+                      className="edit-btn"
+                    >
+                      <IonIcon slot="icon-only" icon={pencil} color="primary" />
+                    </IonButton>
+                    <IonButton
+                      fill="clear"
+                      onClick={() => handleEliminar(cliente.id)}
+                      className="delete-btn"
+                    >
+                      <IonIcon slot="icon-only" icon={trash} color="danger" />
+                    </IonButton>
+                  </div>
                 </IonCol>
               </IonRow>
             ))}

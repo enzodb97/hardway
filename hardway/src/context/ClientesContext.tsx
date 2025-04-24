@@ -13,12 +13,14 @@ interface ClientesContextType {
   clientes: Cliente[];
   agregarCliente: (nuevoCliente: Omit<Cliente, "id">) => void;
   editarCliente: (clienteActualizado: Cliente) => void;
+  eliminarCliente: (id: number) => void;
 }
 
 const ClientesContext = createContext<ClientesContextType>({
   clientes: [],
   agregarCliente: () => {},
   editarCliente: () => {},
+  eliminarCliente: () => {},
 });
 
 export const ClientesProvider = ({
@@ -49,13 +51,28 @@ export const ClientesProvider = ({
     );
   };
 
+  const eliminarCliente = (id: number) => {
+    setClientes((prev) => prev.filter((cliente) => cliente.id !== id));
+  };
+
   return (
     <ClientesContext.Provider
-      value={{ clientes, agregarCliente, editarCliente }}
+      value={{
+        clientes,
+        agregarCliente,
+        editarCliente,
+        eliminarCliente,
+      }}
     >
       {children}
     </ClientesContext.Provider>
   );
 };
 
-export const useClientes = () => useContext(ClientesContext);
+export const useClientes = () => {
+  const context = useContext(ClientesContext);
+  if (!context) {
+    throw new Error("useClientes debe usarse dentro de ClientesProvider");
+  }
+  return context;
+};
