@@ -79,3 +79,45 @@
     height: 100px;
   }
 }
+
+.logout-label {
+  /*Boton Cerrar Sesion*/
+}
+
+/* Nuevos estilos para cerrar sesión */
+.logout-section {
+  margin-top: auto;
+  border-top: 1px solid var(--ion-color-medium-tint);
+  padding: 15px 0;
+}
+
+.logout-item {
+  --background: transparent;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --min-height: 50px;
+}
+
+.logout-item:hover {
+  --background: rgba(var(--ion-color-danger-rgb), 0.1);
+}
+
+.logout-icon {
+  color: var(--ion-color-danger);
+  font-size: 1.8rem;
+  margin-right: 15px;
+}
+
+.logout-label {
+  color: var(--ion-color-danger);
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+/* Ajuste de altura del contenedor */
+.menu-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Añadido para separar secciones */
+}

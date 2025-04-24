@@ -5,19 +5,20 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonListHeader,
   IonMenu,
   IonMenuToggle,
 } from "@ionic/react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import {
   homeOutline,
   bookmarkOutline,
   logoUsd,
   peopleOutline,
+  logOutOutline,
 } from "ionicons/icons";
 import "./Menu.css";
 import persona from "../assets/images/people.png";
+import { useAuth } from "../context/AuthContext"; // Importación añadida
 
 interface AppPage {
   url: string;
@@ -35,6 +36,13 @@ const appPages: AppPage[] = [
 
 const Menu: React.FC = () => {
   const location = useLocation();
+  const history = useHistory();
+  const { logout } = useAuth(); // Obtenemos la función de logout del contexto
+
+  const handleLogout = () => {
+    logout();
+    history.push("/login");
+  };
 
   return (
     <IonMenu contentId="main" type="overlay" className="custom-menu">
@@ -66,6 +74,25 @@ const Menu: React.FC = () => {
                 </IonItem>
               </IonMenuToggle>
             ))}
+
+            {/* Sección de Cerrar Sesión */}
+            <div className="logout-section">
+              <IonMenuToggle autoHide={false}>
+                <IonItem
+                  button
+                  lines="none"
+                  className="logout-item"
+                  onClick={handleLogout}
+                >
+                  <IonIcon
+                    slot="start"
+                    icon={logOutOutline}
+                    className="logout-icon"
+                  />
+                  <IonLabel className="logout-label">Cerrar Sesión</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+            </div>
           </IonList>
         </div>
       </IonContent>

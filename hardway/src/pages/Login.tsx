@@ -1,4 +1,4 @@
-import { IonContent, IonPage, IonLoading } from "@ionic/react";
+import { IonContent, IonPage } from "@ionic/react";
 import { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -16,9 +16,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const history = useHistory();
   const location = useLocation<LocationState>();
-  const { login, error, isAuthenticated, loading: authLoading } = useAuth();
+  const { login, error, isAuthenticated } = useAuth();
 
-  // Redirección automática al dashboard si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
       const redirectPath = location.state?.from?.pathname || "/dashboard";
@@ -26,14 +25,10 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, history, location.state?.from?.pathname]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    await login(username, password);
+    login(username, password);
   };
-
-  if (authLoading) {
-    return <IonLoading isOpen={true} message="Verificando sesión..." />;
-  }
 
   return (
     <IonPage className="login-page">
@@ -80,12 +75,8 @@ const Login: React.FC = () => {
 
                 {error && <div className="error-message">{error}</div>}
 
-                <button
-                  type="submit"
-                  className="primary-button"
-                  disabled={authLoading}
-                >
-                  {authLoading ? "CARGANDO..." : "INICIAR SESIÓN"}
+                <button type="submit" className="primary-button">
+                  INICIAR SESIÓN
                 </button>
               </form>
             </div>
@@ -101,4 +92,5 @@ const Login: React.FC = () => {
     </IonPage>
   );
 };
+
 export default Login;

@@ -5,7 +5,7 @@ import {
   setupIonicReact,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { Redirect, Route } from "react-router-dom";
+import { Route, Redirect } from "react-router-dom";
 import Menu from "./components/Menu";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ClientesProvider } from "./context/ClientesContext";
@@ -21,30 +21,32 @@ import "./theme/variables.css";
 setupIonicReact();
 
 const AppRouter = () => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <div className="loading-screen">Cargando...</div>;
-  }
+  const { isAuthenticated } = useAuth();
 
   return (
     <IonReactRouter>
-      <IonSplitPane contentId="main" when={isAuthenticated}>
-        {isAuthenticated && <Menu />}
-        <IonRouterOutlet id="main">
-          <Route exact path="/login" component={Login} />
-          <PrivateRoute exact path="/dashboard" component={Dashboard} />
-          <PrivateRoute exact path="/Clientes" component={Clientes} />
-          <PrivateRoute exact path="/alta-cliente" component={AltaCliente} />
-          <Route exact path="/">
-            {isAuthenticated ? (
+      {isAuthenticated ? (
+        <IonSplitPane contentId="main" when="md">
+          <Menu />
+          <IonRouterOutlet id="main">
+            <PrivateRoute exact path="/dashboard" component={Dashboard} />
+            <PrivateRoute exact path="/clientes" component={Clientes} />
+            <PrivateRoute
+              exact
+              path="/alta-cliente/:id?"
+              component={AltaCliente}
+            />
+            <Route exact path="/">
               <Redirect to="/dashboard" />
-            ) : (
-              <Redirect to="/login" />
-            )}
-          </Route>
+            </Route>
+          </IonRouterOutlet>
+        </IonSplitPane>
+      ) : (
+        <IonRouterOutlet>
+          <Route exact path="/login" component={Login} />
+          <Redirect to="/login" />
         </IonRouterOutlet>
-      </IonSplitPane>
+      )}
     </IonReactRouter>
   );
 };

@@ -13,7 +13,7 @@ import {
   IonButton,
   IonIcon,
 } from "@ionic/react";
-import { add } from "ionicons/icons";
+import { add, pencil } from "ionicons/icons";
 import { useState } from "react";
 import { useClientes } from "../../context/ClientesContext";
 import "./Clientes.css";
@@ -60,6 +60,7 @@ const Clientes: React.FC = () => {
               <IonCol>Celular</IonCol>
               <IonCol>N° Cliente</IonCol>
               <IonCol>Localidad</IonCol>
+              <IonCol>Acciones</IonCol>
             </IonRow>
 
             {clientesFiltrados.map((cliente) => (
@@ -69,6 +70,16 @@ const Clientes: React.FC = () => {
                 <IonCol>{cliente.celular}</IonCol>
                 <IonCol>{cliente.numeroCliente}</IonCol>
                 <IonCol>{cliente.localidad}</IonCol>
+                <IonCol>
+                  <IonButton
+                    fill="clear"
+                    routerLink={`/alta-cliente/${cliente.id}`}
+                    routerDirection="forward"
+                    className="edit-btn"
+                  >
+                    <IonIcon slot="icon-only" icon={pencil} color="primary" />
+                  </IonButton>
+                </IonCol>
               </IonRow>
             ))}
           </IonGrid>

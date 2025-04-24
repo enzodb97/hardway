@@ -21,7 +21,7 @@
 
 .clientes-page .clientes-header {
   background: var(--ion-color-primary);
-  color: white;
+  color: rgb(0, 0, 0);
   font-weight: bold;
 }
 
@@ -47,4 +47,26 @@
   .clientes-page .clientes-header ion-col {
     min-width: 150px;
   }
+}
+
+.edit-btn {
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: transparent;
+  --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.clientes-page ion-button {
+  margin: 0;
+}
+
+.edit-btn {
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: transparent;
+  --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.clientes-page ion-button {
+  margin: 0;
 }

@@ -11,15 +11,18 @@ import {
   IonItem,
   IonMenuButton,
 } from "@ionic/react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { useClientes } from "../../context/ClientesContext";
+import { Cliente } from "../../context/ClientesContext"; // Importación añadida
 import "./AltaCliente.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const AltaCliente: React.FC = () => {
-  const { agregarCliente } = useClientes();
+  const { id } = useParams<{ id?: string }>();
+  const { clientes, agregarCliente, editarCliente } = useClientes();
   const history = useHistory();
-  const [formData, setFormData] = useState({
+  const [esEdicion, setEsEdicion] = useState(false);
+  const [formData, setFormData] = useState<Partial<Cliente>>({
     nombre: "",
     email: "",
     celular: "",
@@ -27,9 +30,23 @@ const AltaCliente: React.FC = () => {
     localidad: "",
   });
 
+  useEffect(() => {
+    if (id) {
+      const clienteExistente = clientes.find((c) => c.id === Number(id));
+      if (clienteExistente) {
+        setFormData(clienteExistente);
+        setEsEdicion(true);
+      }
+    }
+  }, [id, clientes]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    agregarCliente(formData);
+    if (esEdicion) {
+      editarCliente(formData as Cliente);
+    } else {
+      agregarCliente(formData as Omit<Cliente, "id">);
+    }
     history.push("/Clientes");
   };
 
@@ -40,7 +57,7 @@ const AltaCliente: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>Nuevo Cliente</IonTitle>
+          <IonTitle>{esEdicion ? "Editar Cliente" : "Nuevo Cliente"}</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -105,7 +122,7 @@ const AltaCliente: React.FC = () => {
           </IonItem>
 
           <IonButton expand="block" type="submit" className="guardar-btn">
-            Guardar
+            {esEdicion ? "Actualizar" : "Guardar"}
           </IonButton>
         </form>
       </IonContent>

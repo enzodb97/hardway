@@ -12,11 +12,13 @@ export interface Cliente {
 interface ClientesContextType {
   clientes: Cliente[];
   agregarCliente: (nuevoCliente: Omit<Cliente, "id">) => void;
+  editarCliente: (clienteActualizado: Cliente) => void;
 }
 
 const ClientesContext = createContext<ClientesContextType>({
   clientes: [],
   agregarCliente: () => {},
+  editarCliente: () => {},
 });
 
 export const ClientesProvider = ({
@@ -39,8 +41,18 @@ export const ClientesProvider = ({
     setClientes((prev) => [...prev, { ...nuevoCliente, id: Date.now() }]);
   };
 
+  const editarCliente = (clienteActualizado: Cliente) => {
+    setClientes((prev) =>
+      prev.map((cliente) =>
+        cliente.id === clienteActualizado.id ? clienteActualizado : cliente
+      )
+    );
+  };
+
   return (
-    <ClientesContext.Provider value={{ clientes, agregarCliente }}>
+    <ClientesContext.Provider
+      value={{ clientes, agregarCliente, editarCliente }}
+    >
       {children}
     </ClientesContext.Provider>
   );
