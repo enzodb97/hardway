@@ -1,0 +1,24 @@
+/* AltaCliente.css */
+.alta-cliente-page .alta-cliente-content {
+  --padding-start: 20px;
+  --padding-end: 20px;
+}
+
+.alta-cliente-page .alta-cliente-form {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alta-cliente-page ion-item {
+  margin-bottom: 20px;
+  --background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.guardar-btn {
+  margin-top: 30px;
+  --background: var(--ion-color-primary);
+  --background-activated: var(--ion-color-primary-shade);
+}

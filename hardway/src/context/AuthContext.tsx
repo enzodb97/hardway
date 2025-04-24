@@ -1,49 +1,75 @@
-import { createContext, useContext, useEffect, useState, ReactNode, FC } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  FC,
+} from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  loading: boolean;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  error: string | null;
+  loading: boolean;
 }
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  login: async () => false,
+  logout: () => {},
+  error: null,
+  loading: true,
+});
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
-
-export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(false); // Quitamos loading temporalmente
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Credenciales válidas
-  const validCredentials = {
-    username: 'admin',
-    password: 'admin123'
-  };
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const login = (username: string, password: string): boolean => {
-    if (username === validCredentials.username && password === validCredentials.password) {
-      localStorage.setItem('isAuthenticated', 'true');
-      setIsAuthenticated(true);
-      return true;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (username === "admin" && password === "admin123") {
+        localStorage.setItem("isAuthenticated", "true");
+        setIsAuthenticated(true);
+        return true;
+      }
+
+      setError("Credenciales inválidas");
+      return false;
+    } catch (err) {
+      setError("Error en el servidor");
+      return false;
+    } finally {
+      setLoading(false);
     }
-    return false;
   };
 
   const logout = () => {
-    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem("isAuthenticated");
     setIsAuthenticated(false);
+    setError(null);
   };
 
   useEffect(() => {
-    const authStatus = localStorage.getItem('isAuthenticated');
-    setIsAuthenticated(authStatus === 'true');
+    const authStatus = localStorage.getItem("isAuthenticated");
+    setIsAuthenticated(authStatus === "true");
+    setLoading(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, login, logout, error, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

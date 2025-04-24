@@ -1,2 +1,39 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Poppins:wght@400;600&display=swap");
+
+/* Set variables for all modes */
+:root {
+  /* Set the background of the entire app */
+  --ion-background-color: #f1ecec !important;
+
+  /* Set the font family of the entire app */
+  --ion-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    "Roboto", sans-serif;
+}
+
+/* Set text color of the entire app for iOS only */
+:root.ios {
+  --ion-text-color: #000;
+}
+
+/* Set text color of the entire app for Material Design only */
+:root.md {
+  --ion-text-color: #0a0808;
+  --ion-item-background: #f2eae1 !important;
+  --ion-toolbar-background: #fdfdfd !important;
+}
+
+ion-content {
+  background-color: #bb1a1a !important;
+}
+
+/*.backgorund-content {
+  background-color: #ac1616 !important;
+}*/
+
+/*@media (prefers-color-scheme: dark) {
+  :root.md {
+    --ion-item-background: #e2dada;
+  }
+}*/

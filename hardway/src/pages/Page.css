@@ -1,0 +1,22 @@
+/* Estilos del formulario */
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 15px;
+}
+
+.obligatorio {
+  color: var(--ion-color-danger);
+  font-size: 0.8em;
+}
+
+.guardar-btn {
+  margin-top: 30px;
+  --background: var(--ion-color-primary);
+  --background-activated: var(--ion-color-primary-shade);
+}
+
+/* Estilos para campos deshabilitados */
+ion-input[disabled] {
+  opacity: 0.5;
+}

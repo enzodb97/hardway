@@ -1,79 +1,62 @@
-import { IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
-import { Redirect, Route } from 'react-router-dom';
-import Menu from './components/Menu';
-import Page from './pages/Page';
-import { useAuth } from './context/AuthContext';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import PrivateRoute from './components/PrivateRoute';
+import {
+  IonApp,
+  IonRouterOutlet,
+  IonSplitPane,
+  setupIonicReact,
+} from "@ionic/react";
+import { IonReactRouter } from "@ionic/react-router";
+import { Redirect, Route } from "react-router-dom";
+import Menu from "./components/Menu";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ClientesProvider } from "./context/ClientesContext";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import PrivateRoute from "./components/PrivateRoute";
+import Clientes from "./pages/Clientes/Clientes";
+import AltaCliente from "./pages/AltaCliente/AltaCliente";
 
-/* Core CSS required for Ionic components to work properly */
-import '@ionic/react/css/core.css';
-
-/* Basic CSS for apps built with Ionic */
-import '@ionic/react/css/normalize.css';
-import '@ionic/react/css/structure.css';
-import '@ionic/react/css/typography.css';
-
-/* Optional CSS utils that can be commented out */
-import '@ionic/react/css/padding.css';
-import '@ionic/react/css/float-elements.css';
-import '@ionic/react/css/text-alignment.css';
-import '@ionic/react/css/text-transformation.css';
-import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
-
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* import '@ionic/react/css/palettes/dark.always.css'; */
-/* import '@ionic/react/css/palettes/dark.class.css'; */
-import '@ionic/react/css/palettes/dark.system.css';
-
-/* Theme variables */
-import './theme/variables.css';
+import "@ionic/react/css/core.css";
+import "./theme/variables.css";
 
 setupIonicReact();
 
-const App: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+const AppRouter = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div className="loading-screen">Cargando...</div>;
+  }
 
   return (
+    <IonReactRouter>
+      <IonSplitPane contentId="main" when={isAuthenticated}>
+        {isAuthenticated && <Menu />}
+        <IonRouterOutlet id="main">
+          <Route exact path="/login" component={Login} />
+          <PrivateRoute exact path="/dashboard" component={Dashboard} />
+          <PrivateRoute exact path="/Clientes" component={Clientes} />
+          <PrivateRoute exact path="/alta-cliente" component={AltaCliente} />
+          <Route exact path="/">
+            {isAuthenticated ? (
+              <Redirect to="/dashboard" />
+            ) : (
+              <Redirect to="/login" />
+            )}
+          </Route>
+        </IonRouterOutlet>
+      </IonSplitPane>
+    </IonReactRouter>
+  );
+};
+
+const App: React.FC = () => {
+  return (
     <IonApp>
-      <IonReactRouter>
-        <IonSplitPane contentId="main" when={isAuthenticated}>
-          <Menu />
-          <IonRouterOutlet id="main">
-            {/* Rutas públicas */}
-            <Route exact path="/login">
-              <Login />
-            </Route>
-
-            {/* Rutas privadas */}
-            <PrivateRoute exact path="/dashboard">
-              <Dashboard />
-            </PrivateRoute>
-            
-            <PrivateRoute exact path="/folder/:name">
-              <Page />
-            </PrivateRoute>
-
-            {/* Redirecciones */}
-            <Route exact path="/">
-              {isAuthenticated ? (
-                <Redirect to="/dashboard" />
-              ) : (
-                <Redirect to="/login" />
-              )}
-            </Route>
-          </IonRouterOutlet>
-        </IonSplitPane>
-      </IonReactRouter>
+      <AuthProvider>
+        <ClientesProvider>
+          <AppRouter />
+        </ClientesProvider>
+      </AuthProvider>
     </IonApp>
   );
 };

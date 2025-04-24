@@ -1,0 +1,50 @@
+/* Clientes.css */
+.clientes-page .clientes-content {
+  --background: var(--ion-color-light);
+}
+
+.clientes-page .clientes-container {
+  padding: 20px;
+}
+
+.clientes-page .clientes-search {
+  margin-bottom: 25px;
+}
+
+.clientes-page .clientes-table {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clientes-page .clientes-header {
+  background: var(--ion-color-primary);
+  color: white;
+  font-weight: bold;
+}
+
+.clientes-page .clientes-header ion-col {
+  padding: 15px;
+}
+
+.clientes-page .clientes-row {
+  border-bottom: 1px solid var(--ion-color-medium-tint);
+}
+
+.clientes-page .clientes-row ion-col {
+  padding: 12px 15px;
+  vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+  .clientes-page .clientes-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .clientes-page .clientes-header ion-col {
+    min-width: 150px;
+  }
+}
