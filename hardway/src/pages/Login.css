@@ -38,7 +38,7 @@ ion-content::part(scroll) {
 form {
   display: flex;
   flex-direction: column;
-  width: 90%;
+  width: 100%;
   justify-content: center;
 }
 
@@ -88,7 +88,7 @@ form {
 }
 
 .custom-input {
-  width: 100%;
+  width: 90%;
   padding: 14px;
   border: 2px solid #ddd;
   border-radius: 8px;

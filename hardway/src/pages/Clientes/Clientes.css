@@ -81,9 +81,14 @@ ion-button.toggle-list-btn.force-orange {
   border-bottom: 1px solid #dee2e6;
 }
 
+/* Centrado de contenido */
+.table-header ion-col,
 .table-row ion-col {
-  padding: 12px 15px;
-  vertical-align: middle;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  min-height: 50px;
 }
 
 /* Botones de acción */
@@ -113,13 +118,10 @@ ion-button.toggle-list-btn.force-orange {
     font-size: 0.8rem;
   }
 
-  .table-header ion-col {
-    padding: 10px;
-    min-width: 100px;
-  }
-
+  .table-header ion-col,
   .table-row ion-col {
-    padding: 8px 10px;
+    padding: 10px 5px !important;
+    min-width: 100px;
   }
 
   .toggle-list-btn {
@@ -137,8 +139,12 @@ ion-button.toggle-list-btn.force-orange {
     background: white !important;
   }
 
+  .print-hide {
+    display: none !important;
+  }
+
   ion-menu {
-    display: none !important; /* Oculta completamente el menú */
+    display: none !important;
   }
 
   ion-header,
@@ -189,6 +195,15 @@ ion-button.toggle-list-btn.force-orange {
   .table-row ion-col {
     color: #000 !important;
     padding: 10px;
+    display: table-cell !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+  }
+
+  /* Ocultar columna Acciones */
+  .table-header ion-col:nth-child(7),
+  .table-row ion-col:nth-child(7) {
+    display: none !important;
   }
 }
 
