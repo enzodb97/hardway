@@ -137,6 +137,10 @@ ion-button.toggle-list-btn.force-orange {
     background: white !important;
   }
 
+  ion-menu {
+    display: none !important; /* Oculta completamente el menú */
+  }
+
   ion-header,
   .controls-section,
   ion-fab,
