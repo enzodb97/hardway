@@ -30,21 +30,18 @@
 }
 
 .toggle-list-btn {
-  --background: #ff6b35 !important; /* Naranja vibrante */
+  --background: #ff6b35 !important;
   --background-hover: #e55627 !important;
   --color: white;
   flex-grow: 1;
 }
 
-/* En tu archivo Clientes.css */
 ion-button.toggle-list-btn.force-orange {
-  --ion-color-base: #feaf00 !important; /* Naranja personalizado */
+  --ion-color-base: #feaf00 !important;
   --ion-color-base-rgb: 255, 107, 53 !important;
-  --ion-color-contrast: #ffffff !important; /* Texto blanco */
-  --ion-color-shade: #e55627 !important; /* Tonos oscuros */
-  --ion-color-tint: #ff8c66 !important; /* Tonos claros */
-
-  /* Propiedades adicionales */
+  --ion-color-contrast: #ffffff !important;
+  --ion-color-shade: #e55627 !important;
+  --ion-color-tint: #ff8c66 !important;
   --border-radius: 8px;
   --padding-start: 25px;
   --padding-end: 25px;
@@ -104,7 +101,6 @@ ion-button.toggle-list-btn.force-orange {
   height: 40px;
 }
 
-/* Botón de impresión */
 .print-btn {
   --background: #2c3e50;
   --background-hover: #1a2633;
@@ -128,8 +124,78 @@ ion-button.toggle-list-btn.force-orange {
 
   .toggle-list-btn {
     font-size: 0.9rem;
-    --background: #00ff00 !important; /* Azul moderno */
+    --background: #00ff00 !important;
     --background-hover: #8193a7 !important;
     color: #1a2633 !important;
   }
+}
+
+/* Estilos de impresión */
+@media print {
+  body {
+    margin: 0.5cm !important;
+    background: white !important;
+  }
+
+  ion-header,
+  .controls-section,
+  ion-fab,
+  ion-searchbar,
+  .action-buttons {
+    display: none !important;
+  }
+
+  .clientes-table {
+    display: block !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    margin-top: 0;
+    break-inside: avoid;
+  }
+
+  .print-title {
+    display: block !important;
+    color: #000 !important;
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 20px 0;
+  }
+
+  .print-title h2 {
+    color: #000 !important;
+    font-size: 1.8rem;
+  }
+
+  .print-title p {
+    color: #333 !important;
+    font-size: 1.1rem;
+  }
+
+  .table-header {
+    background: #f8f9fa !important;
+    color: #000 !important;
+    border-bottom: 2px solid #000;
+  }
+
+  .table-row {
+    border-bottom: 1px solid #ddd;
+  }
+
+  .table-header ion-col,
+  .table-row ion-col {
+    color: #000 !important;
+    padding: 10px;
+  }
+}
+
+/* Ajuste columna ID */
+.table-header ion-col:first-child,
+.table-row ion-col:first-child {
+  max-width: 80px;
+  min-width: 60px;
+}
+
+/* Ocultar título en vista normal */
+.print-title {
+  display: none;
 }

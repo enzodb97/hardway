@@ -1,6 +1,7 @@
 /* Estilos encapsulados para el menú */
 .custom-menu {
-  --width: 280px;
+  --ion-color-primary: #feb514; /* Naranja exacto solicitado */
+  --ion-color-primary-rgb: 254, 181, 20; /* RGB del color #feb514 */
 }
 
 .menu-container {
@@ -8,8 +9,10 @@
   display: flex;
   flex-direction: column;
   background: var(--ion-color-light);
+  justify-content: space-between;
 }
 
+/* Header del Menú */
 .menu-header {
   padding: 20px;
   text-align: center;
@@ -30,6 +33,7 @@
   margin: 0;
 }
 
+/* Lista de Items */
 .menu-list {
   background: transparent;
   padding: 15px 0;
@@ -41,13 +45,29 @@
   --padding-end: 20px;
   --min-height: 50px;
   margin: 5px 0;
+  transition: all 0.2s ease;
 }
 
+/* Efecto Hover/Active para Items Principales */
+
+.menu-item:not(.logout-item):hover,
+.menu-item:not(.logout-item):active {
+  --background: rgba(var(--ion-color-primary-rgb), 0.15) !important;
+  border-left-color: var(--ion-color-primary) !important;
+}
+
+.menu-item.selected .menu-icon,
+.menu-item:not(.logout-item):hover .menu-icon {
+  color: var(--ion-color-primary) !important;
+}
+
+/* Item Seleccionado */
 .menu-item.selected {
-  --background: rgba(var(--ion-color-primary-rgb), 0.1);
-  border-left: 4px solid var(--ion-color-primary);
+  --background: rgba(var(--ion-color-primary-rgb), 0.4) !important;
+  border-left: 4px solid var(--ion-color-primary) !important;
 }
 
+/* Iconos y Labels */
 .menu-icon {
   color: var(--ion-color-medium);
   font-size: 1.8rem;
@@ -64,27 +84,7 @@
   color: var(--ion-color-dark);
 }
 
-/* Responsividad */
-@media (max-width: 768px) {
-  .custom-menu {
-    --width: 240px;
-  }
-
-  .menu-header {
-    padding: 15px;
-  }
-
-  .menu-logo {
-    width: 100px;
-    height: 100px;
-  }
-}
-
-.logout-label {
-  /*Boton Cerrar Sesion*/
-}
-
-/* Nuevos estilos para cerrar sesión */
+/* Sección de Cerrar Sesión */
 .logout-section {
   margin-top: auto;
   border-top: 1px solid var(--ion-color-medium-tint);
@@ -114,10 +114,22 @@
   font-size: 1.1rem;
 }
 
-/* Ajuste de altura del contenedor */
-.menu-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* Añadido para separar secciones */
+/* Responsividad */
+@media (max-width: 768px) {
+  .custom-menu {
+    --width: 240px;
+  }
+
+  .menu-header {
+    padding: 15px;
+  }
+
+  .menu-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .menu-item {
+    --min-height: 45px;
+  }
 }

@@ -5,10 +5,11 @@ http://ionicframework.com/docs/theming/ */
 /* Set variables for all modes */
 :root {
   /* Set the background of the entire app */
-  --ion-background-color: #f1ecec !important;
+  --ion-background-color: #f2eae1 !important;
   --ion-color-custom-yellow: #fdb40b;
   --ion-color-custom-yellow-rgb: 253, 180, 11;
   --ion-color-custom-yellow-contrast: #2d3436;
+  color: #000;
 
   /* Set the font family of the entire app */
   --ion-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
@@ -23,12 +24,12 @@ http://ionicframework.com/docs/theming/ */
 /* Set text color of the entire app for Material Design only */
 :root.md {
   --ion-text-color: #0a0808;
-  --ion-item-background: #f2eae1 !important;
+  --ion-item-background: #f2d2ae !important;
   --ion-toolbar-background: #fdfdfd !important;
 }
-
+/* Fondo de todos los contenedores*/
 ion-content {
-  background-color: #bb1a1a !important;
+  background-color: #fdb40b !important;
 }
 
 /*.backgorund-content {
@@ -43,4 +44,9 @@ ion-content {
 
 :clientes-page.ion-page {
   background-color: #bb1a1a;
+}
+
+.custom-menu {
+  --ion-color-primary: #feb514;
+  --ion-color-primary-rgb: 253, 180, 11;
 }

@@ -31,23 +31,13 @@ export const ClientesProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [clientes, setClientes] = useState<Cliente[]>([
-    {
-      id: 1,
-      tipoDocumento: "DNI",
-      numeroDocumento: "12345678",
-      nombre: "Enzo Bertolusso",
-      domicilio: "Calle Falsa 123",
-      localidad: "Rosario, Santa Fe",
-      cp: "2000",
-      telefono: "123456789",
-      email: "enzober@gmail.com",
-    },
-  ]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [ultimoId, setUltimoId] = useState(0);
 
-  // ID autoincremental mejorado
   const obtenerNuevoId = () => {
-    return clientes.length > 0 ? Math.max(...clientes.map((c) => c.id)) + 1 : 1;
+    const nuevoId = ultimoId + 1;
+    setUltimoId(nuevoId);
+    return nuevoId;
   };
 
   const agregarCliente = (nuevoCliente: Omit<Cliente, "id">) => {
@@ -71,7 +61,7 @@ export const ClientesProvider = ({
       value={{
         clientes,
         agregarCliente,
-        editarCliente,
+        editarCliente: editarCliente,
         eliminarCliente,
       }}
     >

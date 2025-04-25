@@ -26,13 +26,21 @@ ion-content::part(scroll) {
 }
 
 .form-container {
+  display: flex;
+  flex-direction: column;
   background: white;
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   padding: 2.5rem;
   position: relative;
 }
-*/
+
+form {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  justify-content: center;
+}
 
 /* Título principal */
 .brand-title {

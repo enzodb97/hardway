@@ -69,14 +69,21 @@ const AltaCliente: React.FC = () => {
 
       <IonContent className="alta-cliente-content">
         <form onSubmit={handleSubmit} className="alta-cliente-form">
-          <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
-          <h1 className="form-title">Alta Cliente</h1>
-
+          <div className="encb">
+            <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
+            <h1 className="form-title">
+              {esEdicion ? "Editar Cliente" : "Nuevo Cliente"}
+            </h1>
+          </div>
           <div className="two-column-grid">
-            {/* Columna Izquierda */}
             <div className="form-column">
               <div className="form-section">
-                <h3 className="section-title">ID Cliente: AUTO</h3>
+                {/* Solo muestra ID en modo edición */}
+                {esEdicion && (
+                  <div className="id-display">
+                    <strong>ID Cliente:</strong> {formData.id}
+                  </div>
+                )}
 
                 <IonItem className="form-item">
                   <IonLabel position="floating">Tipo Documento </IonLabel>

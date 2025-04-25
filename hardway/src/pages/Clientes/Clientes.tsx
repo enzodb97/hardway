@@ -42,6 +42,13 @@ const Clientes: React.FC = () => {
     }
   };
 
+  const handleImprimir = () => {
+    setMostrarListado(true);
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
+
   return (
     <IonPage className="clientes-page">
       <IonHeader>
@@ -49,7 +56,7 @@ const Clientes: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>Clientes</IonTitle>
+          <IonTitle>Lista de Clientes</IonTitle>
           <IonButtons slot="end">
             <IonButton routerLink="/alta-cliente" routerDirection="forward">
               <IonIcon slot="icon-only" icon={add} />
@@ -83,7 +90,16 @@ const Clientes: React.FC = () => {
 
           {mostrarListado && (
             <IonGrid className="clientes-table">
+              {/* Título oculto solo para impresión */}
+              <div className="print-title">
+                <h2>Listado de Clientes</h2>
+                <p>Fecha: {new Date().toLocaleDateString()}</p>
+              </div>
+
               <IonRow className="table-header">
+                <IonCol>
+                  <strong>ID</strong>
+                </IonCol>
                 <IonCol>
                   <strong>Nombre</strong>
                 </IonCol>
@@ -106,6 +122,7 @@ const Clientes: React.FC = () => {
 
               {clientesFiltrados.map((cliente) => (
                 <IonRow key={cliente.id} className="table-row">
+                  <IonCol>{cliente.id}</IonCol>
                   <IonCol>{cliente.nombre}</IonCol>
                   <IonCol>{`${cliente.tipoDocumento}: ${cliente.numeroDocumento}`}</IonCol>
                   <IonCol>{cliente.telefono}</IonCol>
@@ -135,7 +152,7 @@ const Clientes: React.FC = () => {
           )}
 
           <IonFab vertical="bottom" horizontal="end" slot="fixed">
-            <IonFabButton className="print-btn" onClick={() => window.print()}>
+            <IonFabButton className="print-btn" onClick={handleImprimir}>
               <IonIcon icon={print} />
             </IonFabButton>
           </IonFab>
