@@ -2,11 +2,14 @@ import { createContext, useContext, useState } from "react";
 
 export interface Cliente {
   id: number;
+  tipoDocumento: string;
+  numeroDocumento: string;
   nombre: string;
-  email: string;
-  celular: string;
-  numeroCliente: string;
+  domicilio: string;
   localidad: string;
+  cp: string;
+  telefono: string;
+  email?: string;
 }
 
 interface ClientesContextType {
@@ -31,16 +34,24 @@ export const ClientesProvider = ({
   const [clientes, setClientes] = useState<Cliente[]>([
     {
       id: 1,
+      tipoDocumento: "DNI",
+      numeroDocumento: "12345678",
       nombre: "Enzo Bertolusso",
-      email: "enzober@gmail.com",
-      celular: "123456789",
-      numeroCliente: "123",
+      domicilio: "Calle Falsa 123",
       localidad: "Rosario, Santa Fe",
+      cp: "2000",
+      telefono: "123456789",
+      email: "enzober@gmail.com",
     },
   ]);
 
+  // ID autoincremental mejorado
+  const obtenerNuevoId = () => {
+    return clientes.length > 0 ? Math.max(...clientes.map((c) => c.id)) + 1 : 1;
+  };
+
   const agregarCliente = (nuevoCliente: Omit<Cliente, "id">) => {
-    setClientes((prev) => [...prev, { ...nuevoCliente, id: Date.now() }]);
+    setClientes((prev) => [...prev, { ...nuevoCliente, id: obtenerNuevoId() }]);
   };
 
   const editarCliente = (clienteActualizado: Cliente) => {

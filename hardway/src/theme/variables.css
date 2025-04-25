@@ -6,6 +6,9 @@ http://ionicframework.com/docs/theming/ */
 :root {
   /* Set the background of the entire app */
   --ion-background-color: #f1ecec !important;
+  --ion-color-custom-yellow: #fdb40b;
+  --ion-color-custom-yellow-rgb: 253, 180, 11;
+  --ion-color-custom-yellow-contrast: #2d3436;
 
   /* Set the font family of the entire app */
   --ion-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
@@ -37,3 +40,7 @@ ion-content {
     --ion-item-background: #e2dada;
   }
 }*/
+
+:clientes-page.ion-page {
+  background-color: #bb1a1a;
+}

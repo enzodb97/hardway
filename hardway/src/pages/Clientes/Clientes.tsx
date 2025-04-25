@@ -12,8 +12,11 @@ import {
   IonSearchbar,
   IonButton,
   IonIcon,
+  IonBadge,
+  IonFab,
+  IonFabButton,
 } from "@ionic/react";
-import { add, pencil, trash } from "ionicons/icons";
+import { add, pencil, trash, print } from "ionicons/icons";
 import { useState } from "react";
 import { useClientes } from "../../context/ClientesContext";
 import "./Clientes.css";
@@ -21,13 +24,17 @@ import "./Clientes.css";
 const Clientes: React.FC = () => {
   const { clientes, eliminarCliente } = useClientes();
   const [busqueda, setBusqueda] = useState("");
+  const [mostrarListado, setMostrarListado] = useState(false);
 
   const clientesFiltrados = clientes.filter(
     (cliente) =>
       cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      cliente.email.toLowerCase().includes(busqueda.toLowerCase()) ||
-      cliente.numeroCliente.includes(busqueda)
+      (cliente.email &&
+        cliente.email.toLowerCase().includes(busqueda.toLowerCase())) ||
+      cliente.numeroDocumento.includes(busqueda)
   );
+
+  const totalClientes = clientes.length;
 
   const handleEliminar = (id: number) => {
     if (window.confirm("¿Está seguro que desea eliminar este cliente?")) {
@@ -50,8 +57,23 @@ const Clientes: React.FC = () => {
           </IonButtons>
         </IonToolbar>
       </IonHeader>
+
       <IonContent className="clientes-content">
         <div className="clientes-container">
+          <div className="controls-section">
+            <IonButton
+              color="tertiary"
+              onClick={() => setMostrarListado(!mostrarListado)}
+              className="toggle-list-btn force-orange"
+            >
+              {mostrarListado ? "Ocultar listado" : "Mostrar listado"}
+            </IonButton>
+
+            <IonBadge color="primary" className="total-badge">
+              Registrados: {totalClientes}
+            </IonBadge>
+          </div>
+
           <IonSearchbar
             className="clientes-search"
             value={busqueda}
@@ -59,47 +81,68 @@ const Clientes: React.FC = () => {
             placeholder="Buscar clientes..."
           />
 
-          <IonGrid className="clientes-table">
-            <IonRow className="clientes-header">
-              <IonCol>Nombre</IonCol>
-              <IonCol>Email</IonCol>
-              <IonCol>Celular</IonCol>
-              <IonCol>N° Cliente</IonCol>
-              <IonCol>Localidad</IonCol>
-              <IonCol>Acciones</IonCol>
-            </IonRow>
-
-            {clientesFiltrados.map((cliente) => (
-              <IonRow key={cliente.id} className="clientes-row">
-                <IonCol>{cliente.nombre}</IonCol>
-                <IonCol>{cliente.email}</IonCol>
-                <IonCol>{cliente.celular}</IonCol>
-                <IonCol>{cliente.numeroCliente}</IonCol>
-                <IonCol>{cliente.localidad}</IonCol>
+          {mostrarListado && (
+            <IonGrid className="clientes-table">
+              <IonRow className="table-header">
                 <IonCol>
-                  <div className="action-buttons">
-                    <IonButton
-                      fill="clear"
-                      routerLink={`/alta-cliente/${cliente.id}`}
-                      className="edit-btn"
-                    >
-                      <IonIcon slot="icon-only" icon={pencil} color="primary" />
-                    </IonButton>
-                    <IonButton
-                      fill="clear"
-                      onClick={() => handleEliminar(cliente.id)}
-                      className="delete-btn"
-                    >
-                      <IonIcon slot="icon-only" icon={trash} color="danger" />
-                    </IonButton>
-                  </div>
+                  <strong>Nombre</strong>
+                </IonCol>
+                <IonCol>
+                  <strong>Documento</strong>
+                </IonCol>
+                <IonCol>
+                  <strong>Teléfono</strong>
+                </IonCol>
+                <IonCol>
+                  <strong>Localidad</strong>
+                </IonCol>
+                <IonCol>
+                  <strong>Email</strong>
+                </IonCol>
+                <IonCol>
+                  <strong>Acciones</strong>
                 </IonCol>
               </IonRow>
-            ))}
-          </IonGrid>
+
+              {clientesFiltrados.map((cliente) => (
+                <IonRow key={cliente.id} className="table-row">
+                  <IonCol>{cliente.nombre}</IonCol>
+                  <IonCol>{`${cliente.tipoDocumento}: ${cliente.numeroDocumento}`}</IonCol>
+                  <IonCol>{cliente.telefono}</IonCol>
+                  <IonCol>{cliente.localidad}</IonCol>
+                  <IonCol>{cliente.email || "-"}</IonCol>
+                  <IonCol>
+                    <div className="action-buttons">
+                      <IonButton
+                        fill="clear"
+                        routerLink={`/alta-cliente/${cliente.id}`}
+                        className="edit-btn"
+                      >
+                        <IonIcon icon={pencil} color="primary" />
+                      </IonButton>
+                      <IonButton
+                        fill="clear"
+                        onClick={() => handleEliminar(cliente.id)}
+                        className="delete-btn"
+                      >
+                        <IonIcon icon={trash} color="danger" />
+                      </IonButton>
+                    </div>
+                  </IonCol>
+                </IonRow>
+              ))}
+            </IonGrid>
+          )}
+
+          <IonFab vertical="bottom" horizontal="end" slot="fixed">
+            <IonFabButton className="print-btn" onClick={() => window.print()}>
+              <IonIcon icon={print} />
+            </IonFabButton>
+          </IonFab>
         </div>
       </IonContent>
     </IonPage>
   );
 };
+
 export default Clientes;

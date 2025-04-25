@@ -1,72 +1,135 @@
-/* Clientes.css */
-.clientes-page .clientes-content {
-  --background: var(--ion-color-light);
+/* Estructura principal */
+.clientes-page {
+  --ion-background-color: #f8f9fa;
+  height: 100vh;
 }
 
-.clientes-page .clientes-container {
-  padding: 20px;
+.clientes-content {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
 }
 
-.clientes-page .clientes-search {
-  margin-bottom: 25px;
+.clientes-container {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
 }
 
-.clientes-page .clientes-table {
+/* Controles superiores */
+.controls-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toggle-list-btn {
+  --background: #ff6b35 !important; /* Naranja vibrante */
+  --background-hover: #e55627 !important;
+  --color: white;
+  flex-grow: 1;
+}
+
+/* En tu archivo Clientes.css */
+ion-button.toggle-list-btn.force-orange {
+  --ion-color-base: #feaf00 !important; /* Naranja personalizado */
+  --ion-color-base-rgb: 255, 107, 53 !important;
+  --ion-color-contrast: #ffffff !important; /* Texto blanco */
+  --ion-color-shade: #e55627 !important; /* Tonos oscuros */
+  --ion-color-tint: #ff8c66 !important; /* Tonos claros */
+
+  /* Propiedades adicionales */
+  --border-radius: 8px;
+  --padding-start: 25px;
+  --padding-end: 25px;
+  font-weight: 600;
+}
+
+.total-badge {
+  padding: 10px 15px;
+  font-size: 0.9rem;
+}
+
+/* Tabla de clientes */
+.clientes-table {
   width: 100%;
   background: white;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-grow: 1;
+  overflow: auto;
 }
 
-.clientes-page .clientes-header {
+.table-header {
   background: var(--ion-color-primary);
-  color: rgb(0, 0, 0);
+  color: white;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
-.clientes-page .clientes-header ion-col {
+.table-header ion-col {
   padding: 15px;
+  min-width: 120px;
 }
 
-.clientes-page .clientes-row {
-  border-bottom: 1px solid var(--ion-color-medium-tint);
+.table-row {
+  border-bottom: 1px solid #dee2e6;
 }
 
-.clientes-page .clientes-row ion-col {
+.table-row ion-col {
   padding: 12px 15px;
   vertical-align: middle;
 }
 
+/* Botones de acción */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.edit-btn,
+.delete-btn {
+  --padding-start: 0;
+  --padding-end: 0;
+  width: 40px;
+  height: 40px;
+}
+
+/* Botón de impresión */
+.print-btn {
+  --background: #2c3e50;
+  --background-hover: #1a2633;
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsividad */
 @media (max-width: 768px) {
-  .clientes-page .clientes-table {
-    display: block;
-    overflow-x: auto;
+  .clientes-table {
+    font-size: 0.8rem;
   }
 
-  .clientes-page .clientes-header ion-col {
-    min-width: 150px;
+  .table-header ion-col {
+    padding: 10px;
+    min-width: 100px;
   }
-}
 
-.edit-btn {
-  --padding-start: 0;
-  --padding-end: 0;
-  --background: transparent;
-  --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
-}
+  .table-row ion-col {
+    padding: 8px 10px;
+  }
 
-.clientes-page ion-button {
-  margin: 0;
-}
-
-.edit-btn {
-  --padding-start: 0;
-  --padding-end: 0;
-  --background: transparent;
-  --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
-}
-
-.clientes-page ion-button {
-  margin: 0;
+  .toggle-list-btn {
+    font-size: 0.9rem;
+    --background: #00ff00 !important; /* Azul moderno */
+    --background-hover: #8193a7 !important;
+    color: #1a2633 !important;
+  }
 }
