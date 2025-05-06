@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 export interface Cliente {
   id: number;
@@ -31,8 +31,26 @@ export const ClientesProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [ultimoId, setUltimoId] = useState(0);
+  const STORAGE_KEY = "hardwayClientes";
+  const storedClientes = localStorage.getItem(STORAGE_KEY);
+  const initialClientes = storedClientes
+    ? (JSON.parse(storedClientes) as Cliente[])
+    : [];
+  const initialMaxId = initialClientes.reduce(
+    (max: number, cliente: Cliente) => Math.max(max, cliente.id),
+    0
+  );
+
+  const [clientes, setClientes] = useState<Cliente[]>(initialClientes);
+  const [ultimoId, setUltimoId] = useState(initialMaxId);
+
+  useEffect(() => {
+    console.log(
+      "ClientesContext.tsx: Guardando clientes en localStorage:",
+      clientes
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clientes));
+  }, [clientes]);
 
   const obtenerNuevoId = () => {
     const nuevoId = ultimoId + 1;
@@ -41,7 +59,8 @@ export const ClientesProvider = ({
   };
 
   const agregarCliente = (nuevoCliente: Omit<Cliente, "id">) => {
-    setClientes((prev) => [...prev, { ...nuevoCliente, id: obtenerNuevoId() }]);
+    const nuevoClienteConId = { ...nuevoCliente, id: obtenerNuevoId() };
+    setClientes((prev) => [...prev, nuevoClienteConId]);
   };
 
   const editarCliente = (clienteActualizado: Cliente) => {

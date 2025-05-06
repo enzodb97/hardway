@@ -12,6 +12,7 @@ import {
   IonMenuButton,
   IonSelect,
   IonSelectOption,
+  IonAlert,
 } from "@ionic/react";
 import { useHistory, useParams } from "react-router-dom";
 import { useClientes } from "../../context/ClientesContext";
@@ -35,6 +36,10 @@ const AltaCliente: React.FC = () => {
     telefono: "",
     email: "",
   });
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [previousNumeroDocumento, setPreviousNumeroDocumento] = useState("");
+  const [previousTelefono, setPreviousTelefono] = useState("");
 
   useEffect(() => {
     if (id) {
@@ -42,12 +47,85 @@ const AltaCliente: React.FC = () => {
       if (clienteExistente) {
         setFormData(clienteExistente);
         setEsEdicion(true);
+        setPreviousNumeroDocumento(clienteExistente.numeroDocumento || "");
+        setPreviousTelefono(clienteExistente.telefono || "");
       }
     }
   }, [id, clientes]);
 
+  const validarUnicidad = (cliente: Partial<Cliente>): string | null => {
+    const { numeroDocumento, email, telefono } = cliente;
+    const clienteExistenteDNI = clientes.find(
+      (c) => c.numeroDocumento === numeroDocumento && c.id !== formData.id // Excluir el cliente actual en modo edición
+    );
+    if (clienteExistenteDNI) {
+      return `Ya existe un cliente con el N° de Documento: ${numeroDocumento}`;
+    }
+
+    const clienteExistenteEmail = clientes.find(
+      (c) => c.email === email && c.id !== formData.id
+    );
+    if (clienteExistenteEmail) {
+      return `Ya existe un cliente con el Email: ${email}`;
+    }
+
+    const clienteExistenteTelefono = clientes.find(
+      (c) => c.telefono === telefono && c.id !== formData.id
+    );
+    if (clienteExistenteTelefono) {
+      return `Ya existe un cliente con el Teléfono: ${telefono}`;
+    }
+
+    return null;
+  };
+
+  const handleNumeroDocumentoChange = (e: any) => {
+    const value = e.detail.value;
+    if (/^\d*$/.test(value)) {
+      setFormData({ ...formData, numeroDocumento: value });
+      setPreviousNumeroDocumento(value);
+    } else {
+      setFormData({ ...formData, numeroDocumento: previousNumeroDocumento });
+    }
+  };
+
+  const handleTelefonoChange = (e: any) => {
+    const value = e.detail.value;
+    if (/^\d*$/.test(value)) {
+      setFormData({ ...formData, telefono: value });
+      setPreviousTelefono(value);
+    } else {
+      setFormData({ ...formData, telefono: previousTelefono });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (
+      formData.numeroDocumento &&
+      formData.numeroDocumento.trim().length < 3
+    ) {
+      setAlertMessage("El N° de Documento debe tener al menos 3 caracteres.");
+      setShowAlert(true);
+      return;
+    }
+
+    if (formData.nombre && formData.nombre.trim().length < 3) {
+      setAlertMessage(
+        "El nombre y apellido deben tener al menos 3 caracteres."
+      );
+      setShowAlert(true);
+      return;
+    }
+
+    const errorUnicidad = validarUnicidad(formData);
+    if (errorUnicidad) {
+      setAlertMessage(errorUnicidad);
+      setShowAlert(true);
+      return;
+    }
+
     if (esEdicion) {
       editarCliente(formData as Cliente);
     } else {
@@ -107,12 +185,7 @@ const AltaCliente: React.FC = () => {
                   <IonInput
                     required
                     value={formData.numeroDocumento}
-                    onIonChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        numeroDocumento: e.detail.value!,
-                      })
-                    }
+                    onIonChange={handleNumeroDocumentoChange}
                   />
                 </IonItem>
 
@@ -171,9 +244,7 @@ const AltaCliente: React.FC = () => {
                     required
                     type="tel"
                     value={formData.telefono}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, telefono: e.detail.value! })
-                    }
+                    onIonChange={handleTelefonoChange}
                   />
                 </IonItem>
 
@@ -196,6 +267,12 @@ const AltaCliente: React.FC = () => {
           </IonButton>
         </form>
       </IonContent>
+
+      <IonAlert
+        isOpen={showAlert}
+        message={alertMessage}
+        buttons={[{ text: "Aceptar", handler: () => setShowAlert(false) }]}
+      />
     </IonPage>
   );
 };
