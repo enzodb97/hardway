@@ -15,14 +15,14 @@ export interface Cliente {
 interface ClientesContextType {
   clientes: Cliente[];
   agregarCliente: (nuevoCliente: Omit<Cliente, "id">) => void;
-  editarCliente: (clienteActualizado: Cliente) => void;
+  modificarCliente: (clienteActualizado: Cliente) => void;
   eliminarCliente: (id: number) => void;
 }
 
 const ClientesContext = createContext<ClientesContextType>({
   clientes: [],
   agregarCliente: () => {},
-  editarCliente: () => {},
+  modificarCliente: () => {},
   eliminarCliente: () => {},
 });
 
@@ -63,7 +63,7 @@ export const ClientesProvider = ({
     setClientes((prev) => [...prev, nuevoClienteConId]);
   };
 
-  const editarCliente = (clienteActualizado: Cliente) => {
+  const modificarCliente = (clienteActualizado: Cliente) => {
     setClientes((prev) =>
       prev.map((cliente) =>
         cliente.id === clienteActualizado.id ? clienteActualizado : cliente
@@ -80,7 +80,7 @@ export const ClientesProvider = ({
       value={{
         clientes,
         agregarCliente,
-        editarCliente: editarCliente,
+        modificarCliente: modificarCliente,
         eliminarCliente,
       }}
     >

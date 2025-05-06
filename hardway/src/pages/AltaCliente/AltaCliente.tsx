@@ -23,7 +23,7 @@ import { useEffect, useState } from "react";
 
 const AltaCliente: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
-  const { clientes, agregarCliente, editarCliente } = useClientes();
+  const { clientes, agregarCliente, modificarCliente } = useClientes();
   const history = useHistory();
   const [esEdicion, setEsEdicion] = useState(false);
   const [formData, setFormData] = useState<Partial<Cliente>>({
@@ -127,7 +127,7 @@ const AltaCliente: React.FC = () => {
     }
 
     if (esEdicion) {
-      editarCliente(formData as Cliente);
+      modificarCliente(formData as Cliente);
     } else {
       agregarCliente(formData as Omit<Cliente, "id">);
     }
@@ -141,7 +141,9 @@ const AltaCliente: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>{esEdicion ? "Editar Cliente" : "Nuevo Cliente"}</IonTitle>
+          <IonTitle>
+            {esEdicion ? "Modificar Cliente" : "Nuevo Cliente"}
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -150,7 +152,7 @@ const AltaCliente: React.FC = () => {
           <div className="encb">
             <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
             <h1 className="form-title">
-              {esEdicion ? "Editar Cliente" : "Nuevo Cliente"}
+              {esEdicion ? "Modificar Cliente" : "Nuevo Cliente"}
             </h1>
           </div>
           <div className="two-column-grid">
