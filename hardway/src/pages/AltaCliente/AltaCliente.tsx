@@ -119,6 +119,7 @@ const AltaCliente: React.FC = () => {
                 <IonItem className="form-item">
                   <IonLabel position="floating">Nombre y Apellido </IonLabel>
                   <IonInput
+                    type="text"
                     required
                     value={formData.nombre}
                     onIonChange={(e) =>
@@ -146,7 +147,6 @@ const AltaCliente: React.FC = () => {
                 <IonItem className="form-item">
                   <IonLabel position="floating">Localidad </IonLabel>
                   <IonInput
-                    required
                     value={formData.localidad}
                     onIonChange={(e) =>
                       setFormData({ ...formData, localidad: e.detail.value! })
@@ -157,7 +157,6 @@ const AltaCliente: React.FC = () => {
                 <IonItem className="form-item">
                   <IonLabel position="floating">CP </IonLabel>
                   <IonInput
-                    required
                     type="number"
                     value={formData.cp}
                     onIonChange={(e) =>
