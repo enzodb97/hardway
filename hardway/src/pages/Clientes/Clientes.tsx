@@ -114,6 +114,9 @@ const Clientes: React.FC = () => {
                 <IonCol className="text-center">
                   <strong>Email</strong>
                 </IonCol>
+                <IonCol className="text-center">
+                  <strong>Barrio</strong>
+                </IonCol>
                 <IonCol className="print-hide text-center">
                   <strong>Acciones</strong>
                 </IonCol>
@@ -129,6 +132,7 @@ const Clientes: React.FC = () => {
                   <IonCol className="text-center">
                     {cliente.email || "-"}
                   </IonCol>
+                  <IonCol className="text-center">{cliente.barrio}</IonCol>
                   <IonCol className="print-hide text-center">
                     <div className="action-buttons">
                       <IonButton

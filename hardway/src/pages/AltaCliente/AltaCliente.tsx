@@ -32,6 +32,7 @@ const AltaCliente: React.FC = () => {
     nombre: "",
     domicilio: "",
     localidad: "",
+    barrio: "", // <-- Agregado
     cp: "",
     telefono: "",
     email: "",
@@ -115,6 +116,12 @@ const AltaCliente: React.FC = () => {
       setAlertMessage(
         "El nombre y apellido deben tener al menos 3 caracteres."
       );
+      setShowAlert(true);
+      return;
+    }
+
+    if (!formData.barrio || formData.barrio.trim().length < 2) {
+      setAlertMessage("El campo Barrio es obligatorio.");
       setShowAlert(true);
       return;
     }
@@ -257,6 +264,17 @@ const AltaCliente: React.FC = () => {
                     value={formData.email}
                     onIonChange={(e) =>
                       setFormData({ ...formData, email: e.detail.value! })
+                    }
+                  />
+                </IonItem>
+
+                <IonItem className="form-item">
+                  <IonLabel position="floating">Barrio</IonLabel>
+                  <IonInput
+                    required
+                    value={formData.barrio}
+                    onIonChange={(e) =>
+                      setFormData({ ...formData, barrio: e.detail.value! })
                     }
                   />
                 </IonItem>

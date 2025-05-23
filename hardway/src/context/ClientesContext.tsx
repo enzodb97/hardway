@@ -7,6 +7,7 @@ export interface Cliente {
   nombre: string;
   domicilio: string;
   localidad: string;
+  barrio: string; // <-- Agregado
   cp: string;
   telefono: string;
   email?: string;
