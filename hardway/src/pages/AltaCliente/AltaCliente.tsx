@@ -167,16 +167,16 @@ const AltaCliente: React.FC = () => {
               {esEdicion ? "Modificar Cliente" : "Nuevo Cliente"}
             </h1>
           </div>
+          {esEdicion && (
+            <div className="id-cliente-display">
+              <span>ID Cliente: {formData.id}</span>
+            </div>
+          )}
           <div className="two-column-grid">
             {/* Columna Izquierda */}
             <div className="form-column">
               <div className="form-section">
                 {/* Solo muestra ID en modo edición */}
-                {esEdicion && (
-                  <div className="id-display">
-                    <strong>ID Cliente:</strong> {formData.id}
-                  </div>
-                )}
 
                 <IonItem className="form-item">
                   <IonLabel position="floating">Tipo Documento </IonLabel>

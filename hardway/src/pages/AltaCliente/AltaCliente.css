@@ -102,6 +102,20 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
+/* Display ID Cliente */
+.id-cliente-display {
+  text-align: center;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+
+.id-cliente-display span {
+  background: #f8f9fa;
+  padding: 6px 18px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
 /* Responsive Design */
 @media (max-width: 900px) {
   .alta-cliente-form {
