@@ -12,11 +12,11 @@
 }
 
 ion-content::part(scroll) {
-  display: flex !important;
+  display: flex;
   justify-content: center;
   align-items: center;
   position: static;
-  height: 100% !important;
+  height: 100%;
 }
 
 .main-container {

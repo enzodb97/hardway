@@ -28,8 +28,7 @@
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin: 0 auto; /* Centrado horizontal */
-  box-sizing: border-box;
-  overflow-x: auto; /* Previene desbordes */
+  box-sizing: border-box; /* Previene desbordes */
 }
 
 /* Grid de Columnas */
@@ -98,7 +97,7 @@
   padding: 16px 10px 10px 10px;
   margin-bottom: 20px;
   margin-top: -10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 /* Responsive Design */
