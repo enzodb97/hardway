@@ -195,10 +195,14 @@ const AltaCliente: React.FC = () => {
                   </IonSelect>
                 </IonItem>
 
+                {/* N° Documento */}
                 <IonItem className="form-item">
                   <IonLabel position="floating">N° Documento </IonLabel>
                   <IonInput
                     required
+                    type="number"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     value={formData.numeroDocumento}
                     onIonChange={handleNumeroDocumentoChange}
                   />
@@ -237,15 +241,40 @@ const AltaCliente: React.FC = () => {
                   />
                 </IonItem>
 
-                <IonItem className="form-item">
-                  <IonLabel position="floating">Calle</IonLabel>
-                  <IonInput
-                    value={formData.calle}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, calle: e.detail.value! })
-                    }
-                  />
-                </IonItem>
+                {/* Calle y Altura en el mismo renglón */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                  }}
+                >
+                  <IonItem className="form-item" style={{ marginBottom: 0 }}>
+                    <IonLabel position="floating">Calle</IonLabel>
+                    <IonInput
+                      value={formData.calle}
+                      onIonChange={(e) =>
+                        setFormData({ ...formData, calle: e.detail.value! })
+                      }
+                    />
+                  </IonItem>
+                  <IonItem className="form-item" style={{ marginBottom: 0 }}>
+                    <IonLabel position="floating">Altura</IonLabel>
+                    <IonInput
+                      type="number"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
+                      value={formData.altura}
+                      onIonChange={(e) => {
+                        const value = e.detail.value || "";
+                        if (/^\d*$/.test(value)) {
+                          setFormData({ ...formData, altura: value });
+                        }
+                        // Si no es número, no actualiza el valor
+                      }}
+                    />
+                  </IonItem>
+                </div>
 
                 <IonItem className="form-item">
                   <IonLabel position="floating">Piso</IonLabel>
@@ -286,16 +315,6 @@ const AltaCliente: React.FC = () => {
                 </IonItem>
 
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Altura</IonLabel>
-                  <IonInput
-                    value={formData.altura}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, altura: e.detail.value! })
-                    }
-                  />
-                </IonItem>
-
-                <IonItem className="form-item">
                   <IonLabel position="floating">N° Departamento</IonLabel>
                   <IonInput
                     value={formData.numeroDepartamento}
@@ -319,11 +338,14 @@ const AltaCliente: React.FC = () => {
                   />
                 </IonItem>
 
+                {/* Teléfono */}
                 <IonItem className="form-item">
                   <IonLabel position="floating">Teléfono </IonLabel>
                   <IonInput
                     required
-                    type="tel"
+                    type="number"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     value={formData.telefono}
                     onIonChange={handleTelefonoChange}
                   />
