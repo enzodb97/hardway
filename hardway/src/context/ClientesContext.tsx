@@ -6,6 +6,11 @@ export interface Cliente {
   numeroDocumento: string;
   nombre: string;
   domicilio: string;
+  calle: string;
+  altura: string;
+  piso: string;
+  numeroDepartamento: string;
+  observaciones: string;
   localidad: string;
   barrio: string; // <-- Agregado
   cp: string;

@@ -22,18 +22,21 @@
 /* Estructura del Formulario */
 .alta-cliente-form {
   background: white !important;
-  width: 100% !important;
-  max-width: 1200px !important;
+  width: 100%;
+  max-width: 700px !important; /* Antes 1200px, ahora más chico */
   border-radius: 20px;
-  padding: 25px;
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 0 auto; /* Centrado horizontal */
+  box-sizing: border-box;
+  overflow-x: auto; /* Previene desbordes */
 }
 
 /* Grid de Columnas */
 .two-column-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  gap: 24px; /* Menor separación */
   margin: 20px 0;
 }
 
@@ -88,23 +91,25 @@
   border-radius: 8px;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .alta-cliente-form {
-    width: 500px !important;
-    padding: 15px;
-    height: auto;
-    margin-top: auto;
-  }
+/* Subformulario Domicilio */
+.domicilio-subform {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 16px 10px 10px 10px;
+  margin-bottom: 20px;
+  margin-top: -10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
 
+/* Responsive Design */
+@media (max-width: 900px) {
+  .alta-cliente-form {
+    max-width: 98vw !important;
+    padding: 10px;
+  }
   .two-column-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .alta-cliente-form ion-item {
-    --min-height: 75px;
-    margin-bottom: 20px;
+    gap: 10px;
   }
 }
 
