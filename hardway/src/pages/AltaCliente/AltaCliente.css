@@ -29,6 +29,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin: 0 auto; /* Centrado horizontal */
   box-sizing: border-box; /* Previene desbordes */
+  height: auto;
+  margin-top: auto; /* O 64px según el alto de tu header */
 }
 
 /* Grid de Columnas */
