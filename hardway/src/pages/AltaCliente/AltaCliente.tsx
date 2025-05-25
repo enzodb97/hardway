@@ -197,7 +197,7 @@ const AltaCliente: React.FC = () => {
 
                 {/* N° Documento */}
                 <IonItem className="form-item">
-                  <IonLabel position="floating">N° Documento </IonLabel>
+                  <IonLabel position="floating">N° Documento</IonLabel>
                   <IonInput
                     required
                     type="number"
@@ -205,17 +205,33 @@ const AltaCliente: React.FC = () => {
                     pattern="[0-9]*"
                     value={formData.numeroDocumento}
                     onIonChange={handleNumeroDocumentoChange}
+                    placeholder={
+                      esEdicion && !formData.numeroDocumento
+                        ? "Dato obligatorio"
+                        : ""
+                    }
+                    className={
+                      esEdicion && !formData.numeroDocumento
+                        ? "input-obligatorio"
+                        : ""
+                    }
                   />
                 </IonItem>
 
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Nombre y Apellido </IonLabel>
+                  <IonLabel position="floating">Nombre y Apellido</IonLabel>
                   <IonInput
                     type="text"
                     required
                     value={formData.nombre}
                     onIonChange={(e) =>
                       setFormData({ ...formData, nombre: e.detail.value! })
+                    }
+                    placeholder={
+                      esEdicion && !formData.nombre ? "Dato obligatorio." : ""
+                    }
+                    className={
+                      esEdicion && !formData.nombre ? "input-obligatorio" : ""
                     }
                   />
                 </IonItem>

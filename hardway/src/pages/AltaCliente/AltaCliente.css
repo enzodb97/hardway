@@ -133,3 +133,10 @@
 .item-inner { ← REMOVIDO
   height: 200px !important;
 }*/
+
+.input-obligatorio::placeholder {
+  color: #e67e22 !important;
+  opacity: 1 !important;
+  font-size: 0.95em;
+  font-weight: 500;
+}
