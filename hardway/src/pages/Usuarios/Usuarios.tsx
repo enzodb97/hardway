@@ -14,6 +14,8 @@ import {
   IonAlert,
   IonSelect,
   IonSelectOption,
+  IonButtons,
+  IonMenuButton,
 } from "@ionic/react";
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
@@ -145,6 +147,9 @@ const Usuarios: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
+          <IonButtons slot="start">
+            <IonMenuButton />
+          </IonButtons>
           <IonTitle>Gestión de Usuarios</IonTitle>
         </IonToolbar>
       </IonHeader>
