@@ -6,6 +6,7 @@ import {
   ReactNode,
   FC,
 } from "react";
+import axios from "axios";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -25,17 +26,19 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const login = (username: string, password: string): boolean => {
+  const login = async (username: string, password: string) => {
     setError(null);
-
-    if (username === "admin" && password === "admin123") {
+    try {
+      const response = await axios.post("/api/login", { username, password });
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("rol", response.data.rol);
       setIsAuthenticated(true);
       return true;
+    } catch (error) {
+      setError("Credenciales inválidas");
+      setIsAuthenticated(false);
+      return false;
     }
-
-    setError("Credenciales inválidas");
-    return false;
   };
 
   const logout = () => {

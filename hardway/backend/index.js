@@ -66,6 +66,20 @@ const Cliente = sequelize.define(
   }
 );
 
+// Define el modelo Usuario
+const Usuario = sequelize.define(
+  "Usuario",
+  {
+    username: DataTypes.STRING,
+    password: DataTypes.STRING,
+    rol: DataTypes.STRING,
+  },
+  {
+    tableName: "usuarios",
+    timestamps: false,
+  }
+);
+
 // Endpoints básicos
 app.get("/api/clientes", async (req, res) => {
   try {
@@ -96,6 +110,23 @@ app.delete("/api/clientes/:id", async (req, res) => {
 
 app.get("/", (req, res) => {
   res.send("¡API de Clientes funcionando!");
+});
+
+app.post("/api/login", async (req, res) => {
+  const { username, password } = req.body;
+  console.log("Intento de login:", username, password);
+  try {
+    const usuario = await Usuario.findOne({ where: { username } });
+    if (!usuario) {
+      return res.status(401).json({ error: "Credenciales inválidas" });
+    }
+    if (usuario.password !== password) {
+      return res.status(401).json({ error: "Credenciales inválidas" });
+    }
+    res.json({ username: usuario.username, rol: usuario.rol });
+  } catch (error) {
+    res.status(500).json({ error: "Error en el servidor" });
+  }
 });
 
 // Manejo de errores global
