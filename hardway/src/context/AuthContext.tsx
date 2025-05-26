@@ -13,7 +13,8 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   error: string | null;
-  rol: string | null; // <--- agrega esto
+  rol: string | null;
+  username: string | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,45 +22,58 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => false,
   logout: () => {},
   error: null,
-  rol: null, // <--- agrega esto
+  rol: null,
+  username: null,
 });
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rol, setRol] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
-  const login = async (username: string, password: string) => {
+  const login = async (usernameInput: string, password: string) => {
     setError(null);
     try {
-      const response = await axios.post("/api/login", { username, password });
+      const response = await axios.post("/api/login", {
+        username: usernameInput,
+        password,
+      });
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("rol", response.data.rol);
+      localStorage.setItem("username", response.data.username);
       setIsAuthenticated(true);
       setRol(response.data.rol);
+      setUsername(response.data.username);
       return true;
     } catch (error) {
       setError("Credenciales inválidas");
       setIsAuthenticated(false);
       setRol(null);
+      setUsername(null);
       return false;
     }
   };
 
   const logout = () => {
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("rol");
+    localStorage.removeItem("username");
     setIsAuthenticated(false);
+    setRol(null);
+    setUsername(null);
   };
 
   useEffect(() => {
     const authStatus = localStorage.getItem("isAuthenticated");
     setIsAuthenticated(authStatus === "true");
     setRol(localStorage.getItem("rol"));
+    setUsername(localStorage.getItem("username"));
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, login, logout, error, rol }}
+      value={{ isAuthenticated, login, logout, error, rol, username }}
     >
       {children}
     </AuthContext.Provider>

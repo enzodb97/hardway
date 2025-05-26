@@ -18,7 +18,7 @@ import {
 } from "ionicons/icons";
 import "./Menu.css";
 import persona from "../assets/images/people.png";
-import { useAuth } from "../context/AuthContext"; // Importación añadida
+import { useAuth } from "../context/AuthContext";
 
 interface AppPage {
   url: string;
@@ -37,7 +37,7 @@ const appPages: AppPage[] = [
 const Menu: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
-  const { logout } = useAuth(); // Obtenemos la función de logout del contexto
+  const { logout, username } = useAuth(); // Obtenemos la función de logout y el nombre de usuario del contexto
 
   const handleLogout = () => {
     logout();
@@ -51,7 +51,7 @@ const Menu: React.FC = () => {
           <IonList className="menu-list">
             <div className="menu-header">
               <IonImg className="menu-logo" src={persona} />
-              <h2 className="menu-user">Usuario</h2>
+              <h2 className="menu-user">{username || "Usuario"}</h2>
             </div>
 
             {appPages.map((appPage, index) => (
