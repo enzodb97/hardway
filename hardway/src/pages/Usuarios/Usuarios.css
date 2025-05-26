@@ -38,6 +38,16 @@
   width: 100%;
 }
 
+.usuarios-edit-form {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .usuarios-form-item {
   --padding-start: 0;
 }
@@ -48,10 +58,13 @@
 
 .usuarios-list-section {
   margin-top: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .usuarios-list {
   width: 100%;
+  box-sizing: border-box;
 }
 
 .usuarios-list-item {
