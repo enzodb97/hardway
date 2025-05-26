@@ -217,6 +217,13 @@ app.post("/api/pedidos", async (req, res) => {
   res.json(pedido);
 });
 
+// Validar usuario por nombre de usuario
+app.get("/api/usuarios/validate", async (req, res) => {
+  const { username } = req.query;
+  const usuario = await Usuario.findOne({ where: { username } });
+  res.json({ valid: !!usuario });
+});
+
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);

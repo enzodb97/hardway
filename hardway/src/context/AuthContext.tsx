@@ -66,9 +66,33 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     const authStatus = localStorage.getItem("isAuthenticated");
-    setIsAuthenticated(authStatus === "true");
-    setRol(localStorage.getItem("rol"));
-    setUsername(localStorage.getItem("username"));
+    const storedUsername = localStorage.getItem("username");
+    const storedRol = localStorage.getItem("rol");
+
+    if (authStatus === "true" && storedUsername && storedRol) {
+      // Verifica con el backend si el usuario sigue siendo válido
+      axios
+        .get("/api/usuarios/validate", {
+          params: { username: storedUsername },
+        })
+        .then((res) => {
+          if (res.data.valid) {
+            setIsAuthenticated(true);
+            setRol(storedRol);
+            setUsername(storedUsername);
+          } else {
+            // Si no es válido, forzar logout
+            logout();
+          }
+        })
+        .catch(() => {
+          logout();
+        });
+    } else {
+      setIsAuthenticated(false);
+      setRol(null);
+      setUsername(null);
+    }
   }, []);
 
   return (
