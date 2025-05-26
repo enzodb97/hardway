@@ -6,6 +6,8 @@ import {
   editarUsuario,
   cambiarPassword,
   rolesDisponibles,
+  validarCamposUsuario,
+  validarUnicidadUsuario,
   Usuario,
 } from "../../utils/usuariosUtils";
 import {
@@ -64,25 +66,32 @@ const Usuarios: React.FC = () => {
     );
   }
 
-  // Obtener usuarios
-  const cargarUsuariosLista = async () => {
-    const data = await cargarUsuarios();
-    setUsuarios(data);
-  };
-
+  // Cargar usuarios al montar
   useEffect(() => {
-    cargarUsuariosLista();
+    cargarUsuarios().then(setUsuarios);
   }, []);
 
   // Crear usuario
   const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
+    const errorCampos = validarCamposUsuario(nuevoUsuario);
+    if (errorCampos) {
+      setAlertMsg(errorCampos);
+      setShowAlert(true);
+      return;
+    }
+    const errorUnicidad = validarUnicidadUsuario(nuevoUsuario, usuarios);
+    if (errorUnicidad) {
+      setAlertMsg(errorUnicidad);
+      setShowAlert(true);
+      return;
+    }
     try {
       await crearUsuario(nuevoUsuario);
       setAlertMsg("Usuario creado correctamente");
       setShowAlert(true);
       setNuevoUsuario({ username: "", password: "", rol: "vendedor" });
-      cargarUsuariosLista();
+      cargarUsuarios().then(setUsuarios);
     } catch {
       setAlertMsg("Error al crear usuario");
       setShowAlert(true);
@@ -105,12 +114,24 @@ const Usuarios: React.FC = () => {
   const handleGuardarEdicion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editando) return;
+    const errorCampos = validarCamposUsuario(editando);
+    if (errorCampos) {
+      setAlertMsg(errorCampos);
+      setShowAlert(true);
+      return;
+    }
+    const errorUnicidad = validarUnicidadUsuario(editando, usuarios);
+    if (errorUnicidad) {
+      setAlertMsg(errorUnicidad);
+      setShowAlert(true);
+      return;
+    }
     try {
       await editarUsuario(editando);
       setAlertMsg("Usuario actualizado correctamente");
       setShowAlert(true);
       setEditando(null);
-      cargarUsuariosLista();
+      cargarUsuarios().then(setUsuarios);
     } catch {
       setAlertMsg("Error al actualizar usuario");
       setShowAlert(true);
@@ -156,7 +177,6 @@ const Usuarios: React.FC = () => {
                 <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
                 <h2 className="usuarios-section-title">Crear nuevo usuario</h2>
               </div>
-
               <form onSubmit={handleCrear} className="usuarios-form">
                 <IonItem className="usuarios-form-item">
                   <IonLabel position="floating">Usuario</IonLabel>
@@ -217,7 +237,6 @@ const Usuarios: React.FC = () => {
               <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
               <h2 className="usuarios-section-title">Lista de usuarios</h2>
             </div>
-
             <IonList className="usuarios-list">
               {usuarios.map((usuario) =>
                 editando && editando.id === usuario.id ? (
@@ -306,7 +325,6 @@ const Usuarios: React.FC = () => {
               )}
             </IonList>
           </div>
-
           {/* Alertas */}
           <IonAlert
             isOpen={showAlert}
@@ -314,7 +332,6 @@ const Usuarios: React.FC = () => {
             buttons={["OK"]}
             onDidDismiss={() => setShowAlert(false)}
           />
-
           {/* Modal para cambiar contraseña */}
           <IonAlert
             isOpen={showPasswordAlert}

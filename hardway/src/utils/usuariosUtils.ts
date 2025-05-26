@@ -9,6 +9,34 @@ export interface Usuario {
 
 export const rolesDisponibles = ["admin", "vendedor", "consulta"];
 
+// Validación de campos de usuario
+export function validarCamposUsuario(usuario: Partial<Usuario>): string | null {
+  if (!usuario.username || usuario.username.trim().length < 3) {
+    return "El nombre de usuario debe tener al menos 3 caracteres.";
+  }
+  if (!usuario.rol) {
+    return "El rol es obligatorio.";
+  }
+  // Si es creación, la contraseña es obligatoria
+  if (usuario.password !== undefined && usuario.password.trim().length < 4) {
+    return "La contraseña debe tener al menos 4 caracteres.";
+  }
+  return null;
+}
+
+// Validación de unicidad de usuario
+export function validarUnicidadUsuario(
+  usuario: Partial<Usuario>,
+  usuarios: Usuario[]
+): string | null {
+  const { username, id } = usuario;
+  if (username) {
+    const existe = usuarios.find((u) => u.username === username && u.id !== id);
+    if (existe) return `Ya existe un usuario con el nombre: ${username}`;
+  }
+  return null;
+}
+
 // Obtener usuarios
 export const cargarUsuarios = async (): Promise<Usuario[]> => {
   const res = await axios.get("/api/usuarios");

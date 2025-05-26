@@ -20,6 +20,11 @@ import { Cliente } from "../../context/ClientesContext";
 import "./AltaCliente.css";
 import zepelin from "../../assets/images/zepelin.png";
 import { useEffect, useState } from "react";
+import {
+  validarUnicidadCliente,
+  validarCamposCliente,
+  soloNumeros,
+} from "../../utils/clientesUtils";
 
 const AltaCliente: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -59,79 +64,32 @@ const AltaCliente: React.FC = () => {
     }
   }, [id, clientes]);
 
-  const validarUnicidad = (cliente: Partial<Cliente>): string | null => {
-    const { numeroDocumento, email, telefono } = cliente;
-    const clienteExistenteDNI = clientes.find(
-      (c) => c.numeroDocumento === numeroDocumento && c.id !== formData.id // Excluir el cliente actual en modo edición
-    );
-    if (clienteExistenteDNI) {
-      return `Ya existe un cliente con el N° de Documento: ${numeroDocumento}`;
-    }
-
-    const clienteExistenteEmail = clientes.find(
-      (c) => c.email === email && c.id !== formData.id
-    );
-    if (clienteExistenteEmail) {
-      return `Ya existe un cliente con el Email: ${email}`;
-    }
-
-    const clienteExistenteTelefono = clientes.find(
-      (c) => c.telefono === telefono && c.id !== formData.id
-    );
-    if (clienteExistenteTelefono) {
-      return `Ya existe un cliente con el Teléfono: ${telefono}`;
-    }
-
-    return null;
-  };
-
+  // Handlers delegados a utils
   const handleNumeroDocumentoChange = (e: any) => {
     const value = e.detail.value;
-    if (/^\d*$/.test(value)) {
-      setFormData({ ...formData, numeroDocumento: value });
-      setPreviousNumeroDocumento(value);
-    } else {
-      setFormData({ ...formData, numeroDocumento: previousNumeroDocumento });
-    }
+    const nuevoValor = soloNumeros(value, previousNumeroDocumento);
+    setFormData({ ...formData, numeroDocumento: nuevoValor });
+    setPreviousNumeroDocumento(nuevoValor);
   };
 
   const handleTelefonoChange = (e: any) => {
     const value = e.detail.value;
-    if (/^\d*$/.test(value)) {
-      setFormData({ ...formData, telefono: value });
-      setPreviousTelefono(value);
-    } else {
-      setFormData({ ...formData, telefono: previousTelefono });
-    }
+    const nuevoValor = soloNumeros(value, previousTelefono);
+    setFormData({ ...formData, telefono: nuevoValor });
+    setPreviousTelefono(nuevoValor);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      formData.numeroDocumento &&
-      formData.numeroDocumento.trim().length < 3
-    ) {
-      setAlertMessage("El N° de Documento debe tener al menos 3 caracteres.");
+    const errorCampos = validarCamposCliente(formData);
+    if (errorCampos) {
+      setAlertMessage(errorCampos);
       setShowAlert(true);
       return;
     }
 
-    if (formData.nombre && formData.nombre.trim().length < 3) {
-      setAlertMessage(
-        "El nombre y apellido deben tener al menos 3 caracteres."
-      );
-      setShowAlert(true);
-      return;
-    }
-
-    if (!formData.barrio || formData.barrio.trim().length < 2) {
-      setAlertMessage("El campo Barrio es obligatorio.");
-      setShowAlert(true);
-      return;
-    }
-
-    const errorUnicidad = validarUnicidad(formData);
+    const errorUnicidad = validarUnicidadCliente(formData, clientes);
     if (errorUnicidad) {
       setAlertMessage(errorUnicidad);
       setShowAlert(true);
@@ -305,7 +263,6 @@ const AltaCliente: React.FC = () => {
                   />
                 </IonItem>
 
-                {/* Altura */}
                 <IonItem className="form-item">
                   <IonLabel position="floating">Altura</IonLabel>
                   <IonInput
@@ -343,7 +300,6 @@ const AltaCliente: React.FC = () => {
                   />
                 </IonItem>
 
-                {/* Teléfono */}
                 <IonItem className="form-item">
                   <IonLabel position="floating">Teléfono </IonLabel>
                   <IonInput
