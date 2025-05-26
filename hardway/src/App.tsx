@@ -16,6 +16,8 @@ import Clientes from "./pages/Clientes/Clientes";
 import AltaCliente from "./pages/AltaCliente/AltaCliente";
 import RoleRoute from "./components/RoleRoute";
 import Usuarios from "./pages/Usuarios/Usuarios";
+import Pedidos from "./pages/Pedidos/Pedidos";
+import AltaPedido from "./pages/Pedidos/AltaPedido";
 
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
@@ -49,6 +51,18 @@ const AppRouter = () => {
               path="/usuarios"
               component={Usuarios}
               requiredRoles={["admin"]}
+            />
+            <RoleRoute
+              exact
+              path="/pedidos"
+              component={Pedidos}
+              requiredRoles={["admin", "vendedor"]}
+            />
+            <RoleRoute
+              exact
+              path="/alta-pedido"
+              component={AltaPedido}
+              requiredRoles={["admin", "vendedor"]}
             />
             <Route exact path="/">
               <Redirect to="/dashboard" />

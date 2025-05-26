@@ -80,6 +80,32 @@ const Usuario = sequelize.define(
   }
 );
 
+// Define el modelo Pedido
+const Pedido = sequelize.define(
+  "Pedido",
+  {
+    descripcion: DataTypes.STRING,
+    fecha: DataTypes.DATE,
+    estado: DataTypes.STRING,
+    clienteId: {
+      type: DataTypes.INTEGER,
+      field: "cliente_id",
+      references: {
+        model: "clientes",
+        key: "id",
+      },
+    },
+  },
+  {
+    tableName: "pedidos",
+    timestamps: false,
+  }
+);
+
+// Relación
+Pedido.belongsTo(Cliente, { foreignKey: "clienteId" });
+Cliente.hasMany(Pedido, { foreignKey: "clienteId" });
+
 // Endpoints básicos
 app.get("/api/clientes", async (req, res) => {
   try {
@@ -177,6 +203,18 @@ app.put("/api/usuarios/:id/password", async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: "No se pudo cambiar la contraseña" });
   }
+});
+
+// Obtener todos los pedidos
+app.get("/api/pedidos", async (req, res) => {
+  const pedidos = await Pedido.findAll({ include: Cliente });
+  res.json(pedidos);
+});
+
+// Crear pedido
+app.post("/api/pedidos", async (req, res) => {
+  const pedido = await Pedido.create(req.body);
+  res.json(pedido);
 });
 
 // Manejo de errores global
