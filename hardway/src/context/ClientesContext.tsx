@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
 export interface Cliente {
   id: number;
@@ -32,53 +33,62 @@ const ClientesContext = createContext<ClientesContextType>({
   eliminarCliente: () => {},
 });
 
-export const ClientesProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const STORAGE_KEY = "hardwayClientes";
-  const storedClientes = localStorage.getItem(STORAGE_KEY);
-  const initialClientes = storedClientes
-    ? (JSON.parse(storedClientes) as Cliente[])
-    : [];
-  const initialMaxId = initialClientes.reduce(
-    (max: number, cliente: Cliente) => Math.max(max, cliente.id),
-    0
-  );
+export const ClientesProvider = ({ children }: { children: React.ReactNode }) => {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
 
-  const [clientes, setClientes] = useState<Cliente[]>(initialClientes);
-  const [ultimoId, setUltimoId] = useState(initialMaxId);
-
+  // Cargar clientes desde el backend
   useEffect(() => {
-    console.log(
-      "ClientesContext.tsx: Guardando clientes en localStorage:",
-      clientes
-    );
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clientes));
-  }, [clientes]);
+    const fetchClientes = async () => {
+      try {
+        console.log('Intentando obtener clientes del backend...');
+        const response = await axios.get("/api/clientes");
+        console.log('Respuesta del servidor:', response.data);
+        setClientes(response.data);
+      } catch (error) {
+        console.error("Error al cargar clientes:", error);
+        // Mostrar más detalles del error
+        if (axios.isAxiosError(error)) {
+          console.error('Status:', error.response?.status);
+          console.error('Data:', error.response?.data);
+        }
+      }
+    };
 
-  const obtenerNuevoId = () => {
-    const nuevoId = ultimoId + 1;
-    setUltimoId(nuevoId);
-    return nuevoId;
+    fetchClientes();
+  }, []);
+
+  const agregarCliente = async (nuevoCliente: Omit<Cliente, "id">) => {
+    try {
+      const response = await axios.post("/api/clientes", nuevoCliente);
+      setClientes((prev) => [...prev, response.data]);
+    } catch (error) {
+      console.error("Error al agregar cliente:", error);
+    }
   };
 
-  const agregarCliente = (nuevoCliente: Omit<Cliente, "id">) => {
-    const nuevoClienteConId = { ...nuevoCliente, id: obtenerNuevoId() };
-    setClientes((prev) => [...prev, nuevoClienteConId]);
+  const modificarCliente = async (clienteActualizado: Cliente) => {
+    try {
+      await axios.put(
+        `/api/clientes/${clienteActualizado.id}`,
+        clienteActualizado
+      );
+      setClientes((prev) =>
+        prev.map((cliente) =>
+          cliente.id === clienteActualizado.id ? clienteActualizado : cliente
+        )
+      );
+    } catch (error) {
+      console.error("Error al modificar cliente:", error);
+    }
   };
 
-  const modificarCliente = (clienteActualizado: Cliente) => {
-    setClientes((prev) =>
-      prev.map((cliente) =>
-        cliente.id === clienteActualizado.id ? clienteActualizado : cliente
-      )
-    );
-  };
-
-  const eliminarCliente = (id: number) => {
-    setClientes((prev) => prev.filter((cliente) => cliente.id !== id));
+  const eliminarCliente = async (id: number) => {
+    try {
+      await axios.delete(`/api/clientes/${id}`);
+      setClientes((prev) => prev.filter((cliente) => cliente.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+    }
   };
 
   return (
@@ -86,7 +96,7 @@ export const ClientesProvider = ({
       value={{
         clientes,
         agregarCliente,
-        modificarCliente: modificarCliente,
+        modificarCliente,
         eliminarCliente,
       }}
     >
