@@ -17,6 +17,7 @@ import {
 } from "@ionic/react";
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
+import zepelin from "../../assets/images/zepelin.png";
 
 interface Usuario {
   id: number;
@@ -149,61 +150,75 @@ const Usuarios: React.FC = () => {
       </IonHeader>
       <IonContent className="ion-padding usuarios-content">
         <div className="usuarios-columna">
-          <div className="usuarios-section usuarios-form-section">
-            {/* Formulario de creación */}
-            <h2 className="usuarios-section-title">Crear nuevo usuario</h2>
-            <form onSubmit={handleCrear} className="usuarios-form">
-              <IonItem className="usuarios-form-item">
-                <IonLabel position="floating">Usuario</IonLabel>
-                <IonInput
-                  value={nuevoUsuario.username}
-                  onIonChange={(e) =>
-                    setNuevoUsuario({
-                      ...nuevoUsuario,
-                      username: e.detail.value!,
-                    })
-                  }
-                  required
-                />
-              </IonItem>
-              <IonItem className="usuarios-form-item">
-                <IonLabel position="floating">Contraseña</IonLabel>
-                <IonInput
-                  type="password"
-                  value={nuevoUsuario.password}
-                  onIonChange={(e) =>
-                    setNuevoUsuario({
-                      ...nuevoUsuario,
-                      password: e.detail.value!,
-                    })
-                  }
-                  required
-                />
-              </IonItem>
-              <IonItem className="usuarios-form-item">
-                <IonLabel position="floating">Rol</IonLabel>
-                <IonSelect
-                  value={nuevoUsuario.rol}
-                  onIonChange={(e) =>
-                    setNuevoUsuario({ ...nuevoUsuario, rol: e.detail.value! })
-                  }
-                  required
+          {!editando && (
+            <div className="usuarios-section usuarios-form-section">
+              {/* Formulario de creación */}
+              <div className="encb">
+                <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
+                <h2 className="usuarios-section-title">Crear nuevo usuario</h2>
+              </div>
+
+              <form onSubmit={handleCrear} className="usuarios-form">
+                <IonItem className="usuarios-form-item">
+                  <IonLabel position="floating">Usuario</IonLabel>
+                  <IonInput
+                    value={nuevoUsuario.username}
+                    onIonChange={(e) =>
+                      setNuevoUsuario({
+                        ...nuevoUsuario,
+                        username: e.detail.value!,
+                      })
+                    }
+                    required
+                  />
+                </IonItem>
+                <IonItem className="usuarios-form-item">
+                  <IonLabel position="floating">Contraseña</IonLabel>
+                  <IonInput
+                    type="password"
+                    value={nuevoUsuario.password}
+                    onIonChange={(e) =>
+                      setNuevoUsuario({
+                        ...nuevoUsuario,
+                        password: e.detail.value!,
+                      })
+                    }
+                    required
+                  />
+                </IonItem>
+                <IonItem className="usuarios-form-item">
+                  <IonLabel position="floating">Rol</IonLabel>
+                  <IonSelect
+                    value={nuevoUsuario.rol}
+                    onIonChange={(e) =>
+                      setNuevoUsuario({ ...nuevoUsuario, rol: e.detail.value! })
+                    }
+                    required
+                  >
+                    {rolesDisponibles.map((rol) => (
+                      <IonSelectOption key={rol} value={rol}>
+                        {rol}
+                      </IonSelectOption>
+                    ))}
+                  </IonSelect>
+                </IonItem>
+                <IonButton
+                  expand="block"
+                  type="submit"
+                  className="usuarios-btn"
                 >
-                  {rolesDisponibles.map((rol) => (
-                    <IonSelectOption key={rol} value={rol}>
-                      {rol}
-                    </IonSelectOption>
-                  ))}
-                </IonSelect>
-              </IonItem>
-              <IonButton expand="block" type="submit" className="usuarios-btn">
-                Crear Usuario
-              </IonButton>
-            </form>
-          </div>
+                  Crear Usuario
+                </IonButton>
+              </form>
+            </div>
+          )}
           <div className="usuarios-section usuarios-list-section">
             {/* Lista de usuarios */}
-            <h2 className="usuarios-section-title">Lista de usuarios</h2>
+            <div className="encb">
+              <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
+              <h2 className="usuarios-section-title">Lista de usuarios</h2>
+            </div>
+
             <IonList className="usuarios-list">
               {usuarios.map((usuario) =>
                 editando && editando.id === usuario.id ? (

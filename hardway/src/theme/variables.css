@@ -5,7 +5,7 @@ http://ionicframework.com/docs/theming/ */
 /* Set variables for all modes */
 :root {
   /* Set the background of the entire app */
-  --ion-background-color: #f2eae1 !important;
+  --ion-background-color: #f2eae1;
   --ion-color-custom-yellow: #fdb40b;
   --ion-color-custom-yellow-rgb: 253, 180, 11;
   --ion-color-custom-yellow-contrast: #2d3436;
@@ -24,13 +24,13 @@ http://ionicframework.com/docs/theming/ */
 /* Set text color of the entire app for Material Design only */
 :root.md {
   --ion-text-color: #0a0808;
-  --ion-item-background: #f2d2ae !important;
+  /*--ion-item-background: #f2d2ae !important;*/
   --ion-toolbar-background: #fdfdfd !important;
 }
 /* Fondo de todos los contenedores*/
-ion-content {
+/*ion-content {
   background-color: #fdb40b !important;
-}
+}*/
 
 /*.backgorund-content {
   background-color: #ac1616 !important;

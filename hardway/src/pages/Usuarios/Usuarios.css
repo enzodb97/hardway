@@ -1,3 +1,12 @@
+* {
+  box-sizing: border-box;
+}
+ion-content.usuarios-content {
+  --background: #fdb40b !important;
+  --ion-background-color: #ffffff !important;
+  background: #fdb40b !important;
+}
+
 .usuarios-content {
   display: flex !important;
   flex-direction: column !important;
@@ -8,7 +17,14 @@
   gap: 2rem;
   box-sizing: border-box;
   min-height: 100vh;
-  background: transparent;
+}
+
+.encb {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 }
 
 .usuarios-section {
@@ -59,7 +75,9 @@
 .usuarios-list-section {
   margin-top: 0;
   width: 100%;
-  box-sizing: border-box;
+  height: auto;
+  flex-wrap: wrap;
+  margin-bottom: 80px;
 }
 
 .usuarios-list {
@@ -86,8 +104,9 @@
   flex-direction: column;
   width: 100%;
   max-width: 700px;
-  margin: 0 auto;
+  margin: auto;
   gap: 2rem;
+  padding: 2rem;
 }
 
 @media (max-width: 600px) {
