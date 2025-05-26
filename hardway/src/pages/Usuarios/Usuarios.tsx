@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import {
+  cargarUsuarios,
+  crearUsuario,
+  eliminarUsuario,
+  editarUsuario,
+  cambiarPassword,
+  rolesDisponibles,
+  Usuario,
+} from "../../utils/usuariosUtils";
 import {
   IonPage,
   IonHeader,
@@ -20,15 +28,6 @@ import {
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
 import zepelin from "../../assets/images/zepelin.png";
-
-interface Usuario {
-  id: number;
-  username: string;
-  password?: string;
-  rol: string;
-}
-
-const rolesDisponibles = ["admin", "vendedor", "consulta"];
 
 const Usuarios: React.FC = () => {
   const { rol } = useAuth();
@@ -66,24 +65,24 @@ const Usuarios: React.FC = () => {
   }
 
   // Obtener usuarios
-  const cargarUsuarios = async () => {
-    const res = await axios.get("/api/usuarios");
-    setUsuarios(res.data);
+  const cargarUsuariosLista = async () => {
+    const data = await cargarUsuarios();
+    setUsuarios(data);
   };
 
   useEffect(() => {
-    cargarUsuarios();
+    cargarUsuariosLista();
   }, []);
 
   // Crear usuario
   const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("/api/usuarios", nuevoUsuario);
+      await crearUsuario(nuevoUsuario);
       setAlertMsg("Usuario creado correctamente");
       setShowAlert(true);
       setNuevoUsuario({ username: "", password: "", rol: "vendedor" });
-      cargarUsuarios();
+      cargarUsuariosLista();
     } catch {
       setAlertMsg("Error al crear usuario");
       setShowAlert(true);
@@ -93,7 +92,7 @@ const Usuarios: React.FC = () => {
   // Eliminar usuario
   const handleEliminar = async (id: number) => {
     if (window.confirm("¿Eliminar este usuario?")) {
-      await axios.delete(`/api/usuarios/${id}`);
+      await eliminarUsuario(id);
       setUsuarios(usuarios.filter((u) => u.id !== id));
     }
   };
@@ -107,14 +106,11 @@ const Usuarios: React.FC = () => {
     e.preventDefault();
     if (!editando) return;
     try {
-      await axios.put(`/api/usuarios/${editando.id}`, {
-        username: editando.username,
-        rol: editando.rol,
-      });
+      await editarUsuario(editando);
       setAlertMsg("Usuario actualizado correctamente");
       setShowAlert(true);
       setEditando(null);
-      cargarUsuarios();
+      cargarUsuariosLista();
     } catch {
       setAlertMsg("Error al actualizar usuario");
       setShowAlert(true);
@@ -131,9 +127,7 @@ const Usuarios: React.FC = () => {
   const handleGuardarPassword = async () => {
     if (!usuarioPasswordId || !nuevaPassword) return;
     try {
-      await axios.put(`/api/usuarios/${usuarioPasswordId}/password`, {
-        password: nuevaPassword,
-      });
+      await cambiarPassword(usuarioPasswordId, nuevaPassword);
       setAlertMsg("Contraseña actualizada correctamente");
       setShowAlert(true);
       setShowPasswordAlert(false);
