@@ -129,6 +129,56 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Obtener todos los usuarios (solo para admin)
+app.get("/api/usuarios", async (req, res) => {
+  const usuarios = await Usuario.findAll({
+    attributes: ["id", "username", "rol"],
+  }); // No envíes la contraseña
+  res.json(usuarios);
+});
+
+// Crear usuario
+app.post("/api/usuarios", async (req, res) => {
+  const { username, password, rol } = req.body;
+  try {
+    const nuevo = await Usuario.create({ username, password, rol });
+    res.json({ id: nuevo.id, username: nuevo.username, rol: nuevo.rol });
+  } catch (error) {
+    res.status(400).json({ error: "No se pudo crear el usuario" });
+  }
+});
+
+// Eliminar usuario
+app.delete("/api/usuarios/:id", async (req, res) => {
+  const { id } = req.params;
+  await Usuario.destroy({ where: { id } });
+  res.json({ success: true });
+});
+
+// Actualizar usuario (nombre de usuario y rol)
+app.put("/api/usuarios/:id", async (req, res) => {
+  const { id } = req.params;
+  const { username, rol } = req.body;
+  try {
+    await Usuario.update({ username, rol }, { where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: "No se pudo actualizar el usuario" });
+  }
+});
+
+// Cambiar contraseña
+app.put("/api/usuarios/:id/password", async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+  try {
+    await Usuario.update({ password }, { where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: "No se pudo cambiar la contraseña" });
+  }
+});
+
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);

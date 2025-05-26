@@ -14,6 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Clientes from "./pages/Clientes/Clientes";
 import AltaCliente from "./pages/AltaCliente/AltaCliente";
+import RoleRoute from "./components/RoleRoute";
+import Usuarios from "./pages/Usuarios/Usuarios";
 
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
@@ -30,11 +32,23 @@ const AppRouter = () => {
           <Menu />
           <IonRouterOutlet id="main">
             <PrivateRoute exact path="/dashboard" component={Dashboard} />
-            <PrivateRoute exact path="/clientes" component={Clientes} />
-            <PrivateRoute
+            <RoleRoute
+              exact
+              path="/clientes"
+              component={Clientes}
+              requiredRoles={["admin", "vendedor"]}
+            />
+            <RoleRoute
               exact
               path="/alta-cliente/:id?"
               component={AltaCliente}
+              requiredRoles={["admin", "vendedor"]}
+            />
+            <RoleRoute
+              exact
+              path="/usuarios"
+              component={Usuarios}
+              requiredRoles={["admin"]}
             />
             <Route exact path="/">
               <Redirect to="/dashboard" />

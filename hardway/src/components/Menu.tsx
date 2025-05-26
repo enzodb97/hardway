@@ -31,7 +31,7 @@ const appPages: AppPage[] = [
   { title: "Reportes", url: "/folder/Reportes", icon: bookmarkOutline },
   { title: "Pedidos", url: "/folder/Pedidos", icon: logoUsd },
   { title: "Clientes", url: "/Clientes", icon: peopleOutline },
-  { title: "Usuarios", url: "/folder/Usuarios", icon: peopleOutline },
+  { title: "Usuarios", url: "/usuarios", icon: peopleOutline },
 ];
 
 const Menu: React.FC = () => {
