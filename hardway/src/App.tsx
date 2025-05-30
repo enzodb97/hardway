@@ -3,6 +3,7 @@ import {
   IonRouterOutlet,
   IonSplitPane,
   setupIonicReact,
+  IonAlert,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Route, Redirect } from "react-router-dom";
@@ -25,7 +26,7 @@ import "./theme/variables.css";
 setupIonicReact();
 
 const AppRouter = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, showWelcome, setShowWelcome, username } = useAuth();
 
   return (
     <IonReactRouter>
@@ -75,6 +76,13 @@ const AppRouter = () => {
           <Redirect to="/login" />
         </IonRouterOutlet>
       )}
+      <IonAlert
+        isOpen={showWelcome}
+        onDidDismiss={() => setShowWelcome(false)}
+        header="¡Bienvenido!"
+        message={`Bienvenido ${username || ""} al Sistema Pegasus`}
+        buttons={["Aceptar"]}
+      />
     </IonReactRouter>
   );
 };

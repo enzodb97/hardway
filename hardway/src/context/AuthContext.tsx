@@ -15,6 +15,8 @@ interface AuthContextType {
   error: string | null;
   rol: string | null;
   username: string | null;
+  showWelcome: boolean;
+  setShowWelcome: (show: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,6 +26,8 @@ const AuthContext = createContext<AuthContextType>({
   error: null,
   rol: null,
   username: null,
+  showWelcome: false,
+  setShowWelcome: () => {},
 });
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -31,6 +35,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [rol, setRol] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const login = async (usernameInput: string, password: string) => {
     setError(null);
@@ -45,6 +50,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setIsAuthenticated(true);
       setRol(response.data.rol);
       setUsername(response.data.username);
+      setShowWelcome(true); // Activa el mensaje tras login exitoso
       return true;
     } catch (error) {
       setError("Credenciales inválidas");
@@ -97,7 +103,16 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, login, logout, error, rol, username }}
+      value={{
+        isAuthenticated,
+        login,
+        logout,
+        error,
+        rol,
+        username,
+        showWelcome,
+        setShowWelcome,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -5,19 +5,27 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  IonAlert,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
 import "./Dashboard.css";
 
 const Dashboard: React.FC = () => {
   const history = useHistory();
-  const { logout } = useAuth();
+  const { logout, username } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (username) {
+      setShowWelcome(true);
+    }
+  }, [username]);
 
   const handleLogout = () => {
-    // Asegurar que NO hay llamadas API aquí
-    logout(); // Esta función solo debe limpiar el estado local
-    history.replace("/login.tsx");
+    logout();
+    history.replace("/login");
   };
 
   return (
@@ -32,6 +40,13 @@ const Dashboard: React.FC = () => {
         <IonButton expand="block" onClick={handleLogout} className="logout-btn">
           Cerrar Sesión
         </IonButton>
+        <IonAlert
+          isOpen={showWelcome}
+          onDidDismiss={() => setShowWelcome(false)}
+          header="¡Bienvenido!"
+          message={`Bienvenido ${username || ""} al Sistema Pegasus`}
+          buttons={["Aceptar"]}
+        />
       </IonContent>
     </IonPage>
   );
