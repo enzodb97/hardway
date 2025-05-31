@@ -9,6 +9,10 @@
   border-radius: 7px;
 }
 
+.alta-pedido-page ion-item {
+  --background: white; /* Cambia este color al que desees */
+}
+
 .pedidos-list strong {
   color: var(--ion-color-primary);
 }

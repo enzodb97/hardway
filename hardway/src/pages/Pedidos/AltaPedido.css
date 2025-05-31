@@ -25,6 +25,10 @@
   margin-bottom: 18px;
 }
 
+.alta-pedido-form ion-item ion-input {
+  margin-top: 12px;
+}
+
 .alta-pedido-form ion-input[readonly] {
   opacity: 0.7;
 }
