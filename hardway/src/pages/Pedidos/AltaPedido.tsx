@@ -10,8 +10,6 @@ import {
   IonInput,
   IonItem,
   IonLabel,
-  IonSelect,
-  IonSelectOption,
   IonAlert,
   IonModal,
   IonList,
@@ -33,7 +31,7 @@ const AltaPedido: React.FC = () => {
   const [form, setForm] = useState({
     descripcion: "",
     fecha: "",
-    estado: "pendiente",
+    estado: "En Curso", // Estado fijo por defecto
     clienteId: "",
   });
   const [showAlert, setShowAlert] = useState(false);
@@ -56,7 +54,12 @@ const AltaPedido: React.FC = () => {
       setAlertMsg(error);
       return;
     }
-    await crearPedido({ ...form, clienteId: Number(form.clienteId) });
+    // Estado siempre "En Curso" al guardar
+    await crearPedido({
+      ...form,
+      estado: "En Curso",
+      clienteId: Number(form.clienteId),
+    });
     history.push("/pedidos");
   };
 
@@ -86,13 +89,8 @@ const AltaPedido: React.FC = () => {
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Estado</IonLabel>
-            <IonSelect
-              value={form.estado}
-              onIonChange={(e) => setForm({ ...form, estado: e.detail.value! })}
-            >
-              <IonSelectOption value="pendiente">Pendiente</IonSelectOption>
-              <IonSelectOption value="entregado">Entregado</IonSelectOption>
-            </IonSelect>
+            {/* Solo muestra el estado, no editable */}
+            <IonInput value="En Curso" readonly />
           </IonItem>
           <IonItem button onClick={() => setShowClienteModal(true)}>
             <IonLabel position="floating">Cliente</IonLabel>

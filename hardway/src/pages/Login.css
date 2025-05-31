@@ -11,13 +11,14 @@
   padding: 20px;
 }
 
+/*
 ion-content::part(scroll) {
   display: flex;
   justify-content: center;
   align-items: center;
   position: static;
   height: 100%;
-}
+}*/
 
 .main-container {
   width: 100%;
@@ -199,4 +200,13 @@ form {
   --background-hover: #bb2d3b;
   margin-top: 2rem;
   max-width: 300px;
+}
+
+.login-content::part(scroll),
+.menu-content::part(scroll) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: static;
+  height: 100%;
 }

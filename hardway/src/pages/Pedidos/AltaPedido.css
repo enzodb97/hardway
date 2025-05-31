@@ -39,3 +39,12 @@
 .cliente-modal ion-content {
   padding: 16px;
 }
+
+.alta-pedido-content::part(scroll) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: static;
+  height: 100%;
+  width: 100%;
+}
