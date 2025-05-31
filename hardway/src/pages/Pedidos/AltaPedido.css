@@ -1,0 +1,41 @@
+/* Estructura principal */
+
+.alta-pedido-page {
+  --ion-background-color: #feaf00;
+  min-height: 100vh;
+}
+
+.alta-pedido-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.alta-pedido-form {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.alta-pedido-form ion-item {
+  margin-bottom: 18px;
+}
+
+.alta-pedido-form ion-input[readonly] {
+  opacity: 0.7;
+}
+
+.guardar-btn {
+  margin-top: 24px;
+  --background: var(--ion-color-primary);
+  --background-activated: var(--ion-color-primary-shade);
+}
+
+/* Modal de clientes */
+.cliente-modal ion-content {
+  padding: 16px;
+}

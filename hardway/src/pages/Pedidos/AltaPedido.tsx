@@ -1,5 +1,5 @@
 // src/pages/Pedidos/AltaPedido.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IonPage,
   IonHeader,
@@ -15,11 +15,17 @@ import {
   IonAlert,
   IonModal,
   IonList,
-  IonDatetime,
+  IonMenuButton,
 } from "@ionic/react";
 import { useClientes } from "../../context/ClientesContext";
-import { crearPedido } from "../../utils/pedidosUtils";
+import {
+  crearPedido,
+  validarCamposPedido,
+  filtrarClientesPorNombre,
+  obtenerFechaHoraArgentina,
+} from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
+import "./AltaPedido.css";
 
 const AltaPedido: React.FC = () => {
   const { clientes } = useClientes();
@@ -35,23 +41,19 @@ const AltaPedido: React.FC = () => {
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [filtroCliente, setFiltroCliente] = useState("");
 
-  const clientesFiltrados = clientes.filter((c) => {
-    const filtro = filtroCliente
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    const nombre = c.nombre
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    return nombre.includes(filtro);
-  });
+  // Al cargar el componente, setea la fecha y hora actual automáticamente
+  useEffect(() => {
+    setForm((f) => ({ ...f, fecha: obtenerFechaHoraArgentina() }));
+  }, []);
+
+  const clientesFiltrados = filtrarClientesPorNombre(clientes, filtroCliente);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.descripcion.trim() || !form.fecha || !form.clienteId) {
+    const error = validarCamposPedido(form);
+    if (error) {
       setShowAlert(true);
-      setAlertMsg("Todos los campos son obligatorios.");
+      setAlertMsg(error);
       return;
     }
     await crearPedido({ ...form, clienteId: Number(form.clienteId) });
@@ -59,14 +61,15 @@ const AltaPedido: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage className="alta-pedido-page">
       <IonHeader>
         <IonToolbar>
+          <IonMenuButton slot="start" />
           <IonTitle>Nuevo Pedido</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        <form onSubmit={handleSubmit}>
+      <IonContent className="alta-pedido-content">
+        <form className="alta-pedido-form" onSubmit={handleSubmit}>
           <IonItem>
             <IonLabel position="floating">Descripción</IonLabel>
             <IonInput
@@ -78,14 +81,8 @@ const AltaPedido: React.FC = () => {
             />
           </IonItem>
           <IonItem>
-            <IonLabel position="floating">Fecha</IonLabel>
-            <IonDatetime
-              presentation="date"
-              value={form.fecha}
-              onIonChange={(e) =>
-                setForm({ ...form, fecha: e.detail.value as string })
-              }
-            />
+            <IonLabel position="floating">Fecha y hora</IonLabel>
+            <IonInput value={form.fecha} readonly required />
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Estado</IonLabel>
@@ -160,7 +157,7 @@ const AltaPedido: React.FC = () => {
             </IonContent>
           </IonModal>
 
-          <IonButton expand="block" type="submit">
+          <IonButton className="guardar-btn" expand="block" type="submit">
             Guardar Pedido
           </IonButton>
         </form>

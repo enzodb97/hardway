@@ -6,14 +6,20 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
   IonButton,
   IonInput,
+  IonMenuButton,
+  IonGrid,
+  IonRow,
+  IonCol,
 } from "@ionic/react";
-import { cargarPedidos, Pedido } from "../../utils/pedidosUtils";
+import {
+  cargarPedidos,
+  filtrarPedidos,
+  Pedido,
+} from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
+import "./Pedidos.css";
 
 const Pedidos: React.FC = () => {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -24,65 +30,77 @@ const Pedidos: React.FC = () => {
     cargarPedidos().then(setPedidos);
   }, []);
 
-  // Buscador integrado
-  const pedidosFiltrados = pedidos.filter((pedido) => {
-    const texto = busqueda
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    if (texto === "") return true;
-
-    const nombreCliente = (pedido.Cliente?.nombre || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    const fecha = (pedido.fecha || "").toLowerCase();
-    const id = pedido.id.toString();
-
-    return (
-      nombreCliente.includes(texto) ||
-      fecha.includes(texto) ||
-      id.includes(texto)
-    );
-  });
+  const pedidosFiltrados = filtrarPedidos(pedidos, busqueda);
 
   return (
-    <IonPage>
+    <IonPage className="pedidos-page">
       <IonHeader>
         <IonToolbar>
+          <IonMenuButton slot="start" />
           <IonTitle>Pedidos</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        <IonButton routerLink="/alta-pedido" expand="block">
-          Nuevo Pedido
-        </IonButton>
-
-        {/* Buscador único */}
-        <div style={{ margin: "16px 0" }}>
-          <IonInput
-            placeholder="Buscar por cliente, fecha o ID"
-            value={busqueda}
-            onIonChange={(e) => setBusqueda(e.detail.value!)}
-            clearInput
-          />
-        </div>
-
-        <IonList>
-          {pedidosFiltrados.map((pedido) => (
-            <IonItem key={pedido.id}>
-              <IonLabel>
-                <strong>{pedido.descripcion}</strong> - {pedido.estado} <br />
-                Cliente:{" "}
-                <strong>{pedido.Cliente?.nombre || "Sin cliente"}</strong>
-                <br />
-                Fecha: {pedido.fecha} <br />
-                ID: {pedido.id}
-              </IonLabel>
-            </IonItem>
-          ))}
-        </IonList>
+      <IonContent className="pedidos-content">
+        <IonGrid>
+          <IonRow>
+            <IonCol size="12">
+              {/* Fila 1: Botón */}
+              <IonButton routerLink="/alta-pedido" expand="block">
+                Nuevo Pedido
+              </IonButton>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol size="12">
+              {/* Fila 2: Buscador */}
+              <div className="pedidos-buscador">
+                <IonInput
+                  placeholder="Buscar por cliente, fecha o ID"
+                  value={busqueda}
+                  onIonChange={(e) => setBusqueda(e.detail.value!)}
+                  clearInput
+                />
+              </div>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol size="12">
+              {/* Fila 3: Tabla */}
+              <IonGrid className="pedidos-table">
+                <IonRow className="table-header">
+                  <IonCol className="text-center">
+                    <strong>ID</strong>
+                  </IonCol>
+                  <IonCol className="text-center">
+                    <strong>Descripción</strong>
+                  </IonCol>
+                  <IonCol className="text-center">
+                    <strong>Estado</strong>
+                  </IonCol>
+                  <IonCol className="text-center">
+                    <strong>Cliente</strong>
+                  </IonCol>
+                  <IonCol className="text-center">
+                    <strong>Fecha</strong>
+                  </IonCol>
+                </IonRow>
+                {pedidosFiltrados.map((pedido) => (
+                  <IonRow key={pedido.id} className="table-row">
+                    <IonCol className="text-center">{pedido.id}</IonCol>
+                    <IonCol className="text-center">
+                      {pedido.descripcion}
+                    </IonCol>
+                    <IonCol className="text-center">{pedido.estado}</IonCol>
+                    <IonCol className="text-center">
+                      {pedido.Cliente?.nombre || "Sin cliente"}
+                    </IonCol>
+                    <IonCol className="text-center">{pedido.fecha}</IonCol>
+                  </IonRow>
+                ))}
+              </IonGrid>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
       </IonContent>
     </IonPage>
   );

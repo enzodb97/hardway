@@ -1,0 +1,61 @@
+* {
+  box-sizing: border-box;
+}
+
+.pedidos-page {
+  --ion-background-color: #feaf00;
+  min-height: 100vh;
+}
+
+.pedidos-content {
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.pedidos-content > div,
+.pedidos-content > .pedidos-buscador,
+.pedidos-content > .pedidos-table {
+  margin-bottom: 16px;
+}
+
+.pedidos-buscador {
+  margin: 16px 0;
+}
+
+.pedidos-list ion-item {
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.pedidos-list strong {
+  color: var(--ion-color-primary);
+}
+
+.pedidos-table {
+  width: 100%;
+  min-width: 600px;
+  overflow-x: auto;
+}
+
+.table-header {
+  background: var(--ion-color-primary);
+  color: white;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.table-row {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.text-center {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  min-height: 50px;
+}
