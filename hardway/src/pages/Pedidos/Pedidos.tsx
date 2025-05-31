@@ -10,17 +10,35 @@ import {
   IonItem,
   IonLabel,
   IonButton,
+  IonInput,
 } from "@ionic/react";
 import { cargarPedidos, Pedido } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 
 const Pedidos: React.FC = () => {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [busqueda, setBusqueda] = useState("");
   const history = useHistory();
 
   useEffect(() => {
     cargarPedidos().then(setPedidos);
   }, []);
+
+  // Buscador integrado
+  const pedidosFiltrados = pedidos.filter((pedido) => {
+    const texto = busqueda.trim().toLowerCase();
+    if (texto === "") return true;
+
+    const nombreCliente = (pedido.Cliente?.nombre || "").toLowerCase();
+    const fecha = (pedido.fecha || "").toLowerCase();
+    const id = pedido.id.toString();
+
+    return (
+      nombreCliente.includes(texto) ||
+      fecha.includes(texto) ||
+      id.includes(texto)
+    );
+  });
 
   return (
     <IonPage>
@@ -33,12 +51,27 @@ const Pedidos: React.FC = () => {
         <IonButton routerLink="/alta-pedido" expand="block">
           Nuevo Pedido
         </IonButton>
+
+        {/* Buscador único */}
+        <div style={{ margin: "16px 0" }}>
+          <IonInput
+            placeholder="Buscar por cliente, fecha o ID"
+            value={busqueda}
+            onIonChange={(e) => setBusqueda(e.detail.value!)}
+            clearInput
+          />
+        </div>
+
         <IonList>
-          {pedidos.map((pedido: any) => (
+          {pedidosFiltrados.map((pedido) => (
             <IonItem key={pedido.id}>
               <IonLabel>
                 <strong>{pedido.descripcion}</strong> - {pedido.estado} <br />
-                Cliente: {pedido.cliente?.nombre || "Sin cliente"}
+                Cliente:{" "}
+                <strong>{pedido.Cliente?.nombre || "Sin cliente"}</strong>
+                <br />
+                Fecha: {pedido.fecha} <br />
+                ID: {pedido.id}
               </IonLabel>
             </IonItem>
           ))}
