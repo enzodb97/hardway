@@ -95,11 +95,13 @@ export function filtrarClientesPorNombre(
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
-  return clientes.filter((c) =>
-    c.nombre
+
+  return clientes.filter((c) => {
+    const nombreNormalizado = c.nombre
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .includes(normalizado)
-  );
+      .replace(/[\u0300-\u036f]/g, "");
+    const dni = c.numeroDocumento ? c.numeroDocumento.toString() : "";
+    return nombreNormalizado.includes(normalizado) || dni.includes(normalizado);
+  });
 }
