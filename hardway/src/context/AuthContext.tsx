@@ -62,9 +62,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("rol");
-    localStorage.removeItem("username");
+    localStorage.clear(); // Borra todo el localStorage
     setIsAuthenticated(false);
     setRol(null);
     setUsername(null);
