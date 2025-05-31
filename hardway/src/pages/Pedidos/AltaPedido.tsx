@@ -15,6 +15,7 @@ import {
   IonAlert,
   IonModal,
   IonList,
+  IonDatetime,
 } from "@ionic/react";
 import { useClientes } from "../../context/ClientesContext";
 import { crearPedido } from "../../utils/pedidosUtils";
@@ -34,9 +35,17 @@ const AltaPedido: React.FC = () => {
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [filtroCliente, setFiltroCliente] = useState("");
 
-  const clientesFiltrados = clientes.filter((c) =>
-    c.nombre.toLowerCase().includes(filtroCliente.toLowerCase())
-  );
+  const clientesFiltrados = clientes.filter((c) => {
+    const filtro = filtroCliente
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    const nombre = c.nombre
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    return nombre.includes(filtro);
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,11 +79,12 @@ const AltaPedido: React.FC = () => {
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Fecha</IonLabel>
-            <IonInput
-              type="date"
+            <IonDatetime
+              presentation="date"
               value={form.fecha}
-              onIonChange={(e) => setForm({ ...form, fecha: e.detail.value! })}
-              required
+              onIonChange={(e) =>
+                setForm({ ...form, fecha: e.detail.value as string })
+              }
             />
           </IonItem>
           <IonItem>
@@ -121,17 +131,17 @@ const AltaPedido: React.FC = () => {
                   clearInput
                 />
               </IonItem>
+              <IonItem
+                button
+                onClick={() => {
+                  setForm({ ...form, clienteId: "nuevo" });
+                  setShowClienteModal(false);
+                  history.push("/alta-cliente");
+                }}
+              >
+                <IonLabel>Registrar nuevo cliente</IonLabel>
+              </IonItem>
               <IonList>
-                <IonItem
-                  button
-                  onClick={() => {
-                    setForm({ ...form, clienteId: "nuevo" });
-                    setShowClienteModal(false);
-                    history.push("/alta-cliente");
-                  }}
-                >
-                  <IonLabel>Registrar nuevo cliente</IonLabel>
-                </IonItem>
                 {clientesFiltrados.map((c) => (
                   <IonItem
                     key={c.id}

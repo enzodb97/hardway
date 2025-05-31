@@ -8,7 +8,7 @@ export interface Pedido {
   fecha: string;
   estado: string;
   clienteId: number;
-  cliente?: Cliente;
+  Cliente?: Cliente;
 }
 
 export const cargarPedidos = async (): Promise<Pedido[]> => {

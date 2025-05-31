@@ -26,10 +26,17 @@ const Pedidos: React.FC = () => {
 
   // Buscador integrado
   const pedidosFiltrados = pedidos.filter((pedido) => {
-    const texto = busqueda.trim().toLowerCase();
+    const texto = busqueda
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
     if (texto === "") return true;
 
-    const nombreCliente = (pedido.Cliente?.nombre || "").toLowerCase();
+    const nombreCliente = (pedido.Cliente?.nombre || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
     const fecha = (pedido.fecha || "").toLowerCase();
     const id = pedido.id.toString();
 
