@@ -14,6 +14,7 @@ import {
   IonCol,
   IonIcon,
   IonAlert,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import {
   cargarPedidos,
@@ -39,18 +40,21 @@ const Pedidos: React.FC = () => {
     setPedidos(res.data);
   };
 
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     cargarPedidos();
-  }, []);
+  });
 
   // Ordena los pedidos por fecha descendente (los más recientes primero)
-  const pedidosFiltrados = filtrarPedidos(pedidos, busqueda).sort(
+  const mostrarTodos = busqueda === " ";
+  const pedidosFiltrados = filtrarPedidos(pedidos, busqueda === " " ? "" : busqueda).sort(
     (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
   );
-
-  // Mostrar solo 5 si el buscador está vacío, si no, mostrar todos los resultados
   const pedidosAMostrar =
-    busqueda.trim() === "" ? pedidosFiltrados.slice(0, 5) : pedidosFiltrados;
+    mostrarTodos
+      ? pedidosFiltrados
+      : busqueda.trim() === ""
+      ? pedidosFiltrados.slice(0, 5)
+      : pedidosFiltrados;
 
   // Eliminar pedido y recargar lista
   const handleEliminarPedido = async (id: number) => {
@@ -81,9 +85,17 @@ const Pedidos: React.FC = () => {
               <div className="pedidos-buscador">
                 <IonInput
                   placeholder="Buscar por cliente, fecha o ID de pedido"
-                  value={busqueda}
+                  value={busqueda === " " ? "" : busqueda}
                   onIonChange={(e) => setBusqueda(e.detail.value!)}
                   clearInput
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === "Enter" &&
+                      (!busqueda || busqueda.trim() === "")
+                    ) {
+                      setBusqueda(" "); // Fuerza a mostrar todos los pedidos
+                    }
+                  }}
                 />
               </div>
             </IonCol>
