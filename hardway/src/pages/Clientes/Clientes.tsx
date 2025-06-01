@@ -15,6 +15,7 @@ import {
   IonBadge,
   IonFab,
   IonFabButton,
+  IonAlert,
 } from "@ionic/react";
 import { add, pencil, trash, print } from "ionicons/icons";
 import { useState } from "react";
@@ -26,6 +27,10 @@ const Clientes: React.FC = () => {
   const [busqueda, setBusqueda] = useState("");
   const [mostrarListado, setMostrarListado] = useState(false);
 
+  // NUEVO: Estado para alertas
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
+
   const clientesFiltrados = clientes.filter(
     (cliente) =>
       cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -36,9 +41,28 @@ const Clientes: React.FC = () => {
 
   const totalClientes = clientes.length;
 
-  const handleEliminar = (id: number) => {
+  // Modifica handleEliminar para capturar el error
+  const handleEliminar = async (id: number) => {
     if (window.confirm("¿Está seguro que desea eliminar este cliente?")) {
-      eliminarCliente(id);
+      try {
+        await eliminarCliente(id);
+      } catch (error: any) {
+        // Intenta obtener el mensaje del backend
+        const backendMsg =
+          error.response?.data?.error || error.response?.data?.detalle || "";
+
+        if (
+          error.response &&
+          error.response.status === 400 &&
+          backendMsg.includes("No se puede eliminar el cliente")
+        ) {
+          setAlertMsg("Error al eliminar el cliente, tiene pedidos.");
+          setShowAlert(true);
+        } else {
+          setAlertMsg("Error al eliminar al cliente, tiene pedidos.");
+          setShowAlert(true);
+        }
+      }
     }
   };
 
@@ -161,6 +185,13 @@ const Clientes: React.FC = () => {
               <IonIcon icon={print} />
             </IonFabButton>
           </IonFab>
+
+          <IonAlert
+            isOpen={showAlert}
+            onDidDismiss={() => setShowAlert(false)}
+            message={alertMsg}
+            buttons={["Aceptar"]}
+          />
         </div>
       </IonContent>
     </IonPage>

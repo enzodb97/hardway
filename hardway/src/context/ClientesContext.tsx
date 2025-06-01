@@ -85,9 +85,9 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
   const eliminarCliente = async (id: number) => {
     try {
       await axios.delete(`/api/clientes/${id}`);
-      setClientes((prev) => prev.filter((cliente) => cliente.id !== id));
+      // Actualiza el estado de clientes aquí si es necesario
     } catch (error) {
-      console.error("Error al eliminar cliente:", error);
+      throw error; // <-- Esto es clave para que el catch del componente lo capture
     }
   };
 

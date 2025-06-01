@@ -130,8 +130,29 @@ app.put("/api/clientes/:id", async (req, res) => {
 
 app.delete("/api/clientes/:id", async (req, res) => {
   const { id } = req.params;
-  await Cliente.destroy({ where: { id } });
-  res.json({ success: true });
+  try {
+    // Verifica si tiene pedidos asociados
+    const pedidos = await Pedido.findAll({ where: { clienteId: id } });
+    if (pedidos.length > 0) {
+      return res
+        .status(400)
+        .json({
+          error:
+            "No se puede eliminar el cliente porque tiene pedidos asociados.",
+        });
+    }
+    const deleted = await Cliente.destroy({ where: { id } });
+    if (deleted) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: "Cliente no encontrado" });
+    }
+  } catch (error) {
+    console.error("Error al eliminar cliente:", error);
+    res
+      .status(500)
+      .json({ error: "Error al eliminar cliente", detalle: error.message });
+  }
 });
 
 app.get("/", (req, res) => {
