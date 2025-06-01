@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonGrid, IonRow, IonCol, IonButton, IonIcon, IonAlert, IonInput, IonMenuButton
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonButton,
+  IonIcon,
+  IonAlert,
+  IonInput,
+  IonMenuButton,
 } from "@ionic/react";
 import { pencil, trash } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
@@ -41,14 +52,16 @@ const Indumentaria: React.FC = () => {
   };
 
   // Búsqueda insensible a tildes
-  const normalizar = (str: string) =>
-    str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalizar = (str: string | undefined) =>
+    (str ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
   const prendasFiltradas = indumentaria.filter(
     (item) =>
-      normalizar(item.nombre).includes(normalizar(busqueda)) ||
-      normalizar(item.talle).includes(normalizar(busqueda)) ||
+      normalizar(item.descripcionIndumentaria).includes(normalizar(busqueda)) ||
+      normalizar(item.nroTalle).includes(normalizar(busqueda)) ||
       normalizar(item.color).includes(normalizar(busqueda)) ||
-      (item.id && item.id.toString().includes(busqueda))
+      normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) || // <-- Agregado
+      (item.idIndumentaria && item.idIndumentaria.toString().includes(busqueda))
   );
 
   return (
@@ -60,7 +73,10 @@ const Indumentaria: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <IonButton expand="block" onClick={() => history.push("/alta-indumentaria")}>
+        <IonButton
+          expand="block"
+          onClick={() => history.push("/alta-indumentaria")}
+        >
           Nueva Prenda
         </IonButton>
         <IonInput
@@ -71,31 +87,56 @@ const Indumentaria: React.FC = () => {
         />
         <IonGrid>
           <IonRow>
-            <IonCol><strong>ID</strong></IonCol>
-            <IonCol><strong>Nombre</strong></IonCol>
-            <IonCol><strong>Talle</strong></IonCol>
-            <IonCol><strong>Color</strong></IonCol>
-            <IonCol><strong>Cantidad</strong></IonCol>
-            <IonCol><strong>Acciones</strong></IonCol>
+            <IonCol>
+              <strong>ID</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Código</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Descripción</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Color</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Tela</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Talle</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Categoría</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Precio</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Cantidad</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Acciones</strong>
+            </IonCol>
           </IonRow>
           {prendasFiltradas.map((item) => (
-            <IonRow key={item.id}>
-              <IonCol>{item.id}</IonCol>
-              <IonCol>{item.nombre}</IonCol>
-              <IonCol>{item.talle}</IonCol>
+            <IonRow key={item.idIndumentaria}>
+              <IonCol>{item.idIndumentaria}</IonCol>
+              <IonCol>{item.codigoIndumentaria}</IonCol>
+              <IonCol>{item.descripcionIndumentaria}</IonCol>
               <IonCol>{item.color}</IonCol>
-              <IonCol>{item.cantidad}</IonCol>
+              <IonCol>{item.nombreTela}</IonCol>
+              <IonCol>{item.nroTalle}</IonCol>
+              <IonCol>{item.categoria}</IonCol>
+              <IonCol>{item.precioVenta}</IonCol>
+              <IonCol>{item.cantidadIndumentaria}</IonCol>
               <IonCol>
                 <IonButton
                   fill="clear"
-                  onClick={() => history.push(`/alta-indumentaria/${item.id}`)}
+                  onClick={() => history.push(`/alta-indumentaria/${item.idIndumentaria}`)}
                 >
                   <IonIcon icon={pencil} color="primary" />
                 </IonButton>
-                <IonButton
-                  fill="clear"
-                  onClick={() => handleEliminar(item.id)}
-                >
+                <IonButton fill="clear" onClick={() => handleEliminar(item.idIndumentaria)}>
                   <IonIcon icon={trash} color="danger" />
                 </IonButton>
               </IonCol>

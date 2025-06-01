@@ -104,10 +104,27 @@ const Pedido = sequelize.define(
 
 // Modelo Sequelize (ajusta los campos según tu modelo real)
 const Indumentaria = sequelize.define("Indumentaria", {
-  nombre: { type: Sequelize.STRING },
-  talle: { type: Sequelize.STRING },
-  color: { type: Sequelize.STRING },
-  cantidad: { type: Sequelize.INTEGER },
+  idIndumentaria: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+  },
+  codigoIndumentaria: Sequelize.STRING,
+  descripcionIndumentaria: Sequelize.STRING,
+  color: Sequelize.STRING,
+  nombreTela: Sequelize.STRING,
+  nroTalle: Sequelize.STRING,
+  descripcionTalle: Sequelize.STRING,
+  categoria: Sequelize.STRING,
+  subCategoria: Sequelize.STRING,
+  precioVenta: Sequelize.DECIMAL(12, 2),
+  costoIndumentaria: Sequelize.DECIMAL(12, 2),
+  cantidadIndumentaria: Sequelize.INTEGER,
+  estado_actual: Sequelize.INTEGER,
+  codigoDetalle: Sequelize.STRING,
+  cantidadTotal: Sequelize.INTEGER,
+}, {
+  tableName: "indumentaria",
+  timestamps: false,
 });
 
 // Relación
@@ -306,6 +323,7 @@ app.get("/api/indumentaria", async (req, res) => {
     const prendas = await Indumentaria.findAll();
     res.json(prendas);
   } catch (error) {
+    console.error("Error en /api/indumentaria:", error); // <-- AGREGA ESTO
     res.status(500).json({ error: "Error al obtener indumentaria" });
   }
 });
