@@ -23,6 +23,7 @@ import {
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 import { pencil, trash, documentText } from "ionicons/icons";
+import axios from "axios";
 import "./Pedidos.css";
 
 const Pedidos: React.FC = () => {
@@ -32,8 +33,14 @@ const Pedidos: React.FC = () => {
   const [alertMsg, setAlertMsg] = useState("");
   const history = useHistory();
 
+  // Función para cargar pedidos
+  const cargarPedidos = async () => {
+    const res = await axios.get("/api/pedidos");
+    setPedidos(res.data);
+  };
+
   useEffect(() => {
-    cargarPedidos().then(setPedidos);
+    cargarPedidos();
   }, []);
 
   // Ordena los pedidos por fecha descendente (los más recientes primero)
@@ -45,12 +52,12 @@ const Pedidos: React.FC = () => {
   const pedidosAMostrar =
     busqueda.trim() === "" ? pedidosFiltrados.slice(0, 5) : pedidosFiltrados;
 
-  // Función para eliminar pedido
+  // Eliminar pedido y recargar lista
   const handleEliminarPedido = async (id: number) => {
     if (window.confirm("¿Seguro que desea eliminar este pedido?")) {
       try {
-        await eliminarPedido(id); // Llama a tu función que elimina en la base de datos
-        setPedidos((prev) => prev.filter((p) => p.id !== id));
+        await eliminarPedido(id);
+        await cargarPedidos(); // Recarga la lista después de eliminar
       } catch (error: any) {
         setAlertMsg("Error al eliminar el pedido.");
         setShowAlert(true);
