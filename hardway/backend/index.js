@@ -341,7 +341,7 @@ app.post("/api/indumentaria", async (req, res) => {
 // Editar prenda
 app.put("/api/indumentaria/:id", async (req, res) => {
   try {
-    const [updated] = await Indumentaria.update(req.body, { where: { id: req.params.id } });
+    const [updated] = await Indumentaria.update(req.body, { where: { idIndumentaria: req.params.id } });
     if (updated) {
       res.json({ success: true });
     } else {
@@ -355,7 +355,7 @@ app.put("/api/indumentaria/:id", async (req, res) => {
 // Eliminar prenda
 app.delete("/api/indumentaria/:id", async (req, res) => {
   try {
-    const deleted = await Indumentaria.destroy({ where: { id: req.params.id } });
+    const deleted = await Indumentaria.destroy({ where: { idIndumentaria: req.params.id } });
     if (deleted) {
       res.json({ success: true });
     } else {
@@ -363,6 +363,20 @@ app.delete("/api/indumentaria/:id", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Error al eliminar prenda" });
+  }
+});
+
+// Obtener prenda por ID
+app.get("/api/indumentaria/:id", async (req, res) => {
+  try {
+    const prenda = await Indumentaria.findOne({ where: { idIndumentaria: req.params.id } });
+    if (prenda) {
+      res.json(prenda);
+    } else {
+      res.status(404).json({ error: "Prenda no encontrada" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener prenda" });
   }
 });
 
