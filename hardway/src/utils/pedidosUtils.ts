@@ -48,28 +48,28 @@ export function validarCamposPedido(form: PedidoForm): string | null {
 }
 
 // Filtrar pedidos por texto (cliente, fecha, id)
-export function filtrarPedidos(pedidos: Pedido[], texto: string): Pedido[] {
-  const normalizado = texto
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-  if (normalizado === "") return pedidos;
+export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
+  if (!filtro) return pedidos;
 
-  return pedidos.filter((pedido) => {
-    const nombreCliente = (pedido.Cliente?.nombre || "")
+  // Normaliza para ignorar tildes/acentos y pasa a minúsculas
+  const normalizar = (str: string) =>
+    str
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
-    const fecha = (pedido.fecha || "").toLowerCase();
-    const id = pedido.id.toString();
 
-    return (
-      nombreCliente.includes(normalizado) ||
-      fecha.includes(normalizado) ||
-      id.includes(normalizado)
-    );
-  });
+  const filtroNorm = normalizar(filtro);
+
+  return pedidos.filter(
+    (p) =>
+      (p.descripcion && normalizar(p.descripcion).includes(filtroNorm)) ||
+      (p.id && p.id.toString().includes(filtroNorm)) ||
+      (p.fecha && normalizar(p.fecha).includes(filtroNorm)) ||
+      (p.Cliente?.nombre &&
+        normalizar(p.Cliente.nombre).includes(filtroNorm)) ||
+      (p.Cliente?.numeroDocumento &&
+        p.Cliente.numeroDocumento.toString().includes(filtroNorm))
+  );
 }
 
 /**
