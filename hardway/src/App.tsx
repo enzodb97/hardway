@@ -61,7 +61,7 @@ const AppRouter = () => {
             />
             <RoleRoute
               exact
-              path="/alta-pedido"
+              path="/alta-pedido/:id"
               component={AltaPedido}
               requiredRoles={["admin", "vendedor"]}
             />

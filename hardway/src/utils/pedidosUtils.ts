@@ -29,6 +29,16 @@ export const crearPedido = async (pedido: Omit<Pedido, "id">) => {
   return await axios.post("/api/pedidos", pedido);
 };
 
+// Eliminar un pedido por ID
+export const eliminarPedido = async (id: number) => {
+  await axios.delete(`/api/pedidos/${id}`);
+};
+
+// Editar un pedido por ID
+export const editarPedido = async (id: number, datos: any) => {
+  await axios.put(`/api/pedidos/${id}`, datos);
+};
+
 // Validar campos obligatorios de un pedido
 export function validarCamposPedido(form: PedidoForm): string | null {
   if (!form.descripcion.trim()) return "La descripción es obligatoria.";

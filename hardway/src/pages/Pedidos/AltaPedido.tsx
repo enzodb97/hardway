@@ -1,5 +1,5 @@
 // src/pages/Pedidos/AltaPedido.tsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   IonPage,
   IonHeader,
@@ -11,56 +11,69 @@ import {
   IonItem,
   IonLabel,
   IonAlert,
-  IonModal,
-  IonList,
   IonMenuButton,
 } from "@ionic/react";
-import { useClientes } from "../../context/ClientesContext";
-import {
-  crearPedido,
-  validarCamposPedido,
-  filtrarClientesPorNombre,
-  obtenerFechaHoraArgentina,
-} from "../../utils/pedidosUtils";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
+import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
+import axios from "axios";
 import "./AltaPedido.css";
 
 const AltaPedido: React.FC = () => {
-  const { clientes } = useClientes();
+  const { id } = useParams<{ id?: string }>();
   const history = useHistory();
   const [form, setForm] = useState({
     descripcion: "",
     fecha: "",
-    estado: "En Curso", // Estado fijo por defecto
+    estado: "En Curso",
     clienteId: "",
+    clienteNombre: "",
   });
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
-  const [showClienteModal, setShowClienteModal] = useState(false);
-  const [filtroCliente, setFiltroCliente] = useState("");
+  const esEdicion = Boolean(id);
 
-  // Al cargar el componente, setea la fecha y hora actual automáticamente
+  // Cargar datos si es edición
   useEffect(() => {
-    setForm((f) => ({ ...f, fecha: obtenerFechaHoraArgentina() }));
-  }, []);
-
-  const clientesFiltrados = filtrarClientesPorNombre(clientes, filtroCliente);
+    if (esEdicion && id) {
+      const cargarPedido = async () => {
+        try {
+          const res = await axios.get(`/api/pedidos/${id}`);
+          setForm({
+            descripcion: res.data.descripcion,
+            fecha: res.data.fecha,
+            estado: res.data.estado,
+            clienteId: res.data.clienteId?.toString() || "",
+            clienteNombre: res.data.Cliente?.nombre || "",
+          });
+        } catch (error) {
+          setAlertMsg("Error al cargar el pedido.");
+          setShowAlert(true);
+        }
+      };
+      cargarPedido();
+    } else {
+      setForm((f) => ({
+        ...f,
+        fecha: new Date().toISOString().slice(0, 16).replace("T", " "),
+        estado: "En Curso",
+        clienteNombre: "",
+      }));
+    }
+  }, [id, esEdicion]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const error = validarCamposPedido(form);
-    if (error) {
+    try {
+      if (esEdicion && id) {
+        await editarPedido(Number(id), form);
+      } else {
+        await crearPedido({ ...form, clienteId: Number(form.clienteId) });
+      }
+      history.push("/pedidos");
+    } catch (error) {
+      setAlertMsg("Error al guardar el pedido.");
       setShowAlert(true);
-      setAlertMsg(error);
-      return;
     }
-    // Estado siempre "En Curso" al guardar
-    await crearPedido({
-      ...form,
-      estado: "En Curso",
-      clienteId: Number(form.clienteId),
-    });
-    history.push("/pedidos");
   };
 
   return (
@@ -68,7 +81,7 @@ const AltaPedido: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
-          <IonTitle>Nuevo Pedido</IonTitle>
+          <IonTitle>{esEdicion ? "Editar Pedido" : "Nuevo Pedido"}</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="alta-pedido-content">
@@ -85,78 +98,22 @@ const AltaPedido: React.FC = () => {
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Fecha y hora</IonLabel>
-            <IonInput value={form.fecha} readonly required />
+            <IonInput value={form.fecha} readonly />
+          </IonItem>
+          <IonItem>
+            <IonLabel position="floating">Cliente ID</IonLabel>
+            <IonInput value={form.clienteId} readonly />
+          </IonItem>
+          <IonItem>
+            <IonLabel position="floating">Cliente</IonLabel>
+            <IonInput value={form.clienteNombre} readonly />
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Estado</IonLabel>
-            {/* Solo muestra el estado, no editable */}
-            <IonInput value="En Curso" readonly />
+            <IonInput value={form.estado} readonly />
           </IonItem>
-          <IonItem button onClick={() => setShowClienteModal(true)}>
-            <IonLabel position="floating">Cliente</IonLabel>
-            <IonInput
-              value={
-                form.clienteId === "nuevo"
-                  ? "Registrar nuevo cliente"
-                  : clientes.find((c) => c.id === Number(form.clienteId))
-                      ?.nombre || ""
-              }
-              placeholder="Seleccionar cliente"
-              readonly
-              required
-            />
-          </IonItem>
-
-          {/* Modal para seleccionar cliente con buscador */}
-          <IonModal
-            isOpen={showClienteModal}
-            onDidDismiss={() => setShowClienteModal(false)}
-          >
-            <IonHeader>
-              <IonToolbar>
-                <IonTitle>Seleccionar Cliente</IonTitle>
-              </IonToolbar>
-            </IonHeader>
-            <IonContent>
-              <IonItem>
-                <IonInput
-                  placeholder="Buscar cliente por nombre"
-                  value={filtroCliente}
-                  onIonChange={(e) => setFiltroCliente(e.detail.value!)}
-                  clearInput
-                />
-              </IonItem>
-              <IonItem
-                button
-                onClick={() => {
-                  setForm({ ...form, clienteId: "nuevo" });
-                  setShowClienteModal(false);
-                  history.push("/alta-cliente");
-                }}
-              >
-                <IonLabel>Registrar nuevo cliente</IonLabel>
-              </IonItem>
-              <IonList>
-                {clientesFiltrados.map((c) => (
-                  <IonItem
-                    key={c.id}
-                    button
-                    onClick={() => {
-                      setForm({ ...form, clienteId: c.id.toString() });
-                      setShowClienteModal(false);
-                    }}
-                  >
-                    <IonLabel>
-                      {c.nombre} ({c.numeroDocumento})
-                    </IonLabel>
-                  </IonItem>
-                ))}
-              </IonList>
-            </IonContent>
-          </IonModal>
-
-          <IonButton className="guardar-btn" expand="block" type="submit">
-            Guardar Pedido
+          <IonButton expand="block" type="submit">
+            {esEdicion ? "Guardar Cambios" : "Guardar Pedido"}
           </IonButton>
         </form>
         <IonAlert

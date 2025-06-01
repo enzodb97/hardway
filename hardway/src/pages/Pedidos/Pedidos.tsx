@@ -12,18 +12,24 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonIcon,
+  IonAlert,
 } from "@ionic/react";
 import {
   cargarPedidos,
   filtrarPedidos,
   Pedido,
+  eliminarPedido,
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
+import { pencil, trash, documentText } from "ionicons/icons";
 import "./Pedidos.css";
 
 const Pedidos: React.FC = () => {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [busqueda, setBusqueda] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
   const history = useHistory();
 
   useEffect(() => {
@@ -38,6 +44,19 @@ const Pedidos: React.FC = () => {
   // Mostrar solo 5 si el buscador está vacío, si no, mostrar todos los resultados
   const pedidosAMostrar =
     busqueda.trim() === "" ? pedidosFiltrados.slice(0, 5) : pedidosFiltrados;
+
+  // Función para eliminar pedido
+  const handleEliminarPedido = async (id: number) => {
+    if (window.confirm("¿Seguro que desea eliminar este pedido?")) {
+      try {
+        await eliminarPedido(id); // Llama a tu función que elimina en la base de datos
+        setPedidos((prev) => prev.filter((p) => p.id !== id));
+      } catch (error: any) {
+        setAlertMsg("Error al eliminar el pedido.");
+        setShowAlert(true);
+      }
+    }
+  };
 
   return (
     <IonPage className="pedidos-page">
@@ -83,6 +102,9 @@ const Pedidos: React.FC = () => {
                     <IonCol className="text-center">
                       <strong>Fecha</strong>
                     </IonCol>
+                    <IonCol className="text-center">
+                      <strong>Acciones</strong>
+                    </IonCol>
                   </IonRow>
                   {pedidosAMostrar.map((pedido) => (
                     <IonRow key={pedido.id} className="table-row">
@@ -95,6 +117,32 @@ const Pedidos: React.FC = () => {
                         {pedido.Cliente?.nombre || "Sin cliente"}
                       </IonCol>
                       <IonCol className="text-center">{pedido.fecha}</IonCol>
+                      <IonCol className="text-center">
+                        <div className="action-buttons">
+                          <IonButton
+                            fill="clear"
+                            onClick={() => history.push(`/alta-pedido/${pedido.id}`)}
+                          >
+                            <IonIcon icon={pencil} color="primary" />
+                          </IonButton>
+                          <IonButton
+                            fill="clear"
+                            onClick={() => handleEliminarPedido(pedido.id)}
+                            className="delete-btn"
+                          >
+                            <IonIcon icon={trash} color="danger" />
+                          </IonButton>
+                          <IonButton
+                            fill="clear"
+                            onClick={() =>
+                              history.push(`/detalle-pedido/${pedido.id}`)
+                            }
+                            className="detail-btn"
+                          >
+                            <IonIcon icon={documentText} color="medium" />
+                          </IonButton>
+                        </div>
+                      </IonCol>
                     </IonRow>
                   ))}
                 </IonGrid>
@@ -110,6 +158,12 @@ const Pedidos: React.FC = () => {
             </IonCol>
           </IonRow>
         </IonGrid>
+        <IonAlert
+          isOpen={showAlert}
+          onDidDismiss={() => setShowAlert(false)}
+          message={alertMsg}
+          buttons={["Aceptar"]}
+        />
       </IonContent>
     </IonPage>
   );

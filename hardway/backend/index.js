@@ -134,12 +134,10 @@ app.delete("/api/clientes/:id", async (req, res) => {
     // Verifica si tiene pedidos asociados
     const pedidos = await Pedido.findAll({ where: { clienteId: id } });
     if (pedidos.length > 0) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "No se puede eliminar el cliente porque tiene pedidos asociados.",
-        });
+      return res.status(400).json({
+        error:
+          "No se puede eliminar el cliente porque tiene pedidos asociados.",
+      });
     }
     const deleted = await Cliente.destroy({ where: { id } });
     if (deleted) {
@@ -236,6 +234,55 @@ app.get("/api/pedidos", async (req, res) => {
 app.post("/api/pedidos", async (req, res) => {
   const pedido = await Pedido.create(req.body);
   res.json(pedido);
+});
+
+// Eliminar pedido
+app.delete("/api/pedidos/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleted = await Pedido.destroy({ where: { id } });
+    if (deleted) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: "Pedido no encontrado" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al eliminar pedido", detalle: error.message });
+  }
+});
+
+// Editar pedido
+app.put("/api/pedidos/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [updated] = await Pedido.update(req.body, { where: { id } });
+    if (updated) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: "Pedido no encontrado" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al editar pedido", detalle: error.message });
+  }
+});
+
+// Obtener pedido por ID
+app.get("/api/pedidos/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pedido = await Pedido.findOne({ where: { id }, include: Cliente });
+    if (pedido) {
+      res.json(pedido);
+    } else {
+      res.status(404).json({ error: "Pedido no encontrado" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener pedido", detalle: error.message });
+  }
 });
 
 // Validar usuario por nombre de usuario

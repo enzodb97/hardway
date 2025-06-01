@@ -54,3 +54,9 @@
   text-align: center;
   height: 100%;
 }
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
