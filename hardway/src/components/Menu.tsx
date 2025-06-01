@@ -15,6 +15,7 @@ import {
   logoUsd,
   peopleOutline,
   logOutOutline,
+  shirtOutline,
 } from "ionicons/icons";
 import "./Menu.css";
 import persona from "../assets/images/people.png";
@@ -32,6 +33,7 @@ const appPages: AppPage[] = [
   { title: "Pedidos", url: "/pedidos", icon: logoUsd },
   { title: "Clientes", url: "/Clientes", icon: peopleOutline },
   { title: "Usuarios", url: "/usuarios", icon: peopleOutline },
+  { title: "Indumentaria", url: "/indumentaria", icon: shirtOutline },
 ];
 
 const Menu: React.FC = () => {

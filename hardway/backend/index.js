@@ -102,6 +102,14 @@ const Pedido = sequelize.define(
   }
 );
 
+// Modelo Sequelize (ajusta los campos según tu modelo real)
+const Indumentaria = sequelize.define("Indumentaria", {
+  nombre: { type: Sequelize.STRING },
+  talle: { type: Sequelize.STRING },
+  color: { type: Sequelize.STRING },
+  cantidad: { type: Sequelize.INTEGER },
+});
+
 // Relación
 Pedido.belongsTo(Cliente, { foreignKey: "clienteId" });
 Cliente.hasMany(Pedido, { foreignKey: "clienteId" });
@@ -290,6 +298,54 @@ app.get("/api/usuarios/validate", async (req, res) => {
   const { username } = req.query;
   const usuario = await Usuario.findOne({ where: { username } });
   res.json({ valid: !!usuario });
+});
+
+// Obtener todas las prendas
+app.get("/api/indumentaria", async (req, res) => {
+  try {
+    const prendas = await Indumentaria.findAll();
+    res.json(prendas);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener indumentaria" });
+  }
+});
+
+// Crear nueva prenda
+app.post("/api/indumentaria", async (req, res) => {
+  try {
+    const prenda = await Indumentaria.create(req.body);
+    res.json(prenda);
+  } catch (error) {
+    res.status(500).json({ error: "Error al crear prenda" });
+  }
+});
+
+// Editar prenda
+app.put("/api/indumentaria/:id", async (req, res) => {
+  try {
+    const [updated] = await Indumentaria.update(req.body, { where: { id: req.params.id } });
+    if (updated) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: "Prenda no encontrada" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error al editar prenda" });
+  }
+});
+
+// Eliminar prenda
+app.delete("/api/indumentaria/:id", async (req, res) => {
+  try {
+    const deleted = await Indumentaria.destroy({ where: { id: req.params.id } });
+    if (deleted) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: "Prenda no encontrada" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar prenda" });
+  }
 });
 
 // Manejo de errores global
