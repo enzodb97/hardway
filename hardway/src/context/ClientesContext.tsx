@@ -82,12 +82,17 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
+  const obtenerClientes = async () => {
+    const res = await axios.get("/api/clientes");
+    setClientes(res.data);
+  };
+
   const eliminarCliente = async (id: number) => {
     try {
       await axios.delete(`/api/clientes/${id}`);
-      // Actualiza el estado de clientes aquí si es necesario
+      await obtenerClientes(); // Recarga la lista después de eliminar
     } catch (error) {
-      throw error; // <-- Esto es clave para que el catch del componente lo capture
+      throw error;
     }
   };
 
