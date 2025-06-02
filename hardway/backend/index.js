@@ -325,21 +325,37 @@ app.post("/api/pedidos", async (req, res) => {
 // Eliminar pedido
 app.delete("/api/pedidos/:id", async (req, res) => {
   const { id } = req.params;
+  const t = await sequelize.transaction();
   try {
-    // Elimina los detalles asociados primero
-    await PedidoIndumentaria.destroy({ where: { pedido_id: id } });
-    // Luego elimina el pedido
-    const deleted = await Pedido.destroy({ where: { id } });
+    // 1. Obtén los detalles del pedido
+    const detalles = await PedidoIndumentaria.findAll({ where: { pedido_id: id }, transaction: t });
+
+    // 2. Devuelve el stock de cada prenda
+    for (const detalle of detalles) {
+      const ind = await Indumentaria.findOne({ where: { idIndumentaria: detalle.idIndumentaria }, transaction: t });
+      if (ind) {
+        ind.cantidadIndumentaria += detalle.cantidad;
+        await ind.save({ transaction: t });
+      }
+    }
+
+    // 3. Elimina los detalles asociados
+    await PedidoIndumentaria.destroy({ where: { pedido_id: id }, transaction: t });
+
+    // 4. Elimina el pedido
+    const deleted = await Pedido.destroy({ where: { id }, transaction: t });
+
+    await t.commit();
+
     if (deleted) {
       res.json({ success: true });
     } else {
       res.status(404).json({ error: "Pedido no encontrado" });
     }
   } catch (error) {
+    await t.rollback();
     console.error("Error al eliminar pedido:", error);
-    res
-      .status(500)
-      .json({ error: "Error al eliminar pedido", detalle: error.message });
+    res.status(500).json({ error: "Error al eliminar pedido", detalle: error.message });
   }
 });
 
