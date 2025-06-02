@@ -15,6 +15,7 @@ import {
   IonList,
 } from "@ionic/react";
 import { useParams, useHistory } from "react-router-dom";
+import "./DetallePedido.css";
 import axios from "axios";
 
 const DetallePedido: React.FC = () => {
@@ -46,7 +47,7 @@ const DetallePedido: React.FC = () => {
   }, [id]);
 
   return (
-    <IonPage>
+    <IonPage className="detalle-pedido-page">
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
@@ -54,38 +55,50 @@ const DetallePedido: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <h2 style={{ textAlign: "center", margin: "1.5rem 0" }}>
+        <h2 className="detalle-pedido-titulo">
           Detalle de Pedido #{pedido?.id}
         </h2>
         <IonGrid>
           <IonRow className="table-header">
-            <IonCol>
+            <IonCol size="2">
               <strong>Nombre del producto</strong>
             </IonCol>
-            <IonCol>
+            <IonCol size="2">
               <strong>Referencia</strong>
             </IonCol>
-            <IonCol>
+            <IonCol size="2">
               <strong>SKU</strong>
             </IonCol>
-            <IonCol>
+            <IonCol size="2">
               <strong>Categoria</strong>
             </IonCol>
-            <IonCol>
+            <IonCol size="2">
               <strong>Rack</strong>
             </IonCol>
-            <IonCol>
+            <IonCol size="2">
               <strong>Cantidad</strong>
             </IonCol>
           </IonRow>
           {prendas.map((prenda, idx) => (
             <IonRow key={idx}>
-              <IonCol>{prenda.nombre}</IonCol>
-              <IonCol>{prenda.referencia}</IonCol>
-              <IonCol>{prenda.sku}</IonCol>
-              <IonCol>{prenda.categoria}</IonCol>
-              <IonCol>{prenda.rack}</IonCol>
-              <IonCol>{prenda.cantidad}</IonCol>
+              <IonCol class="col" size="2">
+                {prenda.nombre}
+              </IonCol>
+              <IonCol class="col" size="2">
+                {prenda.referencia}
+              </IonCol>
+              <IonCol class="col" size="2">
+                {prenda.sku}
+              </IonCol>
+              <IonCol class="col" size="2">
+                {prenda.categoria}
+              </IonCol>
+              <IonCol class="col" size="2">
+                {prenda.rack}
+              </IonCol>
+              <IonCol class="col" size="2">
+                {prenda.cantidad}
+              </IonCol>
             </IonRow>
           ))}
         </IonGrid>

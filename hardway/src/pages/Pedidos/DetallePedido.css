@@ -1,0 +1,27 @@
+.detalle-pedido-page {
+  background-color: #feaf00;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.detalle-pedido-titulo {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.table-header {
+  box-sizing: border-box;
+  text-wrap: wrap;
+  justify-content: center;
+}
+
+.detalle-pedido-page .ion-col {
+  flex: 1 1 0;
+  max-width: none;
+}
+.col {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}

@@ -24,7 +24,6 @@ http://ionicframework.com/docs/theming/ */
 /* Set text color of the entire app for Material Design only */
 :root.md {
   --ion-text-color: #0a0808;
-  /*--ion-item-background: #f2d2ae !important;*/
   --ion-toolbar-background: #fdfdfd !important;
 }
 /* Fondo de todos los contenedores*/
