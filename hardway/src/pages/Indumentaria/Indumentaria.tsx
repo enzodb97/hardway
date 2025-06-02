@@ -5,18 +5,19 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
+  IonButton,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonAlert,
   IonGrid,
   IonRow,
   IonCol,
-  IonButton,
   IonIcon,
-  IonAlert,
-  IonInput,
-  IonMenuButton,
 } from "@ionic/react";
-import { pencil, trash } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import { pencil, trash } from "ionicons/icons";
 
 const Indumentaria: React.FC = () => {
   const history = useHistory();
@@ -25,6 +26,7 @@ const Indumentaria: React.FC = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
 
+  // Cargar indumentaria
   const cargarIndumentaria = async () => {
     try {
       const res = await axios.get("/api/indumentaria");
@@ -39,11 +41,12 @@ const Indumentaria: React.FC = () => {
     cargarIndumentaria();
   }, []);
 
+  // Eliminar prenda
   const handleEliminar = async (id: number) => {
     if (window.confirm("¿Seguro que desea eliminar esta prenda?")) {
       try {
         await axios.delete(`/api/indumentaria/${id}`);
-        await cargarIndumentaria();
+        await cargarIndumentaria(); // Recarga la lista después de eliminar
       } catch (error) {
         setAlertMsg("Error al eliminar prenda.");
         setShowAlert(true);
@@ -51,72 +54,57 @@ const Indumentaria: React.FC = () => {
     }
   };
 
-  // Búsqueda insensible a tildes
+  // Filtro de búsqueda
   const normalizar = (str: string | undefined) =>
-    (str ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    (str ?? "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
 
   const prendasFiltradas = indumentaria.filter(
     (item) =>
       normalizar(item.descripcionIndumentaria).includes(normalizar(busqueda)) ||
       normalizar(item.nroTalle).includes(normalizar(busqueda)) ||
       normalizar(item.color).includes(normalizar(busqueda)) ||
-      normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) || // <-- Agregado
-      (item.idIndumentaria && item.idIndumentaria.toString().includes(busqueda))
+      normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
+      (item.idIndumentaria &&
+        item.idIndumentaria.toString().includes(busqueda))
   );
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonMenuButton slot="start" />
           <IonTitle>Indumentaria</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <IonButton
-          expand="block"
-          onClick={() => history.push("/alta-indumentaria")}
-        >
-          Nueva Prenda
-        </IonButton>
-        <IonInput
-          placeholder="Buscar por nombre, talle, color o ID"
-          value={busqueda}
-          onIonChange={(e) => setBusqueda(e.detail.value!)}
-          clearInput
-        />
+        <IonItem>
+          <IonInput
+            placeholder="Buscar por descripción, código, color o talle"
+            value={busqueda}
+            onIonChange={(e) => setBusqueda(e.detail.value!)}
+            clearInput
+          />
+          <IonButton
+            slot="end"
+            onClick={() => history.push("/alta-indumentaria")}
+          >
+            Nueva Prenda
+          </IonButton>
+        </IonItem>
         <IonGrid>
           <IonRow>
-            <IonCol>
-              <strong>ID</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Código</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Descripción</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Color</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Tela</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Talle</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Categoría</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Precio</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Cantidad</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Acciones</strong>
-            </IonCol>
+            <IonCol><strong>ID</strong></IonCol>
+            <IonCol><strong>Código</strong></IonCol>
+            <IonCol><strong>Descripción</strong></IonCol>
+            <IonCol><strong>Color</strong></IonCol>
+            <IonCol><strong>Tela</strong></IonCol>
+            <IonCol><strong>Talle</strong></IonCol>
+            <IonCol><strong>Categoría</strong></IonCol>
+            <IonCol><strong>Precio</strong></IonCol>
+            <IonCol><strong>Cantidad</strong></IonCol>
+            <IonCol><strong>Acciones</strong></IonCol>
           </IonRow>
           {prendasFiltradas.map((item) => (
             <IonRow key={item.idIndumentaria}>
@@ -132,11 +120,16 @@ const Indumentaria: React.FC = () => {
               <IonCol>
                 <IonButton
                   fill="clear"
-                  onClick={() => history.push(`/alta-indumentaria/${item.idIndumentaria}`)}
+                  onClick={() =>
+                    history.push(`/alta-indumentaria/${item.idIndumentaria}`)
+                  }
                 >
                   <IonIcon icon={pencil} color="primary" />
                 </IonButton>
-                <IonButton fill="clear" onClick={() => handleEliminar(item.idIndumentaria)}>
+                <IonButton
+                  fill="clear"
+                  onClick={() => handleEliminar(item.idIndumentaria)}
+                >
                   <IonIcon icon={trash} color="danger" />
                 </IonButton>
               </IonCol>
@@ -145,9 +138,9 @@ const Indumentaria: React.FC = () => {
         </IonGrid>
         <IonAlert
           isOpen={showAlert}
-          onDidDismiss={() => setShowAlert(false)}
           message={alertMsg}
           buttons={["Aceptar"]}
+          onDidDismiss={() => setShowAlert(false)}
         />
       </IonContent>
     </IonPage>

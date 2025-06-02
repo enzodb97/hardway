@@ -38,6 +38,19 @@ const AltaPedido: React.FC = () => {
   const [filtroCliente, setFiltroCliente] = useState("");
   const esEdicion = Boolean(id);
 
+  // --- Indumentaria ---
+  const [indumentaria, setIndumentaria] = useState<any[]>([]);
+  const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
+    { idIndumentaria: number; descripcion: string; cantidad: number }[]
+  >([]);
+  const [showIndumentariaModal, setShowIndumentariaModal] = useState(false);
+  const [filtroIndumentaria, setFiltroIndumentaria] = useState("");
+
+  // Cargar indumentaria
+  useEffect(() => {
+    axios.get("/api/indumentaria").then((res) => setIndumentaria(res.data));
+  }, []);
+
   // Cargar datos si es edición
   useEffect(() => {
     if (esEdicion && id) {
@@ -51,6 +64,16 @@ const AltaPedido: React.FC = () => {
             clienteId: res.data.clienteId?.toString() || "",
             clienteNombre: res.data.Cliente?.nombre || "",
           });
+          // Cargar prendas asociadas al pedido
+          if (res.data.Indumentaria) {
+            setPrendasSeleccionadas(
+              res.data.Indumentaria.map((prenda: any) => ({
+                idIndumentaria: prenda.idIndumentaria,
+                descripcion: prenda.descripcionIndumentaria,
+                cantidad: prenda.PedidoIndumentaria.cantidad,
+              }))
+            );
+          }
         } catch (error) {
           setAlertMsg("Error al cargar el pedido.");
           setShowAlert(true);
@@ -66,16 +89,67 @@ const AltaPedido: React.FC = () => {
         clienteId: "",
         clienteNombre: "",
       });
+      setPrendasSeleccionadas([]);
     }
   }, [id, esEdicion]);
 
+  // --- Lógica de prendas ---
+  const agregarPrenda = (prenda: any, cantidad: number) => {
+    if (
+      prendasSeleccionadas.some(
+        (p) => p.idIndumentaria === prenda.idIndumentaria
+      )
+    ) {
+      setAlertMsg("Ya has agregado esta prenda.");
+      setShowAlert(true);
+      return;
+    }
+    if (cantidad > prenda.cantidadIndumentaria) {
+      setAlertMsg(
+        `Stock insuficiente. Stock disponible: ${prenda.cantidadIndumentaria}`
+      );
+      setShowAlert(true);
+      return;
+    }
+    setPrendasSeleccionadas((prev) => [
+      ...prev,
+      {
+        idIndumentaria: prenda.idIndumentaria,
+        descripcion: prenda.descripcionIndumentaria,
+        cantidad,
+      },
+    ]);
+    setShowIndumentariaModal(false);
+    setFiltroIndumentaria("");
+  };
+
+  const eliminarPrenda = (idIndumentaria: number) => {
+    setPrendasSeleccionadas((prev) =>
+      prev.filter((p) => p.idIndumentaria !== idIndumentaria)
+    );
+  };
+
+  // --- Envío del formulario ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (prendasSeleccionadas.length === 0) {
+      setAlertMsg("Debes agregar al menos una prenda al pedido.");
+      setShowAlert(true);
+      return;
+    }
     try {
       if (esEdicion && id) {
-        await editarPedido(Number(id), form);
+        await editarPedido(Number(id), {
+          ...form,
+          clienteId: Number(form.clienteId),
+          indumentaria: prendasSeleccionadas,
+        });
       } else {
-        await crearPedido({ ...form, clienteId: Number(form.clienteId) });
+        await crearPedido({
+          ...form,
+          clienteId: Number(form.clienteId),
+          indumentaria: prendasSeleccionadas,
+        });
       }
       history.push("/pedidos");
     } catch (error) {
@@ -84,9 +158,13 @@ const AltaPedido: React.FC = () => {
     }
   };
 
+  // --- Filtro de clientes ---
   const clientesFiltrados = clientes.filter((c) => {
     const normalizar = (str: string) =>
-      str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
     const filtroNorm = normalizar(filtroCliente);
     return (
       normalizar(c.nombre).includes(filtroNorm) ||
@@ -111,7 +189,6 @@ const AltaPedido: React.FC = () => {
               onIonChange={(e) =>
                 setForm({ ...form, descripcion: e.detail.value! })
               }
-              required
             />
           </IonItem>
           <IonItem>
@@ -135,6 +212,33 @@ const AltaPedido: React.FC = () => {
             <IonLabel position="floating">Estado</IonLabel>
             <IonInput value={form.estado} readonly />
           </IonItem>
+
+          {/* --- Prendas seleccionadas --- */}
+          <IonList>
+            {prendasSeleccionadas.map((prenda) => (
+              <IonItem key={prenda.idIndumentaria}>
+                <IonLabel>
+                  {prenda.descripcion} (Cantidad: {prenda.cantidad})
+                </IonLabel>
+                <IonButton
+                  color="danger"
+                  onClick={() => eliminarPrenda(prenda.idIndumentaria)}
+                  type="button"
+                >
+                  Quitar
+                </IonButton>
+              </IonItem>
+            ))}
+          </IonList>
+
+          <IonButton
+            expand="block"
+            onClick={() => setShowIndumentariaModal(true)}
+            type="button"
+          >
+            Agregar Prenda
+          </IonButton>
+
           <IonButton expand="block" type="submit">
             {esEdicion ? "Guardar Cambios" : "Guardar Pedido"}
           </IonButton>
@@ -145,6 +249,8 @@ const AltaPedido: React.FC = () => {
           buttons={["Aceptar"]}
           onDidDismiss={() => setShowAlert(false)}
         />
+
+        {/* --- Modal de selección de cliente --- */}
         <IonModal
           isOpen={showClienteModal}
           onDidDismiss={() => setShowClienteModal(false)}
@@ -192,6 +298,67 @@ const AltaPedido: React.FC = () => {
                 </IonItem>
               ))}
             </IonList>
+          </IonContent>
+        </IonModal>
+
+        {/* --- Modal de selección de indumentaria --- */}
+        <IonModal
+          isOpen={showIndumentariaModal}
+          onDidDismiss={() => setShowIndumentariaModal(false)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Seleccionar Prenda</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            <IonItem>
+              <IonInput
+                placeholder="Buscar prenda"
+                value={filtroIndumentaria}
+                onIonChange={(e) => setFiltroIndumentaria(e.detail.value!)}
+                clearInput
+              />
+            </IonItem>
+            <IonList>
+              {indumentaria
+                .filter((i) =>
+                  i.descripcionIndumentaria
+                    .toLowerCase()
+                    .includes(filtroIndumentaria.toLowerCase())
+                )
+                .map((prenda) => (
+                  <IonItem key={prenda.idIndumentaria}>
+                    <IonLabel>
+                      {prenda.descripcionIndumentaria} (Stock:{" "}
+                      {prenda.cantidadIndumentaria})
+                    </IonLabel>
+                    <IonInput
+                      type="number"
+                      placeholder="Cantidad"
+                      min={1}
+                      onIonChange={(e) => {
+                        const cantidad = Number(e.detail.value);
+                        prenda._cantidadTemp = cantidad;
+                      }}
+                    />
+                    <IonButton
+                      onClick={() =>
+                        agregarPrenda(prenda, prenda._cantidadTemp || 1)
+                      }
+                    >
+                      Agregar
+                    </IonButton>
+                  </IonItem>
+                ))}
+            </IonList>
+            <IonButton
+              expand="block"
+              color="medium"
+              onClick={() => setShowIndumentariaModal(false)}
+            >
+              Cerrar
+            </IonButton>
           </IonContent>
         </IonModal>
       </IonContent>
