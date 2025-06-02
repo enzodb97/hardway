@@ -19,6 +19,7 @@ import RoleRoute from "./components/RoleRoute";
 import Usuarios from "./pages/Usuarios/Usuarios";
 import Pedidos from "./pages/Pedidos/Pedidos";
 import AltaPedido from "./pages/Pedidos/AltaPedido";
+import DetallePedido from "./pages/Pedidos/DetallePedido";
 import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
 
@@ -91,6 +92,9 @@ const AppRouter = () => {
               component={AltaIndumentaria}
               requiredRoles={["admin", "vendedor"]}
             />
+            <Route exact path="/detalle-pedido/:id">
+              <DetallePedido />
+            </Route>
             <Route exact path="/">
               <Redirect to="/dashboard" />
             </Route>

@@ -106,10 +106,7 @@ const Pedido = sequelize.define(
 const Indumentaria = sequelize.define(
   "Indumentaria",
   {
-    idIndumentaria: {
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-    },
+    idIndumentaria: { type: Sequelize.INTEGER, primaryKey: true },
     codigoIndumentaria: Sequelize.STRING,
     descripcionIndumentaria: Sequelize.STRING,
     color: Sequelize.STRING,
@@ -124,6 +121,8 @@ const Indumentaria = sequelize.define(
     estado_actual: Sequelize.INTEGER,
     codigoDetalle: Sequelize.STRING,
     cantidadTotal: Sequelize.INTEGER,
+    SKU: Sequelize.STRING, // <--- YA ESTÁ
+    Rack: Sequelize.STRING, // <--- YA ESTÁ
   },
   {
     tableName: "indumentaria",
@@ -318,11 +317,9 @@ app.post("/api/pedidos", async (req, res) => {
         });
         if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
           await t.rollback();
-          return res
-            .status(400)
-            .json({
-              error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
-            });
+          return res.status(400).json({
+            error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
+          });
         }
         ind.cantidadIndumentaria -= prenda.cantidad;
         await ind.save({ transaction: t });
@@ -436,11 +433,9 @@ app.put("/api/pedidos/:id", async (req, res) => {
         });
         if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
           await t.rollback();
-          return res
-            .status(400)
-            .json({
-              error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
-            });
+          return res.status(400).json({
+            error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
+          });
         }
         ind.cantidadIndumentaria -= prenda.cantidad;
         await ind.save({ transaction: t });
