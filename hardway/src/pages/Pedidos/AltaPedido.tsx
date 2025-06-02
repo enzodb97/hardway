@@ -394,8 +394,18 @@ const AltaPedido: React.FC = () => {
                       type="number"
                       placeholder="Cantidad"
                       min={1}
+                      value={prenda._cantidadTemp || ""}
                       onIonChange={(e) => {
                         const cantidad = Number(e.detail.value);
+                        // Validar stock en tiempo real
+                        if (cantidad > prenda.cantidadIndumentaria) {
+                          setAlertMsg(
+                            `Stock del producto insuficiente, el stock actual es: ${prenda.cantidadIndumentaria}`
+                          );
+                          setShowAlert(true);
+                          prenda._cantidadTemp = prenda.cantidadIndumentaria; // Opcional: limitar al máximo
+                          return;
+                        }
                         prenda._cantidadTemp = cantidad;
                       }}
                     />
