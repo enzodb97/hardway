@@ -21,6 +21,15 @@ import axios from "axios";
 import "./AltaPedido.css";
 import { useClientes } from "../../context/ClientesContext";
 
+// --- Aquí define el tipo ---
+type PedidoInput = {
+  descripcion: string;
+  fecha: string;
+  estado: string;
+  clienteId: number;
+  indumentaria: { idIndumentaria: number; cantidad: number }[];
+};
+
 const AltaPedido: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const history = useHistory();
@@ -138,18 +147,20 @@ const AltaPedido: React.FC = () => {
       return;
     }
     try {
+      const pedido: PedidoInput = {
+        ...form,
+        clienteId: Number(form.clienteId),
+        indumentaria: prendasSeleccionadas.map(
+          ({ idIndumentaria, cantidad }) => ({
+            idIndumentaria,
+            cantidad,
+          })
+        ),
+      };
       if (esEdicion && id) {
-        await editarPedido(Number(id), {
-          ...form,
-          clienteId: Number(form.clienteId),
-          indumentaria: prendasSeleccionadas,
-        });
+        await editarPedido(Number(id), pedido);
       } else {
-        await crearPedido({
-          ...form,
-          clienteId: Number(form.clienteId),
-          indumentaria: prendasSeleccionadas,
-        });
+        await crearPedido(pedido);
       }
       history.push("/pedidos");
     } catch (error) {

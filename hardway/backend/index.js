@@ -103,40 +103,48 @@ const Pedido = sequelize.define(
 );
 
 // Modelo Sequelize (ajusta los campos según tu modelo real)
-const Indumentaria = sequelize.define("Indumentaria", {
-  idIndumentaria: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
+const Indumentaria = sequelize.define(
+  "Indumentaria",
+  {
+    idIndumentaria: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+    },
+    codigoIndumentaria: Sequelize.STRING,
+    descripcionIndumentaria: Sequelize.STRING,
+    color: Sequelize.STRING,
+    nombreTela: Sequelize.STRING,
+    nroTalle: Sequelize.STRING,
+    descripcionTalle: Sequelize.STRING,
+    categoria: Sequelize.STRING,
+    subCategoria: Sequelize.STRING,
+    precioVenta: Sequelize.DECIMAL(12, 2),
+    costoIndumentaria: Sequelize.DECIMAL(12, 2),
+    cantidadIndumentaria: Sequelize.INTEGER,
+    estado_actual: Sequelize.INTEGER,
+    codigoDetalle: Sequelize.STRING,
+    cantidadTotal: Sequelize.INTEGER,
   },
-  codigoIndumentaria: Sequelize.STRING,
-  descripcionIndumentaria: Sequelize.STRING,
-  color: Sequelize.STRING,
-  nombreTela: Sequelize.STRING,
-  nroTalle: Sequelize.STRING,
-  descripcionTalle: Sequelize.STRING,
-  categoria: Sequelize.STRING,
-  subCategoria: Sequelize.STRING,
-  precioVenta: Sequelize.DECIMAL(12, 2),
-  costoIndumentaria: Sequelize.DECIMAL(12, 2),
-  cantidadIndumentaria: Sequelize.INTEGER,
-  estado_actual: Sequelize.INTEGER,
-  codigoDetalle: Sequelize.STRING,
-  cantidadTotal: Sequelize.INTEGER,
-}, {
-  tableName: "indumentaria",
-  timestamps: false,
-});
+  {
+    tableName: "indumentaria",
+    timestamps: false,
+  }
+);
 
 // Modelo intermedio
-const PedidoIndumentaria = sequelize.define("PedidoIndumentaria", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  pedido_id: { type: DataTypes.INTEGER },
-  idIndumentaria: { type: DataTypes.INTEGER },
-  cantidad: { type: DataTypes.INTEGER },
-}, {
-  tableName: "pedido_indumentaria",
-  timestamps: false,
-});
+const PedidoIndumentaria = sequelize.define(
+  "PedidoIndumentaria",
+  {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    pedido_id: { type: DataTypes.INTEGER },
+    idIndumentaria: { type: DataTypes.INTEGER },
+    cantidad: { type: DataTypes.INTEGER },
+  },
+  {
+    tableName: "pedido_indumentaria",
+    timestamps: false,
+  }
+);
 
 // Relaciones
 Pedido.belongsToMany(Indumentaria, {
@@ -286,7 +294,9 @@ app.get("/api/pedidos", async (req, res) => {
     });
     res.json(pedidos);
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener pedidos", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al obtener pedidos", detalle: error.message });
   }
 });
 
@@ -295,30 +305,45 @@ app.post("/api/pedidos", async (req, res) => {
   const { descripcion, fecha, estado, clienteId, indumentaria } = req.body;
   const t = await sequelize.transaction();
   try {
-    const pedido = await Pedido.create({ descripcion, fecha, estado, clienteId }, { transaction: t });
+    const pedido = await Pedido.create(
+      { descripcion, fecha, estado, clienteId },
+      { transaction: t }
+    );
     if (indumentaria && Array.isArray(indumentaria)) {
       for (const prenda of indumentaria) {
         // Descontar stock
-        const ind = await Indumentaria.findOne({ where: { idIndumentaria: prenda.idIndumentaria }, transaction: t });
+        const ind = await Indumentaria.findOne({
+          where: { idIndumentaria: prenda.idIndumentaria },
+          transaction: t,
+        });
         if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
           await t.rollback();
-          return res.status(400).json({ error: `Stock insuficiente para ${ind.descripcionIndumentaria}` });
+          return res
+            .status(400)
+            .json({
+              error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
+            });
         }
         ind.cantidadIndumentaria -= prenda.cantidad;
         await ind.save({ transaction: t });
 
-        await PedidoIndumentaria.create({
-          pedido_id: pedido.id,
-          idIndumentaria: prenda.idIndumentaria,
-          cantidad: prenda.cantidad,
-        }, { transaction: t });
+        await PedidoIndumentaria.create(
+          {
+            pedido_id: pedido.id,
+            idIndumentaria: prenda.idIndumentaria,
+            cantidad: prenda.cantidad,
+          },
+          { transaction: t }
+        );
       }
     }
     await t.commit();
     res.json(pedido);
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ error: "Error al crear pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al crear pedido", detalle: error.message });
   }
 });
 
@@ -328,11 +353,17 @@ app.delete("/api/pedidos/:id", async (req, res) => {
   const t = await sequelize.transaction();
   try {
     // 1. Obtén los detalles del pedido
-    const detalles = await PedidoIndumentaria.findAll({ where: { pedido_id: id }, transaction: t });
+    const detalles = await PedidoIndumentaria.findAll({
+      where: { pedido_id: id },
+      transaction: t,
+    });
 
     // 2. Devuelve el stock de cada prenda
     for (const detalle of detalles) {
-      const ind = await Indumentaria.findOne({ where: { idIndumentaria: detalle.idIndumentaria }, transaction: t });
+      const ind = await Indumentaria.findOne({
+        where: { idIndumentaria: detalle.idIndumentaria },
+        transaction: t,
+      });
       if (ind) {
         ind.cantidadIndumentaria += detalle.cantidad;
         await ind.save({ transaction: t });
@@ -340,7 +371,10 @@ app.delete("/api/pedidos/:id", async (req, res) => {
     }
 
     // 3. Elimina los detalles asociados
-    await PedidoIndumentaria.destroy({ where: { pedido_id: id }, transaction: t });
+    await PedidoIndumentaria.destroy({
+      where: { pedido_id: id },
+      transaction: t,
+    });
 
     // 4. Elimina el pedido
     const deleted = await Pedido.destroy({ where: { id }, transaction: t });
@@ -355,7 +389,9 @@ app.delete("/api/pedidos/:id", async (req, res) => {
   } catch (error) {
     await t.rollback();
     console.error("Error al eliminar pedido:", error);
-    res.status(500).json({ error: "Error al eliminar pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al eliminar pedido", detalle: error.message });
   }
 });
 
@@ -370,43 +406,67 @@ app.put("/api/pedidos/:id", async (req, res) => {
       return res.status(404).json({ error: "Pedido no encontrado" });
     }
     // 1. Recupera prendas anteriores
-    const prendasAnteriores = await PedidoIndumentaria.findAll({ where: { pedido_id: pedido.id }, transaction: t });
+    const prendasAnteriores = await PedidoIndumentaria.findAll({
+      where: { pedido_id: pedido.id },
+      transaction: t,
+    });
     // 2. Devuelve stock
     for (const pa of prendasAnteriores) {
-      const ind = await Indumentaria.findOne({ where: { idIndumentaria: pa.idIndumentaria }, transaction: t });
+      const ind = await Indumentaria.findOne({
+        where: { idIndumentaria: pa.idIndumentaria },
+        transaction: t,
+      });
       if (ind) {
         ind.cantidadIndumentaria += pa.cantidad;
         await ind.save({ transaction: t });
       }
     }
     // 3. Borra relaciones anteriores
-    await PedidoIndumentaria.destroy({ where: { pedido_id: pedido.id }, transaction: t });
+    await PedidoIndumentaria.destroy({
+      where: { pedido_id: pedido.id },
+      transaction: t,
+    });
 
     // 4. Agrega nuevas prendas y descuenta stock
     if (indumentaria && Array.isArray(indumentaria)) {
       for (const prenda of indumentaria) {
-        const ind = await Indumentaria.findOne({ where: { idIndumentaria: prenda.idIndumentaria }, transaction: t });
+        const ind = await Indumentaria.findOne({
+          where: { idIndumentaria: prenda.idIndumentaria },
+          transaction: t,
+        });
         if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
           await t.rollback();
-          return res.status(400).json({ error: `Stock insuficiente para ${ind.descripcionIndumentaria}` });
+          return res
+            .status(400)
+            .json({
+              error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
+            });
         }
         ind.cantidadIndumentaria -= prenda.cantidad;
         await ind.save({ transaction: t });
 
-        await PedidoIndumentaria.create({
-          pedido_id: pedido.id,
-          idIndumentaria: prenda.idIndumentaria,
-          cantidad: prenda.cantidad,
-        }, { transaction: t });
+        await PedidoIndumentaria.create(
+          {
+            pedido_id: pedido.id,
+            idIndumentaria: prenda.idIndumentaria,
+            cantidad: prenda.cantidad,
+          },
+          { transaction: t }
+        );
       }
     }
     // Actualiza datos del pedido
-    await pedido.update({ descripcion, fecha, estado, clienteId }, { transaction: t });
+    await pedido.update(
+      { descripcion, fecha, estado, clienteId },
+      { transaction: t }
+    );
     await t.commit();
     res.json(pedido);
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ error: "Error al editar pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al editar pedido", detalle: error.message });
   }
 });
 
@@ -429,7 +489,9 @@ app.get("/api/pedidos/:id", async (req, res) => {
       res.status(404).json({ error: "Pedido no encontrado" });
     }
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al obtener pedido", detalle: error.message });
   }
 });
 
@@ -464,7 +526,9 @@ app.post("/api/indumentaria", async (req, res) => {
 // Editar prenda
 app.put("/api/indumentaria/:id", async (req, res) => {
   try {
-    const [updated] = await Indumentaria.update(req.body, { where: { idIndumentaria: req.params.id } });
+    const [updated] = await Indumentaria.update(req.body, {
+      where: { idIndumentaria: req.params.id },
+    });
     if (updated) {
       res.json({ success: true });
     } else {
@@ -478,7 +542,9 @@ app.put("/api/indumentaria/:id", async (req, res) => {
 // Eliminar prenda
 app.delete("/api/indumentaria/:id", async (req, res) => {
   try {
-    const deleted = await Indumentaria.destroy({ where: { idIndumentaria: req.params.id } });
+    const deleted = await Indumentaria.destroy({
+      where: { idIndumentaria: req.params.id },
+    });
     if (deleted) {
       res.json({ success: true });
     } else {
@@ -492,7 +558,9 @@ app.delete("/api/indumentaria/:id", async (req, res) => {
 // Obtener prenda por ID
 app.get("/api/indumentaria/:id", async (req, res) => {
   try {
-    const prenda = await Indumentaria.findOne({ where: { idIndumentaria: req.params.id } });
+    const prenda = await Indumentaria.findOne({
+      where: { idIndumentaria: req.params.id },
+    });
     if (prenda) {
       res.json(prenda);
     } else {
