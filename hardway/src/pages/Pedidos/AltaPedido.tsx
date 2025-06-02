@@ -215,11 +215,57 @@ const AltaPedido: React.FC = () => {
 
           {/* --- Prendas seleccionadas --- */}
           <IonList>
-            {prendasSeleccionadas.map((prenda) => (
+            {prendasSeleccionadas.map((prenda, idx) => (
               <IonItem key={prenda.idIndumentaria}>
                 <IonLabel>
                   {prenda.descripcion} (Cantidad: {prenda.cantidad})
                 </IonLabel>
+                <IonButton
+                  onClick={() => {
+                    setPrendasSeleccionadas((prev) =>
+                      prev.map((p, i) =>
+                        i === idx && p.cantidad > 1
+                          ? { ...p, cantidad: p.cantidad - 1 }
+                          : p
+                      )
+                    );
+                  }}
+                  disabled={prenda.cantidad <= 1}
+                  color="medium"
+                  type="button"
+                >
+                  -
+                </IonButton>
+                <IonButton
+                  onClick={() => {
+                    // Stock real en base de datos
+                    const stockReal =
+                      indumentaria.find(
+                        (i) => i.idIndumentaria === prenda.idIndumentaria
+                      )?.cantidadIndumentaria ?? 0;
+
+                    // Stock disponible = stock real - cantidad seleccionada actualmente
+                    const stockDisponible = stockReal - prenda.cantidad;
+
+                    if (stockDisponible <= 0) {
+                      setAlertMsg(
+                        `Stock del producto insuficiente, el stock actual es: ${stockReal}`
+                      );
+                      setShowAlert(true);
+                      return;
+                    }
+
+                    setPrendasSeleccionadas((prev) =>
+                      prev.map((p, i) =>
+                        i === idx ? { ...p, cantidad: p.cantidad + 1 } : p
+                      )
+                    );
+                  }}
+                  color="medium"
+                  type="button"
+                >
+                  +
+                </IonButton>
                 <IonButton
                   color="danger"
                   onClick={() => eliminarPrenda(prenda.idIndumentaria)}
