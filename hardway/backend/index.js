@@ -326,6 +326,9 @@ app.post("/api/pedidos", async (req, res) => {
 app.delete("/api/pedidos/:id", async (req, res) => {
   const { id } = req.params;
   try {
+    // Elimina los detalles asociados primero
+    await PedidoIndumentaria.destroy({ where: { pedido_id: id } });
+    // Luego elimina el pedido
     const deleted = await Pedido.destroy({ where: { id } });
     if (deleted) {
       res.json({ success: true });
@@ -333,6 +336,7 @@ app.delete("/api/pedidos/:id", async (req, res) => {
       res.status(404).json({ error: "Pedido no encontrado" });
     }
   } catch (error) {
+    console.error("Error al eliminar pedido:", error);
     res
       .status(500)
       .json({ error: "Error al eliminar pedido", detalle: error.message });
