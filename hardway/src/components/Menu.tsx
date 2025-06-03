@@ -16,6 +16,16 @@ import {
   peopleOutline,
   logOutOutline,
   shirtOutline,
+  arrowDownRightBoxSharp,
+  arrowUpLeftBox,
+  arrowUpRightBox,
+  wifiSharp,
+  arrowDownLeftBoxSharp,
+  logoAmazon,
+  arrowUpSharp,
+  logoIonic,
+  arrowUpLeftBoxSharp,
+  archiveOutline,
 } from "ionicons/icons";
 import "./Menu.css";
 import persona from "../assets/images/people.png";
@@ -30,7 +40,7 @@ interface AppPage {
 const appPages: AppPage[] = [
   { title: "Inicio", url: "/folder/Inicio", icon: homeOutline },
   { title: "Reportes", url: "/folder/Reportes", icon: bookmarkOutline },
-  { title: "Pedidos", url: "/pedidos", icon: logoUsd },
+  { title: "Pedidos", url: "/pedidos", icon: archiveOutline },
   { title: "Clientes", url: "/Clientes", icon: peopleOutline },
   { title: "Usuarios", url: "/usuarios", icon: peopleOutline },
   { title: "Indumentaria", url: "/indumentaria", icon: shirtOutline },

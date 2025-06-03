@@ -46,15 +46,15 @@ const Pedidos: React.FC = () => {
 
   // Ordena los pedidos por fecha descendente (los más recientes primero)
   const mostrarTodos = busqueda === " ";
-  const pedidosFiltrados = filtrarPedidos(pedidos, busqueda === " " ? "" : busqueda).sort(
-    (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-  );
-  const pedidosAMostrar =
-    mostrarTodos
-      ? pedidosFiltrados
-      : busqueda.trim() === ""
-      ? pedidosFiltrados.slice(0, 5)
-      : pedidosFiltrados;
+  const pedidosFiltrados = filtrarPedidos(
+    pedidos,
+    busqueda === " " ? "" : busqueda
+  ).sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+  const pedidosAMostrar = mostrarTodos
+    ? pedidosFiltrados
+    : busqueda.trim() === ""
+    ? pedidosFiltrados.slice(0, 5)
+    : pedidosFiltrados;
 
   // Eliminar pedido y recargar lista
   const handleEliminarPedido = async (id: number) => {
@@ -110,7 +110,7 @@ const Pedidos: React.FC = () => {
                       <strong>ID</strong>
                     </IonCol>
                     <IonCol className="text-center">
-                      <strong>Descripción</strong>
+                      <strong>Observacion</strong>
                     </IonCol>
                     <IonCol className="text-center">
                       <strong>Estado</strong>
@@ -140,7 +140,9 @@ const Pedidos: React.FC = () => {
                         <div className="action-buttons">
                           <IonButton
                             fill="clear"
-                            onClick={() => history.push(`/alta-pedido/${pedido.id}`)}
+                            onClick={() =>
+                              history.push(`/alta-pedido/${pedido.id}`)
+                            }
                           >
                             <IonIcon icon={pencil} color="primary" />
                           </IonButton>
