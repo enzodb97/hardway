@@ -15,13 +15,13 @@ import {
   IonModal,
   IonList,
 } from "@ionic/react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
 import axios from "axios";
 import "./AltaPedido.css";
 import { useClientes } from "../../context/ClientesContext";
 
-// --- Aquí define el tipo ---
+// --- Tipo para el pedido ---
 type PedidoInput = {
   descripcion: string;
   fecha: string;
@@ -30,30 +30,47 @@ type PedidoInput = {
   indumentaria: { idIndumentaria: number; cantidad: number }[];
 };
 
+const estadoInicial = {
+  descripcion: "",
+  fecha: new Date().toISOString().slice(0, 16).replace("T", " "),
+  estado: "En Curso",
+  clienteId: "",
+  clienteNombre: "",
+};
+
 const AltaPedido: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const history = useHistory();
+  const location = useLocation();
   const { clientes } = useClientes();
-  const [form, setForm] = useState({
-    descripcion: "",
-    fecha: "",
-    estado: "En Curso",
-    clienteId: "",
-    clienteNombre: "",
-  });
+
+  const [form, setForm] = useState(estadoInicial);
+  const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
+    { idIndumentaria: number; descripcion: string; cantidad: number }[]
+  >([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [filtroCliente, setFiltroCliente] = useState("");
   const esEdicion = Boolean(id);
 
   // --- Indumentaria ---
   const [indumentaria, setIndumentaria] = useState<any[]>([]);
-  const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
-    { idIndumentaria: number; descripcion: string; cantidad: number }[]
-  >([]);
   const [showIndumentariaModal, setShowIndumentariaModal] = useState(false);
   const [filtroIndumentaria, setFiltroIndumentaria] = useState("");
+
+  // Limpiar formulario y prendas SIEMPRE al entrar a la página de alta
+  useEffect(() => {
+    if (!esEdicion) {
+      setForm({
+        ...estadoInicial,
+        fecha: new Date().toISOString().slice(0, 16).replace("T", " "),
+      });
+      setPrendasSeleccionadas([]);
+    }
+    // eslint-disable-next-line
+  }, [location.pathname, esEdicion]);
 
   // Cargar indumentaria
   useEffect(() => {
@@ -89,16 +106,6 @@ const AltaPedido: React.FC = () => {
         }
       };
       cargarPedido();
-    } else {
-      // Lógica para alta: formulario vacío y fecha actual
-      setForm({
-        descripcion: "",
-        fecha: new Date().toISOString().slice(0, 16).replace("T", " "),
-        estado: "En Curso",
-        clienteId: "",
-        clienteNombre: "",
-      });
-      setPrendasSeleccionadas([]);
     }
   }, [id, esEdicion]);
 
@@ -162,7 +169,7 @@ const AltaPedido: React.FC = () => {
       } else {
         await crearPedido(pedido);
       }
-      history.push("/pedidos");
+      setShowSuccess(true); // Mostrar mensaje de éxito
     } catch (error) {
       setAlertMsg("Error al guardar el pedido.");
       setShowAlert(true);
@@ -305,6 +312,19 @@ const AltaPedido: React.FC = () => {
           message={alertMsg}
           buttons={["Aceptar"]}
           onDidDismiss={() => setShowAlert(false)}
+        />
+        <IonAlert
+          isOpen={showSuccess}
+          message="Registro exitoso"
+          buttons={[
+            {
+              text: "Aceptar",
+              handler: () => {
+                setShowSuccess(false);
+                history.push("/pedidos");
+              },
+            },
+          ]}
         />
 
         {/* --- Modal de selección de cliente --- */}
