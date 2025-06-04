@@ -148,6 +148,11 @@ const AltaPedido: React.FC = () => {
   // --- Envío del formulario ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.clienteId) {
+      setAlertMsg("Debe agregar un cliente");
+      setShowAlert(true);
+      return;
+    }
     if (prendasSeleccionadas.length === 0) {
       setAlertMsg("Debes agregar al menos una prenda al pedido.");
       setShowAlert(true);
