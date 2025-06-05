@@ -33,7 +33,7 @@ type PedidoInput = {
 const estadoInicial = {
   descripcion: "",
   fecha: new Date().toISOString().slice(0, 16).replace("T", " "),
-  estado: "En Curso",
+  estado: "",
   clienteId: "",
   clienteNombre: "",
 };
@@ -161,6 +161,7 @@ const AltaPedido: React.FC = () => {
     try {
       const pedido: PedidoInput = {
         ...form,
+        estado: "En Curso", // Estado por defecto
         clienteId: Number(form.clienteId),
         indumentaria: prendasSeleccionadas.map(
           ({ idIndumentaria, cantidad }) => ({
@@ -230,10 +231,6 @@ const AltaPedido: React.FC = () => {
               readonly
               required
             />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Estado</IonLabel>
-            <IonInput value={form.estado} readonly />
           </IonItem>
 
           {/* --- Prendas seleccionadas --- */}

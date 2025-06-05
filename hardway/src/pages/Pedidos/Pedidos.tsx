@@ -32,6 +32,7 @@ const Pedidos: React.FC = () => {
   const [busqueda, setBusqueda] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const history = useHistory();
 
   // Función para cargar pedidos
@@ -61,7 +62,9 @@ const Pedidos: React.FC = () => {
     if (window.confirm("¿Seguro que desea eliminar este pedido?")) {
       try {
         await eliminarPedido(id);
-        await cargarPedidos(); // Recarga la lista después de eliminar
+        setShowDeleteSuccess(true);
+        // Recarga la lista después de eliminar
+        cargarPedidos();
       } catch (error: any) {
         setAlertMsg("Error al eliminar el pedido.");
         setShowAlert(true);
@@ -184,6 +187,16 @@ const Pedidos: React.FC = () => {
           onDidDismiss={() => setShowAlert(false)}
           message={alertMsg}
           buttons={["Aceptar"]}
+        />
+        <IonAlert
+          isOpen={showDeleteSuccess}
+          message="Se eliminó correctamente el pedido"
+          buttons={[
+            {
+              text: "Aceptar",
+              handler: () => setShowDeleteSuccess(false),
+            },
+          ]}
         />
       </IonContent>
     </IonPage>
