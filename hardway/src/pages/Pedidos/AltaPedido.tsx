@@ -223,15 +223,25 @@ const AltaPedido: React.FC = () => {
             <IonLabel position="floating">Cliente ID</IonLabel>
             <IonInput value={form.clienteId} readonly />
           </IonItem>
-          <IonItem button onClick={() => setShowClienteModal(true)}>
-            <IonLabel position="floating">Cliente</IonLabel>
-            <IonInput
-              value={form.clienteNombre}
-              placeholder="Seleccionar cliente"
-              readonly
-              required
-            />
-          </IonItem>
+          {/* --- Cliente --- */}
+          {esEdicion ? (
+            // Si es edición, solo mostrar el cliente como texto no editable
+            <IonItem>
+              <IonLabel position="floating">Cliente</IonLabel>
+              <IonInput value={form.clienteNombre} readonly />
+            </IonItem>
+          ) : (
+            // Si es alta, permitir seleccionar cliente
+            <IonItem button onClick={() => setShowClienteModal(true)}>
+              <IonLabel position="floating">Cliente</IonLabel>
+              <IonInput
+                value={form.clienteNombre}
+                placeholder="Seleccionar cliente"
+                readonly
+                required
+              />
+            </IonItem>
+          )}
 
           {/* --- Prendas seleccionadas --- */}
           <IonList>
@@ -401,11 +411,14 @@ const AltaPedido: React.FC = () => {
             </IonItem>
             <IonList>
               {indumentaria
-                .filter((i) =>
-                  i.descripcionIndumentaria
-                    .toLowerCase()
-                    .includes(filtroIndumentaria.toLowerCase())
-                )
+                .filter((i) => {
+                  const filtro = filtroIndumentaria.toLowerCase();
+                  return (
+                    i.descripcionIndumentaria.toLowerCase().includes(filtro) ||
+                    (i.codigoIndumentaria &&
+                      i.codigoIndumentaria.toLowerCase().includes(filtro))
+                  );
+                })
                 .map((prenda) => (
                   <IonItem key={prenda.idIndumentaria}>
                     <IonLabel>
