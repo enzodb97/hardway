@@ -16,6 +16,7 @@ import {
 } from "@ionic/react";
 import { useParams, useHistory } from "react-router-dom";
 import "./DetallePedido.css";
+import zepelin from "../../assets/images/zepelin.png";
 import axios from "axios";
 
 const DetallePedido: React.FC = () => {
@@ -56,6 +57,7 @@ const DetallePedido: React.FC = () => {
       </IonHeader>
       <IonContent>
         <h2 className="detalle-pedido-titulo">
+          <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />{" "}
           Detalle de Pedido #{pedido?.id}
         </h2>
         <IonGrid>

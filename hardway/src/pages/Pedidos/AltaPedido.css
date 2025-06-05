@@ -5,6 +5,18 @@
   min-height: 100vh;
 }
 
+.titulo {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.alta-pedido-form ion-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
 .alta-pedido-content {
   padding: 20px;
   display: flex;

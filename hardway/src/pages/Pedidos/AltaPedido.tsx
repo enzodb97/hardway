@@ -19,6 +19,7 @@ import { useHistory, useParams, useLocation } from "react-router-dom";
 import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
 import axios from "axios";
 import "./AltaPedido.css";
+import zepelin from "../../assets/images/zepelin.png";
 import { useClientes } from "../../context/ClientesContext";
 
 // --- Tipo para el pedido ---
@@ -206,6 +207,12 @@ const AltaPedido: React.FC = () => {
       </IonHeader>
       <IonContent className="alta-pedido-content">
         <form className="alta-pedido-form" onSubmit={handleSubmit}>
+          <div className="titulo">
+            <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
+            <IonTitle>
+              {esEdicion ? "Editar Pedido" : "Registrar Pedido"}
+            </IonTitle>
+          </div>
           <IonItem>
             <IonLabel position="floating">Descripción</IonLabel>
             <IonInput

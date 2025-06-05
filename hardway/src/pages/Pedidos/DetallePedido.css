@@ -5,8 +5,10 @@
 }
 
 .detalle-pedido-titulo {
-  text-align: center;
+  display: flex;
   margin: 1.5rem 0;
+  align-items: center;
+  justify-content: center;
 }
 
 .table-header {
@@ -24,4 +26,10 @@
   align-items: center;
   justify-content: center;
   display: flex;
+}
+
+ion-content h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
