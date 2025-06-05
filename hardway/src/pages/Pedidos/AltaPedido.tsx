@@ -319,7 +319,7 @@ const AltaPedido: React.FC = () => {
             onClick={() => setShowIndumentariaModal(true)}
             type="button"
           >
-            Agregar Prenda
+            Agregar Indumentaria
           </IonButton>
 
           <IonButton expand="block" type="submit">
@@ -404,19 +404,19 @@ const AltaPedido: React.FC = () => {
         >
           <IonHeader>
             <IonToolbar>
-              <IonTitle>Seleccionar Prenda</IonTitle>
+              <IonTitle>Seleccionar Indumentaria</IonTitle>
             </IonToolbar>
           </IonHeader>
           <IonContent>
             <IonItem>
               <IonInput
-                placeholder="Buscar prenda"
+                placeholder="Buscar Indumentaria"
                 value={filtroIndumentaria}
                 onIonChange={(e) => setFiltroIndumentaria(e.detail.value!)}
                 clearInput
               />
             </IonItem>
-            <IonList>
+            <IonList class="indumentaria-list">
               {indumentaria
                 .filter((i) => {
                   const filtro = filtroIndumentaria.toLowerCase();
@@ -427,8 +427,11 @@ const AltaPedido: React.FC = () => {
                   );
                 })
                 .map((prenda) => (
-                  <IonItem key={prenda.idIndumentaria}>
-                    <IonLabel>
+                  <IonItem
+                    key={prenda.idIndumentaria}
+                    className="indumentaria-item"
+                  >
+                    <IonLabel class="indumentaria-label">
                       {prenda.descripcionIndumentaria} (Stock:{" "}
                       {prenda.cantidadIndumentaria})
                     </IonLabel>
