@@ -24,6 +24,8 @@
     "axios": "^1.8.4",
     "esbuild": "^0.21.5",
     "ionicons": "^7.4.0",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-router": "^5.3.4",

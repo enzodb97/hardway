@@ -13,12 +13,6 @@
   align-items: center;
 }
 
-/*.indumentaria-item {
-  display: grid;
-  grid-template-columns: 100%;
-  align-items: center;
-  justify-content: center;
-}*/
 .indumentaria-label {
   width: 100% !important; /* Ocupa todo el ancho disponible */
   min-width: 350px !important; /* Puedes aumentar este valor si quieres aún más ancho */
