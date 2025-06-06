@@ -155,7 +155,7 @@ const AltaPedido: React.FC = () => {
       return;
     }
     if (prendasSeleccionadas.length === 0) {
-      setAlertMsg("Debes agregar al menos una prenda al pedido.");
+      setAlertMsg("Debes agregar al menos un producto al pedido.");
       setShowAlert(true);
       return;
     }
