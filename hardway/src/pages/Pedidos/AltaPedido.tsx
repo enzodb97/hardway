@@ -210,9 +210,12 @@ const AltaPedido: React.FC = () => {
           <div className="titulo">
             <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
             <IonTitle>
-              {esEdicion ? "Editar Pedido" : "Registrar Pedido"}
+              {esEdicion
+                ? `Editar Pedido${id ? ` #${id}` : ""}`
+                : "Registrar Pedido"}
             </IonTitle>
           </div>
+          {/*}
           <IonItem>
             <IonLabel position="floating">Descripción</IonLabel>
             <IonInput
@@ -221,7 +224,7 @@ const AltaPedido: React.FC = () => {
                 setForm({ ...form, descripcion: e.detail.value! })
               }
             />
-          </IonItem>
+          </IonItem>*/}
           <IonItem>
             <IonLabel position="floating">Fecha y hora</IonLabel>
             <IonInput value={form.fecha} readonly />
@@ -249,7 +252,6 @@ const AltaPedido: React.FC = () => {
               />
             </IonItem>
           )}
-
           {/* --- Prendas seleccionadas --- */}
           <IonList>
             {prendasSeleccionadas.map((prenda, idx) => (
@@ -313,7 +315,6 @@ const AltaPedido: React.FC = () => {
               </IonItem>
             ))}
           </IonList>
-
           <IonButton
             expand="block"
             onClick={() => setShowIndumentariaModal(true)}
@@ -321,7 +322,6 @@ const AltaPedido: React.FC = () => {
           >
             Agregar Indumentaria
           </IonButton>
-
           <IonButton expand="block" type="submit">
             {esEdicion ? "Guardar Cambios" : "Guardar Pedido"}
           </IonButton>
