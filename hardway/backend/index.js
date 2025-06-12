@@ -56,12 +56,19 @@ const Cliente = sequelize.define(
 const Persona = sequelize.define(
   "Persona",
   {
-    idPersona: { type: DataTypes.INTEGER, primaryKey: true },
+    idPersona: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    }, // <--- AGREGA ESTO
     dni: DataTypes.INTEGER,
     nombre: DataTypes.STRING,
     apellido: DataTypes.STRING,
     direccion: DataTypes.STRING,
-    idDomicilio: DataTypes.INTEGER,
+    idDomicilio: {
+      type: DataTypes.INTEGER,
+      allowNull: false, // <-- Esto fuerza a que no sea NULL
+    },
   },
   {
     tableName: "Persona",
@@ -262,7 +269,13 @@ app.get("/api/clientes", async (req, res) => {
         attributes: ["dni", "nombre", "apellido", "direccion"],
         include: {
           model: Domicilio,
-          attributes: ["calle", "altura", "piso", "departamento", "observaciones"],
+          attributes: [
+            "calle",
+            "altura",
+            "piso",
+            "departamento",
+            "observaciones",
+          ],
           include: [
             {
               model: Barrio,
@@ -270,7 +283,7 @@ app.get("/api/clientes", async (req, res) => {
             },
             {
               model: Ciudad,
-              attributes: ["nombreCiudad"],
+              attributes: ["nombreCiudad", "codigoPostal"], // <-- AGREGA codigoPostal
             },
           ],
         },
@@ -285,7 +298,13 @@ app.get("/api/clientes", async (req, res) => {
       telefono: c.telefono,
       email: c.email,
       domicilio: c.Persona?.direccion || "",
-      localidad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // ciudad = localidad en el front
+      calle: c.Persona?.Domicilio?.calle || "",
+      altura: c.Persona?.Domicilio?.altura || "",
+      piso: c.Persona?.Domicilio?.piso || "",
+      numeroDepartamento: c.Persona?.Domicilio?.departamento || "",
+      observaciones: c.Persona?.Domicilio?.observaciones || "",
+      localidad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "",
+      cp: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "",
       barrio: c.Persona?.Domicilio?.Barrio?.nombreBarrio || "",
     }));
 
@@ -297,14 +316,107 @@ app.get("/api/clientes", async (req, res) => {
 });
 
 app.post("/api/clientes", async (req, res) => {
-  const cliente = await Cliente.create(req.body);
-  res.json(cliente);
+  const t = await sequelize.transaction();
+  try {
+    // 1. Crear domicilio
+    const domicilio = await Domicilio.create(
+      {
+        calle: req.body.calle,
+        altura: req.body.altura,
+        piso: req.body.piso,
+        departamento: req.body.numeroDepartamento,
+        observaciones: req.body.observaciones,
+        idBarrio: req.body.idBarrio, // Debes obtener el idBarrio según el nombre
+        idCiudad: req.body.idCiudad, // Debes obtener el idCiudad según el nombre
+      },
+      { transaction: t }
+    );
+
+    // 2. Crear persona
+    const persona = await Persona.create(
+      {
+        dni: req.body.numeroDocumento,
+        nombre: req.body.nombre,
+        apellido: "", // Si lo manejas separado
+        direccion: req.body.domicilio,
+        idDomicilio: domicilio.idDomicilio,
+      },
+      { transaction: t }
+    );
+
+    // 3. Crear cliente
+    const cliente = await Cliente.create(
+      {
+        email: req.body.email,
+        telefono: req.body.telefono,
+        idPersona: persona.idPersona,
+      },
+      { transaction: t }
+    );
+
+    await t.commit();
+    res.json({ success: true, id: cliente.idCliente });
+  } catch (error) {
+    await t.rollback();
+    res
+      .status(500)
+      .json({ error: "Error al crear cliente", detalle: error.message });
+  }
 });
 
 app.put("/api/clientes/:id", async (req, res) => {
-  const { id } = req.params;
-  await Cliente.update(req.body, { where: { id } });
-  res.json({ success: true });
+  const t = await sequelize.transaction();
+  try {
+    // 1. Buscar cliente y persona
+    const cliente = await Cliente.findByPk(req.params.id, { transaction: t });
+    if (!cliente) throw new Error("Cliente no encontrado");
+    const persona = await Persona.findByPk(cliente.idPersona, {
+      transaction: t,
+    });
+    if (!persona) throw new Error("Persona no encontrada");
+
+    // 2. Actualizar domicilio
+    await Domicilio.update(
+      {
+        calle: req.body.calle,
+        altura: req.body.altura,
+        piso: req.body.piso,
+        departamento: req.body.numeroDepartamento,
+        observaciones: req.body.observaciones,
+        idBarrio: req.body.idBarrio,
+        idCiudad: req.body.idCiudad,
+      },
+      { where: { idDomicilio: persona.idDomicilio }, transaction: t }
+    );
+
+    // 3. Actualizar persona
+    await Persona.update(
+      {
+        dni: req.body.numeroDocumento,
+        nombre: req.body.nombre,
+        apellido: "", // Si lo manejas separado
+        direccion: req.body.domicilio,
+      },
+      { where: { idPersona: persona.idPersona }, transaction: t }
+    );
+
+    // 4. Actualizar cliente
+    await Cliente.update(
+      {
+        email: req.body.email,
+        telefono: req.body.telefono,
+      },
+      { where: { idCliente: req.params.id }, transaction: t }
+    );
+
+    await t.commit();
+    res.json({ success: true });
+  } catch (error) {
+    await t.rollback();
+    res
+      .status(500)
+      .json({ error: "Error al editar cliente", detalle: error.message });
+  }
 });
 
 app.delete("/api/clientes/:id", async (req, res) => {
@@ -453,11 +565,15 @@ app.put("/api/usuarios/:id", async (req, res) => {
 app.put("/api/usuarios/:id/password", async (req, res) => {
   const { password } = req.body;
   try {
-    await Usuario.update(
+    const [updated] = await Usuario.update(
       { contrasena: password },
       { where: { idUsuario: req.params.id } }
     );
-    res.json({ success: true });
+    if (updated) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: "Usuario no encontrado" });
+    }
   } catch (error) {
     res.status(400).json({ error: "No se pudo cambiar la contraseña" });
   }
@@ -677,10 +793,9 @@ app.get("/api/pedidos/:id", async (req, res) => {
 // Validar usuario por nombre de usuario
 app.get("/api/usuarios/validate", async (req, res) => {
   const { username } = req.query;
-  const usuario = await Usuario.findOne({ where: { username } });
+  const usuario = await Usuario.findOne({ where: { nombreUsuario: username } });
   res.json({ valid: !!usuario });
 });
-
 // Obtener todas las prendas
 app.get("/api/indumentaria", async (req, res) => {
   try {
@@ -758,6 +873,26 @@ app.get("/api/tiporoles", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Error al obtener roles" });
   }
+});
+
+// Buscar o crear ciudad
+app.post("/api/ciudades/find-or-create", async (req, res) => {
+  const { nombreCiudad, codigoPostal } = req.body;
+  let ciudad = await Ciudad.findOne({ where: { nombreCiudad } });
+  if (!ciudad) {
+    ciudad = await Ciudad.create({ nombreCiudad, codigoPostal });
+  }
+  res.json(ciudad);
+});
+
+// Buscar o crear barrio
+app.post("/api/barrios/find-or-create", async (req, res) => {
+  const { nombreBarrio, idCiudad } = req.body;
+  let barrio = await Barrio.findOne({ where: { nombreBarrio, idCiudad } });
+  if (!barrio) {
+    barrio = await Barrio.create({ nombreBarrio, idCiudad });
+  }
+  res.json(barrio);
 });
 
 // Manejo de errores global
