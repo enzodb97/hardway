@@ -27,9 +27,11 @@ const Clientes: React.FC = () => {
   const [busqueda, setBusqueda] = useState("");
   const [mostrarListado, setMostrarListado] = useState(false);
 
-  // NUEVO: Estado para alertas
+  // NUEVO: Estados para alertas
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false); // NUEVO
+  const [clienteAEliminar, setClienteAEliminar] = useState<number | null>(null); // NUEVO
 
   const clientesFiltrados = clientes.filter(
     (cliente) =>
@@ -40,28 +42,35 @@ const Clientes: React.FC = () => {
 
   const totalClientes = clientes.length;
 
-  // Modifica handleEliminar para capturar el error
-  const handleEliminar = async (id: number) => {
-    if (window.confirm("¿Está seguro que desea eliminar este cliente?")) {
-      try {
-        await eliminarCliente(id);
-      } catch (error: any) {
-        // Intenta obtener el mensaje del backend
-        const backendMsg =
-          error.response?.data?.error || error.response?.data?.detalle || "";
+  // NUEVO: Mostrar IonAlert de confirmación
+  const pedirConfirmacionEliminar = (id: number) => {
+    setClienteAEliminar(id);
+    setShowConfirm(true);
+  };
 
-        if (
-          error.response &&
-          error.response.status === 400 &&
-          backendMsg.includes("No se puede eliminar el cliente")
-        ) {
-          setAlertMsg("Error al eliminar el cliente, tiene pedidos.");
-          setShowAlert(true);
-        } else {
-          setAlertMsg("Error al eliminar al cliente, tiene pedidos.");
-          setShowAlert(true);
-        }
+  // Modifica handleEliminar para usar el IonAlert
+  const handleEliminar = async () => {
+    if (clienteAEliminar === null) return;
+    try {
+      await eliminarCliente(clienteAEliminar);
+    } catch (error: any) {
+      const backendMsg =
+        error.response?.data?.error || error.response?.data?.detalle || "";
+
+      if (
+        error.response &&
+        error.response.status === 400 &&
+        backendMsg.includes("No se puede eliminar el cliente")
+      ) {
+        setAlertMsg("Error al eliminar el cliente, tiene pedidos.");
+        setShowAlert(true);
+      } else {
+        setAlertMsg("Error al eliminar al cliente, tiene pedidos.");
+        setShowAlert(true);
       }
+    } finally {
+      setShowConfirm(false);
+      setClienteAEliminar(null);
     }
   };
 
@@ -167,7 +176,7 @@ const Clientes: React.FC = () => {
                       </IonButton>
                       <IonButton
                         fill="clear"
-                        onClick={() => handleEliminar(cliente.id)}
+                        onClick={() => pedirConfirmacionEliminar(cliente.id)}
                         className="delete-btn"
                       >
                         <IonIcon icon={trash} color="danger" />
@@ -185,6 +194,24 @@ const Clientes: React.FC = () => {
             </IonFabButton>
           </IonFab>
 
+          <IonAlert
+            isOpen={showConfirm}
+            onDidDismiss={() => setShowConfirm(false)}
+            header="Confirmar eliminación"
+            message="¿Está seguro que desea eliminar este cliente?"
+            buttons={[
+              {
+                text: "Cancelar",
+                role: "cancel",
+                handler: () => setShowConfirm(false),
+              },
+              {
+                text: "Eliminar",
+                handler: handleEliminar,
+                cssClass: "danger",
+              },
+            ]}
+          />
           <IonAlert
             isOpen={showAlert}
             onDidDismiss={() => setShowAlert(false)}

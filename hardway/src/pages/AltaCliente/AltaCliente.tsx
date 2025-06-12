@@ -392,7 +392,7 @@ const AltaCliente: React.FC = () => {
       />
       <IonAlert
         isOpen={showSuccess}
-        message="Registro de cliente exitoso"
+        message="Actualizacion de cliente exitoso"
         buttons={[
           {
             text: "Aceptar",
