@@ -42,29 +42,35 @@ sequelize
 const Cliente = sequelize.define(
   "Cliente",
   {
-    tipoDocumento: { type: DataTypes.STRING, field: "tipo_documento" },
-    numeroDocumento: { type: DataTypes.STRING, field: "numero_documento" },
-    nombre: DataTypes.STRING,
-    domicilio: DataTypes.STRING,
-    calle: DataTypes.STRING,
-    altura: DataTypes.STRING,
-    piso: DataTypes.STRING,
-    numeroDepartamento: {
-      type: DataTypes.STRING,
-      field: "numero_departamento",
-    },
-    observaciones: DataTypes.STRING,
-    localidad: DataTypes.STRING,
-    barrio: DataTypes.STRING,
-    cp: DataTypes.STRING,
-    telefono: DataTypes.STRING,
+    idCliente: { type: DataTypes.INTEGER, primaryKey: true },
     email: DataTypes.STRING,
+    telefono: DataTypes.STRING,
+    idPersona: DataTypes.INTEGER,
   },
   {
-    tableName: "clientes",
+    tableName: "Cliente", // Respeta mayúsculas y singular
     timestamps: false,
   }
 );
+
+const Persona = sequelize.define(
+  "Persona",
+  {
+    idPersona: { type: DataTypes.INTEGER, primaryKey: true },
+    dni: DataTypes.INTEGER,
+    nombre: DataTypes.STRING,
+    apellido: DataTypes.STRING,
+    direccion: DataTypes.STRING,
+    idDomicilio: DataTypes.INTEGER,
+  },
+  {
+    tableName: "Persona",
+    timestamps: false,
+  }
+);
+
+// Relación
+Cliente.belongsTo(Persona, { foreignKey: "idPersona" });
 
 // Define el modelo Usuario
 const Usuario = sequelize.define(
@@ -197,11 +203,93 @@ Cliente.hasMany(Pedido, { foreignKey: "clienteId" });
 Usuario.belongsTo(Rol, { foreignKey: "idRol" });
 Rol.belongsTo(TipoRol, { foreignKey: "idTipoRol" });
 
+// Domicilio y Barrio
+const Domicilio = sequelize.define(
+  "Domicilio",
+  {
+    idDomicilio: { type: DataTypes.INTEGER, primaryKey: true },
+    calle: DataTypes.STRING,
+    altura: DataTypes.STRING,
+    piso: DataTypes.STRING,
+    departamento: DataTypes.STRING,
+    observaciones: DataTypes.STRING,
+    idBarrio: DataTypes.INTEGER,
+    idCiudad: DataTypes.INTEGER,
+  },
+  {
+    tableName: "Domicilio",
+    timestamps: false,
+  }
+);
+
+const Barrio = sequelize.define(
+  "Barrio",
+  {
+    idBarrio: { type: DataTypes.INTEGER, primaryKey: true },
+    nombreBarrio: DataTypes.STRING,
+    idCiudad: DataTypes.INTEGER,
+  },
+  {
+    tableName: "Barrio",
+    timestamps: false,
+  }
+);
+
+const Ciudad = sequelize.define(
+  "Ciudad",
+  {
+    idCiudad: { type: DataTypes.INTEGER, primaryKey: true },
+    nombreCiudad: DataTypes.STRING,
+    codigoPostal: DataTypes.STRING,
+  },
+  {
+    tableName: "Ciudad",
+    timestamps: false,
+  }
+);
+
+// Relaciones
+Persona.belongsTo(Domicilio, { foreignKey: "idDomicilio" });
+Domicilio.belongsTo(Barrio, { foreignKey: "idBarrio" });
+Domicilio.belongsTo(Ciudad, { foreignKey: "idCiudad" });
+
 // Endpoints básicos
 app.get("/api/clientes", async (req, res) => {
   try {
-    const clientes = await Cliente.findAll();
-    res.json(clientes);
+    const clientes = await Cliente.findAll({
+      include: {
+        model: Persona,
+        attributes: ["dni", "nombre", "apellido", "direccion"],
+        include: {
+          model: Domicilio,
+          attributes: ["calle", "altura", "piso", "departamento", "observaciones"],
+          include: [
+            {
+              model: Barrio,
+              attributes: ["nombreBarrio"],
+            },
+            {
+              model: Ciudad,
+              attributes: ["nombreCiudad"],
+            },
+          ],
+        },
+      },
+    });
+
+    const clientesFormateados = clientes.map((c) => ({
+      id: c.idCliente,
+      nombre: `${c.Persona?.nombre || ""} ${c.Persona?.apellido || ""}`,
+      tipoDocumento: "DNI",
+      numeroDocumento: c.Persona?.dni?.toString() || "",
+      telefono: c.telefono,
+      email: c.email,
+      domicilio: c.Persona?.direccion || "",
+      localidad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // ciudad = localidad en el front
+      barrio: c.Persona?.Domicilio?.Barrio?.nombreBarrio || "",
+    }));
+
+    res.json(clientesFormateados);
   } catch (error) {
     console.error("Error al obtener clientes:", error);
     res.status(500).json({ error: "Error al obtener clientes" });
