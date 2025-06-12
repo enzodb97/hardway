@@ -42,13 +42,17 @@ sequelize
 const Cliente = sequelize.define(
   "Cliente",
   {
-    idCliente: { type: DataTypes.INTEGER, primaryKey: true },
+    idCliente: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    }, // <--- AGREGA autoIncrement
     email: DataTypes.STRING,
     telefono: DataTypes.STRING,
     idPersona: DataTypes.INTEGER,
   },
   {
-    tableName: "Cliente", // Respeta mayúsculas y singular
+    tableName: "Cliente",
     timestamps: false,
   }
 );
@@ -214,7 +218,11 @@ Rol.belongsTo(TipoRol, { foreignKey: "idTipoRol" });
 const Domicilio = sequelize.define(
   "Domicilio",
   {
-    idDomicilio: { type: DataTypes.INTEGER, primaryKey: true },
+    idDomicilio: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    }, // <--- AGREGA autoIncrement
     calle: DataTypes.STRING,
     altura: DataTypes.STRING,
     piso: DataTypes.STRING,
@@ -232,7 +240,11 @@ const Domicilio = sequelize.define(
 const Barrio = sequelize.define(
   "Barrio",
   {
-    idBarrio: { type: DataTypes.INTEGER, primaryKey: true },
+    idBarrio: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    }, // <--- AGREGA autoIncrement
     nombreBarrio: DataTypes.STRING,
     idCiudad: DataTypes.INTEGER,
   },
@@ -245,7 +257,11 @@ const Barrio = sequelize.define(
 const Ciudad = sequelize.define(
   "Ciudad",
   {
-    idCiudad: { type: DataTypes.INTEGER, primaryKey: true },
+    idCiudad: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    }, // <--- AGREGA autoIncrement
     nombreCiudad: DataTypes.STRING,
     codigoPostal: DataTypes.STRING,
   },
@@ -318,6 +334,8 @@ app.get("/api/clientes", async (req, res) => {
 app.post("/api/clientes", async (req, res) => {
   const t = await sequelize.transaction();
   try {
+    console.log("BODY recibido en /api/clientes:", req.body);
+
     // 1. Crear domicilio
     const domicilio = await Domicilio.create(
       {
@@ -326,11 +344,12 @@ app.post("/api/clientes", async (req, res) => {
         piso: req.body.piso,
         departamento: req.body.numeroDepartamento,
         observaciones: req.body.observaciones,
-        idBarrio: req.body.idBarrio, // Debes obtener el idBarrio según el nombre
-        idCiudad: req.body.idCiudad, // Debes obtener el idCiudad según el nombre
+        idBarrio: req.body.idBarrio,
+        idCiudad: req.body.idCiudad,
       },
       { transaction: t }
     );
+    console.log("Domicilio creado:", domicilio.toJSON());
 
     // 2. Crear persona
     const persona = await Persona.create(
@@ -343,6 +362,7 @@ app.post("/api/clientes", async (req, res) => {
       },
       { transaction: t }
     );
+    console.log("Persona creada:", persona.toJSON());
 
     // 3. Crear cliente
     const cliente = await Cliente.create(
@@ -353,14 +373,56 @@ app.post("/api/clientes", async (req, res) => {
       },
       { transaction: t }
     );
+    console.log("Cliente creado:", cliente.toJSON());
 
     await t.commit();
-    res.json({ success: true, id: cliente.idCliente });
+
+    // Busca el cliente recién creado con sus relaciones
+    const clienteCreado = await Cliente.findByPk(cliente.idCliente, {
+      include: {
+        model: Persona,
+        attributes: ["dni", "nombre", "apellido", "direccion"],
+        include: {
+          model: Domicilio,
+          attributes: [
+            "calle",
+            "altura",
+            "piso",
+            "departamento",
+            "observaciones",
+          ],
+          include: [
+            { model: Barrio, attributes: ["nombreBarrio"] },
+            { model: Ciudad, attributes: ["nombreCiudad", "codigoPostal"] },
+          ],
+        },
+      },
+    });
+
+    // Formatea igual que en el GET
+    const clienteFormateado = {
+      id: clienteCreado.idCliente,
+      nombre: `${clienteCreado.Persona?.nombre || ""} ${clienteCreado.Persona?.apellido || ""}`,
+      tipoDocumento: "DNI",
+      numeroDocumento: clienteCreado.Persona?.dni?.toString() || "",
+      telefono: clienteCreado.telefono,
+      email: clienteCreado.email,
+      domicilio: clienteCreado.Persona?.direccion || "",
+      calle: clienteCreado.Persona?.Domicilio?.calle || "",
+      altura: clienteCreado.Persona?.Domicilio?.altura || "",
+      piso: clienteCreado.Persona?.Domicilio?.piso || "",
+      numeroDepartamento: clienteCreado.Persona?.Domicilio?.departamento || "",
+      observaciones: clienteCreado.Persona?.Domicilio?.observaciones || "",
+      localidad: clienteCreado.Persona?.Domicilio?.Ciudad?.nombreCiudad || "",
+      cp: clienteCreado.Persona?.Domicilio?.Ciudad?.codigoPostal || "",
+      barrio: clienteCreado.Persona?.Domicilio?.Barrio?.nombreBarrio || "",
+    };
+
+    res.json(clienteFormateado);
   } catch (error) {
     await t.rollback();
-    res
-      .status(500)
-      .json({ error: "Error al crear cliente", detalle: error.message });
+    console.error("Error al crear cliente:", error);
+    res.status(500).json({ error: "Error al crear cliente", detalle: error.message });
   }
 });
 
@@ -882,7 +944,12 @@ app.post("/api/ciudades/find-or-create", async (req, res) => {
   if (!ciudad) {
     ciudad = await Ciudad.create({ nombreCiudad, codigoPostal });
   }
-  res.json(ciudad);
+  // Devuelve solo los datos planos
+  res.json({
+    idCiudad: ciudad.idCiudad,
+    nombreCiudad: ciudad.nombreCiudad,
+    codigoPostal: ciudad.codigoPostal,
+  });
 });
 
 // Buscar o crear barrio
@@ -892,7 +959,11 @@ app.post("/api/barrios/find-or-create", async (req, res) => {
   if (!barrio) {
     barrio = await Barrio.create({ nombreBarrio, idCiudad });
   }
-  res.json(barrio);
+  res.json({
+    idBarrio: barrio.idBarrio,
+    nombreBarrio: barrio.nombreBarrio,
+    idCiudad: barrio.idCiudad,
+  });
 });
 
 // Manejo de errores global

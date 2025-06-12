@@ -33,10 +33,9 @@ const Clientes: React.FC = () => {
 
   const clientesFiltrados = clientes.filter(
     (cliente) =>
-      cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      (cliente.email &&
-        cliente.email.toLowerCase().includes(busqueda.toLowerCase())) ||
-      cliente.numeroDocumento.includes(busqueda)
+      (cliente.nombre?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
+      (cliente.email?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
+      (cliente.numeroDocumento || "").includes(busqueda)
   );
 
   const totalClientes = clientes.length;

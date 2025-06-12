@@ -25,6 +25,7 @@ import {
   validarCamposCliente,
   soloNumeros,
 } from "../../utils/clientesUtils";
+import axios from "axios";
 
 const AltaCliente: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -51,6 +52,7 @@ const AltaCliente: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [previousNumeroDocumento, setPreviousNumeroDocumento] = useState("");
   const [previousTelefono, setPreviousTelefono] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false); // NUEVO
 
   useEffect(() => {
     if (id) {
@@ -79,7 +81,7 @@ const AltaCliente: React.FC = () => {
     setPreviousTelefono(nuevoValor);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const errorCampos = validarCamposCliente(formData);
@@ -96,12 +98,63 @@ const AltaCliente: React.FC = () => {
       return;
     }
 
-    if (esEdicion) {
-      modificarCliente(formData as Cliente);
-    } else {
-      agregarCliente(formData as Omit<Cliente, "id">);
+    try {
+      // 1. Obtener o crear ciudad
+      const ciudadRes = await axios.post("/api/ciudades/find-or-create", {
+        nombreCiudad: formData.localidad,
+        codigoPostal: formData.cp,
+      });
+      console.log("Respuesta ciudad:", ciudadRes.data); // <-- Agrega esto
+      const idCiudad = ciudadRes.data.idCiudad;
+
+      // 2. Obtener o crear barrio
+      const barrioRes = await axios.post("/api/barrios/find-or-create", {
+        nombreBarrio: formData.barrio,
+        idCiudad,
+      });
+      console.log("Respuesta barrio:", barrioRes.data); // <-- Agrega esto
+      const idBarrio = barrioRes.data.idBarrio;
+
+      // 3. Armar el payload
+      const clientePayload = {
+        ...formData,
+        idCiudad,
+        idBarrio,
+      };
+
+      // 4. Enviar al backend
+      if (esEdicion) {
+        await modificarCliente({
+          ...clientePayload,
+          id: formData.id!,
+          tipoDocumento: formData.tipoDocumento ?? "",
+          numeroDocumento: formData.numeroDocumento ?? "",
+          nombre: formData.nombre ?? "",
+          domicilio: formData.domicilio ?? "",
+          calle: formData.calle ?? "",
+          altura: formData.altura ?? "",
+          piso: formData.piso ?? "",
+          numeroDepartamento: formData.numeroDepartamento ?? "",
+          observaciones: formData.observaciones ?? "",
+          localidad: formData.localidad ?? "",
+          barrio: formData.barrio ?? "",
+          cp: formData.cp ?? "",
+          telefono: formData.telefono ?? "",
+          email: formData.email ?? "",
+        });
+        setShowSuccess(true); // NUEVO
+      } else {
+        await agregarCliente(clientePayload as Omit<Cliente, "id">);
+        setShowSuccess(true); // NUEVO
+      }
+      // history.push("/Clientes"); // QUITA ESTA LÍNEA
+    } catch (error: any) {
+      setAlertMessage(
+        error?.response?.data?.error ||
+          "Ocurrió un error al guardar el cliente."
+      );
+      setShowAlert(true);
     }
-    history.push("/Clientes");
   };
 
   return (
@@ -336,6 +389,16 @@ const AltaCliente: React.FC = () => {
         isOpen={showAlert}
         message={alertMessage}
         buttons={[{ text: "Aceptar", handler: () => setShowAlert(false) }]}
+      />
+      <IonAlert
+        isOpen={showSuccess}
+        message="Registro de cliente exitoso"
+        buttons={[
+          {
+            text: "Aceptar",
+            handler: () => history.push("/Clientes"),
+          },
+        ]}
       />
     </IonPage>
   );
