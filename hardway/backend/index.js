@@ -402,7 +402,9 @@ app.post("/api/clientes", async (req, res) => {
     // Formatea igual que en el GET
     const clienteFormateado = {
       id: clienteCreado.idCliente,
-      nombre: `${clienteCreado.Persona?.nombre || ""} ${clienteCreado.Persona?.apellido || ""}`,
+      nombre: `${clienteCreado.Persona?.nombre || ""} ${
+        clienteCreado.Persona?.apellido || ""
+      }`,
       tipoDocumento: "DNI",
       numeroDocumento: clienteCreado.Persona?.dni?.toString() || "",
       telefono: clienteCreado.telefono,
@@ -422,7 +424,9 @@ app.post("/api/clientes", async (req, res) => {
   } catch (error) {
     await t.rollback();
     console.error("Error al crear cliente:", error);
-    res.status(500).json({ error: "Error al crear cliente", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al crear cliente", detalle: error.message });
   }
 });
 
