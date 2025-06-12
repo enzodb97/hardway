@@ -5,7 +5,6 @@ import {
   eliminarUsuario,
   editarUsuario,
   cambiarPassword,
-  rolesDisponibles,
   validarCamposUsuario,
   validarUnicidadUsuario,
   Usuario,
@@ -30,6 +29,7 @@ import {
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
 import zepelin from "../../assets/images/zepelin.png";
+import axios from "axios";
 
 const Usuarios: React.FC = () => {
   const { rol } = useAuth();
@@ -47,9 +47,10 @@ const Usuarios: React.FC = () => {
   const [usuarioPasswordId, setUsuarioPasswordId] = useState<number | null>(
     null
   );
+  const [rolesDisponibles, setRolesDisponibles] = useState<string[]>([]);
 
   // Solo admin puede ver esta página
-  if (rol !== "admin") {
+  if (rol !== "Administrador") {
     return (
       <IonPage>
         <IonHeader>
@@ -66,9 +67,11 @@ const Usuarios: React.FC = () => {
     );
   }
 
-  // Cargar usuarios al montar
+  // Cargar usuarios y roles al montar
   useEffect(() => {
     cargarUsuarios().then(setUsuarios);
+    // Cargar roles desde el backend
+    axios.get("/api/tiporoles").then((res) => setRolesDisponibles(res.data));
   }, []);
 
   // Crear usuario
@@ -145,10 +148,10 @@ const Usuarios: React.FC = () => {
     setShowPasswordAlert(true);
   };
 
-  const handleGuardarPassword = async () => {
-    if (!usuarioPasswordId || !nuevaPassword) return;
+  const handleGuardarPassword = async (password: string) => {
+    if (!usuarioPasswordId || !password) return;
     try {
-      await cambiarPassword(usuarioPasswordId, nuevaPassword);
+      await cambiarPassword(usuarioPasswordId, password);
       setAlertMsg("Contraseña actualizada correctamente");
       setShowAlert(true);
       setShowPasswordAlert(false);
@@ -354,8 +357,7 @@ const Usuarios: React.FC = () => {
               {
                 text: "Guardar",
                 handler: (data) => {
-                  setNuevaPassword(data.password);
-                  setTimeout(handleGuardarPassword, 100);
+                  handleGuardarPassword(data.password);
                 },
               },
             ]}

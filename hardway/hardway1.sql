@@ -580,7 +580,7 @@ VALUES
 INSERT INTO
     Usuario (nombreUsuario, contrasena, idRol)
 VALUES
-    ('juanp', 'password123', 2),
+    ('admin', '123', 1),
     ('mariag', 'pass456', 1),
     ('carlosl', 'abc123', 3),
     ('lauraf', '123456', 4),

@@ -41,15 +41,15 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setError(null);
     try {
       const response = await axios.post("/api/login", {
-        username: usernameInput,
-        password,
+        nombreUsuario: usernameInput,
+        contrasena: password,
       });
       localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("rol", response.data.rol);
-      localStorage.setItem("username", response.data.username);
+      localStorage.setItem("rol", response.data.tipoRol || "");
+      localStorage.setItem("username", response.data.nombreUsuario);
       setIsAuthenticated(true);
-      setRol(response.data.rol);
-      setUsername(response.data.username);
+      setRol(response.data.tipoRol || "");
+      setUsername(response.data.nombreUsuario);
       setShowWelcome(true); // Activa el mensaje tras login exitoso
       return true;
     } catch (error) {

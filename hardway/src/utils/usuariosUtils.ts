@@ -62,6 +62,6 @@ export const editarUsuario = async (usuario: Usuario) => {
 };
 
 // Cambiar contraseña
-export const cambiarPassword = async (id: number, password: string) => {
-  return await axios.put(`/api/usuarios/${id}/password`, { password });
-};
+export async function cambiarPassword(id: number, password: string) {
+  await axios.put(`/api/usuarios/${id}/password`, { password });
+}

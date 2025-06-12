@@ -22,7 +22,6 @@ import AltaPedido from "./pages/Pedidos/AltaPedido";
 import DetallePedido from "./pages/Pedidos/DetallePedido";
 import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
-
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -42,55 +41,55 @@ const AppRouter = () => {
               exact
               path="/clientes"
               component={Clientes}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-cliente/:id?"
               component={AltaCliente}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <RoleRoute
               exact
               path="/usuarios"
               component={Usuarios}
-              requiredRoles={["admin"]}
+              requiredRoles={["Administrador"]}
             />
             <RoleRoute
               exact
               path="/pedidos"
               component={Pedidos}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-pedido"
               component={AltaPedido}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-pedido/:id"
               component={AltaPedido}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <RoleRoute
               exact
               path="/indumentaria"
               component={Indumentaria}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-indumentaria"
               component={AltaIndumentaria}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-indumentaria/:id"
               component={AltaIndumentaria}
-              requiredRoles={["admin", "vendedor"]}
+              requiredRoles={["Administrador", "vendedor"]}
             />
             <Route exact path="/detalle-pedido/:id">
               <DetallePedido />

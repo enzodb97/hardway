@@ -70,12 +70,44 @@ const Cliente = sequelize.define(
 const Usuario = sequelize.define(
   "Usuario",
   {
-    username: DataTypes.STRING,
-    password: DataTypes.STRING,
-    rol: DataTypes.STRING,
+    idUsuario: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nombreUsuario: DataTypes.STRING,
+    contrasena: DataTypes.STRING,
+    idRol: DataTypes.INTEGER,
   },
   {
-    tableName: "usuarios",
+    tableName: "Usuario",
+    timestamps: false,
+  }
+);
+
+// Modelo Rol
+const Rol = sequelize.define(
+  "Rol",
+  {
+    idRol: { type: DataTypes.INTEGER, primaryKey: true },
+    idTipoRol: DataTypes.INTEGER,
+  },
+  {
+    tableName: "Rol",
+    timestamps: false,
+  }
+);
+
+// Modelo TipoRol
+const TipoRol = sequelize.define(
+  "TipoRol",
+  {
+    idTipoRol: { type: DataTypes.INTEGER, primaryKey: true },
+    tipoRol: DataTypes.STRING,
+    descripcionRol: DataTypes.STRING,
+  },
+  {
+    tableName: "TipoRol",
     timestamps: false,
   }
 );
@@ -161,6 +193,10 @@ Indumentaria.belongsToMany(Pedido, {
 Pedido.belongsTo(Cliente, { foreignKey: "clienteId" });
 Cliente.hasMany(Pedido, { foreignKey: "clienteId" });
 
+// Relaciones
+Usuario.belongsTo(Rol, { foreignKey: "idRol" });
+Rol.belongsTo(TipoRol, { foreignKey: "idTipoRol" });
+
 // Endpoints básicos
 app.get("/api/clientes", async (req, res) => {
   try {
@@ -213,17 +249,27 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body;
-  console.log("Intento de login:", username, password);
+  const { nombreUsuario, contrasena } = req.body;
   try {
-    const usuario = await Usuario.findOne({ where: { username } });
+    const usuario = await Usuario.findOne({
+      where: { nombreUsuario },
+      include: {
+        model: Rol,
+        include: TipoRol,
+      },
+    });
     if (!usuario) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
-    if (usuario.password !== password) {
+    if (usuario.contrasena !== contrasena) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
-    res.json({ username: usuario.username, rol: usuario.rol });
+    res.json({
+      idUsuario: usuario.idUsuario,
+      nombreUsuario: usuario.nombreUsuario,
+      idRol: usuario.idRol,
+      tipoRol: usuario.Rol?.TipoRol?.tipoRol, // <--- Aquí va el nombre del rol
+    });
   } catch (error) {
     res.status(500).json({ error: "Error en el servidor" });
   }
@@ -231,18 +277,51 @@ app.post("/api/login", async (req, res) => {
 
 // Obtener todos los usuarios (solo para admin)
 app.get("/api/usuarios", async (req, res) => {
-  const usuarios = await Usuario.findAll({
-    attributes: ["id", "username", "rol"],
-  }); // No envíes la contraseña
-  res.json(usuarios);
+  try {
+    const usuarios = await Usuario.findAll({
+      attributes: ["idUsuario", "nombreUsuario"],
+      include: {
+        model: Rol,
+        include: {
+          model: TipoRol,
+          attributes: ["tipoRol"],
+        },
+      },
+    });
+
+    // Formatea la respuesta para el frontend
+    const usuariosFormateados = usuarios.map((u) => ({
+      id: u.idUsuario,
+      username: u.nombreUsuario,
+      rol: u.Rol?.TipoRol?.tipoRol || "",
+    }));
+
+    res.json(usuariosFormateados);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener usuarios" });
+  }
 });
 
 // Crear usuario
 app.post("/api/usuarios", async (req, res) => {
   const { username, password, rol } = req.body;
   try {
-    const nuevo = await Usuario.create({ username, password, rol });
-    res.json({ id: nuevo.id, username: nuevo.username, rol: nuevo.rol });
+    // Busca el idRol correspondiente al tipoRol recibido
+    const rolDB = await Rol.findOne({
+      include: {
+        model: TipoRol,
+        where: { tipoRol: rol },
+      },
+    });
+    if (!rolDB) {
+      return res.status(400).json({ error: "Rol no válido" });
+    }
+    const nuevo = await Usuario.create({
+      nombreUsuario: username,
+      contrasena: password,
+      idRol: rolDB.idRol,
+    });
+    res.json({ id: nuevo.idUsuario, username: nuevo.nombreUsuario, rol });
   } catch (error) {
     res.status(400).json({ error: "No se pudo crear el usuario" });
   }
@@ -250,17 +329,32 @@ app.post("/api/usuarios", async (req, res) => {
 
 // Eliminar usuario
 app.delete("/api/usuarios/:id", async (req, res) => {
-  const { id } = req.params;
-  await Usuario.destroy({ where: { id } });
-  res.json({ success: true });
+  try {
+    await Usuario.destroy({ where: { idUsuario: req.params.id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: "No se pudo eliminar el usuario" });
+  }
 });
 
 // Actualizar usuario (nombre de usuario y rol)
 app.put("/api/usuarios/:id", async (req, res) => {
-  const { id } = req.params;
   const { username, rol } = req.body;
   try {
-    await Usuario.update({ username, rol }, { where: { id } });
+    // Busca el idRol correspondiente al tipoRol recibido
+    const rolDB = await Rol.findOne({
+      include: {
+        model: TipoRol,
+        where: { tipoRol: rol },
+      },
+    });
+    if (!rolDB) {
+      return res.status(400).json({ error: "Rol no válido" });
+    }
+    await Usuario.update(
+      { nombreUsuario: username, idRol: rolDB.idRol },
+      { where: { idUsuario: req.params.id } }
+    );
     res.json({ success: true });
   } catch (error) {
     res.status(400).json({ error: "No se pudo actualizar el usuario" });
@@ -269,10 +363,12 @@ app.put("/api/usuarios/:id", async (req, res) => {
 
 // Cambiar contraseña
 app.put("/api/usuarios/:id/password", async (req, res) => {
-  const { id } = req.params;
   const { password } = req.body;
   try {
-    await Usuario.update({ password }, { where: { id } });
+    await Usuario.update(
+      { contrasena: password },
+      { where: { idUsuario: req.params.id } }
+    );
     res.json({ success: true });
   } catch (error) {
     res.status(400).json({ error: "No se pudo cambiar la contraseña" });
@@ -563,6 +659,16 @@ app.get("/api/indumentaria/:id", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Error al obtener prenda" });
+  }
+});
+
+// Obtener todos los tipos de rol
+app.get("/api/tiporoles", async (req, res) => {
+  try {
+    const roles = await TipoRol.findAll({ attributes: ["tipoRol"] });
+    res.json(roles.map((r) => r.tipoRol));
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener roles" });
   }
 });
 
