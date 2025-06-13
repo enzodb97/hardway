@@ -115,7 +115,9 @@ const Indumentaria: React.FC = () => {
             <IonCol>
               <strong>Estado</strong>
             </IonCol>
-            {/* ...otros campos si quieres... */}
+            <IonCol>
+              <strong>Stock</strong>
+            </IonCol>
           </IonRow>
           {prendasFiltradas.map((item) => (
             <IonRow key={item.codigoIndumentaria}>
@@ -126,6 +128,7 @@ const Indumentaria: React.FC = () => {
               <IonCol>{item.categoria}</IonCol>
               <IonCol>{item.precio}</IonCol>
               <IonCol>{item.estado}</IonCol>
+              <IonCol>{item.cantidadIndumentaria}</IonCol> {/* <-- STOCK */}
             </IonRow>
           ))}
         </IonGrid>

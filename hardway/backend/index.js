@@ -986,6 +986,26 @@ app.get("/api/indumentaria", async (req, res) => {
       ],
     });
 
+    // Obtén todos los stocks y movimientos de una sola vez
+    const stocks = await Stock.findAll();
+    const movimientos = await MovimientoStock.findAll();
+
+    // Mapea el stock actual por codigoIndumentaria
+    const stockPorCodigo = {};
+    stocks.forEach((s) => {
+      const movimientosDeEsteStock = movimientos.filter(
+        (m) => m.idStock === s.idStock
+      );
+      const total = movimientosDeEsteStock.reduce(
+        (acc, m) => acc + (m.cantidad || 0),
+        0
+      );
+      if (!stockPorCodigo[s.codigoIndumentaria]) {
+        stockPorCodigo[s.codigoIndumentaria] = 0;
+      }
+      stockPorCodigo[s.codigoIndumentaria] += total;
+    });
+
     // Formatea la respuesta para el frontend
     const prendasFormateadas = prendas.map((p) => ({
       codigoIndumentaria: p.codigoIndumentaria,
@@ -997,7 +1017,8 @@ app.get("/api/indumentaria", async (req, res) => {
       precio: p.DetalleIndumentarium?.PrecioIndumentarium?.precio || "",
       estado:
         p.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "",
-      // Puedes agregar más campos si los necesitas
+      descripcionIndumentaria: p.DetalleIndumentarium?.descripcion || "", // si tienes campo de descripción
+      cantidadIndumentaria: stockPorCodigo[p.codigoIndumentaria] || 0, // <-- STOCK ACTUAL
     }));
 
     res.json(prendasFormateadas);
@@ -1240,3 +1261,24 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
       .json({ error: "Error al obtener pedido", detalle: error.message });
   }
 });
+
+const Stock = sequelize.define(
+  "Stock",
+  {
+    idStock: { type: DataTypes.STRING, primaryKey: true },
+    codigoIndumentaria: DataTypes.STRING,
+  },
+  { tableName: "stock", timestamps: false }
+);
+
+const MovimientoStock = sequelize.define(
+  "MovimientoStock",
+  {
+    idMovimientoStock: { type: DataTypes.STRING, primaryKey: true },
+    idStock: DataTypes.STRING,
+    fechaMovimiento: DataTypes.DATE,
+    cantidad: DataTypes.INTEGER,
+    observaciones: DataTypes.STRING,
+  },
+  { tableName: "movimientostock", timestamps: false }
+);
