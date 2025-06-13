@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButton, IonInput, IonItem, IonLabel, IonAlert, IonMenuButton
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButton,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonAlert,
+  IonMenuButton,
+  IonSelect,
+  IonSelectOption,
 } from "@ionic/react";
 import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
@@ -9,18 +20,13 @@ import axios from "axios";
 const camposIniciales = {
   codigoIndumentaria: "",
   descripcionIndumentaria: "",
-  color: "",
-  nombreTela: "",
-  nroTalle: "",
-  descripcionTalle: "",
-  categoria: "",
-  subCategoria: "",
-  precioVenta: "",
-  costoIndumentaria: "",
-  cantidadIndumentaria: "",
-  estado_actual: "",
-  codigoDetalle: "",
-  cantidadTotal: "",
+  idColor: "",
+  idTalle: "",
+  idTela: "",
+  idCategoria: "",
+  idEstado: "",
+  idPrecio: "",
+  precio: "", // <--- agrega esta línea
 };
 
 const AltaIndumentaria: React.FC = () => {
@@ -31,6 +37,45 @@ const AltaIndumentaria: React.FC = () => {
   const [alertMsg, setAlertMsg] = useState("");
   const esEdicion = Boolean(id);
 
+  const [colores, setColores] = useState<any[]>([]);
+  const [talles, setTalles] = useState<any[]>([]);
+  const [telas, setTelas] = useState<any[]>([]);
+  const [categorias, setCategorias] = useState<any[]>([]);
+  const [estados, setEstados] = useState<any[]>([]);
+  const [precios, setPrecios] = useState<any[]>([]);
+
+  useEffect(() => {
+    const cargarAuxiliares = async () => {
+      try {
+        const [
+          coloresRes,
+          tallesRes,
+          telasRes,
+          categoriasRes,
+          estadosRes,
+          preciosRes,
+        ] = await Promise.all([
+          axios.get("/api/colores"),
+          axios.get("/api/talles"),
+          axios.get("/api/telas"),
+          axios.get("/api/categorias"),
+          axios.get("/api/estados-indumentaria"),
+          axios.get("/api/precios"),
+        ]);
+        setColores(coloresRes.data);
+        setTalles(tallesRes.data);
+        setTelas(telasRes.data);
+        setCategorias(categoriasRes.data);
+        setEstados(estadosRes.data);
+        setPrecios(preciosRes.data);
+      } catch {
+        setAlertMsg("Error al cargar datos auxiliares.");
+        setShowAlert(true);
+      }
+    };
+    cargarAuxiliares();
+  }, []);
+
   useEffect(() => {
     if (esEdicion && id) {
       const cargarPrenda = async () => {
@@ -39,18 +84,14 @@ const AltaIndumentaria: React.FC = () => {
           setForm({
             codigoIndumentaria: res.data.codigoIndumentaria || "",
             descripcionIndumentaria: res.data.descripcionIndumentaria || "",
-            color: res.data.color || "",
-            nombreTela: res.data.nombreTela || "",
-            nroTalle: res.data.nroTalle || "",
-            descripcionTalle: res.data.descripcionTalle || "",
-            categoria: res.data.categoria || "",
-            subCategoria: res.data.subCategoria || "",
-            precioVenta: res.data.precioVenta?.toString() || "",
-            costoIndumentaria: res.data.costoIndumentaria?.toString() || "",
-            cantidadIndumentaria: res.data.cantidadIndumentaria?.toString() || "",
-            estado_actual: res.data.estado_actual?.toString() || "",
-            codigoDetalle: res.data.codigoDetalle || "",
-            cantidadTotal: res.data.cantidadTotal?.toString() || "",
+            idColor: res.data.idColor || "",
+            idTalle: res.data.idTalle || "",
+            idTela: res.data.idTela || "",
+            idCategoria: res.data.idCategoria || "",
+            idEstado: res.data.idEstado || "",
+            idPrecio: res.data.idPrecio || "",
+            precio:
+              res.data.precio || res.data.PrecioIndumentarium?.precio || "", // <-- Ajusta según tu backend
           });
         } catch (error) {
           setAlertMsg("Error al cargar la prenda.");
@@ -70,23 +111,42 @@ const AltaIndumentaria: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      let idPrecio = form.idPrecio;
+
+      // Si el usuario ingresó un precio manualmente (no seleccionó uno existente)
+      if (form.precio && !form.idPrecio) {
+        const precioRes = await axios.post("/api/precios", {
+          precio: form.precio,
+        });
+        idPrecio = precioRes.data.idPrecio;
+      }
+
+      // 1. Busca o crea el detalle
+      const detalleRes = await axios.post(
+        "/api/detalle-indumentaria/find-or-create",
+        {
+          idPrecio,
+          idCategoria: form.idCategoria,
+          idColor: form.idColor,
+          idTalle: form.idTalle,
+          idEstado: form.idEstado,
+          idTela: form.idTela,
+        }
+      );
+      const idDetalle = detalleRes.data.idDetalle;
+
+      // 2. Alta o edición
       if (esEdicion && id) {
         await axios.put(`/api/indumentaria/${id}`, {
-          ...form,
-          precioVenta: Number(form.precioVenta),
-          costoIndumentaria: Number(form.costoIndumentaria),
-          cantidadIndumentaria: Number(form.cantidadIndumentaria),
-          estado_actual: Number(form.estado_actual),
-          cantidadTotal: Number(form.cantidadTotal),
+          codigoIndumentaria: form.codigoIndumentaria,
+          descripcionIndumentaria: form.descripcionIndumentaria,
+          idDetalle,
         });
       } else {
         await axios.post("/api/indumentaria", {
-          ...form,
-          precioVenta: Number(form.precioVenta),
-          costoIndumentaria: Number(form.costoIndumentaria),
-          cantidadIndumentaria: Number(form.cantidadIndumentaria),
-          estado_actual: Number(form.estado_actual),
-          cantidadTotal: Number(form.cantidadTotal),
+          codigoIndumentaria: form.codigoIndumentaria,
+          descripcionIndumentaria: form.descripcionIndumentaria,
+          idDetalle,
         });
       }
       history.push("/indumentaria");
@@ -110,7 +170,9 @@ const AltaIndumentaria: React.FC = () => {
             <IonLabel position="floating">Código</IonLabel>
             <IonInput
               value={form.codigoIndumentaria}
-              onIonChange={(e) => handleChange("codigoIndumentaria", e.detail.value!)}
+              onIonChange={(e) =>
+                handleChange("codigoIndumentaria", e.detail.value!)
+              }
               required
             />
           </IonItem>
@@ -118,100 +180,176 @@ const AltaIndumentaria: React.FC = () => {
             <IonLabel position="floating">Descripción</IonLabel>
             <IonInput
               value={form.descripcionIndumentaria}
-              onIonChange={(e) => handleChange("descripcionIndumentaria", e.detail.value!)}
+              onIonChange={(e) =>
+                handleChange("descripcionIndumentaria", e.detail.value!)
+              }
               required
             />
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Color</IonLabel>
-            <IonInput
-              value={form.color}
-              onIonChange={(e) => handleChange("color", e.detail.value!)}
+            <IonSelect
+              value={form.idColor}
+              onIonChange={(e) => {
+                if (e.detail.value === "nuevo") {
+                  const nuevoColor = prompt("Ingrese el nuevo color:");
+                  if (nuevoColor) {
+                    axios
+                      .post("/api/colores", { color: nuevoColor })
+                      .then((res) => {
+                        setColores([...colores, res.data]);
+                        handleChange("idColor", res.data.idColor);
+                      });
+                  }
+                } else {
+                  handleChange("idColor", e.detail.value);
+                }
+              }}
               required
-            />
+            >
+              {colores.map((c) => (
+                <IonSelectOption key={c.idColor} value={c.idColor}>
+                  {c.color}
+                </IonSelectOption>
+              ))}
+              <IonSelectOption value="nuevo">
+                + Agregar nuevo color
+              </IonSelectOption>
+            </IonSelect>
           </IonItem>
           <IonItem>
-            <IonLabel position="floating">Nombre Tela</IonLabel>
-            <IonInput
-              value={form.nombreTela}
-              onIonChange={(e) => handleChange("nombreTela", e.detail.value!)}
-            />
+            <IonLabel position="floating">Talle</IonLabel>
+            <IonSelect
+              value={form.idTalle}
+              onIonChange={(e) => {
+                if (e.detail.value === "nuevo") {
+                  const nuevoTalle = prompt("Ingrese el nuevo talle:");
+                  if (nuevoTalle) {
+                    axios
+                      .post("/api/talles", { nroTalle: nuevoTalle })
+                      .then((res) => {
+                        setTalles([...talles, res.data]);
+                        handleChange("idTalle", res.data.idTalle);
+                      });
+                  }
+                } else {
+                  handleChange("idTalle", e.detail.value);
+                }
+              }}
+              required
+            >
+              {talles.map((t) => (
+                <IonSelectOption key={t.idTalle} value={t.idTalle}>
+                  {t.nroTalle}
+                </IonSelectOption>
+              ))}
+              <IonSelectOption value="nuevo">
+                + Agregar nuevo talle
+              </IonSelectOption>
+            </IonSelect>
           </IonItem>
           <IonItem>
-            <IonLabel position="floating">N° Talle</IonLabel>
-            <IonInput
-              value={form.nroTalle}
-              onIonChange={(e) => handleChange("nroTalle", e.detail.value!)}
-            />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Descripción Talle</IonLabel>
-            <IonInput
-              value={form.descripcionTalle}
-              onIonChange={(e) => handleChange("descripcionTalle", e.detail.value!)}
-            />
+            <IonLabel position="floating">Tela</IonLabel>
+            <IonSelect
+              value={form.idTela}
+              onIonChange={(e) => {
+                if (e.detail.value === "nuevo") {
+                  const nuevaTela = prompt("Ingrese el nuevo tipo de tela:");
+                  if (nuevaTela) {
+                    axios
+                      .post("/api/telas", { tipoTela: nuevaTela })
+                      .then((res) => {
+                        setTelas([...telas, res.data]);
+                        handleChange("idTela", res.data.idTela);
+                      });
+                  }
+                } else {
+                  handleChange("idTela", e.detail.value);
+                }
+              }}
+              required
+            >
+              {telas.map((t) => (
+                <IonSelectOption key={t.idTela} value={t.idTela}>
+                  {t.tipoTela}
+                </IonSelectOption>
+              ))}
+              <IonSelectOption value="nuevo">
+                + Agregar nueva tela
+              </IonSelectOption>
+            </IonSelect>
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Categoría</IonLabel>
-            <IonInput
-              value={form.categoria}
-              onIonChange={(e) => handleChange("categoria", e.detail.value!)}
-            />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Subcategoría</IonLabel>
-            <IonInput
-              value={form.subCategoria}
-              onIonChange={(e) => handleChange("subCategoria", e.detail.value!)}
-            />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Precio Venta</IonLabel>
-            <IonInput
-              type="number"
-              value={form.precioVenta}
-              onIonChange={(e) => handleChange("precioVenta", e.detail.value!)}
+            <IonSelect
+              value={form.idCategoria}
+              onIonChange={(e) => {
+                if (e.detail.value === "nuevo") {
+                  const nuevaCategoria = prompt("Ingrese la nueva categoría:");
+                  if (nuevaCategoria) {
+                    axios
+                      .post("/api/categorias", { categoria: nuevaCategoria })
+                      .then((res) => {
+                        setCategorias([...categorias, res.data]);
+                        handleChange("idCategoria", res.data.idCategoria);
+                      });
+                  }
+                } else {
+                  handleChange("idCategoria", e.detail.value);
+                }
+              }}
               required
-            />
+            >
+              {categorias.map((c) => (
+                <IonSelectOption key={c.idCategoria} value={c.idCategoria}>
+                  {c.categoria}
+                </IonSelectOption>
+              ))}
+              <IonSelectOption value="nuevo">
+                + Agregar nueva categoría
+              </IonSelectOption>
+            </IonSelect>
           </IonItem>
           <IonItem>
-            <IonLabel position="floating">Costo Indumentaria</IonLabel>
-            <IonInput
-              type="number"
-              value={form.costoIndumentaria}
-              onIonChange={(e) => handleChange("costoIndumentaria", e.detail.value!)}
-            />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Cantidad Indumentaria</IonLabel>
-            <IonInput
-              type="number"
-              value={form.cantidadIndumentaria}
-              onIonChange={(e) => handleChange("cantidadIndumentaria", e.detail.value!)}
+            <IonLabel position="floating">Estado</IonLabel>
+            <IonSelect
+              value={form.idEstado}
+              onIonChange={(e) => {
+                if (e.detail.value === "nuevo") {
+                  const nuevoEstado = prompt("Ingrese el nuevo estado:");
+                  if (nuevoEstado) {
+                    axios
+                      .post("/api/estados-indumentaria", {
+                        estadoIndumentaria: nuevoEstado,
+                      })
+                      .then((res) => {
+                        setEstados([...estados, res.data]);
+                        handleChange("idEstado", res.data.idEstado);
+                      });
+                  }
+                } else {
+                  handleChange("idEstado", e.detail.value);
+                }
+              }}
               required
-            />
+            >
+              {estados.map((e) => (
+                <IonSelectOption key={e.idEstado} value={e.idEstado}>
+                  {e.estadoIndumentaria}
+                </IonSelectOption>
+              ))}
+              <IonSelectOption value="nuevo">
+                + Agregar nuevo estado
+              </IonSelectOption>
+            </IonSelect>
           </IonItem>
           <IonItem>
-            <IonLabel position="floating">Estado Actual</IonLabel>
+            <IonLabel position="floating">Precio</IonLabel>
             <IonInput
               type="number"
-              value={form.estado_actual}
-              onIonChange={(e) => handleChange("estado_actual", e.detail.value!)}
-            />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Código Detalle</IonLabel>
-            <IonInput
-              value={form.codigoDetalle}
-              onIonChange={(e) => handleChange("codigoDetalle", e.detail.value!)}
-            />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Cantidad Total</IonLabel>
-            <IonInput
-              type="number"
-              value={form.cantidadTotal}
-              onIonChange={(e) => handleChange("cantidadTotal", e.detail.value!)}
+              value={form.precio}
+              onIonChange={(e) => handleChange("precio", e.detail.value!)}
+              required
             />
           </IonItem>
           <IonButton expand="block" type="submit">

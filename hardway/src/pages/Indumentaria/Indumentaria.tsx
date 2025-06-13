@@ -55,8 +55,8 @@ const Indumentaria: React.FC = () => {
   };
 
   // Filtro de búsqueda
-  const normalizar = (str: string | undefined) =>
-    (str ?? "")
+  const normalizar = (str: any) =>
+    String(str ?? "")
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
@@ -67,8 +67,7 @@ const Indumentaria: React.FC = () => {
       normalizar(item.nroTalle).includes(normalizar(busqueda)) ||
       normalizar(item.color).includes(normalizar(busqueda)) ||
       normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
-      (item.idIndumentaria &&
-        item.idIndumentaria.toString().includes(busqueda))
+      (item.idIndumentaria && item.idIndumentaria.toString().includes(busqueda))
   );
 
   return (
@@ -95,44 +94,38 @@ const Indumentaria: React.FC = () => {
         </IonItem>
         <IonGrid>
           <IonRow>
-            <IonCol><strong>ID</strong></IonCol>
-            <IonCol><strong>Código</strong></IonCol>
-            <IonCol><strong>Descripción</strong></IonCol>
-            <IonCol><strong>Color</strong></IonCol>
-            <IonCol><strong>Tela</strong></IonCol>
-            <IonCol><strong>Talle</strong></IonCol>
-            <IonCol><strong>Categoría</strong></IonCol>
-            <IonCol><strong>Precio</strong></IonCol>
-            <IonCol><strong>Cantidad</strong></IonCol>
-            <IonCol><strong>Acciones</strong></IonCol>
+            <IonCol>
+              <strong>Código</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Color</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Tela</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Talle</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Categoría</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Precio</strong>
+            </IonCol>
+            <IonCol>
+              <strong>Estado</strong>
+            </IonCol>
+            {/* ...otros campos si quieres... */}
           </IonRow>
           {prendasFiltradas.map((item) => (
-            <IonRow key={item.idIndumentaria}>
-              <IonCol>{item.idIndumentaria}</IonCol>
+            <IonRow key={item.codigoIndumentaria}>
               <IonCol>{item.codigoIndumentaria}</IonCol>
-              <IonCol>{item.descripcionIndumentaria}</IonCol>
               <IonCol>{item.color}</IonCol>
               <IonCol>{item.nombreTela}</IonCol>
               <IonCol>{item.nroTalle}</IonCol>
               <IonCol>{item.categoria}</IonCol>
-              <IonCol>{item.precioVenta}</IonCol>
-              <IonCol>{item.cantidadIndumentaria}</IonCol>
-              <IonCol>
-                <IonButton
-                  fill="clear"
-                  onClick={() =>
-                    history.push(`/alta-indumentaria/${item.idIndumentaria}`)
-                  }
-                >
-                  <IonIcon icon={pencil} color="primary" />
-                </IonButton>
-                <IonButton
-                  fill="clear"
-                  onClick={() => handleEliminar(item.idIndumentaria)}
-                >
-                  <IonIcon icon={trash} color="danger" />
-                </IonButton>
-              </IonCol>
+              <IonCol>{item.precio}</IonCol>
+              <IonCol>{item.estado}</IonCol>
             </IonRow>
           ))}
         </IonGrid>

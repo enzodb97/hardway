@@ -155,29 +155,109 @@ const Pedido = sequelize.define(
 const Indumentaria = sequelize.define(
   "Indumentaria",
   {
-    idIndumentaria: { type: Sequelize.INTEGER, primaryKey: true },
-    codigoIndumentaria: Sequelize.STRING,
-    descripcionIndumentaria: Sequelize.STRING,
-    color: Sequelize.STRING,
-    nombreTela: Sequelize.STRING,
-    nroTalle: Sequelize.STRING,
-    descripcionTalle: Sequelize.STRING,
-    categoria: Sequelize.STRING,
-    subCategoria: Sequelize.STRING,
-    precioVenta: Sequelize.DECIMAL(12, 2),
-    costoIndumentaria: Sequelize.DECIMAL(12, 2),
-    cantidadIndumentaria: Sequelize.INTEGER,
-    estado_actual: Sequelize.INTEGER,
-    codigoDetalle: Sequelize.STRING,
-    cantidadTotal: Sequelize.INTEGER,
-    SKU: Sequelize.STRING, // <--- YA ESTÁ
-    Rack: Sequelize.STRING, // <--- YA ESTÁ
+    codigoIndumentaria: { type: DataTypes.STRING, primaryKey: true },
+    idDetalle: DataTypes.INTEGER,
   },
-  {
-    tableName: "indumentaria",
-    timestamps: false,
-  }
+  { tableName: "Indumentaria", timestamps: false }
 );
+
+// Modelos auxiliares
+const Color = sequelize.define(
+  "Color",
+  {
+    idColor: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    color: DataTypes.STRING,
+  },
+  { tableName: "Color", timestamps: false }
+);
+
+const Talle = sequelize.define(
+  "Talle",
+  {
+    idTalle: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    nroTalle: DataTypes.INTEGER,
+  },
+  { tableName: "Talle", timestamps: false }
+);
+
+const Tela = sequelize.define(
+  "Tela",
+  {
+    idTela: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    tipoTela: DataTypes.STRING,
+  },
+  { tableName: "Tela", timestamps: false }
+);
+
+const CategoriaIndumentaria = sequelize.define(
+  "CategoriaIndumentaria",
+  {
+    idCategoria: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    categoria: DataTypes.STRING,
+  },
+  { tableName: "CategoriaIndumentaria", timestamps: false }
+);
+
+const EstadoIndumentaria = sequelize.define(
+  "EstadoIndumentaria",
+  {
+    idEstado: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    estadoIndumentaria: DataTypes.STRING,
+  },
+  { tableName: "EstadoIndumentaria", timestamps: false }
+);
+
+const PrecioIndumentaria = sequelize.define(
+  "PrecioIndumentaria",
+  {
+    idPrecio: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    precio: DataTypes.DOUBLE,
+  },
+  { tableName: "PrecioIndumentaria", timestamps: false }
+);
+
+const DetalleIndumentaria = sequelize.define(
+  "DetalleIndumentaria",
+  {
+    idDetalle: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    idPrecio: DataTypes.INTEGER,
+    idCategoria: DataTypes.INTEGER,
+    idColor: DataTypes.INTEGER,
+    idTalle: DataTypes.INTEGER,
+    idEstado: DataTypes.INTEGER,
+    idTela: DataTypes.INTEGER,
+  },
+  { tableName: "DetalleIndumentaria", timestamps: false }
+);
+
+DetalleIndumentaria.belongsTo(Color, { foreignKey: "idColor" });
+DetalleIndumentaria.belongsTo(Talle, { foreignKey: "idTalle" });
+DetalleIndumentaria.belongsTo(Tela, { foreignKey: "idTela" });
+DetalleIndumentaria.belongsTo(CategoriaIndumentaria, {
+  foreignKey: "idCategoria",
+});
+DetalleIndumentaria.belongsTo(PrecioIndumentaria, { foreignKey: "idPrecio" });
+DetalleIndumentaria.belongsTo(EstadoIndumentaria, { foreignKey: "idEstado" });
+
+// Relaciones
+Indumentaria.belongsTo(DetalleIndumentaria, { foreignKey: "idDetalle" });
+DetalleIndumentaria.belongsTo(PrecioIndumentaria, { foreignKey: "idPrecio" });
 
 // Modelo intermedio
 const PedidoIndumentaria = sequelize.define(
@@ -865,10 +945,39 @@ app.get("/api/usuarios/validate", async (req, res) => {
 // Obtener todas las prendas
 app.get("/api/indumentaria", async (req, res) => {
   try {
-    const prendas = await Indumentaria.findAll();
-    res.json(prendas);
+    const prendas = await Indumentaria.findAll({
+      include: [
+        {
+          model: DetalleIndumentaria,
+          include: [
+            { model: Color, attributes: ["color"] },
+            { model: Talle, attributes: ["nroTalle"] },
+            { model: Tela, attributes: ["tipoTela"] },
+            { model: CategoriaIndumentaria, attributes: ["categoria"] },
+            { model: PrecioIndumentaria, attributes: ["precio"] },
+            { model: EstadoIndumentaria, attributes: ["estadoIndumentaria"] },
+          ],
+        },
+      ],
+    });
+
+    // Formatea la respuesta para el frontend
+    const prendasFormateadas = prendas.map((p) => ({
+      codigoIndumentaria: p.codigoIndumentaria,
+      color: p.DetalleIndumentarium?.Color?.color || "",
+      nroTalle: p.DetalleIndumentarium?.Talle?.nroTalle || "",
+      nombreTela: p.DetalleIndumentarium?.Tela?.tipoTela || "",
+      categoria:
+        p.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "",
+      precio: p.DetalleIndumentarium?.PrecioIndumentarium?.precio || "",
+      estado:
+        p.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "",
+      // Puedes agregar más campos si los necesitas
+    }));
+
+    res.json(prendasFormateadas);
   } catch (error) {
-    console.error("Error en /api/indumentaria:", error); // <-- AGREGA ESTO
+    console.error("Error en /api/indumentaria:", error);
     res.status(500).json({ error: "Error al obtener indumentaria" });
   }
 });
@@ -970,6 +1079,26 @@ app.post("/api/barrios/find-or-create", async (req, res) => {
   });
 });
 
+// Buscar o crear detalle de indumentaria
+app.post("/api/detalle-indumentaria/find-or-create", async (req, res) => {
+  const { idPrecio, idCategoria, idColor, idTalle, idEstado, idTela } =
+    req.body;
+  let detalle = await DetalleIndumentaria.findOne({
+    where: { idPrecio, idCategoria, idColor, idTalle, idEstado, idTela },
+  });
+  if (!detalle) {
+    detalle = await DetalleIndumentaria.create({
+      idPrecio,
+      idCategoria,
+      idColor,
+      idTalle,
+      idEstado,
+      idTela,
+    });
+  }
+  res.json({ idDetalle: detalle.idDetalle });
+});
+
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -978,3 +1107,78 @@ app.use((err, req, res, next) => {
 
 // Inicia el servidor
 app.listen(3001, () => console.log("API corriendo en http://localhost:3001"));
+
+// Nuevos endpoints para obtener colores, talles, telas, categorías y estados de indumentaria
+app.get("/api/colores", async (req, res) => {
+  const colores = await Color.findAll();
+  res.json(colores);
+});
+
+app.get("/api/talles", async (req, res) => {
+  const talles = await Talle.findAll();
+  res.json(talles);
+});
+
+app.get("/api/telas", async (req, res) => {
+  const telas = await Tela.findAll();
+  res.json(telas);
+});
+
+app.get("/api/categorias", async (req, res) => {
+  const categorias = await CategoriaIndumentaria.findAll();
+  res.json(categorias);
+});
+
+app.get("/api/estados-indumentaria", async (req, res) => {
+  const estados = await EstadoIndumentaria.findAll();
+  res.json(estados);
+});
+
+app.post("/api/colores", async (req, res) => {
+  const { color } = req.body;
+  const nuevo = await Color.create({ color });
+  res.json(nuevo);
+});
+
+app.post("/api/talles", async (req, res) => {
+  const { nroTalle } = req.body;
+  const nuevo = await Talle.create({ nroTalle });
+  res.json(nuevo);
+});
+
+app.post("/api/telas", async (req, res) => {
+  const { tipoTela } = req.body;
+  const nuevo = await Tela.create({ tipoTela });
+  res.json(nuevo);
+});
+
+app.post("/api/categorias", async (req, res) => {
+  const { categoria } = req.body;
+  const nuevo = await CategoriaIndumentaria.create({ categoria });
+  res.json(nuevo);
+});
+
+app.post("/api/estados-indumentaria", async (req, res) => {
+  const { estadoIndumentaria } = req.body;
+  const nuevo = await EstadoIndumentaria.create({ estadoIndumentaria });
+  res.json(nuevo);
+});
+
+app.get("/api/precios", async (req, res) => {
+  try {
+    const precios = await PrecioIndumentaria.findAll();
+    res.json(precios);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener precios" });
+  }
+});
+
+app.post("/api/precios", async (req, res) => {
+  try {
+    const { precio } = req.body;
+    const nuevo = await PrecioIndumentaria.create({ precio });
+    res.json(nuevo);
+  } catch (error) {
+    res.status(500).json({ error: "Error al crear precio" });
+  }
+});
