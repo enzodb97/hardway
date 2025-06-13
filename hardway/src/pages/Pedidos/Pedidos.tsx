@@ -48,8 +48,8 @@ const Pedidos: React.FC = () => {
     busqueda === " " ? "" : busqueda
   ).sort(
     (a, b) =>
-      (b.fecha ? new Date(b.fecha).getTime() : 0) -
-      (a.fecha ? new Date(a.fecha).getTime() : 0)
+      (b.fechaPedido ? new Date(b.fechaPedido).getTime() : 0) -
+      (a.fechaPedido ? new Date(a.fechaPedido).getTime() : 0)
   );
   const pedidosAMostrar = mostrarTodos
     ? pedidosFiltrados
@@ -98,7 +98,9 @@ const Pedidos: React.FC = () => {
               pedido.Cliente.Persona.apellido ?? ""
             }`.trim()
           : "Sin cliente",
-        pedido.fecha || "",
+        pedido.fechaPedido
+          ? new Date(pedido.fechaPedido).toLocaleString("es-AR")
+          : "",
       ]),
       startY: 28,
       styles: { fontSize: 10 },
@@ -177,7 +179,9 @@ const Pedidos: React.FC = () => {
                           : "Sin cliente"}
                       </IonCol>
                       <IonCol className="text-center">
-                        {pedido.fecha || ""}
+                        {pedido.fechaPedido
+                          ? new Date(pedido.fechaPedido).toLocaleString("es-AR")
+                          : ""}
                       </IonCol>
                       <IonCol className="text-center">
                         <div className="action-buttons">

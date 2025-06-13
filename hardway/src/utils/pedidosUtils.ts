@@ -23,7 +23,7 @@ export interface Pedido {
   numeroPedido: string;
   idCliente: number;
   idEstado: number;
-  fecha?: string;
+  fechaPedido?: string; // <-- agrega esto
   EstadoPedido?: EstadoPedido;
   Cliente?: Cliente;
   // otros campos si necesitas
@@ -65,7 +65,7 @@ export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
   return pedidos.filter(
     (p) =>
       (p.numeroPedido && normalizar(p.numeroPedido).includes(filtroNorm)) ||
-      (p.fecha && normalizar(p.fecha).includes(filtroNorm)) ||
+      (p.fechaPedido && normalizar(p.fechaPedido).includes(filtroNorm)) ||
       (p.Cliente?.Persona?.nombre &&
         normalizar(p.Cliente.Persona.nombre).includes(filtroNorm)) ||
       (p.Cliente?.Persona?.apellido &&

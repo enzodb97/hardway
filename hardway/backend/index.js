@@ -136,6 +136,7 @@ const Pedido = sequelize.define(
     numeroPedido: { type: DataTypes.STRING, primaryKey: true },
     idCliente: DataTypes.INTEGER,
     idEstado: DataTypes.INTEGER,
+    fechaPedido: DataTypes.DATE, // <-- asegúrate de tener esto
   },
   { tableName: "pedido", timestamps: false }
 );
