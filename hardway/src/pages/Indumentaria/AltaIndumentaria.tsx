@@ -13,6 +13,7 @@ import {
   IonMenuButton,
   IonSelect,
   IonSelectOption,
+  IonCol,
 } from "@ionic/react";
 import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
@@ -226,7 +227,7 @@ const AltaIndumentaria: React.FC = () => {
                   const nuevoTalle = prompt("Ingrese el nuevo talle:");
                   if (nuevoTalle) {
                     axios
-                      .post("/api/talles", { nroTalle: nuevoTalle })
+                      .post("/api/talles", { talle: nuevoTalle })
                       .then((res) => {
                         setTalles([...talles, res.data]);
                         handleChange("idTalle", res.data.idTalle);
@@ -240,7 +241,7 @@ const AltaIndumentaria: React.FC = () => {
             >
               {talles.map((t) => (
                 <IonSelectOption key={t.idTalle} value={t.idTalle}>
-                  {t.nroTalle}
+                  {t.talle}
                 </IonSelectOption>
               ))}
               <IonSelectOption value="nuevo">

@@ -64,7 +64,7 @@ const Indumentaria: React.FC = () => {
   const prendasFiltradas = indumentaria.filter(
     (item) =>
       normalizar(item.descripcionIndumentaria).includes(normalizar(busqueda)) ||
-      normalizar(item.nroTalle).includes(normalizar(busqueda)) ||
+      normalizar(item.talle).includes(normalizar(busqueda)) ||
       normalizar(item.color).includes(normalizar(busqueda)) ||
       normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
       (item.idIndumentaria && item.idIndumentaria.toString().includes(busqueda))
@@ -122,7 +122,7 @@ const Indumentaria: React.FC = () => {
               <IonCol>{item.codigoIndumentaria}</IonCol>
               <IonCol>{item.color}</IonCol>
               <IonCol>{item.nombreTela}</IonCol>
-              <IonCol>{item.nroTalle}</IonCol>
+              <IonCol>{item.talle}</IonCol>
               <IonCol>{item.categoria}</IonCol>
               <IonCol>{item.precio}</IonCol>
               <IonCol>{item.estado}</IonCol>

@@ -175,7 +175,7 @@ const Talle = sequelize.define(
   "Talle",
   {
     idTalle: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    nroTalle: DataTypes.INTEGER,
+    talle: DataTypes.STRING, // <-- CAMBIA de nroTalle a talle
   },
   { tableName: "Talle", timestamps: false }
 );
@@ -951,7 +951,7 @@ app.get("/api/indumentaria", async (req, res) => {
           model: DetalleIndumentaria,
           include: [
             { model: Color, attributes: ["color"] },
-            { model: Talle, attributes: ["nroTalle"] },
+            { model: Talle, attributes: ["talle"] },
             { model: Tela, attributes: ["tipoTela"] },
             { model: CategoriaIndumentaria, attributes: ["categoria"] },
             { model: PrecioIndumentaria, attributes: ["precio"] },
@@ -965,7 +965,7 @@ app.get("/api/indumentaria", async (req, res) => {
     const prendasFormateadas = prendas.map((p) => ({
       codigoIndumentaria: p.codigoIndumentaria,
       color: p.DetalleIndumentarium?.Color?.color || "",
-      nroTalle: p.DetalleIndumentarium?.Talle?.nroTalle || "",
+      talle: p.DetalleIndumentarium?.Talle?.talle || "",
       nombreTela: p.DetalleIndumentarium?.Tela?.tipoTela || "",
       categoria:
         p.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "",
@@ -1141,8 +1141,8 @@ app.post("/api/colores", async (req, res) => {
 });
 
 app.post("/api/talles", async (req, res) => {
-  const { nroTalle } = req.body;
-  const nuevo = await Talle.create({ nroTalle });
+  const { talle } = req.body; // <-- CAMBIA de nroTalle a talle
+  const nuevo = await Talle.create({ talle });
   res.json(nuevo);
 });
 
