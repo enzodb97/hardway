@@ -32,11 +32,10 @@ type PedidoInput = {
 };
 
 const estadoInicial = {
-  descripcion: "",
-  fecha: new Date().toISOString().slice(0, 16).replace("T", " "),
-  estado: "",
-  clienteId: "",
+  fechaPedido: new Date().toISOString().slice(0, 16).replace("T", " "),
+  idCliente: "",
   clienteNombre: "",
+  idEstado: "", // si quieres permitir elegir estado
 };
 
 const AltaPedido: React.FC = () => {
@@ -66,7 +65,7 @@ const AltaPedido: React.FC = () => {
     if (!esEdicion) {
       setForm({
         ...estadoInicial,
-        fecha: new Date().toISOString().slice(0, 16).replace("T", " "),
+        fechaPedido: new Date().toISOString().slice(0, 16).replace("T", " "),
       });
       setPrendasSeleccionadas([]);
     }
@@ -85,11 +84,10 @@ const AltaPedido: React.FC = () => {
         try {
           const res = await axios.get(`/api/pedidos/${id}`);
           setForm({
-            descripcion: res.data.descripcion,
-            fecha: res.data.fecha,
-            estado: res.data.estado,
-            clienteId: res.data.clienteId?.toString() || "",
+            fechaPedido: res.data.fechaPedido,
+            idCliente: res.data.idCliente?.toString() || "",
             clienteNombre: res.data.Cliente?.nombre || "",
+            idEstado: res.data.idEstado?.toString() || "",
           });
           // Cargar prendas asociadas al pedido
           if (res.data.Indumentaria) {
@@ -149,7 +147,7 @@ const AltaPedido: React.FC = () => {
   // --- Envío del formulario ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.clienteId) {
+    if (!form.idCliente) {
       setAlertMsg("Debe agregar un cliente");
       setShowAlert(true);
       return;
@@ -160,23 +158,18 @@ const AltaPedido: React.FC = () => {
       return;
     }
     try {
-      const pedido: PedidoInput = {
-        ...form,
-        estado: "En Curso", // Estado por defecto
-        clienteId: Number(form.clienteId),
-        indumentaria: prendasSeleccionadas.map(
-          ({ idIndumentaria, cantidad }) => ({
-            idIndumentaria,
-            cantidad,
-          })
-        ),
+      const pedido = {
+        fechaPedido: form.fechaPedido,
+        idCliente: Number(form.idCliente),
+        idEstado: 1, // o el valor que corresponda
+        // agrega aquí los detalles del pedido si tu backend los espera
+        prendas: prendasSeleccionadas.map(({ idIndumentaria, cantidad }) => ({
+          idIndumentaria,
+          cantidad,
+        })),
       };
-      if (esEdicion && id) {
-        await editarPedido(Number(id), pedido);
-      } else {
-        await crearPedido(pedido);
-      }
-      setShowSuccess(true); // Mostrar mensaje de éxito
+      await crearPedido(pedido);
+      setShowSuccess(true);
     } catch (error) {
       setAlertMsg("Error al guardar el pedido.");
       setShowAlert(true);
@@ -184,9 +177,10 @@ const AltaPedido: React.FC = () => {
   };
 
   // --- Filtro de clientes ---
-  const clientesFiltrados = clientes.filter((c) => {
+  const clientesFiltrados = (clientes ?? []).filter((c) => {
+    if (!c || typeof c.nombre !== "string") return false; // Evita elementos undefined o sin nombre string
     const normalizar = (str: string) =>
-      str
+      (str ?? "")
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
@@ -202,56 +196,32 @@ const AltaPedido: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
-          <IonTitle>{esEdicion ? "Editar Pedido" : "Nuevo Pedido"}</IonTitle>
+          <IonTitle>Nuevo Pedido</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="alta-pedido-content">
         <form className="alta-pedido-form" onSubmit={handleSubmit}>
           <div className="titulo">
             <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
-            <IonTitle>
-              {esEdicion
-                ? `Editar Pedido${id ? ` #${id}` : ""}`
-                : "Registrar Pedido"}
-            </IonTitle>
+            <IonTitle>Registrar Pedido</IonTitle>
           </div>
-          {/*}
-          <IonItem>
-            <IonLabel position="floating">Descripción</IonLabel>
-            <IonInput
-              value={form.descripcion}
-              onIonChange={(e) =>
-                setForm({ ...form, descripcion: e.detail.value! })
-              }
-            />
-          </IonItem>*/}
           <IonItem>
             <IonLabel position="floating">Fecha y hora</IonLabel>
-            <IonInput value={form.fecha} readonly />
+            <IonInput value={form.fechaPedido} readonly />
           </IonItem>
           <IonItem>
             <IonLabel position="floating">Cliente ID</IonLabel>
-            <IonInput value={form.clienteId} readonly />
+            <IonInput value={form.idCliente} readonly />
           </IonItem>
-          {/* --- Cliente --- */}
-          {esEdicion ? (
-            // Si es edición, solo mostrar el cliente como texto no editable
-            <IonItem>
-              <IonLabel position="floating">Cliente</IonLabel>
-              <IonInput value={form.clienteNombre} readonly />
-            </IonItem>
-          ) : (
-            // Si es alta, permitir seleccionar cliente
-            <IonItem button onClick={() => setShowClienteModal(true)}>
-              <IonLabel position="floating">Cliente</IonLabel>
-              <IonInput
-                value={form.clienteNombre}
-                placeholder="Seleccionar cliente"
-                readonly
-                required
-              />
-            </IonItem>
-          )}
+          <IonItem button onClick={() => setShowClienteModal(true)}>
+            <IonLabel position="floating">Cliente</IonLabel>
+            <IonInput
+              value={form.clienteNombre}
+              placeholder="Seleccionar cliente"
+              readonly
+              required
+            />
+          </IonItem>
           {/* --- Prendas seleccionadas --- */}
           <IonList>
             {prendasSeleccionadas.map((prenda, idx) => (
@@ -382,7 +352,7 @@ const AltaPedido: React.FC = () => {
                   onClick={() => {
                     setForm({
                       ...form,
-                      clienteId: c.id.toString(),
+                      idCliente: c.id.toString(),
                       clienteNombre: c.nombre,
                     });
                     setShowClienteModal(false);
@@ -419,9 +389,11 @@ const AltaPedido: React.FC = () => {
             <IonList class="indumentaria-list">
               {indumentaria
                 .filter((i) => {
-                  const filtro = filtroIndumentaria.toLowerCase();
+                  const filtro = (filtroIndumentaria ?? "").toLowerCase();
                   return (
-                    i.descripcionIndumentaria.toLowerCase().includes(filtro) ||
+                    (i.descripcionIndumentaria ?? "")
+                      .toLowerCase()
+                      .includes(filtro) ||
                     (i.codigoIndumentaria &&
                       i.codigoIndumentaria.toLowerCase().includes(filtro))
                   );
