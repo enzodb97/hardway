@@ -746,7 +746,15 @@ app.get("/api/pedidos", async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
       include: [
-        { model: Cliente },
+        {
+          model: Cliente,
+          include: [
+            {
+              model: Persona,
+              attributes: ["nombre", "apellido"],
+            },
+          ],
+        },
         { model: EstadoPedido },
         {
           model: DetallePedido,
@@ -1205,7 +1213,15 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
     const pedido = await Pedido.findOne({
       where: { numeroPedido: req.params.numeroPedido },
       include: [
-        { model: Cliente },
+        {
+          model: Cliente,
+          include: [
+            {
+              model: Persona,
+              attributes: ["nombre", "apellido"],
+            },
+          ],
+        },
         { model: EstadoPedido },
         {
           model: DetallePedido,

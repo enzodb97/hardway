@@ -157,7 +157,7 @@ const Pedidos: React.FC = () => {
                       <strong>Cliente</strong>
                     </IonCol>
                     <IonCol className="text-center">
-                      <strong>Fecha</strong>
+                      <strong>Fecha y Hora</strong>
                     </IonCol>
                     <IonCol className="text-center">
                       <strong>Acciones</strong>
