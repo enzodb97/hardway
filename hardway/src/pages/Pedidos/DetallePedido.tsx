@@ -31,13 +31,10 @@ const DetallePedido: React.FC = () => {
         const res = await axios.get(`/api/pedidos/${id}`);
         setPedido(res.data);
         setPrendas(
-          res.data.Indumentaria?.map((prenda: any) => ({
-            nombre: prenda.descripcionIndumentaria,
-            referencia: prenda.codigoIndumentaria,
-            sku: prenda.SKU || "-", // <-- SKU directo de la base
-            categoria: prenda.categoria || "-",
-            rack: prenda.Rack || "-", // <-- Rack directo de la base
-            cantidad: prenda.PedidoIndumentaria?.cantidad ?? "-",
+          res.data.DetallePedidos?.map((detalle: any) => ({
+            nombre: detalle.Indumentaria?.descripcionIndumentaria,
+            referencia: detalle.Indumentaria?.codigoIndumentaria,
+            cantidad: detalle.cantidad,
           })) || []
         );
       } catch (error) {

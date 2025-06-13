@@ -133,32 +133,43 @@ const TipoRol = sequelize.define(
 const Pedido = sequelize.define(
   "Pedido",
   {
-    descripcion: DataTypes.STRING,
-    fecha: DataTypes.DATE,
-    estado: DataTypes.STRING,
-    clienteId: {
-      type: DataTypes.INTEGER,
-      field: "cliente_id",
-      references: {
-        model: "clientes",
-        key: "id",
-      },
-    },
+    numeroPedido: { type: DataTypes.STRING, primaryKey: true },
+    idCliente: DataTypes.INTEGER,
+    idEstado: DataTypes.INTEGER,
   },
-  {
-    tableName: "pedidos",
-    timestamps: false,
-  }
+  { tableName: "pedido", timestamps: false }
 );
 
-// Modelo Sequelize (ajusta los campos según tu modelo real)
+// DetallePedido
+const DetallePedido = sequelize.define(
+  "DetallePedido",
+  {
+    idDetallePedido: { type: DataTypes.STRING, primaryKey: true },
+    numeroPedido: DataTypes.STRING,
+    codigoIndumentaria: DataTypes.STRING,
+    cantidad: DataTypes.INTEGER,
+  },
+  { tableName: "detallepedido", timestamps: false }
+);
+
+// EstadoPedido
+const EstadoPedido = sequelize.define(
+  "EstadoPedido",
+  {
+    idEstado: { type: DataTypes.INTEGER, primaryKey: true },
+    tipoEstado: DataTypes.STRING,
+  },
+  { tableName: "estadopedido", timestamps: false }
+);
+
+// Indumentaria (ya lo tienes, solo asegúrate de que el nombre y PK coincidan)
 const Indumentaria = sequelize.define(
   "Indumentaria",
   {
     codigoIndumentaria: { type: DataTypes.STRING, primaryKey: true },
     idDetalle: DataTypes.INTEGER,
   },
-  { tableName: "Indumentaria", timestamps: false }
+  { tableName: "indumentaria", timestamps: false }
 );
 
 // Modelos auxiliares
@@ -287,8 +298,12 @@ Indumentaria.belongsToMany(Pedido, {
 });
 
 // Relación
-Pedido.belongsTo(Cliente, { foreignKey: "clienteId" });
-Cliente.hasMany(Pedido, { foreignKey: "clienteId" });
+Pedido.belongsTo(Cliente, { foreignKey: "idCliente" });
+Pedido.belongsTo(EstadoPedido, { foreignKey: "idEstado" });
+Pedido.hasMany(DetallePedido, { foreignKey: "numeroPedido" });
+
+DetallePedido.belongsTo(Pedido, { foreignKey: "numeroPedido" });
+DetallePedido.belongsTo(Indumentaria, { foreignKey: "codigoIndumentaria" });
 
 // Relaciones
 Usuario.belongsTo(Rol, { foreignKey: "idRol" });
@@ -731,9 +746,10 @@ app.get("/api/pedidos", async (req, res) => {
     const pedidos = await Pedido.findAll({
       include: [
         { model: Cliente },
+        { model: EstadoPedido },
         {
-          model: Indumentaria,
-          through: { attributes: ["cantidad"] },
+          model: DetallePedido,
+          include: [{ model: Indumentaria }],
         },
       ],
     });
@@ -1180,5 +1196,30 @@ app.post("/api/precios", async (req, res) => {
     res.json(nuevo);
   } catch (error) {
     res.status(500).json({ error: "Error al crear precio" });
+  }
+});
+
+app.get("/api/pedidos/:numeroPedido", async (req, res) => {
+  try {
+    const pedido = await Pedido.findOne({
+      where: { numeroPedido: req.params.numeroPedido },
+      include: [
+        { model: Cliente },
+        { model: EstadoPedido },
+        {
+          model: DetallePedido,
+          include: [{ model: Indumentaria }],
+        },
+      ],
+    });
+    if (pedido) {
+      res.json(pedido);
+    } else {
+      res.status(404).json({ error: "Pedido no encontrado" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al obtener pedido", detalle: error.message });
   }
 });

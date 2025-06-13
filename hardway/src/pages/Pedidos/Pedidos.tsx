@@ -1,5 +1,5 @@
 // src/pages/Pedidos/Pedidos.tsx
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   IonPage,
   IonHeader,
@@ -24,7 +24,6 @@ import {
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 import { pencil, trash, documentText } from "ionicons/icons";
-import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "./Pedidos.css";
@@ -37,14 +36,9 @@ const Pedidos: React.FC = () => {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const history = useHistory();
 
-  // Función para cargar pedidos
-  const cargarPedidos = async () => {
-    const res = await axios.get("/api/pedidos");
-    setPedidos(res.data);
-  };
-
+  // Cargar pedidos al entrar a la vista
   useIonViewWillEnter(() => {
-    cargarPedidos();
+    cargarPedidos().then(setPedidos);
   });
 
   // Ordena los pedidos por fecha descendente (los más recientes primero)
@@ -52,7 +46,11 @@ const Pedidos: React.FC = () => {
   const pedidosFiltrados = filtrarPedidos(
     pedidos,
     busqueda === " " ? "" : busqueda
-  ).sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+  ).sort(
+    (a, b) =>
+      (b.fecha ? new Date(b.fecha).getTime() : 0) -
+      (a.fecha ? new Date(a.fecha).getTime() : 0)
+  );
   const pedidosAMostrar = mostrarTodos
     ? pedidosFiltrados
     : busqueda.trim() === ""
@@ -60,13 +58,13 @@ const Pedidos: React.FC = () => {
     : pedidosFiltrados;
 
   // Eliminar pedido y recargar lista
-  const handleEliminarPedido = async (id: number) => {
+  const handleEliminarPedido = async (numeroPedido: string) => {
     if (window.confirm("¿Seguro que desea eliminar este pedido?")) {
       try {
-        await eliminarPedido(id);
+        await eliminarPedido(numeroPedido);
         setShowDeleteSuccess(true);
         // Recarga la lista después de eliminar
-        cargarPedidos();
+        cargarPedidos().then(setPedidos);
       } catch (error: any) {
         setAlertMsg("Error al eliminar el pedido.");
         setShowAlert(true);
@@ -93,11 +91,14 @@ const Pedidos: React.FC = () => {
     autoTable(doc, {
       head: [["ID", "Observación", "Estado", "Cliente", "Fecha"]],
       body: pedidosAMostrar.map((pedido) => [
-        pedido.id,
-        pedido.descripcion,
-        pedido.estado,
-        pedido.Cliente?.nombre || "Sin cliente",
-        pedido.fecha,
+        pedido.numeroPedido,
+        pedido.EstadoPedido?.tipoEstado || "Sin estado",
+        pedido.Cliente?.Persona
+          ? `${pedido.Cliente.Persona.nombre} ${
+              pedido.Cliente.Persona.apellido ?? ""
+            }`.trim()
+          : "Sin cliente",
+        pedido.fecha || "",
       ]),
       startY: 28,
       styles: { fontSize: 10 },
@@ -122,7 +123,7 @@ const Pedidos: React.FC = () => {
             <IonCol size="12">
               <div className="pedidos-buscador">
                 <IonInput
-                  placeholder="Buscar por cliente, fecha o ID de pedido"
+                  placeholder="Buscar por cliente, fecha o N° de pedido"
                   value={busqueda === " " ? "" : busqueda}
                   onIonChange={(e) => setBusqueda(e.detail.value!)}
                   clearInput
@@ -145,10 +146,7 @@ const Pedidos: React.FC = () => {
                 <IonGrid className="pedidos-table">
                   <IonRow className="table-header">
                     <IonCol className="text-center">
-                      <strong>ID</strong>
-                    </IonCol>
-                    <IonCol className="text-center">
-                      <strong>Observacion</strong>
+                      <strong>N° Pedido</strong>
                     </IonCol>
                     <IonCol className="text-center">
                       <strong>Estado</strong>
@@ -164,29 +162,40 @@ const Pedidos: React.FC = () => {
                     </IonCol>
                   </IonRow>
                   {pedidosAMostrar.map((pedido) => (
-                    <IonRow key={pedido.id} className="table-row">
-                      <IonCol className="text-center">{pedido.id}</IonCol>
+                    <IonRow key={pedido.numeroPedido} className="table-row">
                       <IonCol className="text-center">
-                        {pedido.descripcion}
+                        {pedido.numeroPedido}
                       </IonCol>
-                      <IonCol className="text-center">{pedido.estado}</IonCol>
                       <IonCol className="text-center">
-                        {pedido.Cliente?.nombre || "Sin cliente"}
+                        {pedido.EstadoPedido?.tipoEstado || "Sin estado"}
                       </IonCol>
-                      <IonCol className="text-center">{pedido.fecha}</IonCol>
+                      <IonCol className="text-center">
+                        {pedido.Cliente?.Persona
+                          ? `${pedido.Cliente.Persona.nombre} ${
+                              pedido.Cliente.Persona.apellido ?? ""
+                            }`.trim()
+                          : "Sin cliente"}
+                      </IonCol>
+                      <IonCol className="text-center">
+                        {pedido.fecha || ""}
+                      </IonCol>
                       <IonCol className="text-center">
                         <div className="action-buttons">
                           <IonButton
                             fill="clear"
                             onClick={() =>
-                              history.push(`/alta-pedido/${pedido.id}`)
+                              history.push(
+                                `/alta-pedido/${pedido.numeroPedido}`
+                              )
                             }
                           >
                             <IonIcon icon={pencil} color="primary" />
                           </IonButton>
                           <IonButton
                             fill="clear"
-                            onClick={() => handleEliminarPedido(pedido.id)}
+                            onClick={() =>
+                              handleEliminarPedido(pedido.numeroPedido)
+                            }
                             className="delete-btn"
                           >
                             <IonIcon icon={trash} color="danger" />
@@ -194,7 +203,9 @@ const Pedidos: React.FC = () => {
                           <IonButton
                             fill="clear"
                             onClick={() =>
-                              history.push(`/detalle-pedido/${pedido.id}`)
+                              history.push(
+                                `/detalle-pedido/${pedido.numeroPedido}`
+                              )
                             }
                             className="detail-btn"
                           >

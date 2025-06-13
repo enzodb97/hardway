@@ -1,21 +1,32 @@
 // src/utils/pedidosUtils.ts
 import axios from "axios";
-import { Cliente } from "../context/ClientesContext";
 
-export interface Pedido {
-  id: number;
-  descripcion: string;
-  fecha: string;
-  estado: string;
-  clienteId: number;
-  Cliente?: Cliente;
+// Interfaces según tu backend
+export interface Persona {
+  nombre: string;
+  apellido: string;
+  // otros campos si necesitas
 }
 
-export interface PedidoForm {
-  descripcion: string;
-  fecha: string;
-  estado: string;
-  clienteId: string;
+export interface Cliente {
+  idCliente: number;
+  Persona?: Persona;
+  // otros campos si necesitas
+}
+
+export interface EstadoPedido {
+  idEstado: number;
+  tipoEstado: string;
+}
+
+export interface Pedido {
+  numeroPedido: string;
+  idCliente: number;
+  idEstado: number;
+  fecha?: string;
+  EstadoPedido?: EstadoPedido;
+  Cliente?: Cliente;
+  // otros campos si necesitas
 }
 
 // Obtener todos los pedidos
@@ -25,33 +36,24 @@ export const cargarPedidos = async (): Promise<Pedido[]> => {
 };
 
 // Crear un pedido
-export const crearPedido = async (pedido: Omit<Pedido, "id">) => {
+export const crearPedido = async (pedido: Omit<Pedido, "numeroPedido">) => {
   return await axios.post("/api/pedidos", pedido);
 };
 
-// Eliminar un pedido por ID
-export const eliminarPedido = async (id: number) => {
-  await axios.delete(`/api/pedidos/${id}`);
+// Eliminar un pedido por numeroPedido
+export const eliminarPedido = async (numeroPedido: string) => {
+  await axios.delete(`/api/pedidos/${numeroPedido}`);
 };
 
-// Editar un pedido por ID
-export const editarPedido = async (id: number, datos: any) => {
-  await axios.put(`/api/pedidos/${id}`, datos);
+// Editar un pedido por numeroPedido
+export const editarPedido = async (numeroPedido: string, datos: any) => {
+  await axios.put(`/api/pedidos/${numeroPedido}`, datos);
 };
 
-// Validar campos obligatorios de un pedido
-export function validarCamposPedido(form: PedidoForm): string | null {
-  if (!form.descripcion.trim()) return "La descripción es obligatoria.";
-  if (!form.fecha) return "La fecha es obligatoria.";
-  if (!form.clienteId) return "Debe seleccionar un cliente.";
-  return null;
-}
-
-// Filtrar pedidos por texto (cliente, fecha, id)
+// Filtrar pedidos por texto (cliente, fecha, numeroPedido)
 export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
   if (!filtro) return pedidos;
 
-  // Normaliza para ignorar tildes/acentos y pasa a minúsculas
   const normalizar = (str: string) =>
     str
       .toLowerCase()
@@ -62,56 +64,11 @@ export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
 
   return pedidos.filter(
     (p) =>
-      (p.descripcion && normalizar(p.descripcion).includes(filtroNorm)) ||
-      (p.id && p.id.toString().includes(filtroNorm)) ||
+      (p.numeroPedido && normalizar(p.numeroPedido).includes(filtroNorm)) ||
       (p.fecha && normalizar(p.fecha).includes(filtroNorm)) ||
-      (p.Cliente?.nombre &&
-        normalizar(p.Cliente.nombre).includes(filtroNorm)) ||
-      (p.Cliente?.numeroDocumento &&
-        p.Cliente.numeroDocumento.toString().includes(filtroNorm))
+      (p.Cliente?.Persona?.nombre &&
+        normalizar(p.Cliente.Persona.nombre).includes(filtroNorm)) ||
+      (p.Cliente?.Persona?.apellido &&
+        normalizar(p.Cliente.Persona.apellido).includes(filtroNorm))
   );
-}
-
-/**
- * Devuelve la fecha y hora actual en formato YYYY-MM-DD HH:mm:ss para Argentina (GMT-3)
- */
-export function obtenerFechaHoraArgentina(): string {
-  const now = new Date();
-  // Obtener los componentes en UTC y restar 3 horas para Argentina
-  const year = now.getUTCFullYear();
-  const month = now.getUTCMonth() + 1;
-  const day = now.getUTCDate();
-  let hour = now.getUTCHours() - 3;
-  // Ajustar día si la hora es negativa
-  let adjDay = day;
-  if (hour < 0) {
-    hour += 24;
-    adjDay -= 1;
-  }
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${year}-${pad(month)}-${pad(adjDay)} ${pad(hour)}:${pad(
-    now.getUTCMinutes()
-  )}:${pad(now.getUTCSeconds())}`;
-}
-
-/**
- * Devuelve la lista de clientes filtrada por nombre, ignorando tildes/acentos.
- */
-export function filtrarClientesPorNombre(
-  clientes: Cliente[],
-  filtro: string
-): Cliente[] {
-  const normalizado = filtro
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-
-  return clientes.filter((c) => {
-    const nombreNormalizado = c.nombre
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    const dni = c.numeroDocumento ? c.numeroDocumento.toString() : "";
-    return nombreNormalizado.includes(normalizado) || dni.includes(normalizado);
-  });
 }
