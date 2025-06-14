@@ -1030,10 +1030,40 @@ app.get("/api/indumentaria", async (req, res) => {
 
 // Crear nueva prenda
 app.post("/api/indumentaria", async (req, res) => {
+  console.log("Datos recibidos en alta indumentaria:", req.body); // <-- agrega esto
+  // ...resto del código...
+  const t = await sequelize.transaction();
   try {
-    const prenda = await Indumentaria.create(req.body);
+    // 1. Crea la prenda
+    const prenda = await Indumentaria.create(req.body, { transaction: t });
+
+    // 2. Crea el registro en stock
+    const stock = await Stock.create(
+      {
+        idStock: "STK" + Math.random().toString().slice(2, 8), // Genera un idStock simple
+        codigoIndumentaria: prenda.codigoIndumentaria,
+      },
+      { transaction: t }
+    );
+
+    // 3. Si se envió cantidad inicial, crea el movimiento de stock
+    if (req.body.cantidad && Number(req.body.cantidad) > 0) {
+      await MovimientoStock.create(
+        {
+          idMovimientoStock: "MOV-INIT-" + Math.random().toString().slice(2, 8),
+          idStock: stock.idStock,
+          fechaMovimiento: new Date(),
+          cantidad: Number(req.body.cantidad),
+          observaciones: "Carga Inicial de Stock",
+        },
+        { transaction: t }
+      );
+    }
+
+    await t.commit();
     res.json(prenda);
   } catch (error) {
+    await t.rollback();
     res.status(500).json({ error: "Error al crear prenda" });
   }
 });

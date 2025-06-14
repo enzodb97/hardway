@@ -118,6 +118,9 @@ const Indumentaria: React.FC = () => {
             <IonCol>
               <strong>Stock</strong>
             </IonCol>
+            <IonCol>
+              <strong>Acciones</strong>
+            </IonCol>
           </IonRow>
           {prendasFiltradas.map((item) => (
             <IonRow key={item.codigoIndumentaria}>
@@ -128,7 +131,24 @@ const Indumentaria: React.FC = () => {
               <IonCol>{item.categoria}</IonCol>
               <IonCol>{item.precio}</IonCol>
               <IonCol>{item.estado}</IonCol>
-              <IonCol>{item.cantidadIndumentaria}</IonCol> {/* <-- STOCK */}
+              <IonCol>{item.cantidadIndumentaria}</IonCol>
+              <IonCol>
+                <IonButton
+                  fill="clear"
+                  onClick={() =>
+                    history.push(`/alta-indumentaria/${item.codigoIndumentaria}`)
+                  }
+                >
+                  <IonIcon icon={pencil} color="primary" />
+                </IonButton>
+                <IonButton
+                  fill="clear"
+                  color="danger"
+                  onClick={() => handleEliminar(item.codigoIndumentaria)}
+                >
+                  <IonIcon icon={trash} />
+                </IonButton>
+              </IonCol>
             </IonRow>
           ))}
         </IonGrid>

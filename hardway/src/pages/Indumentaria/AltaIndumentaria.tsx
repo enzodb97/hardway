@@ -28,6 +28,7 @@ const camposIniciales = {
   idEstado: "",
   idPrecio: "",
   precio: "", // <--- agrega esta línea
+  cantidad: "", // <--- NUEVO
 };
 
 const AltaIndumentaria: React.FC = () => {
@@ -93,6 +94,7 @@ const AltaIndumentaria: React.FC = () => {
             idPrecio: res.data.idPrecio || "",
             precio:
               res.data.precio || res.data.PrecioIndumentarium?.precio || "", // <-- Ajusta según tu backend
+            cantidad: "",
           });
         } catch (error) {
           setAlertMsg("Error al cargar la prenda.");
@@ -148,6 +150,7 @@ const AltaIndumentaria: React.FC = () => {
           codigoIndumentaria: form.codigoIndumentaria,
           descripcionIndumentaria: form.descripcionIndumentaria,
           idDetalle,
+          cantidad: form.cantidad, // <--- AGREGA ESTA LÍNEA
         });
       }
       history.push("/indumentaria");
@@ -353,6 +356,17 @@ const AltaIndumentaria: React.FC = () => {
               required
             />
           </IonItem>
+          <IonItem>
+            <IonLabel position="floating">Cantidad</IonLabel>
+            <IonInput
+              type="number"
+              value={form.cantidad}
+              min={0}
+              onIonChange={(e) => handleChange("cantidad", e.detail.value!)}
+              required
+            />
+          </IonItem>
+
           <IonButton expand="block" type="submit">
             {esEdicion ? "Guardar Cambios" : "Registrar Prenda"}
           </IonButton>
