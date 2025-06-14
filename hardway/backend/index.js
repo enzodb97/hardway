@@ -1473,3 +1473,25 @@ app.put("/api/detalle-indumentaria/:idDetalle/precio", async (req, res) => {
     res.status(500).json({ error: "Error al actualizar precio" });
   }
 });
+
+app.post("/api/stock/movimiento", async (req, res) => {
+  try {
+    const { codigoIndumentaria, cantidad, observaciones } = req.body;
+    // Busca el stock de la prenda
+    const stock = await Stock.findOne({ where: { codigoIndumentaria } });
+    if (!stock) {
+      return res.status(404).json({ error: "Stock no encontrado" });
+    }
+    // Crea el movimiento
+    await MovimientoStock.create({
+      idMovimientoStock: "MOV-" + Math.random().toString().slice(2, 8),
+      idStock: stock.idStock,
+      fechaMovimiento: new Date(),
+      cantidad: Number(cantidad),
+      observaciones: observaciones || "Ajuste manual de stock",
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al crear movimiento de stock" });
+  }
+});

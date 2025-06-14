@@ -20,7 +20,7 @@ import axios from "axios";
 
 const camposIniciales = {
   codigoIndumentaria: "",
-  nombre: "", // Cambia idNombre por nombre
+  nombre: "",
   idColor: "",
   idTalle: "",
   idTela: "",
@@ -30,6 +30,7 @@ const camposIniciales = {
   precio: "",
   cantidad: "",
   idDetalle: "",
+  cantidadAnterior: "", // <--- AGREGA ESTO
 };
 
 const AltaIndumentaria: React.FC = () => {
@@ -90,7 +91,7 @@ const AltaIndumentaria: React.FC = () => {
           const res = await axios.get(`/api/indumentaria/${id}`);
           setForm({
             codigoIndumentaria: res.data.codigoIndumentaria || "",
-            nombre: res.data.nombre || "", // Cambia idNombre por nombre
+            nombre: res.data.nombre || "",
             idColor: res.data.idColor || "",
             idTalle: res.data.idTalle || "",
             idTela: res.data.idTela || "",
@@ -101,6 +102,7 @@ const AltaIndumentaria: React.FC = () => {
               res.data.precio || res.data.PrecioIndumentarium?.precio || "", // <-- Ajusta según tu backend
             cantidad: res.data.cantidad ?? "",
             idDetalle: res.data.idDetalle || "",
+            cantidadAnterior: res.data.cantidad ?? "", // <--- AGREGA ESTO
           });
         } catch (error) {
           setAlertMsg("Error al cargar la prenda.");
@@ -172,6 +174,19 @@ const AltaIndumentaria: React.FC = () => {
             precio: form.precio,
           });
         }
+
+        // --- BLOQUE PARA AJUSTAR STOCK ---
+        const cantidadActual = Number(form.cantidad);
+        const cantidadAnterior = Number(form.cantidadAnterior);
+        const diferencia = cantidadActual - cantidadAnterior;
+        if (diferencia !== 0) {
+          await axios.post("/api/stock/movimiento", {
+            codigoIndumentaria: form.codigoIndumentaria,
+            cantidad: diferencia,
+            observaciones: "Ajuste manual desde edición",
+          });
+        }
+        // --- FIN BLOQUE STOCK ---
       } else {
         await axios.post("/api/indumentaria", {
           codigoIndumentaria: form.codigoIndumentaria,
