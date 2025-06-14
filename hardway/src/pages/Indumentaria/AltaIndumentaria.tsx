@@ -94,7 +94,7 @@ const AltaIndumentaria: React.FC = () => {
             idPrecio: res.data.idPrecio || "",
             precio:
               res.data.precio || res.data.PrecioIndumentarium?.precio || "", // <-- Ajusta según tu backend
-            cantidad: "",
+            cantidad: res.data.cantidad ?? "",
           });
         } catch (error) {
           setAlertMsg("Error al cargar la prenda.");
@@ -189,7 +189,6 @@ const AltaIndumentaria: React.FC = () => {
               onIonChange={(e) =>
                 handleChange("descripcionIndumentaria", e.detail.value!)
               }
-              required
             />
           </IonItem>
           <IonItem>

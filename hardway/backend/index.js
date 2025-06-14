@@ -1134,13 +1134,60 @@ app.delete("/api/indumentaria/:id", async (req, res) => {
 app.get("/api/indumentaria/:id", async (req, res) => {
   try {
     const prenda = await Indumentaria.findOne({
-      where: { idIndumentaria: req.params.id },
+      where: { codigoIndumentaria: req.params.id },
+      include: [
+        {
+          model: DetalleIndumentaria,
+          include: [
+            { model: Color, attributes: ["idColor", "color"] },
+            { model: Talle, attributes: ["idTalle", "talle"] },
+            { model: Tela, attributes: ["idTela", "tipoTela"] },
+            {
+              model: CategoriaIndumentaria,
+              attributes: ["idCategoria", "categoria"],
+            },
+            { model: PrecioIndumentaria, attributes: ["idPrecio", "precio"] },
+            {
+              model: EstadoIndumentaria,
+              attributes: ["idEstado", "estadoIndumentaria"],
+            },
+          ],
+        },
+      ],
     });
-    if (prenda) {
-      res.json(prenda);
-    } else {
-      res.status(404).json({ error: "Prenda no encontrada" });
+
+    if (!prenda) {
+      return res.status(404).json({ error: "Prenda no encontrada" });
     }
+
+    // --- Calcular stock actual ---
+    // 1. Buscar todos los stocks asociados a la prenda
+    const stocks = await Stock.findAll({
+      where: { codigoIndumentaria: prenda.codigoIndumentaria },
+    });
+    // 2. Sumar todos los movimientos de stock de esos stocks
+    let cantidad = 0;
+    for (const stock of stocks) {
+      const movimientos = await MovimientoStock.findAll({
+        where: { idStock: stock.idStock },
+      });
+      cantidad += movimientos.reduce((acc, m) => acc + (m.cantidad || 0), 0);
+    }
+
+    // Formatea la respuesta para el frontend
+    const detalle = prenda.DetalleIndumentarium;
+    res.json({
+      codigoIndumentaria: prenda.codigoIndumentaria,
+      descripcionIndumentaria: detalle?.descripcion || "",
+      idColor: detalle?.idColor || "",
+      idTalle: detalle?.idTalle || "",
+      idTela: detalle?.idTela || "",
+      idCategoria: detalle?.idCategoria || "",
+      idEstado: detalle?.idEstado || "",
+      idPrecio: detalle?.idPrecio || "",
+      precio: detalle?.PrecioIndumentarium?.precio || "",
+      cantidad: cantidad.toString(), // <--- DEVUELVE EL STOCK ACTUAL COMO STRING
+    });
   } catch (error) {
     res.status(500).json({ error: "Error al obtener prenda" });
   }
