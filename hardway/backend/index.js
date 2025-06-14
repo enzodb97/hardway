@@ -261,7 +261,11 @@ const DetalleIndumentaria = sequelize.define(
 const NombreIndumentaria = sequelize.define(
   "NombreIndumentaria",
   {
-    idNombre: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    idNombre: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     nombre: DataTypes.STRING,
   },
   { tableName: "nombreindumentaria", timestamps: false }
@@ -1024,9 +1028,11 @@ app.get("/api/indumentaria", async (req, res) => {
       color: p.DetalleIndumentarium?.Color?.color || "",
       talle: p.DetalleIndumentarium?.Talle?.talle || "",
       nombreTela: p.DetalleIndumentarium?.Tela?.tipoTela || "",
-      categoria: p.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "",
+      categoria:
+        p.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "",
       precio: p.DetalleIndumentarium?.PrecioIndumentarium?.precio || "",
-      estado: p.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "",
+      estado:
+        p.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "",
       cantidadIndumentaria: stockPorCodigo[p.codigoIndumentaria] || 0,
     }));
 
@@ -1040,7 +1046,6 @@ app.get("/api/indumentaria", async (req, res) => {
 // Crear nueva prenda
 app.post("/api/indumentaria", async (req, res) => {
   console.log("Datos recibidos en alta indumentaria:", req.body); // <-- agrega esto
-  // ...resto del código...
   const t = await sequelize.transaction();
   try {
     // 1. Crea la prenda
@@ -1080,9 +1085,15 @@ app.post("/api/indumentaria", async (req, res) => {
 // Editar prenda
 app.put("/api/indumentaria/:id", async (req, res) => {
   try {
-    const [updated] = await Indumentaria.update(req.body, {
-      where: { idIndumentaria: req.params.id },
-    });
+    const [updated] = await Indumentaria.update(
+      {
+        codigoIndumentaria: req.body.codigoIndumentaria,
+        idDetalle: req.body.idDetalle,
+      },
+      {
+        where: { codigoIndumentaria: req.params.id },
+      }
+    );
     if (updated) {
       res.json({ success: true });
     } else {
@@ -1152,9 +1163,15 @@ app.get("/api/indumentaria/:id", async (req, res) => {
             { model: Color, attributes: ["idColor", "color"] },
             { model: Talle, attributes: ["idTalle", "talle"] },
             { model: Tela, attributes: ["idTela", "tipoTela"] },
-            { model: CategoriaIndumentaria, attributes: ["idCategoria", "categoria"] },
+            {
+              model: CategoriaIndumentaria,
+              attributes: ["idCategoria", "categoria"],
+            },
             { model: PrecioIndumentaria, attributes: ["idPrecio", "precio"] },
-            { model: EstadoIndumentaria, attributes: ["idEstado", "estadoIndumentaria"] },
+            {
+              model: EstadoIndumentaria,
+              attributes: ["idEstado", "estadoIndumentaria"],
+            },
           ],
         },
       ],
@@ -1236,19 +1253,13 @@ app.post("/api/barrios/find-or-create", async (req, res) => {
 
 // Buscar o crear detalle de indumentaria
 app.post("/api/detalle-indumentaria/find-or-create", async (req, res) => {
-  const { idPrecio, idCategoria, idColor, idTalle, idEstado, idTela } =
-    req.body;
+  const { idNombre, idPrecio, idCategoria, idColor, idTalle, idEstado, idTela } = req.body;
   let detalle = await DetalleIndumentaria.findOne({
-    where: { idPrecio, idCategoria, idColor, idTalle, idEstado, idTela },
+    where: { idNombre, idPrecio, idCategoria, idColor, idTalle, idEstado, idTela },
   });
   if (!detalle) {
     detalle = await DetalleIndumentaria.create({
-      idPrecio,
-      idCategoria,
-      idColor,
-      idTalle,
-      idEstado,
-      idTela,
+      idNombre, idPrecio, idCategoria, idColor, idTalle, idEstado, idTela,
     });
   }
   res.json({ idDetalle: detalle.idDetalle });
@@ -1391,3 +1402,21 @@ const MovimientoStock = sequelize.define(
   },
   { tableName: "movimientostock", timestamps: false }
 );
+
+app.get("/api/nombres-indumentaria", async (req, res) => {
+  try {
+    const nombres = await NombreIndumentaria.findAll();
+    res.json(nombres);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener nombres de indumentaria" });
+  }
+});
+
+app.post("/api/nombres-indumentaria/find-or-create", async (req, res) => {
+  const { nombre } = req.body;
+  let nombreInd = await NombreIndumentaria.findOne({ where: { nombre } });
+  if (!nombreInd) {
+    nombreInd = await NombreIndumentaria.create({ nombre });
+  }
+  res.json({ idNombre: nombreInd.idNombre });
+});

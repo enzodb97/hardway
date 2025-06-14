@@ -20,7 +20,7 @@ import axios from "axios";
 
 const camposIniciales = {
   codigoIndumentaria: "",
-  idNombre: "",
+  nombre: "", // Cambia idNombre por nombre
   idColor: "",
   idTalle: "",
   idTela: "",
@@ -89,7 +89,7 @@ const AltaIndumentaria: React.FC = () => {
           const res = await axios.get(`/api/indumentaria/${id}`);
           setForm({
             codigoIndumentaria: res.data.codigoIndumentaria || "",
-            idNombre: res.data.idNombre || "",
+            nombre: res.data.nombre || "", // Cambia idNombre por nombre
             idColor: res.data.idColor || "",
             idTalle: res.data.idTalle || "",
             idTela: res.data.idTela || "",
@@ -128,11 +128,20 @@ const AltaIndumentaria: React.FC = () => {
         idPrecio = precioRes.data.idPrecio;
       }
 
-      // 1. Busca o crea el detalle
+      // 1. Busca o crea el nombre
+      const nombreRes = await axios.post(
+        "/api/nombres-indumentaria/find-or-create",
+        {
+          nombre: form.nombre,
+        }
+      );
+      const idNombre = nombreRes.data.idNombre;
+
+      // 2. Busca o crea el detalle
       const detalleRes = await axios.post(
         "/api/detalle-indumentaria/find-or-create",
         {
-          idNombre: form.idNombre,
+          idNombre, // Usa el idNombre obtenido
           idPrecio,
           idCategoria: form.idCategoria,
           idColor: form.idColor,
@@ -143,19 +152,17 @@ const AltaIndumentaria: React.FC = () => {
       );
       const idDetalle = detalleRes.data.idDetalle;
 
-      // 2. Alta o edición
+      // 3. Alta o edición
       if (esEdicion && id) {
         await axios.put(`/api/indumentaria/${id}`, {
           codigoIndumentaria: form.codigoIndumentaria,
-          idNombre: form.idNombre,
           idDetalle,
         });
       } else {
         await axios.post("/api/indumentaria", {
           codigoIndumentaria: form.codigoIndumentaria,
-          idNombre: form.idNombre,
           idDetalle,
-          cantidad: form.cantidad, // <--- AGREGA ESTA LÍNEA
+          cantidad: form.cantidad,
         });
       }
       history.push("/indumentaria");
@@ -190,8 +197,9 @@ const AltaIndumentaria: React.FC = () => {
           <IonItem>
             <IonLabel position="floating">Nombre</IonLabel>
             <IonInput
-              value={form.idNombre}
-              onIonChange={(e) => handleChange("idNombre", e.detail.value!)}
+              value={form.nombre}
+              onIonChange={(e) => handleChange("nombre", e.detail.value!)}
+              required
             />
           </IonItem>
           <IonItem>
@@ -373,7 +381,7 @@ const AltaIndumentaria: React.FC = () => {
           <IonItem>
             <IonLabel position="floating">Nombre</IonLabel>
             <IonSelect
-              value={form.idNombre}
+              value={form.nombre}
               onIonChange={(e) => handleChange("idNombre", e.detail.value!)}
               required
             >
