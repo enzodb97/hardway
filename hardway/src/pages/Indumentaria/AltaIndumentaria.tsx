@@ -29,6 +29,7 @@ const camposIniciales = {
   idPrecio: "",
   precio: "",
   cantidad: "",
+  idDetalle: "",
 };
 
 const AltaIndumentaria: React.FC = () => {
@@ -99,6 +100,7 @@ const AltaIndumentaria: React.FC = () => {
             precio:
               res.data.precio || res.data.PrecioIndumentarium?.precio || "", // <-- Ajusta según tu backend
             cantidad: res.data.cantidad ?? "",
+            idDetalle: res.data.idDetalle || "",
           });
         } catch (error) {
           setAlertMsg("Error al cargar la prenda.");
@@ -141,7 +143,7 @@ const AltaIndumentaria: React.FC = () => {
       const detalleRes = await axios.post(
         "/api/detalle-indumentaria/find-or-create",
         {
-          idNombre, // Usa el idNombre obtenido
+          idNombre,
           idPrecio,
           idCategoria: form.idCategoria,
           idColor: form.idColor,
@@ -154,15 +156,31 @@ const AltaIndumentaria: React.FC = () => {
 
       // 3. Alta o edición
       if (esEdicion && id) {
-        await axios.put(`/api/indumentaria/${id}`, {
-          codigoIndumentaria: form.codigoIndumentaria,
-          idDetalle,
-        });
+        // Si el idDetalle es el mismo que el actual, actualiza el precio
+        if (idDetalle === form.idDetalle) {
+          await axios.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+            precio: form.precio,
+          });
+        } else {
+          // Si cambió algún atributo, actualiza el detalle de la prenda
+          await axios.put(`/api/indumentaria/${id}`, {
+            codigoIndumentaria: form.codigoIndumentaria,
+            idDetalle,
+          });
+          // Y actualiza el precio del nuevo detalle
+          await axios.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+            precio: form.precio,
+          });
+        }
       } else {
         await axios.post("/api/indumentaria", {
           codigoIndumentaria: form.codigoIndumentaria,
           idDetalle,
           cantidad: form.cantidad,
+        });
+        // Y actualiza el precio del nuevo detalle
+        await axios.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+          precio: form.precio,
         });
       }
       history.push("/indumentaria");
@@ -192,6 +210,7 @@ const AltaIndumentaria: React.FC = () => {
                 handleChange("codigoIndumentaria", e.detail.value!)
               }
               required
+              readonly={esEdicion}
             />
           </IonItem>
           <IonItem>
@@ -378,21 +397,6 @@ const AltaIndumentaria: React.FC = () => {
               required
             />
           </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Nombre</IonLabel>
-            <IonSelect
-              value={form.nombre}
-              onIonChange={(e) => handleChange("idNombre", e.detail.value!)}
-              required
-            >
-              {nombresIndumentaria.map((nombre) => (
-                <IonSelectOption key={nombre.idNombre} value={nombre.idNombre}>
-                  {nombre.nombre}
-                </IonSelectOption>
-              ))}
-            </IonSelect>
-          </IonItem>
-
           <IonButton expand="block" type="submit">
             {esEdicion ? "Guardar Cambios" : "Registrar Prenda"}
           </IonButton>

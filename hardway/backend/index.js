@@ -487,7 +487,7 @@ app.post("/api/clientes", async (req, res) => {
 
     await t.commit();
 
-    // Busca el cliente recién creado con sus relaciones
+    // Busca el cliente recién creado with sus relaciones
     const clienteCreado = await Cliente.findByPk(cliente.idCliente, {
       include: {
         model: Persona,
@@ -1085,6 +1085,7 @@ app.post("/api/indumentaria", async (req, res) => {
 // Editar prenda
 app.put("/api/indumentaria/:id", async (req, res) => {
   try {
+    console.log("PUT /api/indumentaria/:id", req.params.id, req.body);
     const [updated] = await Indumentaria.update(
       {
         codigoIndumentaria: req.body.codigoIndumentaria,
@@ -1094,12 +1095,23 @@ app.put("/api/indumentaria/:id", async (req, res) => {
         where: { codigoIndumentaria: req.params.id },
       }
     );
+    console.log("Filas actualizadas:", updated);
+
     if (updated) {
       res.json({ success: true });
     } else {
-      res.status(404).json({ error: "Prenda no encontrada" });
+      // Si no se actualizó ninguna fila, verifica si la prenda existe
+      const existe = await Indumentaria.findOne({
+        where: { codigoIndumentaria: req.params.id },
+      });
+      if (existe) {
+        res.json({ success: true }); // Considera éxito si existe
+      } else {
+        res.status(404).json({ error: "Prenda no encontrada" });
+      }
     }
   } catch (error) {
+    console.error("Error en PUT /api/indumentaria/:id", error);
     res.status(500).json({ error: "Error al editar prenda" });
   }
 });
@@ -1441,4 +1453,23 @@ app.post("/api/nombres-indumentaria/find-or-create", async (req, res) => {
     nombreInd = await NombreIndumentaria.create({ nombre });
   }
   res.json({ idNombre: nombreInd.idNombre });
+});
+
+app.put("/api/detalle-indumentaria/:idDetalle/precio", async (req, res) => {
+  try {
+    const { precio } = req.body;
+    // Busca el detalle
+    const detalle = await DetalleIndumentaria.findByPk(req.params.idDetalle);
+    if (!detalle) {
+      return res.status(404).json({ error: "Detalle no encontrado" });
+    }
+    // Actualiza el precio en la tabla PrecioIndumentaria
+    await PrecioIndumentaria.update(
+      { precio },
+      { where: { idPrecio: detalle.idPrecio } }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar precio" });
+  }
 });
