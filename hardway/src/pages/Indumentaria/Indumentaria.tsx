@@ -64,7 +64,7 @@ const Indumentaria: React.FC = () => {
 
   const prendasFiltradas = indumentaria.filter(
     (item) =>
-      normalizar(item.descripcionIndumentaria).includes(normalizar(busqueda)) ||
+      normalizar(item.nombre).includes(normalizar(busqueda)) ||
       normalizar(item.talle).includes(normalizar(busqueda)) ||
       normalizar(item.color).includes(normalizar(busqueda)) ||
       normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
@@ -99,6 +99,9 @@ const Indumentaria: React.FC = () => {
               <strong>Código</strong>
             </IonCol>
             <IonCol>
+              <strong>Nombre</strong>
+            </IonCol>
+            <IonCol>
               <strong>Color</strong>
             </IonCol>
             <IonCol>
@@ -126,6 +129,7 @@ const Indumentaria: React.FC = () => {
           {prendasFiltradas.map((item) => (
             <IonRow key={item.codigoIndumentaria}>
               <IonCol>{item.codigoIndumentaria}</IonCol>
+              <IonCol>{item.nombre}</IonCol>
               <IonCol>{item.color}</IonCol>
               <IonCol>{item.nombreTela}</IonCol>
               <IonCol>{item.talle}</IonCol>
@@ -137,7 +141,9 @@ const Indumentaria: React.FC = () => {
                 <IonButton
                   fill="clear"
                   onClick={() =>
-                    history.push(`/alta-indumentaria/${item.codigoIndumentaria}`)
+                    history.push(
+                      `/alta-indumentaria/${item.codigoIndumentaria}`
+                    )
                   }
                 >
                   <IonIcon icon={pencil} color="primary" />

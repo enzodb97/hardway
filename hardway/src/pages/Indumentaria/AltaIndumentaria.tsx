@@ -20,15 +20,15 @@ import axios from "axios";
 
 const camposIniciales = {
   codigoIndumentaria: "",
-  descripcionIndumentaria: "",
+  idNombre: "",
   idColor: "",
   idTalle: "",
   idTela: "",
   idCategoria: "",
   idEstado: "",
   idPrecio: "",
-  precio: "", // <--- agrega esta línea
-  cantidad: "", // <--- NUEVO
+  precio: "",
+  cantidad: "",
 };
 
 const AltaIndumentaria: React.FC = () => {
@@ -45,6 +45,7 @@ const AltaIndumentaria: React.FC = () => {
   const [categorias, setCategorias] = useState<any[]>([]);
   const [estados, setEstados] = useState<any[]>([]);
   const [precios, setPrecios] = useState<any[]>([]);
+  const [nombresIndumentaria, setNombresIndumentaria] = useState<any[]>([]);
 
   useEffect(() => {
     const cargarAuxiliares = async () => {
@@ -56,6 +57,7 @@ const AltaIndumentaria: React.FC = () => {
           categoriasRes,
           estadosRes,
           preciosRes,
+          nombresRes,
         ] = await Promise.all([
           axios.get("/api/colores"),
           axios.get("/api/talles"),
@@ -63,6 +65,7 @@ const AltaIndumentaria: React.FC = () => {
           axios.get("/api/categorias"),
           axios.get("/api/estados-indumentaria"),
           axios.get("/api/precios"),
+          axios.get("/api/nombres-indumentaria"),
         ]);
         setColores(coloresRes.data);
         setTalles(tallesRes.data);
@@ -70,6 +73,7 @@ const AltaIndumentaria: React.FC = () => {
         setCategorias(categoriasRes.data);
         setEstados(estadosRes.data);
         setPrecios(preciosRes.data);
+        setNombresIndumentaria(nombresRes.data);
       } catch {
         setAlertMsg("Error al cargar datos auxiliares.");
         setShowAlert(true);
@@ -85,7 +89,7 @@ const AltaIndumentaria: React.FC = () => {
           const res = await axios.get(`/api/indumentaria/${id}`);
           setForm({
             codigoIndumentaria: res.data.codigoIndumentaria || "",
-            descripcionIndumentaria: res.data.descripcionIndumentaria || "",
+            idNombre: res.data.idNombre || "",
             idColor: res.data.idColor || "",
             idTalle: res.data.idTalle || "",
             idTela: res.data.idTela || "",
@@ -128,6 +132,7 @@ const AltaIndumentaria: React.FC = () => {
       const detalleRes = await axios.post(
         "/api/detalle-indumentaria/find-or-create",
         {
+          idNombre: form.idNombre,
           idPrecio,
           idCategoria: form.idCategoria,
           idColor: form.idColor,
@@ -142,13 +147,13 @@ const AltaIndumentaria: React.FC = () => {
       if (esEdicion && id) {
         await axios.put(`/api/indumentaria/${id}`, {
           codigoIndumentaria: form.codigoIndumentaria,
-          descripcionIndumentaria: form.descripcionIndumentaria,
+          idNombre: form.idNombre,
           idDetalle,
         });
       } else {
         await axios.post("/api/indumentaria", {
           codigoIndumentaria: form.codigoIndumentaria,
-          descripcionIndumentaria: form.descripcionIndumentaria,
+          idNombre: form.idNombre,
           idDetalle,
           cantidad: form.cantidad, // <--- AGREGA ESTA LÍNEA
         });
@@ -183,12 +188,10 @@ const AltaIndumentaria: React.FC = () => {
             />
           </IonItem>
           <IonItem>
-            <IonLabel position="floating">Descripción</IonLabel>
+            <IonLabel position="floating">Nombre</IonLabel>
             <IonInput
-              value={form.descripcionIndumentaria}
-              onIonChange={(e) =>
-                handleChange("descripcionIndumentaria", e.detail.value!)
-              }
+              value={form.idNombre}
+              onIonChange={(e) => handleChange("idNombre", e.detail.value!)}
             />
           </IonItem>
           <IonItem>
@@ -366,6 +369,20 @@ const AltaIndumentaria: React.FC = () => {
               onIonChange={(e) => handleChange("cantidad", e.detail.value!)}
               required
             />
+          </IonItem>
+          <IonItem>
+            <IonLabel position="floating">Nombre</IonLabel>
+            <IonSelect
+              value={form.idNombre}
+              onIonChange={(e) => handleChange("idNombre", e.detail.value!)}
+              required
+            >
+              {nombresIndumentaria.map((nombre) => (
+                <IonSelectOption key={nombre.idNombre} value={nombre.idNombre}>
+                  {nombre.nombre}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
           </IonItem>
 
           <IonButton expand="block" type="submit">

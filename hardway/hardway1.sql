@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-06-2025 a las 01:40:03
+-- Tiempo de generación: 14-06-2025 a las 23:35:56
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -107,7 +107,8 @@ VALUES
   (8, 'Ropa Interior'),
   (9, 'Uniforme'),
   (10, 'Exteriores'),
-  (11, 'Sport');
+  (11, 'Sport'),
+  (12, 'Utilitario');
 
 -- --------------------------------------------------------
 --
@@ -235,6 +236,7 @@ VALUES
 CREATE TABLE
   `detalleindumentaria` (
     `idDetalle` int (11) NOT NULL,
+    `idNombre` int (11) DEFAULT NULL,
     `idPrecio` int (11) DEFAULT NULL,
     `idCategoria` int (11) DEFAULT NULL,
     `idColor` int (11) DEFAULT NULL,
@@ -249,6 +251,7 @@ CREATE TABLE
 INSERT INTO
   `detalleindumentaria` (
     `idDetalle`,
+    `idNombre`,
     `idPrecio`,
     `idCategoria`,
     `idColor`,
@@ -257,16 +260,16 @@ INSERT INTO
     `idTela`
   )
 VALUES
-  (1, 1, 1, 1, 1, 1, 1),
-  (2, 2, 2, 2, 2, 2, 2),
-  (3, 3, 3, 3, 3, 3, 3),
-  (4, 4, 4, 4, 4, 4, 4),
-  (5, 5, 5, 5, 5, 5, 5),
-  (6, 6, 6, 6, 6, 6, 6),
-  (7, 7, 7, 7, 7, 7, 7),
-  (8, 8, 8, 8, 8, 8, 8),
-  (9, 9, 9, 9, 9, 9, 9),
-  (10, 10, 10, 10, 10, 10, 10);
+  (1, 1, 1, 1, 1, 1, 1, 1),
+  (2, 2, 2, 2, 2, 2, 2, 2),
+  (3, 3, 3, 3, 3, 3, 3, 3),
+  (4, 4, 4, 4, 4, 4, 4, 4),
+  (5, 5, 5, 5, 5, 5, 5, 5),
+  (6, 6, 6, 6, 6, 6, 6, 6),
+  (7, 7, 7, 7, 7, 7, 7, 7),
+  (8, 8, 8, 8, 8, 8, 8, 8),
+  (9, 9, 9, 9, 9, 9, 9, 9),
+  (10, 10, 10, 10, 10, 10, 10, 10);
 
 -- --------------------------------------------------------
 --
@@ -811,7 +814,7 @@ VALUES
 CREATE TABLE
   `precioindumentaria` (
     `idPrecio` int (11) NOT NULL,
-    `precio` double DEFAULT NULL
+    `precio` decimal(10, 2) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
 
 --
@@ -821,17 +824,20 @@ INSERT INTO
   `precioindumentaria` (`idPrecio`, `precio`)
 VALUES
   (1, 1999.99),
-  (2, 2499.5),
-  (3, 1799),
+  (2, 2499.50),
+  (3, 1799.00),
   (4, 1599.99),
   (5, 2999.95),
-  (6, 1099),
+  (6, 1099.00),
   (7, 1899.25),
   (8, 2150.75),
-  (9, 1750),
-  (10, 2200.5),
-  (11, 2001),
-  (12, 2000);
+  (9, 1750.00),
+  (10, 2200.50),
+  (11, 2001.00),
+  (12, 2000.00),
+  (13, 28092.00),
+  (14, 2800.00),
+  (15, 30058.00);
 
 -- --------------------------------------------------------
 --
@@ -915,7 +921,8 @@ VALUES
   (8, '50'),
   (9, '52'),
   (10, '54'),
-  (12, 'XXL');
+  (12, 'XXL'),
+  (13, 'XS');
 
 -- --------------------------------------------------------
 --
@@ -943,7 +950,8 @@ VALUES
   (8, 'Nylon'),
   (9, 'Cachemira'),
   (10, 'Franela'),
-  (11, 'Harina');
+  (11, 'Harina'),
+  (12, 'Trigo');
 
 -- --------------------------------------------------------
 --
@@ -1081,7 +1089,8 @@ ADD KEY `idCategoria` (`idCategoria`),
 ADD KEY `idColor` (`idColor`),
 ADD KEY `idTalle` (`idTalle`),
 ADD KEY `idEstado` (`idEstado`),
-ADD KEY `idTela` (`idTela`);
+ADD KEY `idTela` (`idTela`),
+ADD KEY `fk_detalle_nombre` (`idNombre`);
 
 --
 -- Indices de la tabla `detallepedido`
@@ -1226,7 +1235,7 @@ AUTO_INCREMENT = 37;
 -- AUTO_INCREMENT de la tabla `categoriaindumentaria`
 --
 ALTER TABLE `categoriaindumentaria` MODIFY `idCategoria` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 12;
+AUTO_INCREMENT = 13;
 
 --
 -- AUTO_INCREMENT de la tabla `ciudad`
@@ -1250,7 +1259,7 @@ AUTO_INCREMENT = 12;
 -- AUTO_INCREMENT de la tabla `detalleindumentaria`
 --
 ALTER TABLE `detalleindumentaria` MODIFY `idDetalle` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 13;
+AUTO_INCREMENT = 16;
 
 --
 -- AUTO_INCREMENT de la tabla `domicilio`
@@ -1286,19 +1295,19 @@ AUTO_INCREMENT = 34;
 -- AUTO_INCREMENT de la tabla `precioindumentaria`
 --
 ALTER TABLE `precioindumentaria` MODIFY `idPrecio` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 13;
+AUTO_INCREMENT = 16;
 
 --
 -- AUTO_INCREMENT de la tabla `talle`
 --
 ALTER TABLE `talle` MODIFY `idTalle` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 13;
+AUTO_INCREMENT = 14;
 
 --
 -- AUTO_INCREMENT de la tabla `tela`
 --
 ALTER TABLE `tela` MODIFY `idTela` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 12;
+AUTO_INCREMENT = 13;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
@@ -1332,7 +1341,8 @@ ADD CONSTRAINT `detalleindumentaria_ibfk_2` FOREIGN KEY (`idCategoria`) REFERENC
 ADD CONSTRAINT `detalleindumentaria_ibfk_3` FOREIGN KEY (`idColor`) REFERENCES `color` (`idColor`),
 ADD CONSTRAINT `detalleindumentaria_ibfk_4` FOREIGN KEY (`idTalle`) REFERENCES `talle` (`idTalle`),
 ADD CONSTRAINT `detalleindumentaria_ibfk_5` FOREIGN KEY (`idEstado`) REFERENCES `estadoindumentaria` (`idEstado`),
-ADD CONSTRAINT `detalleindumentaria_ibfk_6` FOREIGN KEY (`idTela`) REFERENCES `tela` (`idTela`);
+ADD CONSTRAINT `detalleindumentaria_ibfk_6` FOREIGN KEY (`idTela`) REFERENCES `tela` (`idTela`),
+ADD CONSTRAINT `fk_detalle_nombre` FOREIGN KEY (`idNombre`) REFERENCES `nombreindumentaria` (`idNombre`);
 
 --
 -- Filtros para la tabla `detallepedido`

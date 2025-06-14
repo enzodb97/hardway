@@ -258,6 +258,15 @@ const DetalleIndumentaria = sequelize.define(
   { tableName: "DetalleIndumentaria", timestamps: false }
 );
 
+const NombreIndumentaria = sequelize.define(
+  "NombreIndumentaria",
+  {
+    idNombre: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    nombre: DataTypes.STRING,
+  },
+  { tableName: "nombreindumentaria", timestamps: false }
+);
+
 DetalleIndumentaria.belongsTo(Color, { foreignKey: "idColor" });
 DetalleIndumentaria.belongsTo(Talle, { foreignKey: "idTalle" });
 DetalleIndumentaria.belongsTo(Tela, { foreignKey: "idTela" });
@@ -266,6 +275,7 @@ DetalleIndumentaria.belongsTo(CategoriaIndumentaria, {
 });
 DetalleIndumentaria.belongsTo(PrecioIndumentaria, { foreignKey: "idPrecio" });
 DetalleIndumentaria.belongsTo(EstadoIndumentaria, { foreignKey: "idEstado" });
+DetalleIndumentaria.belongsTo(NombreIndumentaria, { foreignKey: "idNombre" });
 
 // Relaciones
 Indumentaria.belongsTo(DetalleIndumentaria, { foreignKey: "idDetalle" });
@@ -789,7 +799,7 @@ app.post("/api/pedidos", async (req, res) => {
         if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
           await t.rollback();
           return res.status(400).json({
-            error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
+            error: `Stock insuficiente para ${ind.nombreIndumentaria}`,
           });
         }
         ind.cantidadIndumentaria -= prenda.cantidad;
@@ -905,7 +915,7 @@ app.put("/api/pedidos/:id", async (req, res) => {
         if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
           await t.rollback();
           return res.status(400).json({
-            error: `Stock insuficiente para ${ind.descripcionIndumentaria}`,
+            error: `Stock insuficiente para ${ind.nombreIndumentaria}`,
           });
         }
         ind.cantidadIndumentaria -= prenda.cantidad;
@@ -975,6 +985,7 @@ app.get("/api/indumentaria", async (req, res) => {
         {
           model: DetalleIndumentaria,
           include: [
+            { model: NombreIndumentaria, attributes: ["idNombre", "nombre"] }, // <--- NUEVO
             { model: Color, attributes: ["color"] },
             { model: Talle, attributes: ["talle"] },
             { model: Tela, attributes: ["tipoTela"] },
@@ -1009,16 +1020,14 @@ app.get("/api/indumentaria", async (req, res) => {
     // Formatea la respuesta para el frontend
     const prendasFormateadas = prendas.map((p) => ({
       codigoIndumentaria: p.codigoIndumentaria,
+      nombre: p.DetalleIndumentarium?.NombreIndumentarium?.nombre || "", // <--- NOMBRE
       color: p.DetalleIndumentarium?.Color?.color || "",
       talle: p.DetalleIndumentarium?.Talle?.talle || "",
       nombreTela: p.DetalleIndumentarium?.Tela?.tipoTela || "",
-      categoria:
-        p.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "",
+      categoria: p.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "",
       precio: p.DetalleIndumentarium?.PrecioIndumentarium?.precio || "",
-      estado:
-        p.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "",
-      descripcionIndumentaria: p.DetalleIndumentarium?.descripcion || "", // si tienes campo de descripción
-      cantidadIndumentaria: stockPorCodigo[p.codigoIndumentaria] || 0, // <-- STOCK ACTUAL
+      estado: p.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "",
+      cantidadIndumentaria: stockPorCodigo[p.codigoIndumentaria] || 0,
     }));
 
     res.json(prendasFormateadas);
@@ -1139,18 +1148,13 @@ app.get("/api/indumentaria/:id", async (req, res) => {
         {
           model: DetalleIndumentaria,
           include: [
+            { model: NombreIndumentaria, attributes: ["idNombre", "nombre"] }, // <--- NUEVO
             { model: Color, attributes: ["idColor", "color"] },
             { model: Talle, attributes: ["idTalle", "talle"] },
             { model: Tela, attributes: ["idTela", "tipoTela"] },
-            {
-              model: CategoriaIndumentaria,
-              attributes: ["idCategoria", "categoria"],
-            },
+            { model: CategoriaIndumentaria, attributes: ["idCategoria", "categoria"] },
             { model: PrecioIndumentaria, attributes: ["idPrecio", "precio"] },
-            {
-              model: EstadoIndumentaria,
-              attributes: ["idEstado", "estadoIndumentaria"],
-            },
+            { model: EstadoIndumentaria, attributes: ["idEstado", "estadoIndumentaria"] },
           ],
         },
       ],
@@ -1161,11 +1165,9 @@ app.get("/api/indumentaria/:id", async (req, res) => {
     }
 
     // --- Calcular stock actual ---
-    // 1. Buscar todos los stocks asociados a la prenda
     const stocks = await Stock.findAll({
       where: { codigoIndumentaria: prenda.codigoIndumentaria },
     });
-    // 2. Sumar todos los movimientos de stock de esos stocks
     let cantidad = 0;
     for (const stock of stocks) {
       const movimientos = await MovimientoStock.findAll({
@@ -1174,11 +1176,11 @@ app.get("/api/indumentaria/:id", async (req, res) => {
       cantidad += movimientos.reduce((acc, m) => acc + (m.cantidad || 0), 0);
     }
 
-    // Formatea la respuesta para el frontend
     const detalle = prenda.DetalleIndumentarium;
     res.json({
       codigoIndumentaria: prenda.codigoIndumentaria,
-      descripcionIndumentaria: detalle?.descripcion || "",
+      idNombre: detalle?.NombreIndumentarium?.idNombre || "",
+      nombre: detalle?.NombreIndumentarium?.nombre || "",
       idColor: detalle?.idColor || "",
       idTalle: detalle?.idTalle || "",
       idTela: detalle?.idTela || "",
@@ -1186,7 +1188,7 @@ app.get("/api/indumentaria/:id", async (req, res) => {
       idEstado: detalle?.idEstado || "",
       idPrecio: detalle?.idPrecio || "",
       precio: detalle?.PrecioIndumentarium?.precio || "",
-      cantidad: cantidad.toString(), // <--- DEVUELVE EL STOCK ACTUAL COMO STRING
+      cantidad: cantidad.toString(),
     });
   } catch (error) {
     res.status(500).json({ error: "Error al obtener prenda" });
