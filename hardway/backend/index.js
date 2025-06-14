@@ -1253,13 +1253,35 @@ app.post("/api/barrios/find-or-create", async (req, res) => {
 
 // Buscar o crear detalle de indumentaria
 app.post("/api/detalle-indumentaria/find-or-create", async (req, res) => {
-  const { idNombre, idPrecio, idCategoria, idColor, idTalle, idEstado, idTela } = req.body;
+  const {
+    idNombre,
+    idPrecio,
+    idCategoria,
+    idColor,
+    idTalle,
+    idEstado,
+    idTela,
+  } = req.body;
   let detalle = await DetalleIndumentaria.findOne({
-    where: { idNombre, idPrecio, idCategoria, idColor, idTalle, idEstado, idTela },
+    where: {
+      idNombre,
+      idPrecio,
+      idCategoria,
+      idColor,
+      idTalle,
+      idEstado,
+      idTela,
+    },
   });
   if (!detalle) {
     detalle = await DetalleIndumentaria.create({
-      idNombre, idPrecio, idCategoria, idColor, idTalle, idEstado, idTela,
+      idNombre,
+      idPrecio,
+      idCategoria,
+      idColor,
+      idTalle,
+      idEstado,
+      idTela,
     });
   }
   res.json({ idDetalle: detalle.idDetalle });
