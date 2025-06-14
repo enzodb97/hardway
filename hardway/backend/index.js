@@ -1086,16 +1086,46 @@ app.put("/api/indumentaria/:id", async (req, res) => {
 
 // Eliminar prenda
 app.delete("/api/indumentaria/:id", async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const deleted = await Indumentaria.destroy({
-      where: { idIndumentaria: req.params.id },
+    const codigo = req.params.id;
+
+    // 1. Busca los stocks asociados a la prenda
+    const stocks = await Stock.findAll({
+      where: { codigoIndumentaria: codigo },
+      transaction: t,
     });
+
+    // 2. Elimina los movimientos de stock asociados
+    for (const stock of stocks) {
+      await MovimientoStock.destroy({
+        where: { idStock: stock.idStock },
+        transaction: t,
+      });
+    }
+
+    // 3. Elimina los stocks asociados
+    await Stock.destroy({
+      where: { codigoIndumentaria: codigo },
+      transaction: t,
+    });
+
+    // 4. Elimina la prenda
+    const deleted = await Indumentaria.destroy({
+      where: { codigoIndumentaria: codigo },
+      transaction: t,
+    });
+
+    await t.commit();
+
     if (deleted) {
       res.json({ success: true });
     } else {
       res.status(404).json({ error: "Prenda no encontrada" });
     }
   } catch (error) {
+    if (t) await t.rollback();
+    console.error("Error al eliminar prenda:", error);
     res.status(500).json({ error: "Error al eliminar prenda" });
   }
 });

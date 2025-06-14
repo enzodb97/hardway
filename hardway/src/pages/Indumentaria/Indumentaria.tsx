@@ -42,11 +42,12 @@ const Indumentaria: React.FC = () => {
   }, []);
 
   // Eliminar prenda
-  const handleEliminar = async (id: number) => {
+  const handleEliminar = async (id: string) => {
+    console.log("Eliminando prenda con código:", id);
     if (window.confirm("¿Seguro que desea eliminar esta prenda?")) {
       try {
         await axios.delete(`/api/indumentaria/${id}`);
-        await cargarIndumentaria(); // Recarga la lista después de eliminar
+        await cargarIndumentaria();
       } catch (error) {
         setAlertMsg("Error al eliminar prenda.");
         setShowAlert(true);

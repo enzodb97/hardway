@@ -165,7 +165,9 @@ const AltaIndumentaria: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
-          <IonTitle>{esEdicion ? "Editar Prenda" : "Nueva Prenda"}</IonTitle>
+          <IonTitle>
+            {esEdicion ? "Editar Indumentaria" : "Nueva Prenda"}
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
