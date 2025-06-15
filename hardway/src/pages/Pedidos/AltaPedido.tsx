@@ -46,7 +46,7 @@ const AltaPedido: React.FC = () => {
 
   const [form, setForm] = useState(estadoInicial);
   const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
-    { idIndumentaria: number; descripcion: string; cantidad: number }[]
+    { idIndumentaria: number; nombre: string; cantidad: number }[]
   >([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
@@ -130,7 +130,7 @@ const AltaPedido: React.FC = () => {
       ...prev,
       {
         idIndumentaria: prenda.idIndumentaria,
-        descripcion: prenda.descripcionIndumentaria,
+        nombre: prenda.nombre, // usa el nombre correcto
         cantidad,
       },
     ]);
@@ -227,7 +227,7 @@ const AltaPedido: React.FC = () => {
             {prendasSeleccionadas.map((prenda, idx) => (
               <IonItem key={prenda.idIndumentaria}>
                 <IonLabel>
-                  {prenda.descripcion} (Cantidad: {prenda.cantidad})
+                  {prenda.nombre} (Cantidad: {prenda.cantidad})
                 </IonLabel>
                 <IonButton
                   onClick={() => {
@@ -404,8 +404,7 @@ const AltaPedido: React.FC = () => {
                     className="indumentaria-item"
                   >
                     <IonLabel class="indumentaria-label">
-                      {prenda.descripcionIndumentaria} (Stock:{" "}
-                      {prenda.cantidadIndumentaria})
+                      {prenda.nombre} (Stock: {prenda.cantidadIndumentaria})
                     </IonLabel>
                     <IonInput
                       type="number"
