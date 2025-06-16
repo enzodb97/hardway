@@ -199,15 +199,6 @@ const ClientesMasPedidos: React.FC = () => {
               <div style={{ fontSize: 14, color: "#888" }}>
                 Fecha de emisión: {fechaEmision}
               </div>
-              <IonButton
-                color="primary"
-                size="small"
-                style={{ marginTop: 8, marginBottom: 16 }}
-                onClick={exportarPDF}
-              >
-                <IonIcon icon={documentText} slot="start" />
-                PDF
-              </IonButton>
             </IonCol>
           </IonRow>
           <IonRow>
@@ -287,6 +278,15 @@ const ClientesMasPedidos: React.FC = () => {
                 style={{ marginLeft: 8 }}
               >
                 {mostrarTodos ? "Ver paginado" : "Ver todos"}
+              </IonButton>
+              <IonButton
+                color="primary"
+                size="small"
+                style={{ marginTop: 8, marginBottom: 16 }}
+                onClick={exportarPDF}
+              >
+                <IonIcon icon={documentText} slot="start" />
+                PDF
               </IonButton>
             </IonCol>
           </IonRow>

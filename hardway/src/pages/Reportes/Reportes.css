@@ -9,15 +9,42 @@
   display: flex;
   justify-content: center;
 }
-.table-header ion-col ion-col {
-  font-size: 16px;
-  text-align: center;
-  justify-content: center;
-}
+
 .celda-centrada {
   text-align: center;
   justify-content: center;
   align-items: center;
   display: flex;
   height: 100%;
+}
+
+.ion-text-center {
+  text-align: center !important;
+}
+
+.reporte-titulo {
+  margin: 16px 0 8px 0;
+  text-align: center;
+}
+
+.reporte-fecha {
+  font-size: 14px;
+  color: #888;
+  text-align: center;
+}
+
+.reporte-grafico-container {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  margin-bottom: 24px;
+}
+
+.reporte-btn-pdf {
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.reporte-btn-ver-todos {
+  margin-left: 8px;
 }
