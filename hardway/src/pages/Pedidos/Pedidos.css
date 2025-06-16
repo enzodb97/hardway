@@ -71,4 +71,5 @@
   box-sizing: border-box;
   /* Si necesitas, puedes agregar: */
   position: static !important;
+  justify-content: center;
 }
