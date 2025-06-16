@@ -89,7 +89,7 @@ const Pedidos: React.FC = () => {
     doc.text(title, x, 18);
 
     autoTable(doc, {
-      head: [["ID", "Observación", "Estado", "Cliente", "Fecha"]],
+      head: [["ID", "Estado", "Cliente", "Fecha de Registro"]],
       body: pedidosAMostrar.map((pedido) => [
         pedido.numeroPedido,
         pedido.EstadoPedido?.tipoEstado || "Sin estado",
@@ -107,7 +107,7 @@ const Pedidos: React.FC = () => {
       headStyles: { fillColor: [254, 175, 0] },
     });
 
-    doc.save("pedidos.pdf");
+    doc.save("Lista pedidos Hardway.pdf");
   };
 
   return (
