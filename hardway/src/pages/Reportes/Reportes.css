@@ -1,0 +1,23 @@
+.table-header {
+  font-weight: bold;
+  background: #0054e9 !important;
+}
+
+.table-header ion-col {
+  font-size: 16px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+.table-header ion-col ion-col {
+  font-size: 16px;
+  text-align: center;
+  justify-content: center;
+}
+.celda-centrada {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  height: 100%;
+}

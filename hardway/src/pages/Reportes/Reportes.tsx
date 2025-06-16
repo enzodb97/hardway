@@ -12,6 +12,7 @@ import {
   IonButton,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
+import "./Reportes.css";
 
 const Reportes: React.FC = () => {
   const history = useHistory();

@@ -23,6 +23,29 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { documentText } from "ionicons/icons";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title as ChartTitle,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import "./Reportes.css";
+
+// Registrar componentes y plugins
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ChartTitle,
+  Tooltip,
+  Legend,
+  ChartDataLabels
+);
 
 interface ClienteReporte {
   idCliente: number;
@@ -37,6 +60,7 @@ const PAGE_SIZE = 5;
 const ClientesMasPedidos: React.FC = () => {
   const [clientes, setClientes] = useState<ClienteReporte[]>([]);
   const [pagina, setPagina] = useState(1);
+  const [mostrarTodos, setMostrarTodos] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -46,12 +70,14 @@ const ClientesMasPedidos: React.FC = () => {
       .catch(() => setClientes([]));
   }, []);
 
-  // Paginación
-  const totalPaginas = Math.ceil(clientes.length / PAGE_SIZE);
-  const clientesPagina = clientes.slice(
-    (pagina - 1) * PAGE_SIZE,
-    pagina * PAGE_SIZE
-  );
+  // Cambia la lógica de paginación:
+  const clientesAMostrar = mostrarTodos
+    ? clientes
+    : clientes.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE);
+
+  const totalPaginas = mostrarTodos
+    ? 1
+    : Math.ceil(clientes.length / PAGE_SIZE);
 
   // Fecha de emisión
   const fechaEmision = new Date().toLocaleString("es-AR");
@@ -91,6 +117,71 @@ const ClientesMasPedidos: React.FC = () => {
     doc.save("Clientes_mas_pedidos.pdf");
   };
 
+  // Prepara los datos para el gráfico
+  const data = {
+    labels: clientes.map((c) => `${c.nombre} ${c.apellido}`),
+    datasets: [
+      {
+        label: "Total de Pedidos",
+        data: clientes.map((c) => c.total_pedidos),
+        backgroundColor: "rgba(254, 175, 0, 0.7)",
+        borderRadius: 8,
+        maxBarThickness: 32,
+      },
+    ],
+  };
+
+  const options = {
+    indexAxis: "y" as const, // Barras horizontales
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "Top 10 Clientes por Cantidad de Pedidos",
+        font: { size: 18 },
+        padding: { top: 10, bottom: 20 },
+      },
+      datalabels: {
+        anchor: "end",
+        align: "end",
+        color: "#333",
+        font: { weight: "bold" },
+        formatter: (value: number) => value,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: any) {
+            const idx = context.dataIndex;
+            const c = clientes[idx];
+            return [
+              `Total pedidos: ${c.total_pedidos}`,
+              `Email: ${c.email || "-"}`,
+            ];
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: "Total de Pedidos",
+          font: { size: 14 },
+        },
+        beginAtZero: true,
+        ticks: { precision: 0 },
+      },
+      y: {
+        title: {
+          display: true,
+          text: "Cliente",
+          font: { size: 14 },
+        },
+      },
+    },
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -124,18 +215,41 @@ const ClientesMasPedidos: React.FC = () => {
               <IonCard>
                 <IonCardContent>
                   <IonGrid>
-                    <IonRow className="table-header" style={{ fontWeight: "bold", background: "#f5f5f5" }}>
-                      <IonCol size="2">N° Cliente</IonCol>
-                      <IonCol size="4">Nombre y Apellido</IonCol>
-                      <IonCol size="4">Email</IonCol>
-                      <IonCol size="2">Total Pedidos</IonCol>
+                    <IonRow
+                      className="table-header"
+                      style={{
+                        fontWeight: "bold",
+                        background: "#0057ff",
+                        color: "white",
+                      }}
+                    >
+                      <IonCol size="2" className="celda-centrada">
+                        N° Cliente
+                      </IonCol>
+                      <IonCol size="4" className="celda-centrada">
+                        Nombre y Apellido
+                      </IonCol>
+                      <IonCol size="4" className="celda-centrada">
+                        Email
+                      </IonCol>
+                      <IonCol size="2" className="celda-centrada">
+                        Total Pedidos
+                      </IonCol>
                     </IonRow>
-                    {clientesPagina.map((c) => (
+                    {clientesAMostrar.map((c) => (
                       <IonRow key={c.idCliente}>
-                        <IonCol size="2">{c.idCliente}</IonCol>
-                        <IonCol size="4">{`${c.nombre} ${c.apellido}`}</IonCol>
-                        <IonCol size="4">{c.email || ""}</IonCol>
-                        <IonCol size="2">{c.total_pedidos}</IonCol>
+                        <IonCol size="2" className="celda-centrada">
+                          {c.idCliente}
+                        </IonCol>
+                        <IonCol size="4" className="celda-centrada">
+                          {`${c.nombre} ${c.apellido}`}
+                        </IonCol>
+                        <IonCol size="4" className="celda-centrada">
+                          {c.email || ""}
+                        </IonCol>
+                        <IonCol size="2" className="celda-centrada">
+                          {c.total_pedidos}
+                        </IonCol>
                       </IonRow>
                     ))}
                   </IonGrid>
@@ -148,7 +262,7 @@ const ClientesMasPedidos: React.FC = () => {
             <IonCol size="12" className="ion-text-center">
               <IonButton
                 size="small"
-                disabled={pagina === 1}
+                disabled={pagina === 1 || mostrarTodos}
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
               >
                 Anterior
@@ -158,7 +272,7 @@ const ClientesMasPedidos: React.FC = () => {
               </span>
               <IonButton
                 size="small"
-                disabled={pagina === totalPaginas}
+                disabled={pagina === totalPaginas || mostrarTodos}
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
               >
                 Siguiente
@@ -166,11 +280,33 @@ const ClientesMasPedidos: React.FC = () => {
               <IonButton
                 size="small"
                 fill="clear"
-                onClick={() => setPagina(1)}
+                onClick={() => {
+                  setMostrarTodos((prev) => !prev);
+                  setPagina(1);
+                }}
                 style={{ marginLeft: 8 }}
               >
-                Ver todos
+                {mostrarTodos ? "Ver paginado" : "Ver todos"}
               </IonButton>
+            </IonCol>
+          </IonRow>
+          {/* Gráfico de barras */}
+          <IonRow>
+            <IonCol size="12">
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: 12,
+                  padding: 40,
+                  marginBottom: 24,
+                }}
+              >
+                <Bar
+                  data={data}
+                  options={options}
+                  plugins={[ChartDataLabels]}
+                />
+              </div>
             </IonCol>
           </IonRow>
           <IonRow>
