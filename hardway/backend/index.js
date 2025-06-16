@@ -852,36 +852,48 @@ app.post("/api/pedidos", async (req, res) => {
 });
 
 // Eliminar pedido
-app.delete("/api/pedidos/:id", async (req, res) => {
-  const { id } = req.params;
+app.delete("/api/pedidos/:numeroPedido", async (req, res) => {
+  const { numeroPedido } = req.params;
   const t = await sequelize.transaction();
   try {
     // 1. Obtén los detalles del pedido
-    const detalles = await PedidoIndumentaria.findAll({
-      where: { pedido_id: id },
+    const detalles = await DetallePedido.findAll({
+      where: { numeroPedido },
       transaction: t,
     });
 
     // 2. Devuelve el stock de cada prenda
     for (const detalle of detalles) {
-      const ind = await Indumentaria.findOne({
-        where: { idIndumentaria: detalle.idIndumentaria },
+      const stock = await Stock.findOne({
+        where: { codigoIndumentaria: detalle.codigoIndumentaria },
         transaction: t,
       });
-      if (ind) {
-        ind.cantidadIndumentaria += detalle.cantidad;
-        await ind.save({ transaction: t });
+      if (stock) {
+        await MovimientoStock.create(
+          {
+            idMovimientoStock:
+              "MOV-DEL-" + Math.random().toString().slice(2, 8),
+            idStock: stock.idStock,
+            fechaMovimiento: new Date(),
+            cantidad: detalle.cantidad, // Devuelve el stock
+            observaciones: `Devolución por eliminación de pedido ${numeroPedido}`,
+          },
+          { transaction: t }
+        );
       }
     }
 
     // 3. Elimina los detalles asociados
-    await PedidoIndumentaria.destroy({
-      where: { pedido_id: id },
+    await DetallePedido.destroy({
+      where: { numeroPedido },
       transaction: t,
     });
 
     // 4. Elimina el pedido
-    const deleted = await Pedido.destroy({ where: { id }, transaction: t });
+    const deleted = await Pedido.destroy({
+      where: { numeroPedido },
+      transaction: t,
+    });
 
     await t.commit();
 
