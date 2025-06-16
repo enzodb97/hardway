@@ -1666,7 +1666,7 @@ app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
         c.idCliente,
         p.nombre,
         p.apellido,
-        p.dni,
+        c.email,
         COUNT(ped.numeroPedido) AS total_pedidos
       FROM
         pedido ped
@@ -1675,7 +1675,7 @@ app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
       JOIN
         persona p ON c.idPersona = p.idPersona
       GROUP BY
-        c.idCliente, p.nombre, p.apellido, p.dni
+        c.idCliente, p.nombre, p.apellido, c.email
       ORDER BY
         total_pedidos DESC
       LIMIT 10
