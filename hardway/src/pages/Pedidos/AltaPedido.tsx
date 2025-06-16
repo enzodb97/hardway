@@ -32,7 +32,6 @@ type PedidoInput = {
 };
 
 const estadoInicial = {
-  fechaPedido: new Date().toISOString().slice(0, 16).replace("T", " "),
   idCliente: "",
   clienteNombre: "",
   idEstado: "", // si quieres permitir elegir estado
@@ -46,7 +45,7 @@ const AltaPedido: React.FC = () => {
 
   const [form, setForm] = useState(estadoInicial);
   const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
-    { idIndumentaria: number; nombre: string; cantidad: number }[]
+    { codigoIndumentaria: string; nombre: string; cantidad: number }[]
   >([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
@@ -65,7 +64,6 @@ const AltaPedido: React.FC = () => {
     if (!esEdicion) {
       setForm({
         ...estadoInicial,
-        fechaPedido: new Date().toISOString().slice(0, 16).replace("T", " "),
       });
       setPrendasSeleccionadas([]);
     }
@@ -84,7 +82,6 @@ const AltaPedido: React.FC = () => {
         try {
           const res = await axios.get(`/api/pedidos/${id}`);
           setForm({
-            fechaPedido: res.data.fechaPedido,
             idCliente: res.data.idCliente?.toString() || "",
             clienteNombre: res.data.Cliente?.nombre || "",
             idEstado: res.data.idEstado?.toString() || "",
@@ -112,7 +109,7 @@ const AltaPedido: React.FC = () => {
   const agregarPrenda = (prenda: any, cantidad: number) => {
     if (
       prendasSeleccionadas.some(
-        (p) => p.idIndumentaria === prenda.idIndumentaria
+        (p) => p.codigoIndumentaria === prenda.codigoIndumentaria
       )
     ) {
       setAlertMsg("Ya has agregado esta prenda.");
@@ -129,8 +126,8 @@ const AltaPedido: React.FC = () => {
     setPrendasSeleccionadas((prev) => [
       ...prev,
       {
-        idIndumentaria: prenda.idIndumentaria,
-        nombre: prenda.nombre, // usa el nombre correcto
+        codigoIndumentaria: prenda.codigoIndumentaria,
+        nombre: prenda.nombre,
         cantidad,
       },
     ]);
@@ -138,9 +135,9 @@ const AltaPedido: React.FC = () => {
     setFiltroIndumentaria("");
   };
 
-  const eliminarPrenda = (idIndumentaria: number) => {
+  const eliminarPrenda = (codigoIndumentaria: string) => {
     setPrendasSeleccionadas((prev) =>
-      prev.filter((p) => p.idIndumentaria !== idIndumentaria)
+      prev.filter((p) => p.codigoIndumentaria !== codigoIndumentaria)
     );
   };
 
@@ -158,16 +155,18 @@ const AltaPedido: React.FC = () => {
       return;
     }
     try {
+      // Al armar el objeto pedido para enviar al backend:
       const pedido = {
-        fechaPedido: form.fechaPedido,
         idCliente: Number(form.idCliente),
-        idEstado: 1, // o el valor que corresponda
-        // agrega aquí los detalles del pedido si tu backend los espera
-        prendas: prendasSeleccionadas.map(({ idIndumentaria, cantidad }) => ({
-          idIndumentaria,
-          cantidad,
-        })),
+        idEstado: 1,
+        prendas: prendasSeleccionadas.map(
+          ({ codigoIndumentaria, cantidad }) => ({
+            codigoIndumentaria,
+            cantidad,
+          })
+        ),
       };
+      // Al enviar el pedido:
       await crearPedido(pedido);
       setShowSuccess(true);
     } catch (error) {
@@ -206,10 +205,6 @@ const AltaPedido: React.FC = () => {
             <IonTitle>Registrar Pedido</IonTitle>
           </div>
           <IonItem>
-            <IonLabel position="floating">Fecha y hora</IonLabel>
-            <IonInput value={form.fechaPedido} readonly />
-          </IonItem>
-          <IonItem>
             <IonLabel position="floating">Cliente ID</IonLabel>
             <IonInput value={form.idCliente} readonly />
           </IonItem>
@@ -225,7 +220,7 @@ const AltaPedido: React.FC = () => {
           {/* --- Prendas seleccionadas --- */}
           <IonList>
             {prendasSeleccionadas.map((prenda, idx) => (
-              <IonItem key={prenda.idIndumentaria}>
+              <IonItem key={prenda.codigoIndumentaria}>
                 <IonLabel>
                   {prenda.nombre} (Cantidad: {prenda.cantidad})
                 </IonLabel>
@@ -250,7 +245,8 @@ const AltaPedido: React.FC = () => {
                     // Stock real en base de datos
                     const stockReal =
                       indumentaria.find(
-                        (i) => i.idIndumentaria === prenda.idIndumentaria
+                        (i) =>
+                          i.codigoIndumentaria === prenda.codigoIndumentaria
                       )?.cantidadIndumentaria ?? 0;
 
                     // Stock disponible = stock real - cantidad seleccionada actualmente
@@ -277,7 +273,7 @@ const AltaPedido: React.FC = () => {
                 </IonButton>
                 <IonButton
                   color="danger"
-                  onClick={() => eliminarPrenda(prenda.idIndumentaria)}
+                  onClick={() => eliminarPrenda(prenda.codigoIndumentaria)}
                   type="button"
                 >
                   Quitar
@@ -391,16 +387,14 @@ const AltaPedido: React.FC = () => {
                 .filter((i) => {
                   const filtro = (filtroIndumentaria ?? "").toLowerCase();
                   return (
-                    (i.descripcionIndumentaria ?? "")
-                      .toLowerCase()
-                      .includes(filtro) ||
+                    (i.nombre ?? "").toLowerCase().includes(filtro) ||
                     (i.codigoIndumentaria &&
                       i.codigoIndumentaria.toLowerCase().includes(filtro))
                   );
                 })
                 .map((prenda) => (
                   <IonItem
-                    key={prenda.idIndumentaria}
+                    key={prenda.codigoIndumentaria}
                     className="indumentaria-item"
                   >
                     <IonLabel class="indumentaria-label">
@@ -413,13 +407,12 @@ const AltaPedido: React.FC = () => {
                       value={prenda._cantidadTemp || ""}
                       onIonChange={(e) => {
                         const cantidad = Number(e.detail.value);
-                        // Validar stock en tiempo real
                         if (cantidad > prenda.cantidadIndumentaria) {
                           setAlertMsg(
                             `Stock del producto insuficiente, el stock actual es: ${prenda.cantidadIndumentaria}`
                           );
                           setShowAlert(true);
-                          prenda._cantidadTemp = prenda.cantidadIndumentaria; // Opcional: limitar al máximo
+                          prenda._cantidadTemp = prenda.cantidadIndumentaria;
                           return;
                         }
                         prenda._cantidadTemp = cantidad;

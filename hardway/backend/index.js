@@ -786,41 +786,63 @@ app.get("/api/pedidos", async (req, res) => {
 
 // Crear pedido con prendas
 app.post("/api/pedidos", async (req, res) => {
-  const { descripcion, fecha, estado, clienteId, indumentaria } = req.body;
+  const { idCliente, idEstado, prendas } = req.body;
   const t = await sequelize.transaction();
   try {
+    // Genera un número de pedido único
+    const numeroPedido =
+      "PED-" +
+      new Date().getFullYear() +
+      "-" +
+      Math.floor(Math.random() * 1000)
+        .toString()
+        .padStart(3, "0");
+
+    // Crea el pedido (fechaPedido se asigna automáticamente por la BD)
     const pedido = await Pedido.create(
-      { descripcion, fecha, estado, clienteId },
+      {
+        numeroPedido,
+        idCliente,
+        idEstado,
+      },
       { transaction: t }
     );
-    if (indumentaria && Array.isArray(indumentaria)) {
-      for (const prenda of indumentaria) {
-        // Descontar stock
-        const ind = await Indumentaria.findOne({
-          where: { idIndumentaria: prenda.idIndumentaria },
-          transaction: t,
-        });
-        if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
-          await t.rollback();
-          return res.status(400).json({
-            error: `Stock insuficiente para ${ind.nombreIndumentaria}`,
-          });
-        }
-        ind.cantidadIndumentaria -= prenda.cantidad;
-        await ind.save({ transaction: t });
 
-        await PedidoIndumentaria.create(
+    // Crea los detalles del pedido y descuenta stock
+    if (prendas && Array.isArray(prendas)) {
+      for (const prenda of prendas) {
+        await DetallePedido.create(
           {
-            pedido_id: pedido.id,
-            idIndumentaria: prenda.idIndumentaria,
+            idDetallePedido: "DPED-" + Math.random().toString().slice(2, 8),
+            numeroPedido,
+            codigoIndumentaria: prenda.codigoIndumentaria,
             cantidad: prenda.cantidad,
           },
           { transaction: t }
         );
+        // Descontar stock
+        const stock = await Stock.findOne({
+          where: { codigoIndumentaria: prenda.codigoIndumentaria },
+          transaction: t,
+        });
+        if (stock) {
+          await MovimientoStock.create(
+            {
+              idMovimientoStock:
+                "MOV-PED-" + Math.random().toString().slice(2, 8),
+              idStock: stock.idStock,
+              fechaMovimiento: new Date(),
+              cantidad: -Math.abs(prenda.cantidad),
+              observaciones: `Descuento por pedido ${numeroPedido}`,
+            },
+            { transaction: t }
+          );
+        }
       }
     }
+
     await t.commit();
-    res.json(pedido);
+    res.json({ numeroPedido });
   } catch (error) {
     await t.rollback();
     res

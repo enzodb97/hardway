@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-06-2025 a las 23:35:56
+-- Tiempo de generación: 16-06-2025 a las 04:21:50
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -269,7 +269,8 @@ VALUES
   (7, 7, 7, 7, 7, 7, 7, 7),
   (8, 8, 8, 8, 8, 8, 8, 8),
   (9, 9, 9, 9, 9, 9, 9, 9),
-  (10, 10, 10, 10, 10, 10, 10, 10);
+  (10, 10, 10, 10, 10, 10, 10, 10),
+  (16, 10, 10, 3, 3, 6, 5, 3);
 
 -- --------------------------------------------------------
 --
@@ -563,7 +564,7 @@ VALUES
   ('IND007', 7),
   ('IND008', 8),
   ('IND009', 9),
-  ('IND010', 10);
+  ('IND010', 16);
 
 -- --------------------------------------------------------
 --
@@ -590,6 +591,20 @@ INSERT INTO
     `observaciones`
   )
 VALUES
+  (
+    'MOV-604887',
+    'STK010',
+    '2025-06-14',
+    2,
+    'Ajuste manual desde edición'
+  ),
+  (
+    'MOV-845053',
+    'STK010',
+    '2025-06-14',
+    -2,
+    'Ajuste manual desde edición'
+  ),
   (
     'MOV-INIT-001',
     'STK001',
@@ -697,6 +712,7 @@ CREATE TABLE
     `numeroPedido` varchar(50) NOT NULL,
     `idCliente` int (11) NOT NULL,
     `fechaPedido` datetime NOT NULL DEFAULT current_timestamp(),
+    `fechaModificacion` datetime DEFAULT NULL ON UPDATE current_timestamp(),
     `idEstado` int (11) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
 
@@ -708,10 +724,17 @@ INSERT INTO
     `numeroPedido`,
     `idCliente`,
     `fechaPedido`,
+    `fechaModificacion`,
     `idEstado`
   )
 VALUES
-  ('PED-2025-002', 2, '2025-06-13 17:33:01', 1);
+  (
+    'PED-2025-002',
+    2,
+    '2025-06-13 17:33:01',
+    '2025-06-14 11:15:00',
+    1
+  );
 
 -- --------------------------------------------------------
 --
@@ -832,12 +855,7 @@ VALUES
   (7, 1899.25),
   (8, 2150.75),
   (9, 1750.00),
-  (10, 2200.50),
-  (11, 2001.00),
-  (12, 2000.00),
-  (13, 28092.00),
-  (14, 2800.00),
-  (15, 30058.00);
+  (10, 2200.00);
 
 -- --------------------------------------------------------
 --
@@ -1259,7 +1277,7 @@ AUTO_INCREMENT = 12;
 -- AUTO_INCREMENT de la tabla `detalleindumentaria`
 --
 ALTER TABLE `detalleindumentaria` MODIFY `idDetalle` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 16;
+AUTO_INCREMENT = 17;
 
 --
 -- AUTO_INCREMENT de la tabla `domicilio`
