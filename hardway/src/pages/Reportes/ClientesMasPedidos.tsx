@@ -52,6 +52,20 @@ interface ClienteReporte {
 
 const PAGE_SIZE = 5;
 
+// Array de colores para las barras
+const colores = [
+  "#FF6384", // rojo
+  "#36A2EB", // azul
+  "#FFCE56", // amarillo
+  "#4BC0C0", // verde agua
+  "#9966FF", // violeta
+  "#FF9F40", // naranja
+  "#B2FF66", // verde claro
+  "#FF66B2", // rosa
+  "#66FFB2", // turquesa
+  "#B266FF", // lila
+];
+
 const ClientesMasPedidos: React.FC = () => {
   const [clientes, setClientes] = useState<ClienteReporte[]>([]);
   const [pagina, setPagina] = useState(1);
@@ -130,12 +144,13 @@ const ClientesMasPedidos: React.FC = () => {
       {
         label: "Total de Pedidos",
         data: clientes.map((c) => c.total_pedidos),
-        backgroundColor: "rgba(254, 175, 0, 0.7)",
+        backgroundColor: colores.slice(0, clientes.length), // Un color por barra
         borderRadius: 8,
         maxBarThickness: 32,
       },
     ],
   };
+  const maxPedidos = Math.max(...clientes.map((c) => c.total_pedidos), 0);
 
   const options = {
     indexAxis: "y" as const, // Barras horizontales
@@ -150,10 +165,13 @@ const ClientesMasPedidos: React.FC = () => {
       },
       datalabels: {
         anchor: "end",
-        align: "right",
+        align: "end",
         color: "#333",
         font: { weight: "bold" },
+        offset: 16,
         formatter: (value: number) => value,
+        clamp: true,
+        display: true,
       },
       tooltip: {
         callbacks: {
@@ -177,6 +195,7 @@ const ClientesMasPedidos: React.FC = () => {
         },
         beginAtZero: true,
         ticks: { precision: 0 },
+        max: maxPedidos + 1, // <-- Esto agrega una "columna" más de espacio
       },
       y: {
         title: {
@@ -288,7 +307,7 @@ const ClientesMasPedidos: React.FC = () => {
               <IonButton
                 size="small"
                 fill={incluirGrafico ? "solid" : "outline"}
-                color={incluirGrafico ? "success" : "medium"}
+                color={incluirGrafico ? "primary" : "medium"} // Cambia "success" por "primary"
                 onClick={() => setIncluirGrafico((prev) => !prev)}
                 style={{ marginLeft: 8, marginBottom: 8 }}
               >
@@ -316,6 +335,9 @@ const ClientesMasPedidos: React.FC = () => {
                   borderRadius: 12,
                   padding: 40,
                   marginBottom: 24,
+                  width: "100%",
+                  maxWidth: "1200px",
+                  margin: "0 auto",
                 }}
               >
                 <Bar
@@ -323,6 +345,8 @@ const ClientesMasPedidos: React.FC = () => {
                   data={data}
                   options={options}
                   plugins={[ChartDataLabels]}
+                  width={1200}
+                  height={600}
                 />
               </div>
             </IonCol>

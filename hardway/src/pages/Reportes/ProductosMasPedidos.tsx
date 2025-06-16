@@ -68,6 +68,15 @@ const ProductosMasPedidos: React.FC = () => {
     (p) => `${p.nombre_indumentaria}, Talle ${p.talle}, ${p.tela}, ${p.color}`
   );
 
+  // Genera un array de colores distintos (puedes personalizarlos)
+  const colores = [
+    "#FF6384", // rojo
+    "#36A2EB", // azul
+    "#FFCE56", // amarillo
+    "#4BC0C0", // verde agua
+    "#9966FF", // violeta
+  ];
+
   // Datos para el gráfico
   const data = {
     labels: etiquetas,
@@ -75,7 +84,7 @@ const ProductosMasPedidos: React.FC = () => {
       {
         label: "Cantidad Vendida",
         data: productos.map((p) => p.cantidad_total_vendida),
-        backgroundColor: "rgba(254, 175, 0, 0.7)",
+        backgroundColor: colores.slice(0, productos.length), // Un color por barra
         borderRadius: 8,
         maxBarThickness: 32,
       },
@@ -257,7 +266,7 @@ const ProductosMasPedidos: React.FC = () => {
                     <IonButton
                       size="small"
                       fill={incluirGrafico ? "solid" : "outline"}
-                      color={incluirGrafico ? "success" : "medium"}
+                      color={incluirGrafico ? "primary" : "medium"} // Cambia "success" por "primary"
                       onClick={() => setIncluirGrafico((prev) => !prev)}
                       style={{ marginLeft: 8, marginBottom: 8 }}
                     >
