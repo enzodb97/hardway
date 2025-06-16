@@ -973,10 +973,10 @@ app.put("/api/pedidos/:id", async (req, res) => {
 });
 
 // Obtener pedido por ID con prendas
-app.get("/api/pedidos/:id", async (req, res) => {
+/*app.get("/api/pedidos/:id", async (req, res) => {
   try {
     const pedido = await Pedido.findOne({
-      where: { id: req.params.id },
+      where: { numeroPedido: req.params.id }, // <-- CORREGIDO
       include: [
         { model: Cliente },
         {
@@ -995,7 +995,7 @@ app.get("/api/pedidos/:id", async (req, res) => {
       .status(500)
       .json({ error: "Error al obtener pedido", detalle: error.message });
   }
-});
+});*/
 
 // Validar usuario por nombre de usuario
 app.get("/api/usuarios/validate", async (req, res) => {

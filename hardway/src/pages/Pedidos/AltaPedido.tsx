@@ -83,16 +83,23 @@ const AltaPedido: React.FC = () => {
           const res = await axios.get(`/api/pedidos/${id}`);
           setForm({
             idCliente: res.data.idCliente?.toString() || "",
-            clienteNombre: res.data.Cliente?.nombre || "",
+            clienteNombre: res.data.Cliente?.Persona
+              ? `${res.data.Cliente.Persona.nombre} ${
+                  res.data.Cliente.Persona.apellido ?? ""
+                }`.trim()
+              : "",
             idEstado: res.data.idEstado?.toString() || "",
           });
           // Cargar prendas asociadas al pedido
-          if (res.data.Indumentaria) {
+          if (res.data.DetallePedidos) {
             setPrendasSeleccionadas(
-              res.data.Indumentaria.map((prenda: any) => ({
-                idIndumentaria: prenda.idIndumentaria,
-                descripcion: prenda.descripcionIndumentaria,
-                cantidad: prenda.PedidoIndumentaria.cantidad,
+              res.data.DetallePedidos.map((detalle: any) => ({
+                codigoIndumentaria: detalle.codigoIndumentaria,
+                nombre:
+                  detalle.Indumentaria?.nombre ||
+                  detalle.Indumentaria?.codigoIndumentaria ||
+                  "",
+                cantidad: detalle.cantidad,
               }))
             );
           }
@@ -202,7 +209,9 @@ const AltaPedido: React.FC = () => {
         <form className="alta-pedido-form" onSubmit={handleSubmit}>
           <div className="titulo">
             <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
-            <IonTitle>Registrar Pedido</IonTitle>
+            <IonTitle>
+              {esEdicion ? "Editar Pedido" : "Registrar Pedido"}
+            </IonTitle>
           </div>
           <IonItem>
             <IonLabel position="floating">Cliente ID</IonLabel>
