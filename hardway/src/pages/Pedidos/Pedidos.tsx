@@ -1,5 +1,6 @@
 // src/pages/Pedidos/Pedidos.tsx
 import React, { useState } from "react";
+import GraficoBarras from "../../../src/components/GraficoBarras";
 import {
   IonPage,
   IonHeader,
@@ -238,6 +239,9 @@ const Pedidos: React.FC = () => {
               </IonButton>
             </IonCol>
           </IonRow>
+          <div className="grafico-barras-container">
+            <GraficoBarras />
+          </div>
         </IonGrid>
         <IonAlert
           isOpen={showAlert}

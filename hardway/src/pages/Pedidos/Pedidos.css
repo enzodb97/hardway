@@ -60,3 +60,15 @@
   gap: 8px;
   justify-content: center;
 }
+
+.grafico-barras-container {
+  min-height: 300px;
+  min-width: 300px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  /* Si necesitas, puedes agregar: */
+  position: static !important;
+}

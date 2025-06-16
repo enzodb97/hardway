@@ -1480,7 +1480,25 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
         { model: EstadoPedido },
         {
           model: DetallePedido,
-          include: [{ model: Indumentaria }],
+          include: [
+            {
+              model: Indumentaria,
+              as: "Indumentarium",
+              include: [
+                {
+                  model: DetalleIndumentaria,
+                  as: "DetalleIndumentarium",
+                  include: [
+                    {
+                      model: NombreIndumentaria,
+                      as: "NombreIndumentarium",
+                      attributes: ["nombre"],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     });
@@ -1612,5 +1630,31 @@ app.post("/api/stock/movimiento", async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Error al crear movimiento de stock" });
+  }
+});
+
+app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
+  try {
+    const [result] = await sequelize.query(`
+      SELECT
+        ni.nombre AS nombreProducto,
+        SUM(dp.cantidad) AS totalPedidos
+      FROM
+        detallepedido dp
+      JOIN
+        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
+      JOIN
+        detalleindumentaria di ON i.idDetalle = di.idDetalle
+      JOIN
+        nombreindumentaria ni ON di.idNombre = ni.idNombre
+      GROUP BY
+        ni.nombre
+      ORDER BY
+        totalPedidos DESC
+      LIMIT 10
+    `);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener productos más pedidos" });
   }
 });
