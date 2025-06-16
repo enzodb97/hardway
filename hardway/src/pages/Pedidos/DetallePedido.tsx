@@ -28,19 +28,9 @@ const DetallePedido: React.FC = () => {
   useEffect(() => {
     const cargarPedido = async () => {
       try {
-        const res = await axios.get(`/api/pedidos/${id}`);
-        setPedido(res.data);
-        setPrendas(
-          res.data.DetallePedidos?.map((detalle: any) => ({
-            nombre:
-              detalle.Indumentarium?.DetalleIndumentarium?.NombreIndumentarium
-                ?.nombre ||
-              detalle.Indumentarium?.codigoIndumentaria ||
-              "",
-            referencia: detalle.Indumentaria?.codigoIndumentaria,
-            cantidad: detalle.cantidad,
-          })) || []
-        );
+        // Cambia el endpoint aquí:
+        const res = await axios.get(`/api/pedidos/${id}/detalle-plano`);
+        setPrendas(res.data);
       } catch (error) {
         // Manejo de error
       }
@@ -59,7 +49,7 @@ const DetallePedido: React.FC = () => {
       <IonContent>
         <h2 className="detalle-pedido-titulo">
           <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />{" "}
-          Detalle de Pedido #{pedido?.id}
+          Detalle de Pedido #{pedido?.id || id}
         </h2>
         <IonGrid>
           <IonRow className="table-header">
@@ -68,9 +58,6 @@ const DetallePedido: React.FC = () => {
             </IonCol>
             <IonCol size="2">
               <strong>Referencia</strong>
-            </IonCol>
-            <IonCol size="2">
-              <strong>SKU</strong>
             </IonCol>
             <IonCol size="2">
               <strong>Categoria</strong>
@@ -85,13 +72,10 @@ const DetallePedido: React.FC = () => {
           {prendas.map((prenda, idx) => (
             <IonRow key={idx}>
               <IonCol class="col" size="2">
-                {prenda.nombre}
+                {prenda.nombreProducto}
               </IonCol>
               <IonCol class="col" size="2">
                 {prenda.referencia}
-              </IonCol>
-              <IonCol class="col" size="2">
-                {prenda.sku}
               </IonCol>
               <IonCol class="col" size="2">
                 {prenda.categoria}

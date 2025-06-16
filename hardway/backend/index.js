@@ -1480,25 +1480,7 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
         { model: EstadoPedido },
         {
           model: DetallePedido,
-          include: [
-            {
-              model: Indumentaria,
-              as: "Indumentarium", // <-- usa el alias que Sequelize genera
-              include: [
-                {
-                  model: DetalleIndumentaria,
-                  as: "DetalleIndumentarium",
-                  include: [
-                    {
-                      model: NombreIndumentaria,
-                      as: "NombreIndumentarium",
-                      attributes: ["nombre"],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+          include: [{ model: Indumentaria }],
         },
       ],
     });
@@ -1511,6 +1493,45 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
     res
       .status(500)
       .json({ error: "Error al obtener pedido", detalle: error.message });
+  }
+});
+
+app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
+  const { numeroPedido } = req.params;
+  try {
+    const [result] = await sequelize.query(
+      `
+      SELECT
+        ni.nombre AS nombreProducto,
+        i.codigoIndumentaria AS referencia,
+        i.codigoIndumentaria AS sku,
+        cat.categoria AS categoria,
+        r.numeroRack AS rack,
+        dp.cantidad AS cantidad
+      FROM
+        detallepedido dp
+      JOIN
+        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
+      JOIN
+        detalleindumentaria di ON i.idDetalle = di.idDetalle
+      JOIN
+        nombreindumentaria ni ON di.idNombre = ni.idNombre
+      JOIN
+        categoriaindumentaria cat ON di.idCategoria = cat.idCategoria
+      JOIN
+        stock s ON i.codigoIndumentaria = s.codigoIndumentaria
+      JOIN
+        rack r ON s.idRack = r.idRack
+      WHERE
+        dp.numeroPedido = ?
+      `,
+      { replacements: [numeroPedido] }
+    );
+    res.json(result);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al obtener detalle plano del pedido" });
   }
 });
 

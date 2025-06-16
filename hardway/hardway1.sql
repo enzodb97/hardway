@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-06-2025 a las 04:21:50
+-- Tiempo de generación: 16-06-2025 a las 18:07:05
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -295,7 +295,12 @@ INSERT INTO
     `cantidad`
   )
 VALUES
-  ('DP-003', 'PED-2025-002', 'IND005', 1);
+  ('DPED-040881', 'PED-2025-446', 'IND003', 2),
+  ('DPED-368986', 'PED-2025-333', 'IND001', 2),
+  ('DPED-472999', 'PED-2025-172', 'IND003', 6),
+  ('DPED-532448', 'PED-2025-172', 'IND002', 4),
+  ('DPED-691464', 'PED-2025-172', 'IND001', 2),
+  ('DPED-696957', 'PED-2025-446', 'IND001', 2);
 
 -- --------------------------------------------------------
 --
@@ -606,6 +611,657 @@ VALUES
     'Ajuste manual desde edición'
   ),
   (
+    'MOV-DEL-109900',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por eliminación de pedido PED-2025-663'
+  ),
+  (
+    'MOV-DEL-148817',
+    'STK003',
+    '2025-06-16',
+    1,
+    'Devolución por eliminación de pedido PED-2025-823'
+  ),
+  (
+    'MOV-DEL-264368',
+    'STK001',
+    '2025-06-16',
+    12,
+    'Devolución por eliminación de pedido PED-2025-663'
+  ),
+  (
+    'MOV-DEL-381517',
+    'STK001',
+    '2025-06-16',
+    1,
+    'Devolución por eliminación de pedido PED-2025-885'
+  ),
+  (
+    'MOV-DEL-423999',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por eliminación de pedido PED-2025-885'
+  ),
+  (
+    'MOV-DEL-438380',
+    'STK001',
+    '2025-06-16',
+    2,
+    'Devolución por eliminación de pedido PED-2025-002'
+  ),
+  (
+    'MOV-DEL-579352',
+    'STK005',
+    '2025-06-16',
+    8,
+    'Devolución por eliminación de pedido PED-2025-973'
+  ),
+  (
+    'MOV-DEL-646992',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por eliminación de pedido PED-2025-576'
+  ),
+  (
+    'MOV-DEL-659172',
+    'STK001',
+    '2025-06-16',
+    1,
+    'Devolución por eliminación de pedido PED-2025-576'
+  ),
+  (
+    'MOV-DEL-724299',
+    'STK005',
+    '2025-06-16',
+    12,
+    'Devolución por eliminación de pedido PED-2025-663'
+  ),
+  (
+    'MOV-DEL-938189',
+    'STK001',
+    '2025-06-16',
+    1,
+    'Devolución por eliminación de pedido PED-2025-823'
+  ),
+  (
+    'MOV-EDIT-DESC-048909',
+    'STK005',
+    '2025-06-16',
+    -8,
+    'Descuento por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DESC-058906',
+    'STK005',
+    '2025-06-16',
+    -8,
+    'Descuento por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DESC-122896',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-129750',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-169481',
+    'STK005',
+    '2025-06-16',
+    -10,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-182533',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-185294',
+    'STK005',
+    '2025-06-16',
+    -16,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-234815',
+    'STK001',
+    '2025-06-16',
+    -10,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-267547',
+    'STK005',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-289981',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-446'
+  ),
+  (
+    'MOV-EDIT-DESC-328881',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-333034',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-341771',
+    'STK005',
+    '2025-06-16',
+    -10,
+    'Descuento por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DESC-392085',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-415749',
+    'STK001',
+    '2025-06-16',
+    -12,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-418381',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-422511',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-424959',
+    'STK005',
+    '2025-06-16',
+    -12,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-440387',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-451916',
+    'STK005',
+    '2025-06-16',
+    -14,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-454311',
+    'STK005',
+    '2025-06-16',
+    -12,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-466865',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DESC-513756',
+    'STK005',
+    '2025-06-16',
+    -1,
+    'Descuento por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DESC-521655',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-555850',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-446'
+  ),
+  (
+    'MOV-EDIT-DESC-558772',
+    'STK005',
+    '2025-06-16',
+    -8,
+    'Descuento por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DESC-568211',
+    'STK005',
+    '2025-06-16',
+    -10,
+    'Descuento por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DESC-574305',
+    'STK005',
+    '2025-06-16',
+    -10,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-590075',
+    'STK005',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-598528',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-614628',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-684918',
+    'STK005',
+    '2025-06-16',
+    -16,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-736685',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-756529',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-756819',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-761677',
+    'STK001',
+    '2025-06-16',
+    -10,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-784970',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-838648',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-860534',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-861777',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DESC-907812',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-938865',
+    'STK005',
+    '2025-06-16',
+    -16,
+    'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-009527',
+    'STK001',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-446'
+  ),
+  (
+    'MOV-EDIT-DEV-012834',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-028788',
+    'STK001',
+    '2025-06-16',
+    1,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-034202',
+    'STK005',
+    '2025-06-16',
+    10,
+    'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-061252',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-065823',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-124081',
+    'STK005',
+    '2025-06-16',
+    16,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-131152',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-134631',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-216002',
+    'STK005',
+    '2025-06-16',
+    8,
+    'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-231203',
+    'STK001',
+    '2025-06-16',
+    10,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-235744',
+    'STK005',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-293018',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-306124',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-309231',
+    'STK005',
+    '2025-06-16',
+    10,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-362418',
+    'STK005',
+    '2025-06-16',
+    10,
+    'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-391331',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-397519',
+    'STK005',
+    '2025-06-16',
+    1,
+    'Devolución por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DEV-436940',
+    'STK005',
+    '2025-06-16',
+    12,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-507330',
+    'STK005',
+    '2025-06-16',
+    10,
+    'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-542624',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-544504',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-548392',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-560199',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-573919',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-580892',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-593845',
+    'STK005',
+    '2025-06-16',
+    16,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-597888',
+    'STK005',
+    '2025-06-16',
+    1,
+    'Devolución por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DEV-611280',
+    'STK005',
+    '2025-06-16',
+    8,
+    'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-622945',
+    'STK005',
+    '2025-06-16',
+    16,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-637531',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-642911',
+    'STK005',
+    '2025-06-16',
+    10,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-645008',
+    'STK005',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-668877',
+    'STK005',
+    '2025-06-16',
+    14,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-743934',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-774661',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-784949',
+    'STK001',
+    '2025-06-16',
+    10,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-793652',
+    'STK001',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DEV-984975',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-987082',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
     'MOV-INIT-001',
     'STK001',
     '2025-06-13',
@@ -674,6 +1330,104 @@ VALUES
     '2025-06-13',
     130,
     'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-PED-131967',
+    'STK002',
+    '2025-06-16',
+    -4,
+    'Descuento por pedido PED-2025-172'
+  ),
+  (
+    'MOV-PED-216017',
+    'STK001',
+    '2025-06-16',
+    -1,
+    'Descuento por pedido PED-2025-885'
+  ),
+  (
+    'MOV-PED-263644',
+    'STK003',
+    '2025-06-16',
+    -1,
+    'Descuento por pedido PED-2025-823'
+  ),
+  (
+    'MOV-PED-280052',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por pedido PED-2025-576'
+  ),
+  (
+    'MOV-PED-299447',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Descuento por pedido PED-2025-172'
+  ),
+  (
+    'MOV-PED-533530',
+    'STK001',
+    '2025-06-16',
+    -1,
+    'Descuento por pedido PED-2025-663'
+  ),
+  (
+    'MOV-PED-563744',
+    'STK001',
+    '2025-06-16',
+    -1,
+    'Descuento por pedido PED-2025-576'
+  ),
+  (
+    'MOV-PED-645037',
+    'STK005',
+    '2025-06-16',
+    -10,
+    'Descuento por pedido PED-2025-973'
+  ),
+  (
+    'MOV-PED-670457',
+    'STK003',
+    '2025-06-16',
+    -6,
+    'Descuento por pedido PED-2025-172'
+  ),
+  (
+    'MOV-PED-704202',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Descuento por pedido PED-2025-333'
+  ),
+  (
+    'MOV-PED-707737',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por pedido PED-2025-885'
+  ),
+  (
+    'MOV-PED-870580',
+    'STK001',
+    '2025-06-16',
+    -1,
+    'Descuento por pedido PED-2025-823'
+  ),
+  (
+    'MOV-PED-943756',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Descuento por pedido PED-2025-446'
+  ),
+  (
+    'MOV-PED-965241',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por pedido PED-2025-663'
   );
 
 -- --------------------------------------------------------
@@ -713,7 +1467,8 @@ CREATE TABLE
     `idCliente` int (11) NOT NULL,
     `fechaPedido` datetime NOT NULL DEFAULT current_timestamp(),
     `fechaModificacion` datetime DEFAULT NULL ON UPDATE current_timestamp(),
-    `idEstado` int (11) DEFAULT NULL
+    `idEstado` int (11) DEFAULT NULL,
+    `dummyUpdate` int (11) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
 
 --
@@ -725,15 +1480,33 @@ INSERT INTO
     `idCliente`,
     `fechaPedido`,
     `fechaModificacion`,
-    `idEstado`
+    `idEstado`,
+    `dummyUpdate`
   )
 VALUES
   (
-    'PED-2025-002',
-    2,
-    '2025-06-13 17:33:01',
-    '2025-06-14 11:15:00',
-    1
+    'PED-2025-172',
+    1,
+    '2025-06-16 03:55:34',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-333',
+    4,
+    '2025-06-16 04:01:30',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-446',
+    3,
+    '2025-06-16 04:02:48',
+    '2025-06-16 04:09:44',
+    1,
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -859,6 +1632,34 @@ VALUES
 
 -- --------------------------------------------------------
 --
+-- Estructura de tabla para la tabla `rack`
+--
+CREATE TABLE
+  `rack` (
+    `idRack` int (11) NOT NULL,
+    `numeroRack` int (11) NOT NULL,
+    `descripcion` varchar(255) DEFAULT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `rack`
+--
+INSERT INTO
+  `rack` (`idRack`, `numeroRack`, `descripcion`)
+VALUES
+  (1, 1, 'Rack 1'),
+  (2, 2, 'Rack 2'),
+  (3, 3, 'Rack 3'),
+  (4, 4, 'Rack 4'),
+  (5, 5, 'Rack 5'),
+  (6, 6, 'Rack 6'),
+  (7, 7, 'Rack 7'),
+  (8, 8, 'Rack 8'),
+  (9, 9, 'Rack 9'),
+  (10, 10, 'Rack 10');
+
+-- --------------------------------------------------------
+--
 -- Estructura de tabla para la tabla `rol`
 --
 CREATE TABLE
@@ -891,25 +1692,26 @@ VALUES
 CREATE TABLE
   `stock` (
     `idStock` varchar(50) NOT NULL,
-    `codigoIndumentaria` varchar(50) DEFAULT NULL
+    `codigoIndumentaria` varchar(50) DEFAULT NULL,
+    `idRack` int (11) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `stock`
 --
 INSERT INTO
-  `stock` (`idStock`, `codigoIndumentaria`)
+  `stock` (`idStock`, `codigoIndumentaria`, `idRack`)
 VALUES
-  ('STK001', 'IND001'),
-  ('STK002', 'IND002'),
-  ('STK003', 'IND003'),
-  ('STK004', 'IND004'),
-  ('STK005', 'IND005'),
-  ('STK006', 'IND006'),
-  ('STK007', 'IND007'),
-  ('STK008', 'IND008'),
-  ('STK009', 'IND009'),
-  ('STK010', 'IND010');
+  ('STK001', 'IND001', 1),
+  ('STK002', 'IND002', 2),
+  ('STK003', 'IND003', 3),
+  ('STK004', 'IND004', 4),
+  ('STK005', 'IND005', 5),
+  ('STK006', 'IND006', 6),
+  ('STK007', 'IND007', 7),
+  ('STK008', 'IND008', 8),
+  ('STK009', 'IND009', 9),
+  ('STK010', 'IND010', 10);
 
 -- --------------------------------------------------------
 --
@@ -1201,6 +2003,12 @@ ADD KEY `idDomicilio` (`idDomicilio`);
 ALTER TABLE `precioindumentaria` ADD PRIMARY KEY (`idPrecio`);
 
 --
+-- Indices de la tabla `rack`
+--
+ALTER TABLE `rack` ADD PRIMARY KEY (`idRack`),
+ADD UNIQUE KEY `idx_numeroRack` (`numeroRack`);
+
+--
 -- Indices de la tabla `rol`
 --
 ALTER TABLE `rol` ADD PRIMARY KEY (`idRol`),
@@ -1210,7 +2018,8 @@ ADD KEY `idTipoRol` (`idTipoRol`);
 -- Indices de la tabla `stock`
 --
 ALTER TABLE `stock` ADD PRIMARY KEY (`idStock`),
-ADD KEY `codigoIndumentaria` (`codigoIndumentaria`);
+ADD KEY `codigoIndumentaria` (`codigoIndumentaria`),
+ADD KEY `fk_stock_rack` (`idRack`);
 
 --
 -- Indices de la tabla `talle`
@@ -1314,6 +2123,12 @@ AUTO_INCREMENT = 34;
 --
 ALTER TABLE `precioindumentaria` MODIFY `idPrecio` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 16;
+
+--
+-- AUTO_INCREMENT de la tabla `rack`
+--
+ALTER TABLE `rack` MODIFY `idRack` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 11;
 
 --
 -- AUTO_INCREMENT de la tabla `talle`
@@ -1429,7 +2244,8 @@ ALTER TABLE `rol` ADD CONSTRAINT `rol_ibfk_1` FOREIGN KEY (`idTipoRol`) REFERENC
 --
 -- Filtros para la tabla `stock`
 --
-ALTER TABLE `stock` ADD CONSTRAINT `stock_ibfk_1` FOREIGN KEY (`codigoIndumentaria`) REFERENCES `indumentaria` (`codigoIndumentaria`);
+ALTER TABLE `stock` ADD CONSTRAINT `fk_stock_rack` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`),
+ADD CONSTRAINT `stock_ibfk_1` FOREIGN KEY (`codigoIndumentaria`) REFERENCES `indumentaria` (`codigoIndumentaria`);
 
 --
 -- Filtros para la tabla `usuario`

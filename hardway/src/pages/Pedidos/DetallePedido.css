@@ -33,3 +33,7 @@ ion-content h2 {
   font-weight: bold;
   margin-bottom: 1rem;
 }
+
+.detalle-pedido-page ion-row {
+  justify-content: center;
+}
