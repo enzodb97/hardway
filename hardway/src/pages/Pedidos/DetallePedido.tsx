@@ -32,7 +32,11 @@ const DetallePedido: React.FC = () => {
         setPedido(res.data);
         setPrendas(
           res.data.DetallePedidos?.map((detalle: any) => ({
-            nombre: detalle.Indumentaria?.descripcionIndumentaria,
+            nombre:
+              detalle.Indumentarium?.DetalleIndumentarium?.NombreIndumentarium
+                ?.nombre ||
+              detalle.Indumentarium?.codigoIndumentaria ||
+              "",
             referencia: detalle.Indumentaria?.codigoIndumentaria,
             cantidad: detalle.cantidad,
           })) || []

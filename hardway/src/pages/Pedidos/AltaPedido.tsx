@@ -96,8 +96,9 @@ const AltaPedido: React.FC = () => {
               res.data.DetallePedidos.map((detalle: any) => ({
                 codigoIndumentaria: detalle.codigoIndumentaria,
                 nombre:
-                  detalle.Indumentaria?.nombre ||
-                  detalle.Indumentaria?.codigoIndumentaria ||
+                  detalle.Indumentarium?.DetalleIndumentarium
+                    ?.NombreIndumentarium?.nombre ||
+                  detalle.Indumentarium?.codigoIndumentaria ||
                   "",
                 cantidad: detalle.cantidad,
               }))

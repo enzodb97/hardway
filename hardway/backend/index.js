@@ -254,8 +254,9 @@ const DetalleIndumentaria = sequelize.define(
     idTalle: DataTypes.INTEGER,
     idEstado: DataTypes.INTEGER,
     idTela: DataTypes.INTEGER,
+    idNombre: DataTypes.INTEGER, // <--- AGREGA ESTA LÍNEA
   },
-  { tableName: "DetalleIndumentaria", timestamps: false }
+  { tableName: "detalleindumentaria", timestamps: false }
 );
 
 const NombreIndumentaria = sequelize.define(
@@ -270,7 +271,18 @@ const NombreIndumentaria = sequelize.define(
   },
   { tableName: "nombreindumentaria", timestamps: false }
 );
-
+DetallePedido.belongsTo(Indumentaria, {
+  foreignKey: "codigoIndumentaria",
+  as: "Indumentarium",
+});
+Indumentaria.belongsTo(DetalleIndumentaria, {
+  foreignKey: "idDetalle",
+  as: "DetalleIndumentarium",
+});
+DetalleIndumentaria.belongsTo(NombreIndumentaria, {
+  foreignKey: "idNombre",
+  as: "NombreIndumentarium",
+});
 DetalleIndumentaria.belongsTo(Color, { foreignKey: "idColor" });
 DetalleIndumentaria.belongsTo(Talle, { foreignKey: "idTalle" });
 DetalleIndumentaria.belongsTo(Tela, { foreignKey: "idTela" });
@@ -991,15 +1003,23 @@ app.put("/api/pedidos/:numeroPedido", async (req, res) => {
       }
     }
 
-    // 5. Actualiza los datos del pedido (fechaModificacion se actualiza automáticamente por la BD)
-    await pedido.update(
+    // 5. Forzar UPDATE real para que se actualice fechaModificacion
+    await sequelize.query(
+      `UPDATE pedido SET idEstado = idEstado + 1 WHERE numeroPedido = ?`,
       {
-        idCliente,
-        idEstado,
-        // No actualices numeroPedido ni fechaPedido
-      },
-      { transaction: t }
+        replacements: [numeroPedido],
+        transaction: t,
+      }
     );
+    await sequelize.query(
+      `UPDATE pedido SET idEstado = idEstado - 1 WHERE numeroPedido = ?`,
+      {
+        replacements: [numeroPedido],
+        transaction: t,
+      }
+    );
+    // Esto asegura que MySQL SIEMPRE modifique la fila y dispare el trigger ON UPDATE
+    // Esto SIEMPRE ejecuta el UPDATE y MySQL actualizará fechaModificacion
 
     await t.commit();
     res.json({ success: true });
@@ -1460,7 +1480,25 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
         { model: EstadoPedido },
         {
           model: DetallePedido,
-          include: [{ model: Indumentaria }],
+          include: [
+            {
+              model: Indumentaria,
+              as: "Indumentarium", // <-- usa el alias que Sequelize genera
+              include: [
+                {
+                  model: DetalleIndumentaria,
+                  as: "DetalleIndumentarium",
+                  include: [
+                    {
+                      model: NombreIndumentaria,
+                      as: "NombreIndumentarium",
+                      attributes: ["nombre"],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     });
