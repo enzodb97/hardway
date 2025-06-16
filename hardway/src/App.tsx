@@ -24,6 +24,8 @@ import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
 import Reportes from "./pages/Reportes/Reportes";
 import ClientesMasPedidos from "./pages/Reportes/ClientesMasPedidos";
+import StockActual from "./pages/Reportes/StockActual";
+/*import ProductosMasPedidos from "./pages/Reportes/ProductosMasPedidos";*/
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -103,6 +105,11 @@ const AppRouter = () => {
             <Route
               path="/reportes/clientes-mas-pedidos"
               component={ClientesMasPedidos}
+              exact
+            />
+            <Route
+              path="/reportes/stock-actual"
+              component={StockActual}
               exact
             />
           </IonRouterOutlet>

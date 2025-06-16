@@ -1687,3 +1687,34 @@ app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
       .json({ error: "Error al obtener clientes con más pedidos" });
   }
 });
+
+app.get("/api/reportes/stock-actual", async (req, res) => {
+  try {
+    const [result] = await sequelize.query(`
+      SELECT
+        s.codigoIndumentaria,
+        ni.nombre AS nombre_producto,
+        r.numeroRack AS rack,
+        SUM(ms.cantidad) AS stock_actual
+      FROM
+        movimientostock ms
+      JOIN
+        stock s ON ms.idStock = s.idStock
+      JOIN
+        indumentaria i ON s.codigoIndumentaria = i.codigoIndumentaria
+      JOIN
+        detalleindumentaria di ON i.idDetalle = di.idDetalle
+      JOIN
+        nombreindumentaria ni ON di.idNombre = ni.idNombre
+      JOIN
+        rack r ON s.idRack = r.idRack
+      GROUP BY
+        s.codigoIndumentaria, ni.nombre, r.numeroRack
+      ORDER BY
+        stock_actual ASC
+    `);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener stock actual" });
+  }
+});
