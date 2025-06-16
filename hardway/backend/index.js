@@ -1633,7 +1633,7 @@ app.post("/api/stock/movimiento", async (req, res) => {
   }
 });
 
-app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
+/*app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
   try {
     const [result] = await sequelize.query(`
       SELECT
@@ -1657,7 +1657,7 @@ app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Error al obtener productos más pedidos" });
   }
-});
+});*/
 
 app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
   try {
@@ -1716,5 +1716,49 @@ app.get("/api/reportes/stock-actual", async (req, res) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener stock actual" });
+  }
+});
+
+app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
+  try {
+    const [result] = await sequelize.query(`
+      SELECT
+        ni.nombre AS nombre_indumentaria,
+        dp.codigoIndumentaria,
+        SUM(dp.cantidad) AS cantidad_total_vendida,
+        ta.talle,
+        te.tipoTela AS tela,
+        co.color
+      FROM
+        detallepedido dp
+      JOIN
+        pedido p ON dp.numeroPedido = p.numeroPedido
+      JOIN
+        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
+      JOIN
+        detalleindumentaria di ON i.idDetalle = di.idDetalle
+      JOIN
+        nombreindumentaria ni ON di.idNombre = ni.idNombre
+      JOIN
+        talle ta ON di.idTalle = ta.idTalle
+      JOIN
+        tela te ON di.idTela = te.idTela
+      JOIN
+        color co ON di.idColor = co.idColor
+      WHERE
+        p.idEstado != 6
+      GROUP BY
+        dp.codigoIndumentaria,
+        ni.nombre,
+        ta.talle,
+        te.tipoTela,
+        co.color
+      ORDER BY
+        cantidad_total_vendida DESC
+      LIMIT 5
+    `);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener productos más pedidos" });
   }
 });
