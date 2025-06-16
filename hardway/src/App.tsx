@@ -23,6 +23,7 @@ import DetallePedido from "./pages/Pedidos/DetallePedido";
 import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
 import Reportes from "./pages/Reportes/Reportes";
+import ClientesMasPedidos from "./pages/Reportes/ClientesMasPedidos";
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -99,6 +100,11 @@ const AppRouter = () => {
               <Redirect to="/dashboard" />
             </Route>
             <Route path="/reportes" component={Reportes} exact />
+            <Route
+              path="/reportes/clientes-mas-pedidos"
+              component={ClientesMasPedidos}
+              exact
+            />
           </IonRouterOutlet>
         </IonSplitPane>
       ) : (

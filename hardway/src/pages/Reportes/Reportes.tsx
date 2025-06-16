@@ -9,48 +9,58 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
+  IonButton,
 } from "@ionic/react";
-import GraficoBarras from "../../components/GraficoBarras"; // Productos más pedidos
-// Aquí puedes importar otros componentes de gráficos o tablas
+import { useHistory } from "react-router-dom";
 
-const Reportes: React.FC = () => (
-  <IonPage>
-    <IonHeader>
-      <IonToolbar color="warning">
-        <IonTitle>Reportes</IonTitle>
-      </IonToolbar>
-    </IonHeader>
-    <IonContent className="ion-padding">
-      <IonCard>
-        <IonCardHeader>
-          <IonCardTitle>Clientes con más pedidos</IonCardTitle>
-        </IonCardHeader>
-        <IonCardContent>
-          {/* Aquí irá el gráfico o tabla de clientes preferenciales */}
-          {/* Ejemplo: <GraficoClientesMasPedidos /> */}
-        </IonCardContent>
-      </IonCard>
+const Reportes: React.FC = () => {
+  const history = useHistory();
 
-      <IonCard>
-        <IonCardHeader>
-          <IonCardTitle>Stock actual disponible</IonCardTitle>
-        </IonCardHeader>
-        <IonCardContent>
-          {/* Aquí irá el listado o gráfico de stock actual */}
-          {/* Ejemplo: <TablaStockActual /> */}
-        </IonCardContent>
-      </IonCard>
+  return (
+    <IonPage>
+      <IonHeader>
+        <IonToolbar color="warning">
+          <IonTitle>Reportes</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent className="ion-padding">
+        <IonCard>
+          <IonCardHeader>
+            <IonButton
+              expand="block"
+              color="primary"
+              onClick={() => history.push("/reportes/clientes-mas-pedidos")}
+            >
+              Clientes con más pedidos
+            </IonButton>
+          </IonCardHeader>
+        </IonCard>
 
-      <IonCard>
-        <IonCardHeader>
-          <IonCardTitle>Productos más pedidos</IonCardTitle>
-        </IonCardHeader>
-        <IonCardContent>
-          <GraficoBarras />
-        </IonCardContent>
-      </IonCard>
-    </IonContent>
-  </IonPage>
-);
+        <IonCard>
+          <IonCardHeader>
+            <IonButton
+              expand="block"
+              color="primary"
+              onClick={() => history.push("/reportes/stock-actual")}
+            >
+              Stock actual disponible
+            </IonButton>
+          </IonCardHeader>
+        </IonCard>
 
+        <IonCard>
+          <IonCardHeader>
+            <IonButton
+              expand="block"
+              color="primary"
+              onClick={() => history.push("/reportes/productos-mas-pedidos")}
+            >
+              Productos más pedidos
+            </IonButton>
+          </IonCardHeader>
+        </IonCard>
+      </IonContent>
+    </IonPage>
+  );
+};
 export default Reportes;

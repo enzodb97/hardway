@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-06-2025 a las 18:07:05
+-- Tiempo de generación: 16-06-2025 a las 21:42:54
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -199,7 +199,27 @@ VALUES
   (7, 'sofia@mail.com', '333444555', 7),
   (8, 'diego@mail.com', '666777888', 8),
   (9, 'lucia@mail.com', '999000111', 9),
-  (10, 'pedro@mail.com', '222333444', 10);
+  (10, 'pedro@mail.com', '222333444', 10),
+  (28, 'martin.gomez1@test.com', '555-1101', 34),
+  (29, 'sofia.rodriguez1@test.com', '555-1102', 35),
+  (30, 'diego.fernandez1@test.com', '555-1103', 36),
+  (31, 'lucia.diaz1@test.com', '555-1104', 37),
+  (32, 'carlos.lopez1@test.com', '555-1105', 38),
+  (33, 'martin.gomez2@test.com', '555-1106', 39),
+  (34, 'sofia.rodriguez2@test.com', '555-1107', 40),
+  (35, 'valeria.paz1@test.com', '555-1108', 41),
+  (36, 'javier.sosa1@test.com', '555-1109', 42),
+  (37, 'carolina.vega1@test.com', '555-1110', 43),
+  (38, 'diego.fernandez2@test.com', '555-1111', 44),
+  (39, 'lucia.diaz2@test.com', '555-1112', 45),
+  (40, 'carlos.lopez2@test.com', '555-1113', 46),
+  (41, 'andrea.moreno1@test.com', '555-1114', 47),
+  (42, 'hernan.alonso1@test.com', '555-1115', 48),
+  (43, 'martin.gomez3@test.com', '555-1116', 49),
+  (44, 'gabriela.torres1@test.com', '555-1117', 50),
+  (45, 'matias.romero1@test.com', '555-1118', 51),
+  (46, 'paula.suarez1@test.com', '555-1119', 52),
+  (47, 'martin.gomez4@test.com', '555-1120', 53);
 
 -- --------------------------------------------------------
 --
@@ -227,7 +247,7 @@ VALUES
   (8, 'Marrón'),
   (9, 'Naranja'),
   (10, 'Violeta'),
-  (11, 'morado');
+  (11, 'Morado');
 
 -- --------------------------------------------------------
 --
@@ -261,16 +281,16 @@ INSERT INTO
   )
 VALUES
   (1, 1, 1, 1, 1, 1, 1, 1),
-  (2, 2, 2, 2, 2, 2, 2, 2),
-  (3, 3, 3, 3, 3, 3, 3, 3),
-  (4, 4, 4, 4, 4, 4, 4, 4),
-  (5, 5, 5, 5, 5, 5, 5, 5),
-  (6, 6, 6, 6, 6, 6, 6, 6),
-  (7, 7, 7, 7, 7, 7, 7, 7),
-  (8, 8, 8, 8, 8, 8, 8, 8),
-  (9, 9, 9, 9, 9, 9, 9, 9),
-  (10, 10, 10, 10, 10, 10, 10, 10),
-  (16, 10, 10, 3, 3, 6, 5, 3);
+  (2, 2, 2, 2, 2, 2, 1, 2),
+  (3, 3, 3, 3, 3, 3, 1, 3),
+  (4, 4, 4, 4, 4, 4, 1, 4),
+  (5, 5, 5, 5, 5, 5, 1, 5),
+  (6, 6, 6, 6, 6, 6, 1, 6),
+  (7, 7, 7, 7, 7, 7, 1, 7),
+  (8, 8, 8, 8, 8, 8, 1, 8),
+  (9, 9, 9, 9, 9, 9, 1, 9),
+  (10, 10, 10, 10, 10, 10, 1, 10),
+  (16, 10, 10, 3, 3, 6, 1, 3);
 
 -- --------------------------------------------------------
 --
@@ -295,12 +315,47 @@ INSERT INTO
     `cantidad`
   )
 VALUES
-  ('DPED-040881', 'PED-2025-446', 'IND003', 2),
+  ('DP-015', 'PED-2025-014', 'IND001', 2),
+  ('DP-016', 'PED-2025-015', 'IND002', 1),
+  ('DP-017', 'PED-2025-016', 'IND006', 3),
+  ('DP-018', 'PED-2025-017', 'IND008', 2),
+  ('DP-019', 'PED-2025-018', 'IND010', 1),
+  ('DP-020', 'PED-2025-019', 'IND003', 2),
+  ('DP-021', 'PED-2025-020', 'IND004', 3),
+  ('DP-022', 'PED-2025-021', 'IND005', 1),
+  ('DP-023', 'PED-2025-022', 'IND007', 2),
+  ('DP-024', 'PED-2025-023', 'IND009', 1),
+  ('DP-025', 'PED-2025-024', 'IND001', 1),
+  ('DP-026', 'PED-2025-025', 'IND002', 2),
+  ('DP-027', 'PED-2025-026', 'IND003', 3),
+  ('DP-028', 'PED-2025-027', 'IND004', 1),
+  ('DP-029', 'PED-2025-028', 'IND005', 2),
+  ('DP-030', 'PED-2025-029', 'IND006', 1),
+  ('DP-031', 'PED-2025-030', 'IND007', 3),
+  ('DP-101', 'PED-2025-101', 'IND001', 2),
+  ('DP-102', 'PED-2025-102', 'IND002', 3),
+  ('DP-103', 'PED-2025-103', 'IND003', 1),
+  ('DP-104', 'PED-2025-104', 'IND004', 2),
+  ('DP-105', 'PED-2025-105', 'IND005', 1),
+  ('DP-106', 'PED-2025-106', 'IND006', 2),
+  ('DP-107', 'PED-2025-107', 'IND007', 3),
+  ('DP-108', 'PED-2025-108', 'IND008', 1),
+  ('DP-109', 'PED-2025-109', 'IND009', 2),
+  ('DP-110', 'PED-2025-110', 'IND010', 1),
+  ('DP-112', 'PED-2025-112', 'IND002', 2),
+  ('DP-113', 'PED-2025-113', 'IND003', 1),
+  ('DP-114', 'PED-2025-114', 'IND004', 3),
+  ('DP-115', 'PED-2025-115', 'IND005', 2),
+  ('DP-116', 'PED-2025-116', 'IND006', 1),
+  ('DP-117', 'PED-2025-117', 'IND007', 2),
+  ('DP-118', 'PED-2025-118', 'IND008', 1),
+  ('DP-119', 'PED-2025-119', 'IND009', 3),
+  ('DP-120', 'PED-2025-120', 'IND010', 2),
   ('DPED-368986', 'PED-2025-333', 'IND001', 2),
   ('DPED-472999', 'PED-2025-172', 'IND003', 6),
   ('DPED-532448', 'PED-2025-172', 'IND002', 4),
   ('DPED-691464', 'PED-2025-172', 'IND001', 2),
-  ('DPED-696957', 'PED-2025-446', 'IND001', 2);
+  ('DPED-911321', 'PED-2025-111', 'IND001', 1);
 
 -- --------------------------------------------------------
 --
@@ -396,7 +451,117 @@ VALUES
     9,
     9
   ),
-  (10, 'Alsinaa', '456', '4', 'F', '', 10, 10);
+  (10, 'Alsinaa', '456', '4', 'F', '', 10, 10),
+  (35, 'Calle Sol', '1100', NULL, NULL, NULL, 1, 1),
+  (36, 'Calle Luna', '1200', NULL, NULL, NULL, 2, 1),
+  (
+    37,
+    'Calle Estrella',
+    '1300',
+    NULL,
+    NULL,
+    NULL,
+    3,
+    2
+  ),
+  (
+    38,
+    'Calle Cometa',
+    '1400',
+    NULL,
+    NULL,
+    NULL,
+    4,
+    3
+  ),
+  (
+    39,
+    'Calle Planeta',
+    '1500',
+    NULL,
+    NULL,
+    NULL,
+    5,
+    4
+  ),
+  (40, 'Av. Sol', '1600', NULL, NULL, NULL, 6, 6),
+  (41, 'Av. Luna', '1700', NULL, NULL, NULL, 7, 7),
+  (
+    42,
+    'Av. Estrella',
+    '1800',
+    NULL,
+    NULL,
+    NULL,
+    8,
+    8
+  ),
+  (43, 'Av. Cometa', '1900', NULL, NULL, NULL, 9, 9),
+  (
+    44,
+    'Av. Planeta',
+    '2000',
+    NULL,
+    NULL,
+    NULL,
+    10,
+    10
+  ),
+  (45, 'Pasaje Sol', '2100', NULL, NULL, NULL, 1, 1),
+  (46, 'Pasaje Luna', '2200', NULL, NULL, NULL, 2, 1),
+  (
+    47,
+    'Pasaje Estrella',
+    '2300',
+    NULL,
+    NULL,
+    NULL,
+    3,
+    2
+  ),
+  (
+    48,
+    'Pasaje Cometa',
+    '2400',
+    NULL,
+    NULL,
+    NULL,
+    4,
+    3
+  ),
+  (
+    49,
+    'Pasaje Planeta',
+    '2500',
+    NULL,
+    NULL,
+    NULL,
+    5,
+    4
+  ),
+  (50, 'Ruta Sol', '2600', NULL, NULL, NULL, 6, 6),
+  (51, 'Ruta Luna', '2700', NULL, NULL, NULL, 7, 7),
+  (
+    52,
+    'Ruta Estrella',
+    '2800',
+    NULL,
+    NULL,
+    NULL,
+    8,
+    8
+  ),
+  (53, 'Ruta Cometa', '2900', NULL, NULL, NULL, 9, 9),
+  (
+    54,
+    'Ruta Planeta',
+    '3000',
+    NULL,
+    NULL,
+    NULL,
+    10,
+    10
+  );
 
 -- --------------------------------------------------------
 --
@@ -481,17 +646,8 @@ CREATE TABLE
 INSERT INTO
   `estadoindumentaria` (`idEstado`, `estadoIndumentaria`)
 VALUES
-  (1, 'Nuevo'),
-  (2, 'Usado'),
-  (3, 'Reacondicionado'),
-  (4, 'Exhibición'),
-  (5, 'Defectuoso'),
-  (6, 'En reparación'),
-  (7, 'Prueba'),
-  (8, 'Liquidación'),
-  (9, 'Demostración'),
-  (10, 'Reservado'),
-  (11, 'Apto');
+  (1, 'Apta'),
+  (2, 'No Apta');
 
 -- --------------------------------------------------------
 --
@@ -651,6 +807,20 @@ VALUES
     '2025-06-16',
     2,
     'Devolución por eliminación de pedido PED-2025-002'
+  ),
+  (
+    'MOV-DEL-547462',
+    'STK001',
+    '2025-06-16',
+    4,
+    'Devolución por eliminación de pedido PED-2025-446'
+  ),
+  (
+    'MOV-DEL-561610',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por eliminación de pedido PED-2025-446'
   ),
   (
     'MOV-DEL-579352',
@@ -849,6 +1019,13 @@ VALUES
     'Descuento por edición de pedido PED-2025-002'
   ),
   (
+    'MOV-EDIT-DESC-515585',
+    'STK001',
+    '2025-06-16',
+    -4,
+    'Descuento por edición de pedido PED-2025-446'
+  ),
+  (
     'MOV-EDIT-DESC-521655',
     'STK001',
     '2025-06-16',
@@ -905,11 +1082,25 @@ VALUES
     'Descuento por edición de pedido PED-2025-663'
   ),
   (
+    'MOV-EDIT-DESC-617106',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Descuento por edición de pedido PED-2025-446'
+  ),
+  (
     'MOV-EDIT-DESC-684918',
     'STK005',
     '2025-06-16',
     -16,
     'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-716976',
+    'STK001',
+    '2025-06-16',
+    -1,
+    'Descuento por edición de pedido PED-2025-111'
   ),
   (
     'MOV-EDIT-DESC-736685',
@@ -1045,6 +1236,13 @@ VALUES
     'Devolución por edición de pedido PED-2025-663'
   ),
   (
+    'MOV-EDIT-DEV-170032',
+    'STK003',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-446'
+  ),
+  (
     'MOV-EDIT-DEV-216002',
     'STK005',
     '2025-06-16',
@@ -1092,6 +1290,13 @@ VALUES
     '2025-06-16',
     10,
     'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-376428',
+    'STK001',
+    '2025-06-16',
+    3,
+    'Devolución por edición de pedido PED-2025-111'
   ),
   (
     'MOV-EDIT-DEV-391331',
@@ -1220,6 +1425,13 @@ VALUES
     'Devolución por edición de pedido PED-2025-663'
   ),
   (
+    'MOV-EDIT-DEV-726457',
+    'STK001',
+    '2025-06-16',
+    2,
+    'Devolución por edición de pedido PED-2025-446'
+  ),
+  (
     'MOV-EDIT-DEV-743934',
     'STK003',
     '2025-06-16',
@@ -1330,6 +1542,265 @@ VALUES
     '2025-06-13',
     130,
     'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-PED-014',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-014'
+  ),
+  (
+    'MOV-PED-015',
+    'STK002',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-015'
+  ),
+  (
+    'MOV-PED-016',
+    'STK006',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-016'
+  ),
+  (
+    'MOV-PED-017',
+    'STK008',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-017'
+  ),
+  (
+    'MOV-PED-018',
+    'STK010',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-018'
+  ),
+  (
+    'MOV-PED-019',
+    'STK003',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-019'
+  ),
+  (
+    'MOV-PED-020',
+    'STK004',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-020'
+  ),
+  (
+    'MOV-PED-021',
+    'STK005',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-021'
+  ),
+  (
+    'MOV-PED-022',
+    'STK007',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-022'
+  ),
+  (
+    'MOV-PED-023',
+    'STK009',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-023'
+  ),
+  (
+    'MOV-PED-024',
+    'STK001',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-024'
+  ),
+  (
+    'MOV-PED-025',
+    'STK002',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-025'
+  ),
+  (
+    'MOV-PED-026',
+    'STK003',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-026'
+  ),
+  (
+    'MOV-PED-027',
+    'STK004',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-027'
+  ),
+  (
+    'MOV-PED-028',
+    'STK005',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-028'
+  ),
+  (
+    'MOV-PED-029',
+    'STK006',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-029'
+  ),
+  (
+    'MOV-PED-030',
+    'STK007',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-030'
+  ),
+  (
+    'MOV-PED-101',
+    'STK001',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-101'
+  ),
+  (
+    'MOV-PED-102',
+    'STK002',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-102'
+  ),
+  (
+    'MOV-PED-103',
+    'STK003',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-103'
+  ),
+  (
+    'MOV-PED-104',
+    'STK004',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-104'
+  ),
+  (
+    'MOV-PED-105',
+    'STK005',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-105'
+  ),
+  (
+    'MOV-PED-106',
+    'STK006',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-106'
+  ),
+  (
+    'MOV-PED-107',
+    'STK007',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-107'
+  ),
+  (
+    'MOV-PED-108',
+    'STK008',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-108'
+  ),
+  (
+    'MOV-PED-109',
+    'STK009',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-109'
+  ),
+  (
+    'MOV-PED-110',
+    'STK010',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-110'
+  ),
+  (
+    'MOV-PED-111',
+    'STK001',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-111'
+  ),
+  (
+    'MOV-PED-112',
+    'STK002',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-112'
+  ),
+  (
+    'MOV-PED-113',
+    'STK003',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-113'
+  ),
+  (
+    'MOV-PED-114',
+    'STK004',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-114'
+  ),
+  (
+    'MOV-PED-115',
+    'STK005',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-115'
+  ),
+  (
+    'MOV-PED-116',
+    'STK006',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-116'
+  ),
+  (
+    'MOV-PED-117',
+    'STK007',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-117'
+  ),
+  (
+    'MOV-PED-118',
+    'STK008',
+    '2025-06-16',
+    -1,
+    'Venta Pedido PED-2025-118'
+  ),
+  (
+    'MOV-PED-119',
+    'STK009',
+    '2025-06-16',
+    -3,
+    'Venta Pedido PED-2025-119'
+  ),
+  (
+    'MOV-PED-120',
+    'STK010',
+    '2025-06-16',
+    -2,
+    'Venta Pedido PED-2025-120'
   ),
   (
     'MOV-PED-131967',
@@ -1485,6 +1956,302 @@ INSERT INTO
   )
 VALUES
   (
+    'PED-2025-014',
+    28,
+    '2025-06-16 15:34:33',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-015',
+    29,
+    '2025-06-16 15:34:33',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-016',
+    28,
+    '2025-06-16 15:34:33',
+    NULL,
+    3,
+    NULL
+  ),
+  (
+    'PED-2025-017',
+    30,
+    '2025-06-16 15:34:33',
+    NULL,
+    4,
+    NULL
+  ),
+  (
+    'PED-2025-018',
+    31,
+    '2025-06-16 15:34:33',
+    NULL,
+    5,
+    NULL
+  ),
+  (
+    'PED-2025-019',
+    32,
+    '2025-06-16 15:34:33',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-020',
+    33,
+    '2025-06-16 15:34:33',
+    NULL,
+    2,
+    NULL
+  ),
+  (
+    'PED-2025-021',
+    34,
+    '2025-06-16 15:34:33',
+    NULL,
+    3,
+    NULL
+  ),
+  (
+    'PED-2025-022',
+    35,
+    '2025-06-16 15:34:33',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-023',
+    33,
+    '2025-06-16 15:34:33',
+    NULL,
+    4,
+    NULL
+  ),
+  (
+    'PED-2025-024',
+    36,
+    '2025-06-16 15:34:33',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-025',
+    37,
+    '2025-06-16 15:34:33',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-026',
+    38,
+    '2025-06-16 15:34:33',
+    NULL,
+    2,
+    NULL
+  ),
+  (
+    'PED-2025-027',
+    39,
+    '2025-06-16 15:34:33',
+    NULL,
+    3,
+    NULL
+  ),
+  (
+    'PED-2025-028',
+    40,
+    '2025-06-16 15:34:33',
+    NULL,
+    4,
+    NULL
+  ),
+  (
+    'PED-2025-029',
+    36,
+    '2025-06-16 15:34:33',
+    NULL,
+    5,
+    NULL
+  ),
+  (
+    'PED-2025-030',
+    41,
+    '2025-06-16 15:34:33',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-101',
+    28,
+    '2025-06-16 15:44:01',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-102',
+    29,
+    '2025-06-16 15:44:01',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-103',
+    30,
+    '2025-06-16 15:44:01',
+    NULL,
+    2,
+    NULL
+  ),
+  (
+    'PED-2025-104',
+    28,
+    '2025-06-16 15:44:01',
+    NULL,
+    3,
+    NULL
+  ),
+  (
+    'PED-2025-105',
+    31,
+    '2025-06-16 15:44:01',
+    NULL,
+    4,
+    NULL
+  ),
+  (
+    'PED-2025-106',
+    32,
+    '2025-06-16 15:44:01',
+    NULL,
+    5,
+    NULL
+  ),
+  (
+    'PED-2025-107',
+    33,
+    '2025-06-16 15:44:01',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-108',
+    34,
+    '2025-06-16 15:44:01',
+    NULL,
+    2,
+    NULL
+  ),
+  (
+    'PED-2025-109',
+    35,
+    '2025-06-16 15:44:01',
+    NULL,
+    3,
+    NULL
+  ),
+  (
+    'PED-2025-110',
+    36,
+    '2025-06-16 15:44:02',
+    NULL,
+    4,
+    NULL
+  ),
+  (
+    'PED-2025-111',
+    37,
+    '2025-06-16 15:44:02',
+    '2025-06-16 18:49:15',
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-112',
+    37,
+    '2025-06-16 15:44:02',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-113',
+    38,
+    '2025-06-16 15:44:02',
+    NULL,
+    2,
+    NULL
+  ),
+  (
+    'PED-2025-114',
+    39,
+    '2025-06-16 15:44:02',
+    NULL,
+    3,
+    NULL
+  ),
+  (
+    'PED-2025-115',
+    40,
+    '2025-06-14 15:44:02',
+    '2025-06-16 15:47:35',
+    4,
+    NULL
+  ),
+  (
+    'PED-2025-116',
+    41,
+    '2025-06-16 15:44:02',
+    NULL,
+    5,
+    NULL
+  ),
+  (
+    'PED-2025-117',
+    1,
+    '2025-06-16 15:44:02',
+    NULL,
+    1,
+    NULL
+  ),
+  (
+    'PED-2025-118',
+    2,
+    '2025-06-16 15:44:02',
+    NULL,
+    2,
+    NULL
+  ),
+  (
+    'PED-2025-119',
+    3,
+    '2025-06-16 15:44:02',
+    NULL,
+    3,
+    NULL
+  ),
+  (
+    'PED-2025-120',
+    4,
+    '2025-06-16 15:44:02',
+    NULL,
+    1,
+    NULL
+  ),
+  (
     'PED-2025-172',
     1,
     '2025-06-16 03:55:34',
@@ -1497,14 +2264,6 @@ VALUES
     4,
     '2025-06-16 04:01:30',
     NULL,
-    1,
-    NULL
-  ),
-  (
-    'PED-2025-446',
-    3,
-    '2025-06-16 04:02:48',
-    '2025-06-16 04:09:44',
     1,
     NULL
   );
@@ -1601,7 +2360,27 @@ VALUES
     '',
     'Alsina 456',
     10
-  );
+  ),
+  (34, 89100101, 'Martin', 'Gomez', NULL, 35),
+  (35, 89100102, 'Sofia', 'Rodriguez', NULL, 36),
+  (36, 89100103, 'Diego', 'Fernandez', NULL, 37),
+  (37, 89100104, 'Lucia', 'Diaz', NULL, 38),
+  (38, 89100105, 'Carlos', 'Lopez', NULL, 39),
+  (39, 89100106, 'Martin', 'Gomez', NULL, 40),
+  (40, 89100107, 'Sofia', 'Rodriguez', NULL, 41),
+  (41, 89100108, 'Valeria', 'Paz', NULL, 42),
+  (42, 89100109, 'Javier', 'Sosa', NULL, 43),
+  (43, 89100110, 'Carolina', 'Vega', NULL, 44),
+  (44, 89100111, 'Diego', 'Fernandez', NULL, 45),
+  (45, 89100112, 'Lucia', 'Diaz', NULL, 46),
+  (46, 89100113, 'Carlos', 'Lopez', NULL, 47),
+  (47, 89100114, 'Andrea', 'Moreno', NULL, 48),
+  (48, 89100115, 'Hernan', 'Alonso', NULL, 49),
+  (49, 89100116, 'Martin', 'Gomez', NULL, 50),
+  (50, 89100117, 'Gabriela', 'Torres', NULL, 51),
+  (51, 89100118, 'Matias', 'Romero', NULL, 52),
+  (52, 89100119, 'Paula', 'Suarez', NULL, 53),
+  (53, 89100120, 'Martin', 'Gomez', NULL, 54);
 
 -- --------------------------------------------------------
 --
@@ -1676,14 +2455,9 @@ INSERT INTO
 VALUES
   (1, 1),
   (2, 2),
-  (3, 3),
-  (4, 4),
   (5, 5),
   (6, 6),
-  (7, 7),
-  (8, 8),
-  (9, 9),
-  (10, 10);
+  (7, 7);
 
 -- --------------------------------------------------------
 --
@@ -1770,8 +2544,8 @@ VALUES
   (8, 'Nylon'),
   (9, 'Cachemira'),
   (10, 'Franela'),
-  (11, 'Harina'),
-  (12, 'Trigo');
+  (11, 'Gabardina'),
+  (12, 'Sarga');
 
 -- --------------------------------------------------------
 --
@@ -1792,14 +2566,9 @@ INSERT INTO
 VALUES
   (1, 'Administrador', 'Acceso completo al sistema'),
   (2, 'Vendedor', 'Puede realizar ventas'),
-  (3, 'Cliente', 'Cliente registrado'),
-  (4, 'Invitado', 'Acceso limitado'),
   (5, 'Gerente', 'Supervisa operaciones'),
   (6, 'Picker', 'Encargado de picking'),
-  (7, 'Encargado de Stock', 'Gestiona stock'),
-  (8, 'Proveedor', 'Suministra productos'),
-  (9, 'Contabilidad', 'Maneja finanzas'),
-  (10, 'Soporte', 'Asistencia técnica');
+  (7, 'Encargado de Stock', 'Gestiona stock');
 
 -- --------------------------------------------------------
 --
@@ -1827,14 +2596,10 @@ INSERT INTO
   )
 VALUES
   (1, NULL, 'admin', 'admin123', 1),
-  (2, NULL, 'mariag', '123', 1),
-  (3, NULL, 'carlosl', 'abc123', 3),
-  (4, NULL, 'lauraf', '123456', 4),
+  (2, NULL, 'mariag', '123', 2),
   (5, NULL, 'anamtz', 'qwerty', 5),
   (6, NULL, 'luisrd', 'asdfgh', 6),
-  (7, NULL, 'sofiag', 'zxcvbn', 7),
-  (8, NULL, 'diegos', 'password', 8),
-  (9, NULL, 'luciav', 'letmein', 9);
+  (7, NULL, 'sofiag', 'zxcvbn', 7);
 
 -- --------------------------------------------------------
 --
@@ -2074,7 +2839,7 @@ AUTO_INCREMENT = 62;
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente` MODIFY `idCliente` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 28;
+AUTO_INCREMENT = 48;
 
 --
 -- AUTO_INCREMENT de la tabla `color`
@@ -2092,7 +2857,7 @@ AUTO_INCREMENT = 17;
 -- AUTO_INCREMENT de la tabla `domicilio`
 --
 ALTER TABLE `domicilio` MODIFY `idDomicilio` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 35;
+AUTO_INCREMENT = 55;
 
 --
 -- AUTO_INCREMENT de la tabla `encargadopicker_stock`
@@ -2116,7 +2881,7 @@ AUTO_INCREMENT = 11;
 -- AUTO_INCREMENT de la tabla `persona`
 --
 ALTER TABLE `persona` MODIFY `idPersona` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 34;
+AUTO_INCREMENT = 54;
 
 --
 -- AUTO_INCREMENT de la tabla `precioindumentaria`

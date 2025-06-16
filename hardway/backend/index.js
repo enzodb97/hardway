@@ -1658,3 +1658,32 @@ app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
     res.status(500).json({ error: "Error al obtener productos más pedidos" });
   }
 });
+
+app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
+  try {
+    const [result] = await sequelize.query(`
+      SELECT
+        c.idCliente,
+        p.nombre,
+        p.apellido,
+        p.dni,
+        COUNT(ped.numeroPedido) AS total_pedidos
+      FROM
+        pedido ped
+      JOIN
+        cliente c ON ped.idCliente = c.idCliente
+      JOIN
+        persona p ON c.idPersona = p.idPersona
+      GROUP BY
+        c.idCliente, p.nombre, p.apellido, p.dni
+      ORDER BY
+        total_pedidos DESC
+      LIMIT 10
+    `);
+    res.json(result);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al obtener clientes con más pedidos" });
+  }
+});
