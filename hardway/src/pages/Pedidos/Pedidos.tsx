@@ -239,9 +239,9 @@ const Pedidos: React.FC = () => {
               </IonButton>
             </IonCol>
           </IonRow>
-          <div className="grafico-barras-container">
+          {/*<div className="grafico-barras-container">
             <GraficoBarras />
-          </div>
+          </div>*/}
         </IonGrid>
         <IonAlert
           isOpen={showAlert}

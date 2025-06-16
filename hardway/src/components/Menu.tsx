@@ -39,7 +39,7 @@ interface AppPage {
 }
 
 const appPages: AppPage[] = [
-  { title: "Inicio", url: "/folder/Inicio", icon: homeOutline },
+  { title: "Inicio", url: "/Inicio", icon: homeOutline },
   { title: "Reportes", url: "/Reportes", icon: bookmarkOutline },
   { title: "Pedidos", url: "/pedidos", icon: archiveOutline },
   { title: "Clientes", url: "/Clientes", icon: peopleOutline },

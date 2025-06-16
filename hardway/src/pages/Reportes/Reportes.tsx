@@ -5,8 +5,13 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
 } from "@ionic/react";
-import GraficoBarras from "../../components/GraficoBarras"; // Ajusta la ruta si es necesario
+import GraficoBarras from "../../components/GraficoBarras"; // Productos más pedidos
+// Aquí puedes importar otros componentes de gráficos o tablas
 
 const Reportes: React.FC = () => (
   <IonPage>
@@ -16,9 +21,34 @@ const Reportes: React.FC = () => (
       </IonToolbar>
     </IonHeader>
     <IonContent className="ion-padding">
-      <h2>Productos más pedidos</h2>
-      <GraficoBarras />
-      {/* Aquí puedes agregar más gráficos o reportes */}
+      <IonCard>
+        <IonCardHeader>
+          <IonCardTitle>Clientes con más pedidos</IonCardTitle>
+        </IonCardHeader>
+        <IonCardContent>
+          {/* Aquí irá el gráfico o tabla de clientes preferenciales */}
+          {/* Ejemplo: <GraficoClientesMasPedidos /> */}
+        </IonCardContent>
+      </IonCard>
+
+      <IonCard>
+        <IonCardHeader>
+          <IonCardTitle>Stock actual disponible</IonCardTitle>
+        </IonCardHeader>
+        <IonCardContent>
+          {/* Aquí irá el listado o gráfico de stock actual */}
+          {/* Ejemplo: <TablaStockActual /> */}
+        </IonCardContent>
+      </IonCard>
+
+      <IonCard>
+        <IonCardHeader>
+          <IonCardTitle>Productos más pedidos</IonCardTitle>
+        </IonCardHeader>
+        <IonCardContent>
+          <GraficoBarras />
+        </IonCardContent>
+      </IonCard>
     </IonContent>
   </IonPage>
 );
