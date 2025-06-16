@@ -1,6 +1,7 @@
 // src/pages/Pedidos/Pedidos.tsx
 import React, { useState } from "react";
-import GraficoBarras from "../../../src/components/GraficoBarras";
+import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
+import { obtenerIconoEstado } from "../../utils/pedidosUtils";
 import {
   IonPage,
   IonHeader,
@@ -123,7 +124,7 @@ const Pedidos: React.FC = () => {
         <IonGrid>
           {/* Fila 1: Buscador */}
           <IonRow>
-            <IonCol size="12">
+            <IonCol size="10">
               <div className="pedidos-buscador">
                 <IonInput
                   placeholder="Buscar por cliente, fecha o N° de pedido"
@@ -140,6 +141,28 @@ const Pedidos: React.FC = () => {
                   }}
                 />
               </div>
+            </IonCol>
+            <IonCol
+              size="2"
+              className="ion-text-right"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span
+                style={{
+                  background: "#0054e9",
+                  borderRadius: "5px",
+                  padding: "14px 70px",
+                  fontWeight: 600,
+                  fontSize: 15,
+                  color: "#fff",
+                }}
+              >
+                Total: {pedidosFiltrados.length}
+              </span>
             </IonCol>
           </IonRow>
           {/* Fila 2: Tabla */}
@@ -170,7 +193,19 @@ const Pedidos: React.FC = () => {
                         {pedido.numeroPedido}
                       </IonCol>
                       <IonCol className="text-center">
-                        {pedido.EstadoPedido?.tipoEstado || "Sin estado"}
+                        <span
+                          className={`status-badge ${obtenerClaseDeEstado(
+                            pedido.EstadoPedido?.tipoEstado || ""
+                          )}`}
+                        >
+                          <IonIcon
+                            icon={obtenerIconoEstado(
+                              pedido.EstadoPedido?.tipoEstado || ""
+                            )}
+                            style={{ marginRight: 8, fontSize: 18 }}
+                          />
+                          {pedido.EstadoPedido?.tipoEstado || "Sin estado"}
+                        </span>
                       </IonCol>
                       <IonCol className="text-center">
                         {pedido.Cliente?.Persona

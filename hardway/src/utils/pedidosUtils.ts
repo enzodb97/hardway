@@ -1,5 +1,6 @@
 // src/utils/pedidosUtils.ts
 import axios from "axios";
+import { checkmarkCircle, closeCircle, time, cash, airplane, ribbon } from "ionicons/icons";
 
 // Interfaces según tu backend
 export interface Persona {
@@ -71,4 +72,37 @@ export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
       (p.Cliente?.Persona?.apellido &&
         normalizar(p.Cliente.Persona.apellido).includes(filtroNorm))
   );
+}
+
+// Devuelve la clase CSS según el estado del pedido
+export function obtenerClaseDeEstado(estado: string): string {
+  const mapa: Record<string, string> = {
+    "En curso": "status--en-curso",
+    "Pendiente de Pago": "status--pendiente-pago",
+    "Abonado": "status--abonado",
+    "Despachado": "status--despachado",
+    "Finalizado": "status--finalizado",
+    "Cancelado": "status--cancelado",
+  };
+  return mapa[estado] || "";
+}
+
+// Devuelve el ícono de Ionicons según el estado del pedido
+export function obtenerIconoEstado(estado: string) {
+  switch (estado) {
+    case "En curso":
+      return time;
+    case "Pendiente de Pago":
+      return cash;
+    case "Abonado":
+      return checkmarkCircle;
+    case "Despachado":
+      return airplane;
+    case "Finalizado":
+      return ribbon;
+    case "Cancelado":
+      return closeCircle;
+    default:
+      return time;
+  }
 }
