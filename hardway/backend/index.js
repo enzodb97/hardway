@@ -912,70 +912,97 @@ app.delete("/api/pedidos/:numeroPedido", async (req, res) => {
 });
 
 // Editar pedido
-app.put("/api/pedidos/:id", async (req, res) => {
-  const { descripcion, fecha, estado, clienteId, indumentaria } = req.body;
+app.put("/api/pedidos/:numeroPedido", async (req, res) => {
+  const { idCliente, idEstado, prendas } = req.body;
+  const { numeroPedido } = req.params;
   const t = await sequelize.transaction();
   try {
-    const pedido = await Pedido.findByPk(req.params.id, { transaction: t });
+    // 1. Busca el pedido existente
+    const pedido = await Pedido.findOne({
+      where: { numeroPedido },
+      transaction: t,
+    });
     if (!pedido) {
       await t.rollback();
       return res.status(404).json({ error: "Pedido no encontrado" });
     }
-    // 1. Recupera prendas anteriores
-    const prendasAnteriores = await PedidoIndumentaria.findAll({
-      where: { pedido_id: pedido.id },
+
+    // 2. Recupera detalles anteriores y devuelve stock
+    const detallesAnteriores = await DetallePedido.findAll({
+      where: { numeroPedido },
       transaction: t,
     });
-    // 2. Devuelve stock
-    for (const pa of prendasAnteriores) {
-      const ind = await Indumentaria.findOne({
-        where: { idIndumentaria: pa.idIndumentaria },
+    for (const detalle of detallesAnteriores) {
+      const stock = await Stock.findOne({
+        where: { codigoIndumentaria: detalle.codigoIndumentaria },
         transaction: t,
       });
-      if (ind) {
-        ind.cantidadIndumentaria += pa.cantidad;
-        await ind.save({ transaction: t });
-      }
-    }
-    // 3. Borra relaciones anteriores
-    await PedidoIndumentaria.destroy({
-      where: { pedido_id: pedido.id },
-      transaction: t,
-    });
-
-    // 4. Agrega nuevas prendas y descuenta stock
-    if (indumentaria && Array.isArray(indumentaria)) {
-      for (const prenda of indumentaria) {
-        const ind = await Indumentaria.findOne({
-          where: { idIndumentaria: prenda.idIndumentaria },
-          transaction: t,
-        });
-        if (!ind || ind.cantidadIndumentaria < prenda.cantidad) {
-          await t.rollback();
-          return res.status(400).json({
-            error: `Stock insuficiente para ${ind.nombreIndumentaria}`,
-          });
-        }
-        ind.cantidadIndumentaria -= prenda.cantidad;
-        await ind.save({ transaction: t });
-
-        await PedidoIndumentaria.create(
+      if (stock) {
+        await MovimientoStock.create(
           {
-            pedido_id: pedido.id,
-            idIndumentaria: prenda.idIndumentaria,
-            cantidad: prenda.cantidad,
+            idMovimientoStock:
+              "MOV-EDIT-DEV-" + Math.random().toString().slice(2, 8),
+            idStock: stock.idStock,
+            fechaMovimiento: new Date(),
+            cantidad: detalle.cantidad, // Devuelve el stock anterior
+            observaciones: `Devolución por edición de pedido ${numeroPedido}`,
           },
           { transaction: t }
         );
       }
     }
-    // Actualiza datos del pedido
+
+    // 3. Elimina los detalles anteriores
+    await DetallePedido.destroy({
+      where: { numeroPedido },
+      transaction: t,
+    });
+
+    // 4. Crea los nuevos detalles y descuenta stock
+    if (prendas && Array.isArray(prendas)) {
+      for (const prenda of prendas) {
+        await DetallePedido.create(
+          {
+            idDetallePedido: "DPED-" + Math.random().toString().slice(2, 8),
+            numeroPedido,
+            codigoIndumentaria: prenda.codigoIndumentaria,
+            cantidad: prenda.cantidad,
+          },
+          { transaction: t }
+        );
+        // Descontar stock
+        const stock = await Stock.findOne({
+          where: { codigoIndumentaria: prenda.codigoIndumentaria },
+          transaction: t,
+        });
+        if (stock) {
+          await MovimientoStock.create(
+            {
+              idMovimientoStock:
+                "MOV-EDIT-DESC-" + Math.random().toString().slice(2, 8),
+              idStock: stock.idStock,
+              fechaMovimiento: new Date(),
+              cantidad: -Math.abs(prenda.cantidad),
+              observaciones: `Descuento por edición de pedido ${numeroPedido}`,
+            },
+            { transaction: t }
+          );
+        }
+      }
+    }
+
+    // 5. Actualiza los datos del pedido (fechaModificacion se actualiza automáticamente por la BD)
     await pedido.update(
-      { descripcion, fecha, estado, clienteId },
+      {
+        idCliente,
+        idEstado,
+        // No actualices numeroPedido ni fechaPedido
+      },
       { transaction: t }
     );
+
     await t.commit();
-    res.json(pedido);
+    res.json({ success: true });
   } catch (error) {
     await t.rollback();
     res
@@ -983,7 +1010,6 @@ app.put("/api/pedidos/:id", async (req, res) => {
       .json({ error: "Error al editar pedido", detalle: error.message });
   }
 });
-
 // Obtener pedido por ID con prendas
 /*app.get("/api/pedidos/:id", async (req, res) => {
   try {

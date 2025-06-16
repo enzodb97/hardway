@@ -162,7 +162,6 @@ const AltaPedido: React.FC = () => {
       return;
     }
     try {
-      // Al armar el objeto pedido para enviar al backend:
       const pedido = {
         idCliente: Number(form.idCliente),
         idEstado: 1,
@@ -173,8 +172,14 @@ const AltaPedido: React.FC = () => {
           })
         ),
       };
-      // Al enviar el pedido:
-      await crearPedido(pedido);
+
+      if (esEdicion && id) {
+        // EDITAR pedido existente
+        await editarPedido(id, pedido);
+      } else {
+        // CREAR nuevo pedido
+        await crearPedido(pedido);
+      }
       setShowSuccess(true);
     } catch (error) {
       setAlertMsg("Error al guardar el pedido.");
