@@ -90,7 +90,7 @@ const Pedidos: React.FC = () => {
     doc.text(title, x, 18);
 
     autoTable(doc, {
-      head: [["ID", "Estado", "Cliente", "Fecha de Registro"]],
+      head: [["N° Pedido", "Estado", "Cliente", "Fecha de Registro"]],
       body: pedidosAMostrar.map((pedido) => [
         pedido.numeroPedido,
         pedido.EstadoPedido?.tipoEstado || "Sin estado",

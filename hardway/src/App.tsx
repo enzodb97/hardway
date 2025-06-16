@@ -22,6 +22,7 @@ import AltaPedido from "./pages/Pedidos/AltaPedido";
 import DetallePedido from "./pages/Pedidos/DetallePedido";
 import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
+import Reportes from "./pages/Reportes/Reportes";
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -97,6 +98,7 @@ const AppRouter = () => {
             <Route exact path="/">
               <Redirect to="/dashboard" />
             </Route>
+            <Route path="/reportes" component={Reportes} exact />
           </IonRouterOutlet>
         </IonSplitPane>
       ) : (
