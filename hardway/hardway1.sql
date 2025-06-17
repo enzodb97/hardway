@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-06-2025 a las 21:42:54
+-- Tiempo de generación: 17-06-2025 a las 23:47:37
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -52,6 +52,20 @@ VALUES
   (8, 2008, 8),
   (9, 2009, 9),
   (10, 2010, 10);
+
+-- --------------------------------------------------------
+--
+-- Estructura de tabla para la tabla `asignacion_picking`
+--
+CREATE TABLE
+  `asignacion_picking` (
+    `idAsignacion` int (11) NOT NULL,
+    `numeroPedido` varchar(50) NOT NULL,
+    `legajoPicker` varchar(20) NOT NULL,
+    `fechaAsignacion` datetime NOT NULL DEFAULT current_timestamp(),
+    `fechaCompletado` datetime DEFAULT NULL,
+    `observaciones` varchar(255) DEFAULT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
 
 -- --------------------------------------------------------
 --
@@ -355,6 +369,7 @@ VALUES
   ('DPED-472999', 'PED-2025-172', 'IND003', 6),
   ('DPED-532448', 'PED-2025-172', 'IND002', 4),
   ('DPED-691464', 'PED-2025-172', 'IND001', 2),
+  ('DPED-740222', 'PED-2025-429', 'IND001', 1),
   ('DPED-911321', 'PED-2025-111', 'IND001', 1);
 
 -- --------------------------------------------------------
@@ -1880,6 +1895,13 @@ VALUES
     'Descuento por pedido PED-2025-885'
   ),
   (
+    'MOV-PED-792885',
+    'STK001',
+    '2025-06-16',
+    -1,
+    'Descuento por pedido PED-2025-429'
+  ),
+  (
     'MOV-PED-870580',
     'STK001',
     '2025-06-16',
@@ -2266,6 +2288,14 @@ VALUES
     NULL,
     1,
     NULL
+  ),
+  (
+    'PED-2025-429',
+    28,
+    '2025-06-16 20:43:17',
+    NULL,
+    1,
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -2595,11 +2625,11 @@ INSERT INTO
     `idRol`
   )
 VALUES
-  (1, NULL, 'admin', 'admin123', 1),
-  (2, NULL, 'mariag', '123', 2),
-  (5, NULL, 'anamtz', 'qwerty', 5),
-  (6, NULL, 'luisrd', 'asdfgh', 6),
-  (7, NULL, 'sofiag', 'zxcvbn', 7);
+  (1, 10, 'admin', 'admin123', 1),
+  (2, 9, 'mariag', '123', 2),
+  (5, 5, 'anamtz', 'qwerty', 5),
+  (6, 6, 'luisrd', 'asdfgh', 6),
+  (7, 7, 'sofiag', 'zxcvbn', 7);
 
 -- --------------------------------------------------------
 --
@@ -2637,6 +2667,13 @@ VALUES
 --
 ALTER TABLE `adminsistemas` ADD PRIMARY KEY (`idAdminSis`),
 ADD KEY `idPersona` (`idPersona`);
+
+--
+-- Indices de la tabla `asignacion_picking`
+--
+ALTER TABLE `asignacion_picking` ADD PRIMARY KEY (`idAsignacion`),
+ADD KEY `fk_asignacion_pedido` (`numeroPedido`),
+ADD KEY `fk_asignacion_picker` (`legajoPicker`);
 
 --
 -- Indices de la tabla `barrio`
@@ -2818,6 +2855,11 @@ ADD KEY `idPersona` (`idPersona`);
 -- AUTO_INCREMENT de las tablas volcadas
 --
 --
+-- AUTO_INCREMENT de la tabla `asignacion_picking`
+--
+ALTER TABLE `asignacion_picking` MODIFY `idAsignacion` int (11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `barrio`
 --
 ALTER TABLE `barrio` MODIFY `idBarrio` int (11) NOT NULL AUTO_INCREMENT,
@@ -2920,6 +2962,12 @@ AUTO_INCREMENT = 15;
 -- Filtros para la tabla `adminsistemas`
 --
 ALTER TABLE `adminsistemas` ADD CONSTRAINT `adminsistemas_ibfk_1` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`);
+
+--
+-- Filtros para la tabla `asignacion_picking`
+--
+ALTER TABLE `asignacion_picking` ADD CONSTRAINT `fk_asignacion_pedido` FOREIGN KEY (`numeroPedido`) REFERENCES `pedido` (`numeroPedido`),
+ADD CONSTRAINT `fk_asignacion_picker` FOREIGN KEY (`legajoPicker`) REFERENCES `encargadopicker` (`legajo`);
 
 --
 -- Filtros para la tabla `barrio`

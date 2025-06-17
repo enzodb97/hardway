@@ -12,21 +12,10 @@ import { useLocation, useHistory } from "react-router-dom";
 import {
   homeOutline,
   bookmarkOutline,
-  logoUsd,
   peopleOutline,
   logOutOutline,
   shirtOutline,
-  arrowDownRightBoxSharp,
-  arrowUpLeftBox,
-  arrowUpRightBox,
-  wifiSharp,
-  arrowDownLeftBoxSharp,
-  logoAmazon,
-  arrowUpSharp,
-  logoIonic,
-  arrowUpLeftBoxSharp,
   archiveOutline,
-  statsChartOutline,
 } from "ionicons/icons";
 import "./Menu.css";
 import persona from "../assets/images/people.png";
@@ -38,19 +27,27 @@ interface AppPage {
   title: string;
 }
 
-const appPages: AppPage[] = [
-  { title: "Inicio", url: "/Inicio", icon: homeOutline },
-  { title: "Reportes", url: "/Reportes", icon: bookmarkOutline },
-  { title: "Pedidos", url: "/pedidos", icon: archiveOutline },
-  { title: "Clientes", url: "/Clientes", icon: peopleOutline },
-  { title: "Usuarios", url: "/usuarios", icon: peopleOutline },
-  { title: "Indumentaria", url: "/indumentaria", icon: shirtOutline },
-];
-
 const Menu: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
-  const { logout, username } = useAuth(); // Obtenemos la función de logout y el nombre de usuario del contexto
+  const { logout, username, rol } = useAuth();
+
+  const appPages: AppPage[] = [
+    { title: "Inicio", url: "/Inicio", icon: homeOutline },
+    { title: "Reportes", url: "/Reportes", icon: bookmarkOutline },
+    { title: "Pedidos", url: "/pedidos", icon: archiveOutline },
+    { title: "Clientes", url: "/Clientes", icon: peopleOutline },
+    { title: "Usuarios", url: "/usuarios", icon: peopleOutline },
+    { title: "Indumentaria", url: "/indumentaria", icon: shirtOutline },
+  ];
+  // Botón de gestión de Picking visible para Picker, Encargado de Picking y Administrador
+  if (
+    rol === "Encargado de Picking" ||
+    rol === "Administrador" ||
+    rol === "Picker"
+  ) {
+    appPages.push({ title: "Picking", url: "/picking", icon: archiveOutline });
+  }
 
   const handleLogout = () => {
     logout();

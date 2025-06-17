@@ -646,9 +646,21 @@ app.get("/", (req, res) => {
   res.send("¡API de Clientes funcionando!");
 });
 
+// Modelo EncargadoPicker
+const EncargadoPicker = sequelize.define(
+  "EncargadoPicker",
+  {
+    legajo: { type: DataTypes.STRING, primaryKey: true },
+    idPersona: DataTypes.INTEGER,
+  },
+  { tableName: "encargadopicker", timestamps: false }
+);
+
+// Endpoint de login (debe estar cerca del resto de endpoints)
 app.post("/api/login", async (req, res) => {
   const { nombreUsuario, contrasena } = req.body;
   try {
+    // Busca el usuario y su rol
     const usuario = await Usuario.findOne({
       where: { nombreUsuario },
       include: {
@@ -1643,32 +1655,6 @@ app.post("/api/stock/movimiento", async (req, res) => {
   }
 });
 
-/*app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
-  try {
-    const [result] = await sequelize.query(`
-      SELECT
-        ni.nombre AS nombreProducto,
-        SUM(dp.cantidad) AS totalPedidos
-      FROM
-        detallepedido dp
-      JOIN
-        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
-      JOIN
-        detalleindumentaria di ON i.idDetalle = di.idDetalle
-      JOIN
-        nombreindumentaria ni ON di.idNombre = ni.idNombre
-      GROUP BY
-        ni.nombre
-      ORDER BY
-        totalPedidos DESC
-      LIMIT 10
-    `);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener productos más pedidos" });
-  }
-});*/
-
 app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
   try {
     const [result] = await sequelize.query(`
@@ -1770,5 +1756,153 @@ app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener productos más pedidos" });
+  }
+});
+
+// --- PICKING: Obtener lista de pickers ---
+app.get("/api/pickers", async (req, res) => {
+  try {
+    // Consulta SQL: SELECT ep.legajo, pe.nombre, pe.apellido FROM encargadopicker ep JOIN persona pe ON ep.idPersona = pe.idPersona ORDER BY pe.apellido, pe.nombre;
+    const [pickers] = await sequelize.query(`
+      SELECT ep.legajo, pe.nombre, pe.apellido
+      FROM encargadopicker ep
+      JOIN persona pe ON ep.idPersona = pe.idPersona
+      ORDER BY pe.apellido, pe.nombre
+    `);
+    res.json(
+      pickers.map((p) => ({
+        id: p.legajo,
+        nombre: `${p.nombre} ${p.apellido}`.trim(),
+      }))
+    );
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener pickers" });
+  }
+});
+
+// --- PICKING: Asignar picker a pedido ---
+app.post("/api/pedidos/:numeroPedido/asignar-picker", async (req, res) => {
+  const { numeroPedido } = req.params;
+  const { pickerId } = req.body;
+  try {
+    // Consulta SQL: INSERT INTO asignacion_picking (numeroPedido, legajoPicker, observaciones) VALUES (?, ?, ?)
+    await sequelize.query(
+      `INSERT INTO asignacion_picking (numeroPedido, legajoPicker, observaciones) VALUES (?, ?, ?)`,
+      {
+        replacements: [
+          numeroPedido,
+          pickerId,
+          "Asignación desde panel gerente",
+        ],
+        type: sequelize.QueryTypes.INSERT,
+      }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al asignar picker" });
+  }
+});
+
+// --- ENDPOINTS DE PICKING ---
+
+// 1. Obtener tareas de picking asignadas a un picker
+app.get("/api/picking/tareas", async (req, res) => {
+  let { legajo, rol } = req.query;
+  try {
+    // Si el usuario es administrador (por rol)
+    if (
+      rol &&
+      ["admin", "Administrador", "ADMIN", "administrador"].includes(
+        String(rol).toLowerCase()
+      )
+    ) {
+      const [todas] = await sequelize.query(`
+        SELECT ap.idAsignacion, ap.numeroPedido, ap.fechaAsignacion, ap.legajoPicker
+        FROM asignacion_picking ap
+        WHERE ap.completado = 0
+        ORDER BY ap.fechaAsignacion DESC
+      `);
+      return res.json(todas);
+    }
+    // Si el usuario es administrador (por legajo, compatibilidad)
+    if (
+      !legajo ||
+      ["admin", "Administrador", "ADMIN", "administrador"].includes(
+        String(legajo).toLowerCase()
+      )
+    ) {
+      const [todas] = await sequelize.query(`
+        SELECT ap.idAsignacion, ap.numeroPedido, ap.fechaAsignacion, ap.legajoPicker
+        FROM asignacion_picking ap
+        WHERE ap.completado = 0
+        ORDER BY ap.fechaAsignacion DESC
+      `);
+      return res.json(todas);
+    }
+    // Si es picker, solo sus tareas
+    const [tareas] = await sequelize.query(
+      `
+      SELECT ap.idAsignacion, ap.numeroPedido, ap.fechaAsignacion, ap.legajoPicker
+      FROM asignacion_picking ap
+      WHERE ap.legajoPicker = :legajo AND ap.completado = 0
+      ORDER BY ap.fechaAsignacion DESC
+    `,
+      { replacements: { legajo } }
+    );
+    res.json(tareas);
+  } catch (err) {
+    res.json([]); // Nunca error 500, solo array vacío
+  }
+});
+
+// 2. Obtener picking list de un pedido
+app.get("/api/picking/lista", async (req, res) => {
+  const { numeroPedido } = req.query;
+  try {
+    // Buscar detalle de productos del pedido, rack, color, talle, etc.
+    const [lista] = await sequelize.query(
+      `
+      SELECT 
+        d.codigoIndumentaria,
+        ni.nombre AS nombre_producto,
+        d.cantidad,
+        s.numeroRack,
+        c.color,
+        t.talle
+      FROM detallepedido d
+      JOIN indumentaria i ON d.codigoIndumentaria = i.codigoIndumentaria
+      JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+      JOIN nombreindumentaria ni ON di.idNombre = ni.idNombre
+      LEFT JOIN stock s ON i.codigoIndumentaria = s.codigoIndumentaria
+      LEFT JOIN color c ON di.idColor = c.idColor
+      LEFT JOIN talle t ON di.idTalle = t.idTalle
+      WHERE d.numeroPedido = :numeroPedido
+    `,
+      { replacements: { numeroPedido } }
+    );
+    res.json(lista);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener picking list" });
+  }
+});
+
+// 3. Completar tarea de picking
+app.post("/api/picking/completar", async (req, res) => {
+  const { idAsignacion, numeroPedido } = req.body;
+  try {
+    // Marcar la asignación como completada
+    await sequelize.query(
+      `UPDATE asignacion_picking SET completado = 1, fechaCompletado = NOW() WHERE idAsignacion = :idAsignacion`,
+      { replacements: { idAsignacion } }
+    );
+    // Cambiar el estado del pedido a "Listo para entrega" (ajusta el idEstado según tu tabla)
+    const idEstadoListo = 3; // Por ejemplo, 3 = Listo para entrega
+    await sequelize.query(
+      `UPDATE pedido SET idEstado = :idEstadoListo WHERE numeroPedido = :numeroPedido`,
+      { replacements: { idEstadoListo, numeroPedido } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Error al completar tarea de picking" });
   }
 });

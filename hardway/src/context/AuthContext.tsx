@@ -50,6 +50,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setIsAuthenticated(true);
       setRol(response.data.tipoRol || "");
       setUsername(response.data.nombreUsuario);
+      localStorage.setItem("username", response.data.nombreUsuario || "");
       setShowWelcome(true); // Activa el mensaje tras login exitoso
       return true;
     } catch (error) {
@@ -71,8 +72,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     const authStatus = localStorage.getItem("isAuthenticated");
     const storedUsername = localStorage.getItem("username");
-    const storedRol = localStorage.getItem("rol");
-
+    let storedRol = localStorage.getItem("rol");
+    // Normaliza el valor del rol para pickers al recargar
+    if (storedRol && storedRol.toLowerCase().includes("picker")) {
+      storedRol = "Picker";
+      localStorage.setItem("rol", "Picker");
+    }
     if (authStatus === "true" && storedUsername && storedRol) {
       // Verifica con el backend si el usuario sigue siendo válido
       axios

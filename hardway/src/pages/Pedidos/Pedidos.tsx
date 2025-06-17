@@ -25,9 +25,17 @@ import {
   eliminarPedido,
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
-import { pencil, trash, documentText } from "ionicons/icons";
+import { pencil, trash, documentText, chevronDown } from "ionicons/icons";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import {
+  IonSelect,
+  IonSelectOption,
+  IonPopover,
+  IonLabel,
+  IonList,
+  IonItem,
+} from "@ionic/react";
 import "./Pedidos.css";
 
 const Pedidos: React.FC = () => {
@@ -36,6 +44,15 @@ const Pedidos: React.FC = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [showPickerDropdown, setShowPickerDropdown] = useState<string | null>(
+    null
+  );
+  const [pickers, setPickers] = useState<any[]>([]);
+  const [selectedPicker, setSelectedPicker] = useState<any>(null);
+  const [pedidoParaAsignar, setPedidoParaAsignar] = useState<string | null>(
+    null
+  );
+  const [showConfirmAsignar, setShowConfirmAsignar] = useState(false);
   const history = useHistory();
 
   // Cargar pedidos al entrar a la vista
@@ -71,6 +88,44 @@ const Pedidos: React.FC = () => {
         setAlertMsg("Error al eliminar el pedido.");
         setShowAlert(true);
       }
+    }
+  };
+
+  // Función para obtener pickers del backend
+  const fetchPickers = async () => {
+    try {
+      const res = await fetch("/api/pickers"); // Ajusta el endpoint según tu backend
+      const data = await res.json();
+      setPickers(data);
+    } catch (err) {
+      setAlertMsg("Error al obtener pickers");
+      setShowAlert(true);
+    }
+  };
+
+  // Función para asignar picker (llamada al backend)
+  const asignarPicker = async () => {
+    if (!pedidoParaAsignar || !selectedPicker) return;
+    try {
+      const res = await fetch(
+        `/api/pedidos/${pedidoParaAsignar}/asignar-picker`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pickerId: selectedPicker.id }),
+        }
+      );
+      if (!res.ok) throw new Error();
+      setAlertMsg("Picker asignado correctamente");
+      setShowAlert(true);
+      setShowConfirmAsignar(false);
+      setShowPickerDropdown(null);
+      setSelectedPicker(null);
+      setPedidoParaAsignar(null);
+      cargarPedidos().then(setPedidos); // Refresca la lista
+    } catch (err) {
+      setAlertMsg("Error al asignar picker");
+      setShowAlert(true);
     }
   };
 
@@ -251,6 +306,43 @@ const Pedidos: React.FC = () => {
                           >
                             <IonIcon icon={documentText} color="medium" />
                           </IonButton>
+                          {/* Botón Asignar Picker */}
+                          <IonButton
+                            fill="outline"
+                            color="success"
+                            onClick={async (e) => {
+                              setShowPickerDropdown(pedido.numeroPedido);
+                              setPedidoParaAsignar(pedido.numeroPedido);
+                              await fetchPickers();
+                            }}
+                          >
+                            Asignar Picker{" "}
+                            <IonIcon icon={chevronDown} slot="end" />
+                          </IonButton>
+                          {/* Popover para seleccionar picker */}
+                          <IonPopover
+                            isOpen={showPickerDropdown === pedido.numeroPedido}
+                            onDidDismiss={() => setShowPickerDropdown(null)}
+                          >
+                            <IonList>
+                              {pickers.length === 0 && (
+                                <IonItem>No hay pickers disponibles</IonItem>
+                              )}
+                              {pickers.map((picker) => (
+                                <IonItem
+                                  button
+                                  key={picker.id}
+                                  onClick={() => {
+                                    setSelectedPicker(picker);
+                                    setShowConfirmAsignar(true);
+                                    setShowPickerDropdown(null);
+                                  }}
+                                >
+                                  <IonLabel>{picker.nombre}</IonLabel>
+                                </IonItem>
+                              ))}
+                            </IonList>
+                          </IonPopover>
                         </div>
                       </IonCol>
                     </IonRow>
@@ -291,6 +383,23 @@ const Pedidos: React.FC = () => {
             {
               text: "Aceptar",
               handler: () => setShowDeleteSuccess(false),
+            },
+          ]}
+        />
+        <IonAlert
+          isOpen={showConfirmAsignar}
+          onDidDismiss={() => setShowConfirmAsignar(false)}
+          header="Confirmar asignación"
+          message={`¿Asignar picker '${selectedPicker?.nombre}' al pedido ${pedidoParaAsignar}?`}
+          buttons={[
+            {
+              text: "Cancelar",
+              role: "cancel",
+              handler: () => setShowConfirmAsignar(false),
+            },
+            {
+              text: "Asignar",
+              handler: asignarPicker,
             },
           ]}
         />
