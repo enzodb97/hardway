@@ -401,7 +401,17 @@ Domicilio.belongsTo(Ciudad, { foreignKey: "idCiudad" });
 // Endpoints básicos
 app.get("/api/clientes", async (req, res) => {
   try {
+    // Obtén todos los idPersona que están en la tabla usuario
+    const usuarios = await sequelize.query(
+      "SELECT idPersona FROM usuario WHERE idPersona IS NOT NULL"
+    );
+    const idsPersonasUsuarios = usuarios[0].map((u) => u.idPersona);
+
+    // Busca solo los clientes cuyo idPersona NO está en la tabla usuario
     const clientes = await Cliente.findAll({
+      where: idsPersonasUsuarios.length
+        ? { idPersona: { [Sequelize.Op.notIn]: idsPersonasUsuarios } }
+        : {},
       include: {
         model: Persona,
         attributes: ["dni", "nombre", "apellido", "direccion"],
@@ -421,7 +431,7 @@ app.get("/api/clientes", async (req, res) => {
             },
             {
               model: Ciudad,
-              attributes: ["nombreCiudad", "codigoPostal"], // <-- AGREGA codigoPostal
+              attributes: ["nombreCiudad", "codigoPostal"],
             },
           ],
         },
