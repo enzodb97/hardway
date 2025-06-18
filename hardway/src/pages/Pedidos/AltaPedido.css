@@ -12,10 +12,16 @@
   flex-direction: column;
   align-items: center;
 }
+.indumentaria-modal {
+  --width: 700px;
+}
 
+.cantidad-input {
+  width: 100px;
+}
 .indumentaria-label {
-  width: 100% !important; /* Ocupa todo el ancho disponible */
-  min-width: 350px !important; /* Puedes aumentar este valor si quieres aún más ancho */
+  width: 80% !important; /* Ocupa todo el ancho disponible */
+  /*min-width: 450px !important; /* Puedes aumentar este valor si quieres aún más ancho */
   font-size: 1.2rem !important; /* Aumenta el tamaño de la fuente */
   font-weight: 500;
   display: block !important;

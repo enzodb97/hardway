@@ -24,6 +24,7 @@ import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
 import Reportes from "./pages/Reportes/Reportes";
 import ClientesMasPedidos from "./pages/Reportes/ClientesMasPedidos";
+import UltimaSemanaVenta from "./pages/Reportes/UltimaSemanaVenta";
 import StockActual from "./pages/Reportes/StockActual";
 import ProductosMasPedidos from "./pages/Reportes/ProductosMasPedidos";
 import Picking from "./pages/Picking/Picking";
@@ -133,6 +134,11 @@ const AppRouter = () => {
             <Route
               path="/reportes/productos-mas-pedidos"
               component={ProductosMasPedidos}
+              exact
+            />
+            <Route
+              path="/reportes/ultima-semana-venta"
+              component={UltimaSemanaVenta}
               exact
             />
           </IonRouterOutlet>

@@ -2038,3 +2038,35 @@ app.put("/api/envios/despachar/:numeroPedido", async (req, res) => {
     res.status(500).json({ error: "Error al despachar el pedido" });
   }
 });
+
+app.get("/api/reportes/ventas-ultimos-7-dias", async (req, res) => {
+  try {
+    const [result] = await sequelize.query(`
+      SELECT
+        DATE(p.fechaPedido) AS dia,
+        SUM(pr.precio * dp.cantidad) AS total_ventas_del_dia
+      FROM
+        pedido p
+      JOIN
+        detallepedido dp ON p.numeroPedido = dp.numeroPedido
+      JOIN
+        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
+      JOIN
+        detalleindumentaria di ON i.idDetalle = di.idDetalle
+      JOIN
+        precioindumentaria pr ON di.idPrecio = pr.idPrecio
+      WHERE
+        p.fechaPedido >= CURDATE() - INTERVAL 7 DAY
+        AND p.idEstado != 6
+      GROUP BY
+        dia
+      ORDER BY
+        dia ASC
+    `);
+    res.json(result);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al obtener ventas de la última semana" });
+  }
+});

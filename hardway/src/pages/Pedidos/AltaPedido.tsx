@@ -382,6 +382,7 @@ const AltaPedido: React.FC = () => {
         <IonModal
           isOpen={showIndumentariaModal}
           onDidDismiss={() => setShowIndumentariaModal(false)}
+          className="indumentaria-modal"
         >
           <IonHeader>
             <IonToolbar>
@@ -413,9 +414,11 @@ const AltaPedido: React.FC = () => {
                     className="indumentaria-item"
                   >
                     <IonLabel class="indumentaria-label">
-                      {prenda.nombre} (Stock: {prenda.cantidadIndumentaria})
+                      {`${prenda.nombre} - ${prenda.color} - ${prenda.talle} - ${prenda.nombreTela} - (Stock: ${prenda.cantidadIndumentaria}`}
+                      )
                     </IonLabel>
                     <IonInput
+                      class="cantidad-input"
                       type="number"
                       placeholder="Cantidad"
                       min={1}

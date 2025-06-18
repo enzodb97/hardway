@@ -98,7 +98,7 @@ const ProductosMasPedidos: React.FC = () => {
       legend: { display: false },
       title: {
         display: true,
-        text: "Top 5 Productos Más Vendidos",
+        text: "Top 5 Productos Más Pedidos",
         font: { size: 18 },
         padding: { top: 10, bottom: 20 },
       },
@@ -129,10 +129,12 @@ const ProductosMasPedidos: React.FC = () => {
       x: {
         title: {
           display: true,
-          text: "Cantidad Total Vendida",
+          text: "Cantidad Total",
           font: { size: 14 },
         },
         beginAtZero: true,
+        // Ajuste para que el eje X muestre siempre 1 más que el máximo
+        max: Math.max(...productos.map((p) => p.cantidad_total_vendida), 0) + 1,
         ticks: { precision: 0 },
       },
       y: {
