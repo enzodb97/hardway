@@ -1,0 +1,43 @@
+.envios-page {
+  --ion-background-color: #f4f4f4;
+  min-height: 100vh;
+}
+.envios-content {
+  padding: 16px;
+}
+.envios-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.envios-table {
+  width: 100%;
+}
+.table-header {
+  background: #feaf00;
+  color: #fff;
+  font-weight: 600;
+}
+.table-row ion-col {
+  padding: 10px;
+  text-align: center;
+}
+.envios-formulario {
+  background: #fffbe6;
+  border-radius: 8px;
+  padding: 24px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.despachar-btn {
+  background: #0054e9;
+  color: #fff;
+  font-weight: 600;
+}

@@ -1969,3 +1969,57 @@ app.put("/api/pedidos/:numeroPedido/abonado", async (req, res) => {
     res.status(500).json({ error: "Error al marcar el pedido como abonado" });
   }
 });
+
+// --- API de Envíos/Despachos ---
+
+// 1. Obtener todos los pedidos 'Abonado' (idEstado = 3)
+app.get("/api/envios/pendientes", async (req, res) => {
+  try {
+    const pedidos = await Pedido.findAll({
+      where: { idEstado: 3 },
+      include: [
+        {
+          model: Cliente,
+          include: [
+            {
+              model: Persona,
+              attributes: ["nombre", "apellido"],
+            },
+          ],
+          attributes: ["email"],
+        },
+      ],
+      order: [["fechaPedido", "DESC"]],
+    });
+    const result = pedidos.map((p) => ({
+      numeroPedido: p.numeroPedido,
+      fechaPedido: p.fechaPedido,
+      cliente_email: p.Cliente?.email || "",
+      nombre: p.Cliente?.Persona?.nombre || "",
+      apellido: p.Cliente?.Persona?.apellido || "",
+      codigoSeguimiento: p.codigoSeguimiento || "",
+    }));
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener pedidos para despacho" });
+  }
+});
+
+// 2. Marcar pedido como despachado y guardar código de seguimiento
+app.put("/api/envios/despachar/:numeroPedido", async (req, res) => {
+  try {
+    const { codigoSeguimiento } = req.body;
+    const { numeroPedido } = req.params;
+    // Actualiza el pedido
+    const [updated] = await Pedido.update(
+      { codigoSeguimiento, idEstado: 4 },
+      { where: { numeroPedido } }
+    );
+    if (updated === 0) {
+      return res.status(404).json({ error: "Pedido no encontrado" });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al despachar el pedido" });
+  }
+});

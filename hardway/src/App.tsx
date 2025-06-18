@@ -27,6 +27,7 @@ import ClientesMasPedidos from "./pages/Reportes/ClientesMasPedidos";
 import StockActual from "./pages/Reportes/StockActual";
 import ProductosMasPedidos from "./pages/Reportes/ProductosMasPedidos";
 import Picking from "./pages/Picking/Picking";
+import Envios from "./pages/Envios/Envios";
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -101,6 +102,12 @@ const AppRouter = () => {
               path="/picking"
               component={Picking}
               requiredRoles={["Picker", "Administrador"]}
+            />
+            <RoleRoute
+              exact
+              path="/envios"
+              component={Envios}
+              requiredRoles={["Encargado de Logística", "Administrador"]}
             />
             <Route exact path="/detalle-pedido/:id">
               <DetallePedido />

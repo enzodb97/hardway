@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-06-2025 a las 23:47:37
+-- Tiempo de generación: 18-06-2025 a las 18:38:33
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -64,8 +64,42 @@ CREATE TABLE
     `legajoPicker` varchar(20) NOT NULL,
     `fechaAsignacion` datetime NOT NULL DEFAULT current_timestamp(),
     `fechaCompletado` datetime DEFAULT NULL,
-    `observaciones` varchar(255) DEFAULT NULL
+    `observaciones` varchar(255) DEFAULT NULL,
+    `completado` tinyint (1) NOT NULL DEFAULT 0
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `asignacion_picking`
+--
+INSERT INTO
+  `asignacion_picking` (
+    `idAsignacion`,
+    `numeroPedido`,
+    `legajoPicker`,
+    `fechaAsignacion`,
+    `fechaCompletado`,
+    `observaciones`,
+    `completado`
+  )
+VALUES
+  (
+    29,
+    'PED-2025-112',
+    'LP005',
+    '2025-06-18 06:35:53',
+    NULL,
+    'Asignación desde panel gerente',
+    0
+  ),
+  (
+    30,
+    'PED-2025-113',
+    'LP006',
+    '2025-06-18 06:36:03',
+    NULL,
+    'Asignación desde panel gerente',
+    0
+  );
 
 -- --------------------------------------------------------
 --
@@ -365,11 +399,14 @@ VALUES
   ('DP-118', 'PED-2025-118', 'IND008', 1),
   ('DP-119', 'PED-2025-119', 'IND009', 3),
   ('DP-120', 'PED-2025-120', 'IND010', 2),
+  ('DPED-043831', 'PED-2025-429', 'IND001', 1),
+  ('DPED-242246', 'PED-2025-561', 'IND003', 3),
   ('DPED-368986', 'PED-2025-333', 'IND001', 2),
   ('DPED-472999', 'PED-2025-172', 'IND003', 6),
   ('DPED-532448', 'PED-2025-172', 'IND002', 4),
+  ('DPED-618710', 'PED-2025-429', 'IND002', 1),
   ('DPED-691464', 'PED-2025-172', 'IND001', 2),
-  ('DPED-740222', 'PED-2025-429', 'IND001', 1),
+  ('DPED-693468', 'PED-2025-561', 'IND001', 3),
   ('DPED-911321', 'PED-2025-111', 'IND001', 1);
 
 -- --------------------------------------------------------
@@ -614,16 +651,8 @@ CREATE TABLE
 INSERT INTO
   `encargadopicker` (`legajo`, `idPersona`)
 VALUES
-  ('LP001', 1),
-  ('LP002', 2),
-  ('LP003', 3),
-  ('LP004', 4),
   ('LP005', 5),
-  ('LP006', 6),
-  ('LP007', 7),
-  ('LP008', 8),
-  ('LP009', 9),
-  ('LP010', 10);
+  ('LP006', 6);
 
 -- --------------------------------------------------------
 --
@@ -635,15 +664,6 @@ CREATE TABLE
     `legajo` varchar(20) DEFAULT NULL,
     `idStock` varchar(50) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
-
---
--- Volcado de datos para la tabla `encargadopicker_stock`
---
-INSERT INTO
-  `encargadopicker_stock` (`id`, `legajo`, `idStock`)
-VALUES
-  (1, 'LP001', 'STK001'),
-  (2, 'LP002', 'STK002');
 
 -- --------------------------------------------------------
 --
@@ -1153,6 +1173,13 @@ VALUES
     'Descuento por edición de pedido PED-2025-663'
   ),
   (
+    'MOV-EDIT-DESC-786503',
+    'STK002',
+    '2025-06-17',
+    -1,
+    'Descuento por edición de pedido PED-2025-429'
+  ),
+  (
     'MOV-EDIT-DESC-838648',
     'STK003',
     '2025-06-16',
@@ -1172,6 +1199,13 @@ VALUES
     '2025-06-16',
     -2,
     'Descuento por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DESC-878969',
+    'STK001',
+    '2025-06-17',
+    -1,
+    'Descuento por edición de pedido PED-2025-429'
   ),
   (
     'MOV-EDIT-DESC-907812',
@@ -1256,6 +1290,13 @@ VALUES
     '2025-06-16',
     2,
     'Devolución por edición de pedido PED-2025-446'
+  ),
+  (
+    'MOV-EDIT-DEV-210059',
+    'STK001',
+    '2025-06-17',
+    1,
+    'Devolución por edición de pedido PED-2025-429'
   ),
   (
     'MOV-EDIT-DEV-216002',
@@ -1825,6 +1866,13 @@ VALUES
     'Descuento por pedido PED-2025-172'
   ),
   (
+    'MOV-PED-183627',
+    'STK001',
+    '2025-06-18',
+    -3,
+    'Descuento por pedido PED-2025-561'
+  ),
+  (
     'MOV-PED-216017',
     'STK001',
     '2025-06-16',
@@ -1895,6 +1943,13 @@ VALUES
     'Descuento por pedido PED-2025-885'
   ),
   (
+    'MOV-PED-756345',
+    'STK003',
+    '2025-06-18',
+    -3,
+    'Descuento por pedido PED-2025-561'
+  ),
+  (
     'MOV-PED-792885',
     'STK001',
     '2025-06-16',
@@ -1960,6 +2015,7 @@ CREATE TABLE
     `idCliente` int (11) NOT NULL,
     `fechaPedido` datetime NOT NULL DEFAULT current_timestamp(),
     `fechaModificacion` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+    `codigoSeguimiento` varchar(100) DEFAULT NULL,
     `idEstado` int (11) DEFAULT NULL,
     `dummyUpdate` int (11) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
@@ -1973,6 +2029,7 @@ INSERT INTO
     `idCliente`,
     `fechaPedido`,
     `fechaModificacion`,
+    `codigoSeguimiento`,
     `idEstado`,
     `dummyUpdate`
   )
@@ -1982,6 +2039,7 @@ VALUES
     28,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -1989,6 +2047,7 @@ VALUES
     'PED-2025-015',
     29,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     1,
     NULL
@@ -1998,6 +2057,7 @@ VALUES
     28,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     3,
     NULL
   ),
@@ -2005,6 +2065,7 @@ VALUES
     'PED-2025-017',
     30,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     4,
     NULL
@@ -2014,6 +2075,7 @@ VALUES
     31,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     5,
     NULL
   ),
@@ -2021,6 +2083,7 @@ VALUES
     'PED-2025-019',
     32,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     1,
     NULL
@@ -2030,6 +2093,7 @@ VALUES
     33,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     2,
     NULL
   ),
@@ -2037,6 +2101,7 @@ VALUES
     'PED-2025-021',
     34,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     3,
     NULL
@@ -2046,6 +2111,7 @@ VALUES
     35,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -2053,6 +2119,7 @@ VALUES
     'PED-2025-023',
     33,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     4,
     NULL
@@ -2062,6 +2129,7 @@ VALUES
     36,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -2069,6 +2137,7 @@ VALUES
     'PED-2025-025',
     37,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     1,
     NULL
@@ -2078,6 +2147,7 @@ VALUES
     38,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     2,
     NULL
   ),
@@ -2085,6 +2155,7 @@ VALUES
     'PED-2025-027',
     39,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     3,
     NULL
@@ -2094,6 +2165,7 @@ VALUES
     40,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     4,
     NULL
   ),
@@ -2101,6 +2173,7 @@ VALUES
     'PED-2025-029',
     36,
     '2025-06-16 15:34:33',
+    NULL,
     NULL,
     5,
     NULL
@@ -2110,6 +2183,7 @@ VALUES
     41,
     '2025-06-16 15:34:33',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -2117,6 +2191,7 @@ VALUES
     'PED-2025-101',
     28,
     '2025-06-16 15:44:01',
+    NULL,
     NULL,
     1,
     NULL
@@ -2126,6 +2201,7 @@ VALUES
     29,
     '2025-06-16 15:44:01',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -2133,6 +2209,7 @@ VALUES
     'PED-2025-103',
     30,
     '2025-06-16 15:44:01',
+    NULL,
     NULL,
     2,
     NULL
@@ -2142,6 +2219,7 @@ VALUES
     28,
     '2025-06-16 15:44:01',
     NULL,
+    NULL,
     3,
     NULL
   ),
@@ -2149,6 +2227,7 @@ VALUES
     'PED-2025-105',
     31,
     '2025-06-16 15:44:01',
+    NULL,
     NULL,
     4,
     NULL
@@ -2158,6 +2237,7 @@ VALUES
     32,
     '2025-06-16 15:44:01',
     NULL,
+    NULL,
     5,
     NULL
   ),
@@ -2165,6 +2245,7 @@ VALUES
     'PED-2025-107',
     33,
     '2025-06-16 15:44:01',
+    NULL,
     NULL,
     1,
     NULL
@@ -2174,6 +2255,7 @@ VALUES
     34,
     '2025-06-16 15:44:01',
     NULL,
+    NULL,
     2,
     NULL
   ),
@@ -2181,6 +2263,7 @@ VALUES
     'PED-2025-109',
     35,
     '2025-06-16 15:44:01',
+    NULL,
     NULL,
     3,
     NULL
@@ -2190,6 +2273,7 @@ VALUES
     36,
     '2025-06-16 15:44:02',
     NULL,
+    NULL,
     4,
     NULL
   ),
@@ -2197,14 +2281,16 @@ VALUES
     'PED-2025-111',
     37,
     '2025-06-16 15:44:02',
-    '2025-06-16 18:49:15',
-    1,
+    '2025-06-18 02:32:53',
+    NULL,
+    3,
     NULL
   ),
   (
     'PED-2025-112',
     37,
     '2025-06-16 15:44:02',
+    '2025-06-18 03:35:41',
     NULL,
     1,
     NULL
@@ -2213,14 +2299,16 @@ VALUES
     'PED-2025-113',
     38,
     '2025-06-16 15:44:02',
+    '2025-06-18 03:35:37',
     NULL,
-    2,
+    1,
     NULL
   ),
   (
     'PED-2025-114',
     39,
     '2025-06-16 15:44:02',
+    NULL,
     NULL,
     3,
     NULL
@@ -2230,6 +2318,7 @@ VALUES
     40,
     '2025-06-14 15:44:02',
     '2025-06-16 15:47:35',
+    NULL,
     4,
     NULL
   ),
@@ -2237,6 +2326,7 @@ VALUES
     'PED-2025-116',
     41,
     '2025-06-16 15:44:02',
+    NULL,
     NULL,
     5,
     NULL
@@ -2246,6 +2336,7 @@ VALUES
     1,
     '2025-06-16 15:44:02',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -2253,6 +2344,7 @@ VALUES
     'PED-2025-118',
     2,
     '2025-06-16 15:44:02',
+    NULL,
     NULL,
     2,
     NULL
@@ -2262,6 +2354,7 @@ VALUES
     3,
     '2025-06-16 15:44:02',
     NULL,
+    NULL,
     3,
     NULL
   ),
@@ -2269,6 +2362,7 @@ VALUES
     'PED-2025-120',
     4,
     '2025-06-16 15:44:02',
+    NULL,
     NULL,
     1,
     NULL
@@ -2278,6 +2372,7 @@ VALUES
     1,
     '2025-06-16 03:55:34',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -2286,6 +2381,7 @@ VALUES
     4,
     '2025-06-16 04:01:30',
     NULL,
+    NULL,
     1,
     NULL
   ),
@@ -2293,6 +2389,16 @@ VALUES
     'PED-2025-429',
     28,
     '2025-06-16 20:43:17',
+    '2025-06-18 13:26:38',
+    NULL,
+    2,
+    NULL
+  ),
+  (
+    'PED-2025-561',
+    8,
+    '2025-06-18 16:36:33',
+    NULL,
     NULL,
     1,
     NULL
@@ -2627,9 +2733,9 @@ INSERT INTO
 VALUES
   (1, 10, 'admin', 'admin123', 1),
   (2, 9, 'mariag', '123', 2),
-  (5, 5, 'anamtz', 'qwerty', 5),
-  (6, 6, 'luisrd', 'asdfgh', 6),
-  (7, 7, 'sofiag', 'zxcvbn', 7);
+  (5, 5, 'anamtz', '123', 6),
+  (6, 6, 'luisrd', '123', 6),
+  (7, 7, 'sofiag', '123', 7);
 
 -- --------------------------------------------------------
 --
@@ -2857,7 +2963,8 @@ ADD KEY `idPersona` (`idPersona`);
 --
 -- AUTO_INCREMENT de la tabla `asignacion_picking`
 --
-ALTER TABLE `asignacion_picking` MODIFY `idAsignacion` int (11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `asignacion_picking` MODIFY `idAsignacion` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 31;
 
 --
 -- AUTO_INCREMENT de la tabla `barrio`
