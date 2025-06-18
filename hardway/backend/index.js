@@ -1920,11 +1920,11 @@ app.post("/api/picking/completar", async (req, res) => {
       `UPDATE asignacion_picking SET completado = 1, fechaCompletado = NOW() WHERE idAsignacion = :idAsignacion`,
       { replacements: { idAsignacion } }
     );
-    // Cambiar el estado del pedido a "Listo para entrega" (ajusta el idEstado según tu tabla)
-    const idEstadoListo = 3; // Por ejemplo, 3 = Listo para entrega
+    // Cambiar el estado del pedido a "Pendiente de Pago" (idEstado = 2)
+    const idEstadoPendientePago = 2;
     await sequelize.query(
-      `UPDATE pedido SET idEstado = :idEstadoListo WHERE numeroPedido = :numeroPedido`,
-      { replacements: { idEstadoListo, numeroPedido } }
+      `UPDATE pedido SET idEstado = :idEstadoPendientePago WHERE numeroPedido = :numeroPedido`,
+      { replacements: { idEstadoPendientePago, numeroPedido } }
     );
     res.json({ success: true });
   } catch (err) {
@@ -1953,5 +1953,19 @@ app.get("/api/pedidos/:numeroPedido/picker-asignado", async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ error: "Error al obtener picker asignado" });
+  }
+});
+
+// Cambiar estado a Abonado
+app.put("/api/pedidos/:numeroPedido/abonado", async (req, res) => {
+  const { numeroPedido } = req.params;
+  try {
+    await sequelize.query(
+      `UPDATE pedido SET idEstado = 3 WHERE numeroPedido = :numeroPedido`,
+      { replacements: { numeroPedido } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Error al marcar el pedido como abonado" });
   }
 });
