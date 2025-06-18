@@ -9,10 +9,7 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonLabel,
   IonMenuButton,
-  IonItem,
-  IonList,
 } from "@ionic/react";
 import { useParams, useHistory } from "react-router-dom";
 import "./DetallePedido.css";
@@ -28,7 +25,6 @@ const DetallePedido: React.FC = () => {
   useEffect(() => {
     const cargarPedido = async () => {
       try {
-        // Cambia el endpoint aquí:
         const res = await axios.get(`/api/pedidos/${id}/detalle-plano`);
         setPrendas(res.data);
       } catch (error) {
@@ -37,6 +33,21 @@ const DetallePedido: React.FC = () => {
     };
     cargarPedido();
   }, [id]);
+
+  // Función para mostrar valores amigables
+  const mostrar = (valor: any) => {
+    if (valor === null || valor === undefined || valor === "") return "-";
+    return valor;
+  };
+
+  const mostrarPrecio = (valor: any) => {
+    if (valor === null || valor === undefined || isNaN(Number(valor)))
+      return "-";
+    return Number(valor).toLocaleString("es-AR", {
+      style: "currency",
+      currency: "ARS",
+    });
+  };
 
   return (
     <IonPage className="detalle-pedido-page">
@@ -56,43 +67,66 @@ const DetallePedido: React.FC = () => {
             <IonCol size="2">
               <strong>Nombre del producto</strong>
             </IonCol>
-            <IonCol size="2">
-              <strong>Referencia</strong>
+            <IonCol size="1">
+              <strong>Talle</strong>
+            </IonCol>
+            <IonCol size="1">
+              <strong>Color</strong>
             </IonCol>
             <IonCol size="2">
-              <strong>Categoria</strong>
+              <strong>Precio Unitario</strong>
             </IonCol>
-            <IonCol size="2">
-              <strong>Rack</strong>
-            </IonCol>
-            <IonCol size="2">
+            <IonCol size="1">
               <strong>Cantidad</strong>
+            </IonCol>
+            <IonCol size="2">
+              <strong>Subtotal</strong>
             </IonCol>
           </IonRow>
           {prendas.map((prenda, idx) => (
             <IonRow key={idx}>
               <IonCol class="col" size="2">
-                {prenda.nombreProducto}
+                {mostrar(prenda.nombre_producto)}
+              </IonCol>
+              <IonCol class="col" size="1">
+                {mostrar(prenda.talle)}
+              </IonCol>
+              <IonCol class="col" size="1">
+                {mostrar(prenda.color)}
               </IonCol>
               <IonCol class="col" size="2">
-                {prenda.referencia}
+                {mostrarPrecio(prenda.precio_unitario)}
+              </IonCol>
+              <IonCol class="col" size="1">
+                {mostrar(prenda.cantidad)}
               </IonCol>
               <IonCol class="col" size="2">
-                {prenda.categoria}
-              </IonCol>
-              <IonCol class="col" size="2">
-                {prenda.rack}
-              </IonCol>
-              <IonCol class="col" size="2">
-                {prenda.cantidad}
+                {mostrarPrecio(prenda.subtotal)}
               </IonCol>
             </IonRow>
           ))}
+          {/* Fila de total */}
+          <IonRow className="table-total-row">
+            <IonCol size="9" style={{ textAlign: "right", fontWeight: "bold" }}>
+              Total del pedido:
+            </IonCol>
+            <IonCol size="2" style={{ fontWeight: "bold" }}>
+              {mostrarPrecio(
+                prendas.reduce((acc, p) => acc + (Number(p.subtotal) || 0), 0)
+              )}
+            </IonCol>
+          </IonRow>
         </IonGrid>
+        <hr />
         <IonButton
           expand="block"
           onClick={() => history.goBack()}
-          style={{ marginTop: 24 }}
+          style={{
+            marginTop: 24,
+            width: "50%",
+            marginLeft: "25%",
+            padding: "40px",
+          }}
         >
           Volver
         </IonButton>

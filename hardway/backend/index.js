@@ -1558,12 +1558,12 @@ app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
     const [result] = await sequelize.query(
       `
       SELECT
-        ni.nombre AS nombreProducto,
-        i.codigoIndumentaria AS referencia,
-        i.codigoIndumentaria AS sku,
-        cat.categoria AS categoria,
-        r.numeroRack AS rack,
-        dp.cantidad AS cantidad
+        ni.nombre AS nombre_producto,
+        ta.talle,
+        co.color,
+        pr.precio AS precio_unitario,
+        dp.cantidad,
+        (pr.precio * dp.cantidad) AS subtotal
       FROM
         detallepedido dp
       JOIN
@@ -1573,11 +1573,11 @@ app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
       JOIN
         nombreindumentaria ni ON di.idNombre = ni.idNombre
       JOIN
-        categoriaindumentaria cat ON di.idCategoria = cat.idCategoria
+        precioindumentaria pr ON di.idPrecio = pr.idPrecio
       JOIN
-        stock s ON i.codigoIndumentaria = s.codigoIndumentaria
+        talle ta ON di.idTalle = ta.idTalle
       JOIN
-        rack r ON s.idRack = r.idRack
+        color co ON di.idColor = co.idColor
       WHERE
         dp.numeroPedido = ?
       `,
@@ -1968,6 +1968,24 @@ app.put("/api/pedidos/:numeroPedido/abonado", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Error al marcar el pedido como abonado" });
+  }
+});
+
+// Cambia el estado de un pedido a Finalizado (idEstado = 5)
+app.put("/api/pedidos/:numeroPedido/finalizado", async (req, res) => {
+  try {
+    const { numeroPedido } = req.params;
+    // Actualiza el pedido a estado finalizado (idEstado = 5)
+    const [updated] = await Pedido.update(
+      { idEstado: 5 },
+      { where: { numeroPedido } }
+    );
+    if (updated === 0) {
+      return res.status(404).json({ error: "Pedido no encontrado" });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al finalizar el pedido" });
   }
 });
 

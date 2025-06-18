@@ -17,6 +17,7 @@ import {
   IonButton,
   IonAlert,
   IonLabel,
+  IonModal,
 } from "@ionic/react";
 import "./Envios.css";
 
@@ -128,6 +129,7 @@ const Envios: React.FC = () => {
                             setPedidoSeleccionado(pedido);
                             setCodigoSeguimiento("");
                           }}
+                          disabled={!!pedido.codigoSeguimiento}
                         >
                           Procesar
                         </IonButton>
@@ -164,38 +166,40 @@ const Envios: React.FC = () => {
               </IonCol>
             </IonRow>
           )}
-          {pedidoSeleccionado && (
-            <IonRow>
-              <IonCol size="12">
-                <div className="envios-formulario">
-                  <IonLabel>
-                    Código de Seguimiento para el pedido{" "}
-                    {pedidoSeleccionado.numeroPedido}:
-                  </IonLabel>
-                  <IonInput
-                    value={codigoSeguimiento}
-                    placeholder="Ej: LP123456789AR"
-                    onIonChange={(e) => setCodigoSeguimiento(e.detail.value!)}
-                  />
-                  <IonButton
-                    expand="block"
-                    onClick={handleDespachar}
-                    className="despachar-btn"
-                  >
-                    Marcar como Despachado
-                  </IonButton>
-                  <IonButton
-                    expand="block"
-                    fill="clear"
-                    color="medium"
-                    onClick={() => setPedidoSeleccionado(null)}
-                  >
-                    Cancelar
-                  </IonButton>
-                </div>
-              </IonCol>
-            </IonRow>
-          )}
+          <IonModal
+            isOpen={!!pedidoSeleccionado}
+            onDidDismiss={() => setPedidoSeleccionado(null)}
+            className="envios-modal"
+          >
+            <div className="envios-formulario-modal">
+              <IonLabel>
+                Código de Seguimiento para el pedido{" "}
+                {pedidoSeleccionado?.numeroPedido}:
+              </IonLabel>
+              <IonInput
+                value={codigoSeguimiento}
+                placeholder="Ej: LP123456789AR"
+                onIonChange={(e) => setCodigoSeguimiento(e.detail.value!)}
+                disabled={!!pedidoSeleccionado?.codigoSeguimiento}
+              />
+              <IonButton
+                expand="block"
+                onClick={handleDespachar}
+                className="despachar-btn"
+                disabled={!!pedidoSeleccionado?.codigoSeguimiento}
+              >
+                Marcar como Despachado
+              </IonButton>
+              <IonButton
+                expand="block"
+                fill="clear"
+                color="medium"
+                onClick={() => setPedidoSeleccionado(null)}
+              >
+                Cancelar
+              </IonButton>
+            </div>
+          </IonModal>
         </IonGrid>
         <IonAlert
           isOpen={showAlert}

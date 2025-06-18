@@ -73,6 +73,11 @@ export const marcarPedidoComoAbonado = async (numeroPedido: string) => {
   return await axios.put(`/api/pedidos/${numeroPedido}/abonado`);
 };
 
+// Cambia el estado de un pedido a Finalizado (idEstado = 5)
+export const marcarPedidoComoFinalizado = async (numeroPedido: string) => {
+  return await axios.put(`/api/pedidos/${numeroPedido}/finalizado`);
+};
+
 // Filtrar pedidos por texto (cliente, fecha, numeroPedido, DNI)
 export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
   if (!filtro) return pedidos;
@@ -229,6 +234,29 @@ export const handleConfirmAbonar = async (
     cargarPedidos().then(setPedidos);
   } catch (err) {
     setAlertMsg("Error al marcar el pedido como abonado.");
+    setShowAlert(true);
+  }
+};
+
+// Confirmar finalización de pedido
+export const handleConfirmFinalizar = async (
+  pedidoParaFinalizar: string | null,
+  setAlertMsg: any,
+  setShowAlert: any,
+  setShowConfirmFinalizar: any,
+  setPedidoParaFinalizar: any,
+  setPedidos: any
+) => {
+  if (!pedidoParaFinalizar) return;
+  try {
+    await marcarPedidoComoFinalizado(pedidoParaFinalizar);
+    setAlertMsg("El pedido fue marcado como finalizado correctamente.");
+    setShowAlert(true);
+    setShowConfirmFinalizar(false);
+    setPedidoParaFinalizar(null);
+    cargarPedidos().then(setPedidos);
+  } catch (err) {
+    setAlertMsg("Error al marcar el pedido como finalizado.");
     setShowAlert(true);
   }
 };

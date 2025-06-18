@@ -28,8 +28,10 @@ import {
   fetchPickers,
   asignarPicker,
   handleConfirmAbonar,
+  handleConfirmFinalizar,
   obtenerPickerAsignado,
   exportarPDF,
+  marcarPedidoComoFinalizado,
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 import { pencil, trash, documentText, chevronDown, cash } from "ionicons/icons";
@@ -61,6 +63,10 @@ const Pedidos: React.FC = () => {
   );
   const [showConfirmAsignar, setShowConfirmAsignar] = useState(false);
   const [pagina, setPagina] = useState(1);
+  const [showFinalizarConfirm, setShowFinalizarConfirm] = useState(false);
+  const [pedidoParaFinalizar, setPedidoParaFinalizar] = useState<string | null>(
+    null
+  );
   const porPagina = 6;
   const history = useHistory();
 
@@ -183,143 +189,199 @@ const Pedidos: React.FC = () => {
                       </IonCol>
                       <IonCol className="text-center">
                         <div className="action-buttons">
-                          <IonButton
-                            fill="clear"
-                            onClick={() =>
-                              history.push(
-                                `/alta-pedido/${pedido.numeroPedido}`
-                              )
-                            }
-                          >
-                            <IonIcon icon={pencil} color="primary" />
-                          </IonButton>
-                          <IonButton
-                            fill="clear"
-                            onClick={() =>
-                              handleEliminarPedido(
-                                pedido.numeroPedido,
-                                setShowDeleteSuccess,
-                                setPedidos,
-                                setAlertMsg,
-                                setShowAlert
-                              )
-                            }
-                            className="delete-btn"
-                          >
-                            <IonIcon icon={trash} color="danger" />
-                          </IonButton>
-                          <IonButton
-                            fill="clear"
-                            onClick={() =>
-                              history.push(
-                                `/detalle-pedido/${pedido.numeroPedido}`
-                              )
-                            }
-                            className="detail-btn"
-                          >
-                            <IonIcon icon={documentText} color="medium" />
-                          </IonButton>
-                          {/* Botón Asignar Picker */}
                           {(() => {
                             const estado = pedido.EstadoPedido?.tipoEstado
                               ?.trim()
                               .toLowerCase();
-                            if (estado === "en curso") {
-                              return (
+                            const puedeEditarEliminar =
+                              estado === "en curso" ||
+                              estado === "pendiente de pago";
+                            return (
+                              <>
+                                {puedeEditarEliminar && (
+                                  <>
+                                    <IonButton
+                                      fill="clear"
+                                      onClick={() =>
+                                        history.push(
+                                          `/alta-pedido/${pedido.numeroPedido}`
+                                        )
+                                      }
+                                    >
+                                      <IonIcon icon={pencil} color="primary" />
+                                    </IonButton>
+                                    <IonButton
+                                      fill="clear"
+                                      onClick={() =>
+                                        handleEliminarPedido(
+                                          pedido.numeroPedido,
+                                          setShowDeleteSuccess,
+                                          setPedidos,
+                                          setAlertMsg,
+                                          setShowAlert
+                                        )
+                                      }
+                                      className="delete-btn"
+                                    >
+                                      <IonIcon icon={trash} color="danger" />
+                                    </IonButton>
+                                  </>
+                                )}
                                 <IonButton
-                                  fill="outline"
-                                  color="success"
-                                  onClick={async (e) => {
-                                    const pickerAsignado =
-                                      await obtenerPickerAsignado(
-                                        pedido.numeroPedido
-                                      );
-                                    if (
-                                      pickerAsignado &&
-                                      pickerAsignado.nombre
-                                    ) {
-                                      setAlertMsg(
-                                        `Este pedido ya fue asignado al picker '${pickerAsignado.nombre}'. ¿Desea cambiarlo?`
-                                      );
-                                      setShowAlert(true);
-                                      setShowPickerDropdown(null);
-                                      setPedidoParaAsignar(pedido.numeroPedido);
-                                      fetchPickers(
-                                        setPickers,
-                                        setAlertMsg,
-                                        setShowAlert
-                                      );
-                                    } else {
-                                      setShowPickerDropdown(
-                                        pedido.numeroPedido
-                                      );
-                                      setPedidoParaAsignar(pedido.numeroPedido);
-                                      fetchPickers(
-                                        setPickers,
-                                        setAlertMsg,
-                                        setShowAlert
-                                      );
-                                    }
-                                  }}
-                                  className="asignar-picker-btn"
+                                  fill="clear"
+                                  onClick={() =>
+                                    history.push(
+                                      `/detalle-pedido/${pedido.numeroPedido}`
+                                    )
+                                  }
+                                  className="detail-btn"
                                 >
-                                  + <IonIcon icon={chevronDown} slot="end" />
+                                  <IonIcon icon={documentText} color="medium" />
                                 </IonButton>
-                              );
-                            }
-                            return null;
-                          })()}
-                          {/* Botón Abonar */}
-                          {(() => {
-                            const estado = pedido.EstadoPedido?.tipoEstado
-                              ?.trim()
-                              .toLowerCase();
-                            if (estado === "pendiente de pago") {
-                              return (
-                                <IonButton
-                                  fill="outline"
-                                  color="warning"
-                                  onClick={() => {
-                                    setPedidoParaAsignar(pedido.numeroPedido);
-                                    setShowConfirmAsignar(true);
-                                  }}
-                                  className="abonar-btn"
+                                {/* Botón Asignar Picker */}
+                                {(() => {
+                                  const estado = pedido.EstadoPedido?.tipoEstado
+                                    ?.trim()
+                                    .toLowerCase();
+                                  if (estado === "en curso") {
+                                    return (
+                                      <IonButton
+                                        fill="outline"
+                                        color="success"
+                                        onClick={async (e) => {
+                                          const pickerAsignado =
+                                            await obtenerPickerAsignado(
+                                              pedido.numeroPedido
+                                            );
+                                          if (
+                                            pickerAsignado &&
+                                            pickerAsignado.nombre
+                                          ) {
+                                            setAlertMsg(
+                                              `Este pedido ya fue asignado al picker '${pickerAsignado.nombre}'. ¿Desea cambiarlo?`
+                                            );
+                                            setShowAlert(true);
+                                            setShowPickerDropdown(null);
+                                            setPedidoParaAsignar(
+                                              pedido.numeroPedido
+                                            );
+                                            fetchPickers(
+                                              setPickers,
+                                              setAlertMsg,
+                                              setShowAlert
+                                            );
+                                          } else {
+                                            setShowPickerDropdown(
+                                              pedido.numeroPedido
+                                            );
+                                            setPedidoParaAsignar(
+                                              pedido.numeroPedido
+                                            );
+                                            fetchPickers(
+                                              setPickers,
+                                              setAlertMsg,
+                                              setShowAlert
+                                            );
+                                          }
+                                        }}
+                                        className="asignar-picker-btn"
+                                      >
+                                        +{" "}
+                                        <IonIcon
+                                          icon={chevronDown}
+                                          slot="end"
+                                        />
+                                      </IonButton>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                                {/* Botón Abonar */}
+                                {(() => {
+                                  const estado = pedido.EstadoPedido?.tipoEstado
+                                    ?.trim()
+                                    .toLowerCase();
+                                  if (estado === "pendiente de pago") {
+                                    return (
+                                      <IonButton
+                                        fill="outline"
+                                        color="warning"
+                                        onClick={() => {
+                                          setPedidoParaAsignar(
+                                            pedido.numeroPedido
+                                          );
+                                          setShowConfirmAsignar(true);
+                                        }}
+                                        className="abonar-btn"
+                                      >
+                                        <IonIcon icon={cash} slot="icon-only" />
+                                      </IonButton>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                                {/* Botón Finalizar para estado 'despachado' */}
+                                {(() => {
+                                  const estado = pedido.EstadoPedido?.tipoEstado
+                                    ?.trim()
+                                    .toLowerCase();
+                                  if (estado === "despachado") {
+                                    return (
+                                      <IonButton
+                                        fill="outline"
+                                        color="success"
+                                        onClick={() => {
+                                          setPedidoParaFinalizar(
+                                            pedido.numeroPedido
+                                          );
+                                          setShowFinalizarConfirm(true);
+                                        }}
+                                        className="finalizar-btn"
+                                      >
+                                        Finalizar
+                                      </IonButton>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                                {/* Popover para seleccionar picker */}
+                                <IonPopover
+                                  isOpen={
+                                    showPickerDropdown === pedido.numeroPedido
+                                  }
+                                  onDidDismiss={() =>
+                                    setShowPickerDropdown(null)
+                                  }
                                 >
-                                  <IonIcon icon={cash} slot="icon-only" />
-                                </IonButton>
-                              );
-                            }
-                            return null;
+                                  <IonList>
+                                    <IonItem lines="none" color="light">
+                                      <IonLabel className="ion-text-center picker-label">
+                                        Pickers
+                                      </IonLabel>
+                                    </IonItem>
+                                    {pickers.length === 0 && (
+                                      <IonItem>
+                                        No hay pickers disponibles
+                                      </IonItem>
+                                    )}
+                                    {pickers.map((picker) => (
+                                      <IonItem
+                                        button
+                                        key={picker.id}
+                                        onClick={() => {
+                                          setSelectedPicker(picker);
+                                          setShowConfirmAsignar(true);
+                                          setShowPickerDropdown(null);
+                                        }}
+                                      >
+                                        <IonLabel>{picker.nombre}</IonLabel>
+                                      </IonItem>
+                                    ))}
+                                  </IonList>
+                                </IonPopover>
+                              </>
+                            );
                           })()}
-                          {/* Popover para seleccionar picker */}
-                          <IonPopover
-                            isOpen={showPickerDropdown === pedido.numeroPedido}
-                            onDidDismiss={() => setShowPickerDropdown(null)}
-                          >
-                            <IonList>
-                              <IonItem lines="none" color="light">
-                                <IonLabel className="ion-text-center picker-label">
-                                  Pickers
-                                </IonLabel>
-                              </IonItem>
-                              {pickers.length === 0 && (
-                                <IonItem>No hay pickers disponibles</IonItem>
-                              )}
-                              {pickers.map((picker) => (
-                                <IonItem
-                                  button
-                                  key={picker.id}
-                                  onClick={() => {
-                                    setSelectedPicker(picker);
-                                    setShowConfirmAsignar(true);
-                                    setShowPickerDropdown(null);
-                                  }}
-                                >
-                                  <IonLabel>{picker.nombre}</IonLabel>
-                                </IonItem>
-                              ))}
-                            </IonList>
-                          </IonPopover>
                         </div>
                       </IonCol>
                     </IonRow>
@@ -381,20 +443,11 @@ const Pedidos: React.FC = () => {
         <IonAlert
           isOpen={showAlert}
           onDidDismiss={() => setShowAlert(false)}
-          header={
-            alertMsg === "El pedido fue marcado como abonado correctamente."
-              ? undefined
-              : "Advertencia"
-          }
+          header="Advertencia"
           message={alertMsg}
           buttons={
-            alertMsg === "El pedido fue marcado como abonado correctamente."
-              ? [
-                  {
-                    text: "Aceptar",
-                    handler: () => setShowAlert(false),
-                  },
-                ]
+            alertMsg === "El pedido fue marcado como finalizado correctamente."
+              ? [{ text: "Aceptar", handler: () => setShowAlert(false) }]
               : [
                   {
                     text: "Cancelar",
@@ -413,7 +466,7 @@ const Pedidos: React.FC = () => {
         />
         <IonAlert
           isOpen={showDeleteSuccess}
-          message="Se eliminó correctamente el pedido"
+          message="Se cancelo correctamente el pedido"
           buttons={[
             {
               text: "Aceptar",
@@ -487,6 +540,27 @@ const Pedidos: React.FC = () => {
               },
             ];
           })()}
+        />
+        <IonAlert
+          isOpen={showFinalizarConfirm}
+          onDidDismiss={() => setShowFinalizarConfirm(false)}
+          header="Confirmar"
+          message={`¿Desea dar como Finalizado el Pedido '${pedidoParaFinalizar}'?`}
+          buttons={[
+            {
+              text: "Finalizar",
+              handler: async () => {
+                await handleConfirmFinalizar(
+                  pedidoParaFinalizar,
+                  setAlertMsg,
+                  setShowAlert,
+                  setShowFinalizarConfirm,
+                  setPedidoParaFinalizar,
+                  setPedidos
+                );
+              },
+            },
+          ]}
         />
       </IonContent>
     </IonPage>
