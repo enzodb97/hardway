@@ -815,7 +815,7 @@ app.get("/api/pedidos", async (req, res) => {
           include: [
             {
               model: Persona,
-              attributes: ["nombre", "apellido"],
+              attributes: ["nombre", "apellido", "dni"],
             },
           ],
         },
@@ -1511,7 +1511,7 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
           include: [
             {
               model: Persona,
-              attributes: ["nombre", "apellido"],
+              attributes: ["nombre", "apellido", "dni"],
             },
           ],
         },

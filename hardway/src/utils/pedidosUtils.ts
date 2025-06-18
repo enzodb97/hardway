@@ -15,6 +15,7 @@ import autoTable from "jspdf-autotable";
 export interface Persona {
   nombre: string;
   apellido: string;
+  dni?: string | number;
   // otros campos si necesitas
 }
 
@@ -72,27 +73,36 @@ export const marcarPedidoComoAbonado = async (numeroPedido: string) => {
   return await axios.put(`/api/pedidos/${numeroPedido}/abonado`);
 };
 
-// Filtrar pedidos por texto (cliente, fecha, numeroPedido)
+// Filtrar pedidos por texto (cliente, fecha, numeroPedido, DNI)
 export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
   if (!filtro) return pedidos;
 
   const normalizar = (str: string) =>
-    str
+    (str || "")
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+      .replace(/[^a-z0-9]/g, ""); // Solo elimina tildes y caracteres especiales, no números ni letras
 
   const filtroNorm = normalizar(filtro);
 
-  return pedidos.filter(
-    (p) =>
+  return pedidos.filter((p) => {
+    const nombre = p.Cliente?.Persona?.nombre || "";
+    const apellido = p.Cliente?.Persona?.apellido || "";
+    let dni = "";
+    if (p.Cliente?.Persona && (p.Cliente.Persona as any).dni !== undefined) {
+      dni = String((p.Cliente.Persona as any).dni ?? "");
+    }
+    const fecha = p.fechaPedido
+      ? new Date(p.fechaPedido).toLocaleDateString("es-AR")
+      : "";
+    return (
       (p.numeroPedido && normalizar(p.numeroPedido).includes(filtroNorm)) ||
-      (p.fechaPedido && normalizar(p.fechaPedido).includes(filtroNorm)) ||
-      (p.Cliente?.Persona?.nombre &&
-        normalizar(p.Cliente.Persona.nombre).includes(filtroNorm)) ||
-      (p.Cliente?.Persona?.apellido &&
-        normalizar(p.Cliente.Persona.apellido).includes(filtroNorm))
-  );
+      (nombre && normalizar(nombre).includes(filtroNorm)) ||
+      (apellido && normalizar(apellido).includes(filtroNorm)) ||
+      (dni && normalizar(dni).includes(filtroNorm)) ||
+      (fecha && normalizar(fecha).includes(filtroNorm))
+    );
+  });
 }
 
 // Devuelve la clase CSS según el estado del pedido

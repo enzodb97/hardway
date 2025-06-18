@@ -60,6 +60,8 @@ const Pedidos: React.FC = () => {
     null
   );
   const [showConfirmAsignar, setShowConfirmAsignar] = useState(false);
+  const [pagina, setPagina] = useState(1);
+  const porPagina = 6;
   const history = useHistory();
 
   useIonViewWillEnter(() => {
@@ -74,6 +76,11 @@ const Pedidos: React.FC = () => {
     (a, b) =>
       (b.fechaPedido ? new Date(b.fechaPedido).getTime() : 0) -
       (a.fechaPedido ? new Date(a.fechaPedido).getTime() : 0)
+  );
+  const totalPaginas = Math.ceil(pedidosFiltrados.length / porPagina);
+  const pedidosPaginados = pedidosFiltrados.slice(
+    (pagina - 1) * porPagina,
+    pagina * porPagina
   );
   const pedidosAMostrar = mostrarTodos
     ? pedidosFiltrados
@@ -142,7 +149,7 @@ const Pedidos: React.FC = () => {
                       <strong>Acciones</strong>
                     </IonCol>
                   </IonRow>
-                  {pedidosAMostrar.map((pedido) => (
+                  {pedidosPaginados.map((pedido) => (
                     <IonRow key={pedido.numeroPedido} className="table-row">
                       <IonCol className="text-center">
                         {pedido.numeroPedido}
@@ -321,6 +328,37 @@ const Pedidos: React.FC = () => {
               </div>
             </IonCol>
           </IonRow>
+          {/* Paginación */}
+          {totalPaginas > 1 && (
+            <IonRow className="pedidos-paginacion-row">
+              <IonCol size="12" className="pedidos-paginacion-col">
+                <IonButton
+                  size="small"
+                  disabled={pagina === 1}
+                  onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                >
+                  Anterior
+                </IonButton>
+                <span className="pedidos-paginacion-text">
+                  Página {pagina} de {totalPaginas} &nbsp;|&nbsp; Mostrando{" "}
+                  {pedidosFiltrados.length === 0
+                    ? 0
+                    : (pagina - 1) * porPagina + 1}
+                  -{Math.min(pagina * porPagina, pedidosFiltrados.length)} de{" "}
+                  {pedidosFiltrados.length}
+                </span>
+                <IonButton
+                  size="small"
+                  disabled={pagina === totalPaginas}
+                  onClick={() =>
+                    setPagina((p) => Math.min(totalPaginas, p + 1))
+                  }
+                >
+                  Siguiente
+                </IonButton>
+              </IonCol>
+            </IonRow>
+          )}
           {/* Fila 3: Botón */}
           <IonRow>
             <IonCol size="12">
