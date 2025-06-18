@@ -17,6 +17,7 @@ interface AuthContextType {
   username: string | null;
   showWelcome: boolean;
   setShowWelcome: (show: boolean) => void;
+  legajoPicker: string | null; // NUEVO
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
   username: null,
   showWelcome: false,
   setShowWelcome: () => {},
+  legajoPicker: null, // NUEVO
 });
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -47,10 +49,15 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("rol", response.data.tipoRol || "");
       localStorage.setItem("username", response.data.nombreUsuario);
+      // Guarda el legajoPicker si existe
+      if (response.data.legajoPicker) {
+        localStorage.setItem("legajoPicker", response.data.legajoPicker);
+      } else {
+        localStorage.removeItem("legajoPicker");
+      }
       setIsAuthenticated(true);
       setRol(response.data.tipoRol || "");
       setUsername(response.data.nombreUsuario);
-      localStorage.setItem("username", response.data.nombreUsuario || "");
       setShowWelcome(true); // Activa el mensaje tras login exitoso
       return true;
     } catch (error) {
@@ -58,6 +65,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setIsAuthenticated(false);
       setRol(null);
       setUsername(null);
+      localStorage.removeItem("legajoPicker");
       return false;
     }
   };
@@ -69,6 +77,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setUsername(null);
   };
 
+  // En el useEffect de AuthProvider, recupera legajoPicker
   useEffect(() => {
     const authStatus = localStorage.getItem("isAuthenticated");
     const storedUsername = localStorage.getItem("username");
@@ -101,8 +110,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setIsAuthenticated(false);
       setRol(null);
       setUsername(null);
+      localStorage.removeItem("legajoPicker");
     }
   }, []);
+
+  // Exporta legajoPicker en el contexto
+  const legajoPicker = localStorage.getItem("legajoPicker") || null;
 
   return (
     <AuthContext.Provider
@@ -115,6 +128,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         username,
         showWelcome,
         setShowWelcome,
+        legajoPicker, // NUEVO
       }}
     >
       {children}

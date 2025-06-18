@@ -27,7 +27,7 @@ import {
 import "./Picking.css";
 
 const Picking: React.FC = () => {
-  const { username, rol } = useAuth();
+  const { username, rol, legajoPicker } = useAuth();
   const [tareas, setTareas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
@@ -40,7 +40,9 @@ const Picking: React.FC = () => {
   const cargarTareas = async () => {
     setLoading(true);
     try {
-      const data = await cargarTareasPicking(rol || "", username || "");
+      // Usar legajoPicker si el rol es Picker, sino username (para admin no importa)
+      const pickerId = rol === "Picker" ? legajoPicker : username;
+      const data = await cargarTareasPicking(rol || "", pickerId || "");
       setTareas(data);
     } catch (err) {
       setAlertMsg("Error al cargar tareas");

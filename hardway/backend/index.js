@@ -665,23 +665,38 @@ app.post("/api/login", async (req, res) => {
       where: { nombreUsuario },
       include: {
         model: Rol,
-        include: TipoRol,
+        include: { model: TipoRol },
       },
     });
-    if (!usuario) {
+    if (!usuario || usuario.contrasena !== contrasena) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
-    if (usuario.contrasena !== contrasena) {
-      return res.status(401).json({ error: "Credenciales inválidas" });
+    // Si es picker, buscar el legajo real
+    let legajoPicker = null;
+    if (
+      usuario.Rol &&
+      usuario.Rol.TipoRol &&
+      usuario.Rol.TipoRol.tipoRol &&
+      usuario.Rol.TipoRol.tipoRol.toLowerCase().includes("picker")
+    ) {
+      // Buscar en la tabla encargadopicker por idPersona
+      const persona = await Persona.findOne({
+        where: { idPersona: usuario.idUsuario },
+      });
+      if (persona) {
+        const picker = await EncargadoPicker.findOne({
+          where: { idPersona: persona.idPersona },
+        });
+        if (picker) legajoPicker = picker.legajo;
+      }
     }
     res.json({
-      idUsuario: usuario.idUsuario,
       nombreUsuario: usuario.nombreUsuario,
-      idRol: usuario.idRol,
-      tipoRol: usuario.Rol?.TipoRol?.tipoRol, // <--- Aquí va el nombre del rol
+      tipoRol: usuario.Rol?.TipoRol?.tipoRol || "",
+      legajoPicker, // null si no es picker
     });
   } catch (error) {
-    res.status(500).json({ error: "Error en el servidor" });
+    res.status(500).json({ error: "Error en login" });
   }
 });
 
