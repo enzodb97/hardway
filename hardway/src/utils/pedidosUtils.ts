@@ -1,6 +1,13 @@
 // src/utils/pedidosUtils.ts
 import axios from "axios";
-import { checkmarkCircle, closeCircle, time, cash, airplane, ribbon } from "ionicons/icons";
+import {
+  checkmarkCircle,
+  closeCircle,
+  time,
+  cash,
+  airplane,
+  ribbon,
+} from "ionicons/icons";
 
 // Interfaces según tu backend
 export interface Persona {
@@ -17,6 +24,7 @@ export interface Cliente {
 
 export interface EstadoPedido {
   idEstado: number;
+
   tipoEstado: string;
 }
 
@@ -28,6 +36,12 @@ export interface Pedido {
   EstadoPedido?: EstadoPedido;
   Cliente?: Cliente;
   // otros campos si necesitas
+}
+
+// Agregado para el picker asignado
+export interface PickerAsignado {
+  legajo: string;
+  nombre: string;
 }
 
 // Obtener todos los pedidos
@@ -79,10 +93,10 @@ export function obtenerClaseDeEstado(estado: string): string {
   const mapa: Record<string, string> = {
     "En curso": "status--en-curso",
     "Pendiente de Pago": "status--pendiente-pago",
-    "Abonado": "status--abonado",
-    "Despachado": "status--despachado",
-    "Finalizado": "status--finalizado",
-    "Cancelado": "status--cancelado",
+    Abonado: "status--abonado",
+    Despachado: "status--despachado",
+    Finalizado: "status--finalizado",
+    Cancelado: "status--cancelado",
   };
   return mapa[estado] || "";
 }
@@ -106,3 +120,15 @@ export function obtenerIconoEstado(estado: string) {
       return time;
   }
 }
+
+// Obtener datos del picker asignado por numeroPedido
+export const obtenerPickerAsignado = async (
+  numeroPedido: string
+): Promise<PickerAsignado | null> => {
+  try {
+    const res = await axios.get(`/api/pedidos/${numeroPedido}/picker-asignado`);
+    return res.data;
+  } catch {
+    return null;
+  }
+};

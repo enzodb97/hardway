@@ -15,9 +15,16 @@ import {
   IonItem,
   IonLabel,
   IonSpinner,
+  IonModal,
 } from "@ionic/react";
-import { checkmarkCircleOutline } from "ionicons/icons";
+import { checkmarkCircleOutline, closeOutline } from "ionicons/icons";
 import { useAuth } from "../../context/AuthContext";
+import {
+  cargarTareasPicking,
+  verPickingList,
+  completarTareaPicking,
+} from "../../utils/pickingUtils";
+import "./Picking.css";
 
 const Picking: React.FC = () => {
   const { username, rol } = useAuth();
@@ -30,23 +37,10 @@ const Picking: React.FC = () => {
   const [pickingList, setPickingList] = useState<any[]>([]);
   const [showPickingList, setShowPickingList] = useState(false);
 
-  // Obtener legajo del picker (ajustable: username o legajo)
-  // Si eres admin, no filtra por legajo
-  // Si eres picker, usa username como legajo (ajusta si guardas el legajo en contexto)
-  const legajo = rol === "Administrador" ? "" : username;
-
-  // Cargar tareas pendientes
   const cargarTareas = async () => {
     setLoading(true);
     try {
-      let url = "/api/picking/tareas";
-      if (rol === "Administrador") {
-        url += "?rol=Administrador";
-      } else {
-        url += `?legajo=${username}`;
-      }
-      const res = await fetch(url);
-      const data = await res.json();
+      const data = await cargarTareasPicking(rol || "", username || "");
       setTareas(data);
     } catch (err) {
       setAlertMsg("Error al cargar tareas");
@@ -60,13 +54,9 @@ const Picking: React.FC = () => {
     // eslint-disable-next-line
   }, []);
 
-  // Ver picking list de una tarea
-  const verPickingList = async (numeroPedido: string) => {
+  const handleVerPickingList = async (numeroPedido: string) => {
     try {
-      const res = await fetch(
-        `/api/picking/lista?numeroPedido=${numeroPedido}`
-      );
-      const data = await res.json();
+      const data = await verPickingList(numeroPedido);
       setPickingList(data);
       setShowPickingList(true);
     } catch (err) {
@@ -75,15 +65,12 @@ const Picking: React.FC = () => {
     }
   };
 
-  // Completar tarea
-  const completarTarea = async (idAsignacion: number, numeroPedido: string) => {
+  const handleCompletarTarea = async (
+    idAsignacion: number,
+    numeroPedido: string
+  ) => {
     try {
-      const res = await fetch(`/api/picking/completar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idAsignacion, numeroPedido }),
-      });
-      if (!res.ok) throw new Error();
+      await completarTareaPicking(idAsignacion, numeroPedido);
       setAlertMsg("Tarea completada y pedido actualizado");
       setShowAlert(true);
       cargarTareas();
@@ -115,22 +102,34 @@ const Picking: React.FC = () => {
                   {tareas.map((tarea) => (
                     <IonItem key={tarea.idAsignacion}>
                       <IonLabel>
-                        <b>Pedido:</b> {tarea.numeroPedido} <br />
-                        <b>Fecha asignación:</b>{" "}
-                        {new Date(tarea.fechaAsignacion).toLocaleString(
-                          "es-AR"
+                        {rol === "Administrador" && tarea.pickerAsignado && (
+                          <span className="picking-admin-picker">
+                            Picker asignado: {tarea.pickerAsignado}
+                          </span>
                         )}
+                        <span className="picking-pedido-label">
+                          Pedido: {tarea.numeroPedido}
+                        </span>
+                        <br />
+                        <span className="picking-fecha-label">
+                          Fecha asignación:{" "}
+                          {new Date(tarea.fechaAsignacion).toLocaleString(
+                            "es-AR"
+                          )}
+                        </span>
                       </IonLabel>
                       <IonButton
                         slot="end"
                         color="primary"
-                        onClick={() => verPickingList(tarea.numeroPedido)}
+                        className="picking-action-btn"
+                        onClick={() => handleVerPickingList(tarea.numeroPedido)}
                       >
                         Ver Picking List
                       </IonButton>
                       <IonButton
                         slot="end"
                         color="success"
+                        className="picking-action-btn"
                         onClick={() => {
                           setTareaSeleccionada(tarea);
                           setShowConfirm(true);
@@ -145,23 +144,68 @@ const Picking: React.FC = () => {
             </IonRow>
           </IonGrid>
         )}
-        {/* Modal Picking List */}
-        <IonAlert
+        {/* Modal Picking List con Ionic/React */}
+        <IonModal
           isOpen={showPickingList}
           onDidDismiss={() => setShowPickingList(false)}
-          header="Picking List"
-          message={
-            pickingList.length > 0
-              ? pickingList
-                  .map(
-                    (item: any) =>
-                      `<b>${item.nombre_producto}</b> (${item.codigoIndumentaria})<br/>Cantidad: ${item.cantidad}<br/>Rack: ${item.numeroRack}<br/>Color: ${item.color} - Talle: ${item.talle}`
-                  )
-                  .join("<hr/>")
-              : "No hay productos para este pedido."
-          }
-          buttons={[{ text: "Cerrar", role: "cancel" }]}
-        />
+          className="picking-list-modal"
+        >
+          <IonHeader>
+            <IonToolbar color="primary">
+              <IonTitle>Picking List</IonTitle>
+              <IonButton
+                slot="end"
+                fill="clear"
+                onClick={() => setShowPickingList(false)}
+              >
+                <IonIcon icon={closeOutline} />
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            <IonList>
+              {pickingList.length === 0 && (
+                <IonItem>No hay productos para este pedido.</IonItem>
+              )}
+              {pickingList.map((item: any, idx: number) => (
+                <IonItem key={idx} lines="full">
+                  <IonLabel className="ion-text-wrap">
+                    <div>
+                      <b>Nombre:</b> {item.nombre_producto ?? "-"}
+                    </div>
+                    <div>
+                      <b>Referencia:</b>{" "}
+                      {item.referencia || item.codigoIndumentaria || "-"}
+                    </div>
+                    <div>
+                      <b>Cantidad:</b> {item.cantidad ?? "-"}
+                    </div>
+                    <div>
+                      <b>Rack:</b> {item.rack ?? "Sin asignar"}
+                    </div>
+                    <div>
+                      <b>Categoría:</b> {item.categoria ?? "-"}
+                    </div>
+                    <div>
+                      <b>Color:</b> {item.color ?? "-"}
+                    </div>
+                    <div>
+                      <b>Talle:</b> {item.talle ?? "-"}
+                    </div>
+                  </IonLabel>
+                </IonItem>
+              ))}
+            </IonList>
+            <IonButton
+              expand="block"
+              color="medium"
+              onClick={() => setShowPickingList(false)}
+              style={{ margin: 16 }}
+            >
+              Cerrar
+            </IonButton>
+          </IonContent>
+        </IonModal>
         {/* Confirmar completar tarea */}
         <IonAlert
           isOpen={showConfirm}
@@ -176,7 +220,7 @@ const Picking: React.FC = () => {
             {
               text: "Completar",
               handler: () =>
-                completarTarea(
+                handleCompletarTarea(
                   tareaSeleccionada.idAsignacion,
                   tareaSeleccionada.numeroPedido
                 ),

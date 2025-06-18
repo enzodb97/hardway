@@ -129,6 +129,18 @@ const Pedidos: React.FC = () => {
     }
   };
 
+  // Función para obtener el picker asignado a un pedido
+  const obtenerPickerAsignado = async (numeroPedido: string) => {
+    try {
+      const res = await fetch(`/api/pedidos/${numeroPedido}/picker-asignado`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data;
+    } catch {
+      return null;
+    }
+  };
+
   const exportarPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -306,25 +318,55 @@ const Pedidos: React.FC = () => {
                           >
                             <IonIcon icon={documentText} color="medium" />
                           </IonButton>
-                          {/* Botón Asignar Picker */}
-                          <IonButton
-                            fill="outline"
-                            color="success"
-                            onClick={async (e) => {
-                              setShowPickerDropdown(pedido.numeroPedido);
-                              setPedidoParaAsignar(pedido.numeroPedido);
-                              await fetchPickers();
-                            }}
-                          >
-                            Asignar Picker{" "}
-                            <IonIcon icon={chevronDown} slot="end" />
-                          </IonButton>
+                          {/* Botón Asignar Picker solo si el estado es 'En Curso' (insensible a mayúsculas y espacios) */}
+                          {pedido.EstadoPedido?.tipoEstado
+                            ?.trim()
+                            .toLowerCase() === "en curso" && (
+                            <IonButton
+                              fill="outline"
+                              color="success"
+                              onClick={async (e) => {
+                                // Buscar el picker asignado actual (si existe)
+                                const pickerAsignado =
+                                  await obtenerPickerAsignado(
+                                    pedido.numeroPedido
+                                  );
+                                if (pickerAsignado && pickerAsignado.nombre) {
+                                  setAlertMsg(
+                                    `Este pedido ya fue asignado al picker '${pickerAsignado.nombre}'. ¿Desea cambiarlo?`
+                                  );
+                                  setShowAlert(true);
+                                  setShowPickerDropdown(null);
+                                  setPedidoParaAsignar(pedido.numeroPedido);
+                                  await fetchPickers();
+                                } else {
+                                  setShowPickerDropdown(pedido.numeroPedido);
+                                  setPedidoParaAsignar(pedido.numeroPedido);
+                                  await fetchPickers();
+                                }
+                              }}
+                              style={{ margin: 0 }}
+                            >
+                              + <IonIcon icon={chevronDown} slot="end" />
+                            </IonButton>
+                          )}
                           {/* Popover para seleccionar picker */}
                           <IonPopover
                             isOpen={showPickerDropdown === pedido.numeroPedido}
                             onDidDismiss={() => setShowPickerDropdown(null)}
                           >
                             <IonList>
+                              <IonItem lines="none" color="light">
+                                <IonLabel
+                                  className="ion-text-center"
+                                  style={{
+                                    width: "100%",
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  Pickers
+                                </IonLabel>
+                              </IonItem>
                               {pickers.length === 0 && (
                                 <IonItem>No hay pickers disponibles</IonItem>
                               )}
@@ -400,6 +442,27 @@ const Pedidos: React.FC = () => {
             {
               text: "Asignar",
               handler: asignarPicker,
+            },
+          ]}
+        />
+        {/* IonAlert para advertir sobre cambio de picker */}
+        <IonAlert
+          isOpen={showAlert}
+          onDidDismiss={() => setShowAlert(false)}
+          header="Advertencia"
+          message={alertMsg}
+          buttons={[
+            {
+              text: "Cancelar",
+              role: "cancel",
+              handler: () => setShowAlert(false),
+            },
+            {
+              text: "Cambiar Picker",
+              handler: () => {
+                setShowPickerDropdown(pedidoParaAsignar);
+                setShowAlert(false);
+              },
             },
           ]}
         />

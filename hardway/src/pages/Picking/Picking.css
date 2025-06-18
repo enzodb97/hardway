@@ -1,0 +1,29 @@
+/* Picking.css */
+.picking-admin-picker {
+  color: #0054e9;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  display: block;
+}
+.picking-pedido-label {
+  font-weight: bold;
+  color: #222;
+}
+.picking-fecha-label {
+  color: #444;
+  font-size: 0.95rem;
+}
+.picking-action-btn {
+  margin-left: 8px;
+}
+.picking-list-modal .ion-text-wrap {
+  font-size: 1rem;
+}
+.picking-list-modal .ion-label > div {
+  margin-bottom: 2px;
+}
+
+.picking-list-modal {
+  --height: 60%;
+}

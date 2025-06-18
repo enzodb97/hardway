@@ -1785,7 +1785,12 @@ app.post("/api/pedidos/:numeroPedido/asignar-picker", async (req, res) => {
   const { numeroPedido } = req.params;
   const { pickerId } = req.body;
   try {
-    // Consulta SQL: INSERT INTO asignacion_picking (numeroPedido, legajoPicker, observaciones) VALUES (?, ?, ?)
+    // 1. Marcar como completadas todas las asignaciones activas previas de este pedido
+    await sequelize.query(
+      `UPDATE asignacion_picking SET completado = 1, fechaCompletado = NOW() WHERE numeroPedido = ? AND completado = 0`,
+      { replacements: [numeroPedido] }
+    );
+    // 2. Insertar la nueva asignación
     await sequelize.query(
       `INSERT INTO asignacion_picking (numeroPedido, legajoPicker, observaciones) VALUES (?, ?, ?)`,
       {
@@ -1859,24 +1864,29 @@ app.get("/api/picking/tareas", async (req, res) => {
 app.get("/api/picking/lista", async (req, res) => {
   const { numeroPedido } = req.query;
   try {
-    // Buscar detalle de productos del pedido, rack, color, talle, etc.
+    // Consulta robusta: muestra productos aunque no tengan stock/rack, pero incluye rack si existe
     const [lista] = await sequelize.query(
       `
-      SELECT 
-        d.codigoIndumentaria,
+      SELECT
         ni.nombre AS nombre_producto,
-        d.cantidad,
-        s.numeroRack,
+        i.codigoIndumentaria AS referencia,
+        i.codigoIndumentaria AS sku,
+        cat.categoria AS categoria,
+        r.numeroRack AS rack,
+        dp.cantidad AS cantidad,
         c.color,
         t.talle
-      FROM detallepedido d
-      JOIN indumentaria i ON d.codigoIndumentaria = i.codigoIndumentaria
+      FROM
+        detallepedido dp
+      JOIN indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
       JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
       JOIN nombreindumentaria ni ON di.idNombre = ni.idNombre
+      JOIN categoriaindumentaria cat ON di.idCategoria = cat.idCategoria
       LEFT JOIN stock s ON i.codigoIndumentaria = s.codigoIndumentaria
+      LEFT JOIN rack r ON s.idRack = r.idRack
       LEFT JOIN color c ON di.idColor = c.idColor
       LEFT JOIN talle t ON di.idTalle = t.idTalle
-      WHERE d.numeroPedido = :numeroPedido
+      WHERE dp.numeroPedido = :numeroPedido
     `,
       { replacements: { numeroPedido } }
     );
@@ -1904,5 +1914,29 @@ app.post("/api/picking/completar", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Error al completar tarea de picking" });
+  }
+});
+
+// --- PICKING: Obtener picker asignado a un pedido ---
+app.get("/api/pedidos/:numeroPedido/picker-asignado", async (req, res) => {
+  const { numeroPedido } = req.params;
+  try {
+    const [result] = await sequelize.query(
+      `SELECT ep.legajo, CONCAT(pe.nombre, ' ', pe.apellido) AS nombre
+       FROM asignacion_picking ap
+       JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
+       JOIN persona pe ON ep.idPersona = pe.idPersona
+       WHERE ap.numeroPedido = :numeroPedido
+       ORDER BY ap.fechaAsignacion DESC
+       LIMIT 1`,
+      { replacements: { numeroPedido } }
+    );
+    if (result.length > 0) {
+      res.json(result[0]);
+    } else {
+      res.json(null);
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener picker asignado" });
   }
 });
