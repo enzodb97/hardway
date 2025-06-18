@@ -48,8 +48,12 @@ const Menu: React.FC = () => {
   ) {
     appPages.push({ title: "Picking", url: "/picking", icon: archiveOutline });
   }
-  // Botón de gestión de Envíos visible para Encargado de Logística y Administrador
-  if (rol === "Encargado de Logística" || rol === "Administrador") {
+  // Botón de gestión de Envíos visible para Administrador y Usuario Envios
+  if (
+    rol === "Encargado de Logística" ||
+    rol === "Administrador" ||
+    rol === "Envios"
+  ) {
     appPages.push({ title: "Envíos", url: "/envios", icon: archiveOutline });
   }
 

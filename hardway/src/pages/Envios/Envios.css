@@ -41,3 +41,39 @@
   color: #fff;
   font-weight: 600;
 }
+.envios-contador-row {
+  margin-bottom: 8px;
+}
+.envios-contador-col {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.envios-total-badge {
+  background: #0054e9;
+  border-radius: 5px;
+  padding: 10px 30px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #fff;
+}
+.envios-paginacion-info {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+}
+.envios-paginacion-row {
+  margin-top: 12px;
+}
+.envios-paginacion-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.envios-paginacion-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+}

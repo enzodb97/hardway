@@ -137,6 +137,7 @@ const Pedido = sequelize.define(
     idCliente: DataTypes.INTEGER,
     idEstado: DataTypes.INTEGER,
     fechaPedido: DataTypes.DATE, // <-- asegúrate de tener esto
+    codigoSeguimiento: DataTypes.STRING, // <-- necesario para update correcto
   },
   { tableName: "pedido", timestamps: false }
 );
@@ -1975,30 +1976,26 @@ app.put("/api/pedidos/:numeroPedido/abonado", async (req, res) => {
 // 1. Obtener todos los pedidos 'Abonado' (idEstado = 3)
 app.get("/api/envios/pendientes", async (req, res) => {
   try {
-    const pedidos = await Pedido.findAll({
-      where: { idEstado: 3 },
-      include: [
-        {
-          model: Cliente,
-          include: [
-            {
-              model: Persona,
-              attributes: ["nombre", "apellido"],
-            },
-          ],
-          attributes: ["email"],
-        },
-      ],
-      order: [["fechaPedido", "DESC"]],
-    });
-    const result = pedidos.map((p) => ({
-      numeroPedido: p.numeroPedido,
-      fechaPedido: p.fechaPedido,
-      cliente_email: p.Cliente?.email || "",
-      nombre: p.Cliente?.Persona?.nombre || "",
-      apellido: p.Cliente?.Persona?.apellido || "",
-      codigoSeguimiento: p.codigoSeguimiento || "",
-    }));
+    const [result] = await sequelize.query(`
+      SELECT
+        p.numeroPedido,
+        p.fechaPedido,
+        c.email AS cliente_email,
+        pe.nombre,
+        pe.apellido,
+        CONCAT(d.calle, ' ', d.altura, ', ', ci.nombreCiudad) AS direccion_envio,
+        SUM(dp.cantidad) AS total_items,
+        p.codigoSeguimiento
+      FROM pedido p
+      JOIN cliente c ON p.idCliente = c.idCliente
+      JOIN persona pe ON c.idPersona = pe.idPersona
+      JOIN domicilio d ON pe.idDomicilio = d.idDomicilio
+      JOIN ciudad ci ON d.idCiudad = ci.idCiudad
+      JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
+      WHERE p.idEstado = 3
+      GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, p.codigoSeguimiento
+      ORDER BY p.fechaPedido DESC
+    `);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener pedidos para despacho" });

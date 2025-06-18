@@ -107,7 +107,11 @@ const AppRouter = () => {
               exact
               path="/envios"
               component={Envios}
-              requiredRoles={["Encargado de Logística", "Administrador"]}
+              requiredRoles={[
+                "Encargado de Logística",
+                "Administrador",
+                "Envios",
+              ]}
             />
             <Route exact path="/detalle-pedido/:id">
               <DetallePedido />
