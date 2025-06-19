@@ -14,9 +14,11 @@ import {
   IonRow,
   IonCol,
   IonSpinner,
+  IonIcon,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import { people, cube, trendingUp } from "ionicons/icons";
 import "./Reportes.css";
 
 const Reportes: React.FC = () => {
@@ -66,7 +68,16 @@ const Reportes: React.FC = () => {
               <IonCol size="6">
                 <IonCard className="reporte-tarjeta">
                   <IonCardHeader>
-                    <IonCardTitle>Clientes principales</IonCardTitle>
+                    <IonCardTitle>
+                      <IonIcon
+                        icon={people}
+                        style={{
+                          marginRight: 8,
+                          verticalAlign: "middle",
+                        }}
+                      />
+                      Clientes principales
+                    </IonCardTitle>
                   </IonCardHeader>
                   <IonCardContent>
                     <ul className="reporte-lista">
@@ -93,7 +104,16 @@ const Reportes: React.FC = () => {
               <IonCol size="6">
                 <IonCard className="reporte-tarjeta">
                   <IonCardHeader>
-                    <IonCardTitle>Resumen de stock</IonCardTitle>
+                    <IonCardTitle>
+                      <IonIcon
+                        icon={cube}
+                        style={{
+                          marginRight: 8,
+                          verticalAlign: "middle",
+                        }}
+                      />
+                      Resumen de stock
+                    </IonCardTitle>
                   </IonCardHeader>
                   <IonCardContent>
                     <div>
@@ -115,7 +135,16 @@ const Reportes: React.FC = () => {
               <IonCol size="6">
                 <IonCard className="reporte-tarjeta">
                   <IonCardHeader>
-                    <IonCardTitle>Productos estrella</IonCardTitle>
+                    <IonCardTitle>
+                      <IonIcon
+                        icon={trendingUp}
+                        style={{
+                          marginRight: 8,
+                          verticalAlign: "middle",
+                        }}
+                      />
+                      Productos mas pedidos
+                    </IonCardTitle>
                   </IonCardHeader>
                   <IonCardContent>
                     <ul className="reporte-lista">

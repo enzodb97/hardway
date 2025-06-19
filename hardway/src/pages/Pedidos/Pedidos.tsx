@@ -67,6 +67,10 @@ const Pedidos: React.FC = () => {
   const [pedidoParaFinalizar, setPedidoParaFinalizar] = useState<string | null>(
     null
   );
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [pedidoParaCancelar, setPedidoParaCancelar] = useState<string | null>(
+    null
+  );
   const porPagina = 6;
   const history = useHistory();
 
@@ -96,6 +100,10 @@ const Pedidos: React.FC = () => {
 
   // --- FUNCIONES UTILITARIAS ---
   // Todas las funciones de negocio se delegan a pedidosUtils.ts
+  const handleCancelarPedido = async (numeroPedido: string) => {
+    setPedidoParaCancelar(numeroPedido);
+    setShowCancelConfirm(true);
+  };
 
   return (
     <IonPage className="pedidos-page">
@@ -213,15 +221,11 @@ const Pedidos: React.FC = () => {
                                     <IonButton
                                       fill="clear"
                                       onClick={() =>
-                                        handleEliminarPedido(
-                                          pedido.numeroPedido,
-                                          setShowDeleteSuccess,
-                                          setPedidos,
-                                          setAlertMsg,
-                                          setShowAlert
+                                        handleCancelarPedido(
+                                          pedido.numeroPedido
                                         )
                                       }
-                                      className="delete-btn"
+                                      className="cancel-btn"
                                     >
                                       <IonIcon icon={trash} color="danger" />
                                     </IonButton>
@@ -466,7 +470,7 @@ const Pedidos: React.FC = () => {
         />
         <IonAlert
           isOpen={showDeleteSuccess}
-          message="Se cancelo correctamente el pedido"
+          message="El pedido fue cancelado correctamente."
           buttons={[
             {
               text: "Aceptar",
@@ -558,6 +562,37 @@ const Pedidos: React.FC = () => {
                   setPedidoParaFinalizar,
                   setPedidos
                 );
+              },
+            },
+          ]}
+        />
+        <IonAlert
+          isOpen={showCancelConfirm}
+          onDidDismiss={() => setShowCancelConfirm(false)}
+          header="Cancelar pedido"
+          message={`¿Desea cancelar el pedido N° ${pedidoParaCancelar}?`}
+          buttons={[
+            {
+              text: "Cancelar",
+              role: "cancel",
+              handler: () => setShowCancelConfirm(false),
+            },
+            {
+              text: "Aceptar",
+              handler: async () => {
+                try {
+                  await fetch(`/api/pedidos/${pedidoParaCancelar}/cancelar`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ idEstado: 6 }),
+                  });
+                  setShowDeleteSuccess(true);
+                  cargarPedidos().then(setPedidos);
+                } catch (error) {
+                  setAlertMsg("Error al cancelar el pedido.");
+                  setShowAlert(true);
+                }
+                setShowCancelConfirm(false);
               },
             },
           ]}

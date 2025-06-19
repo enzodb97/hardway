@@ -1708,14 +1708,15 @@ app.get("/api/reportes/stock-actual", async (req, res) => {
           ni.nombre AS producto,
           ta.talle,
           co.color,
-          r.numeroRack AS rack, -- <-- COLUMNA AGREGADA
+          te.tipoTela AS tela, -- <-- COLUMNA AGREGADA
+          r.numeroRack AS rack,
           SUM(ms.cantidad) AS stock_actual
       FROM
           movimientostock ms
       JOIN
           stock s ON ms.idStock = s.idStock
       JOIN
-          rack r ON s.idRack = r.idRack -- <-- JOIN AGREGADO
+          rack r ON s.idRack = r.idRack
       JOIN
           indumentaria i ON s.codigoIndumentaria = i.codigoIndumentaria
       JOIN
@@ -1726,12 +1727,15 @@ app.get("/api/reportes/stock-actual", async (req, res) => {
           talle ta ON di.idTalle = ta.idTalle
       JOIN
           color co ON di.idColor = co.idColor
+      JOIN
+          tela te ON di.idTela = te.idTela -- <-- JOIN AGREGADO
       GROUP BY
           i.codigoIndumentaria,
           ni.nombre,
           ta.talle,
           co.color,
-          r.numeroRack -- <-- COLUMNA AGREGADA AL GROUP BY
+          te.tipoTela, -- <-- COLUMNA AGREGADA AL GROUP BY
+          r.numeroRack
       ORDER BY
           stock_actual ASC;
     `);
@@ -2078,5 +2082,29 @@ app.get("/api/reportes/ventas-ultimos-7-dias", async (req, res) => {
     res
       .status(500)
       .json({ error: "Error al obtener ventas de la última semana" });
+  }
+});
+
+// Cancelar pedido (cambiar estado a Cancelado, idEstado = 6)
+app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
+  const { numeroPedido } = req.params;
+  try {
+    const pedido = await Pedido.findOne({ where: { numeroPedido } });
+    if (!pedido) {
+      return res.status(404).json({ error: "Pedido no encontrado" });
+    }
+    // Solo permitir cancelar si está En Curso (idEstado=1) o Pendiente de Pago (idEstado=2)
+    if (![1, 2].includes(pedido.idEstado)) {
+      return res.status(400).json({
+        error: "Solo se pueden cancelar pedidos En Curso o Pendiente de Pago",
+      });
+    }
+    pedido.idEstado = 6; // Cancelado
+    await pedido.save();
+    res.json({ success: true });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al cancelar el pedido", detalle: error.message });
   }
 });

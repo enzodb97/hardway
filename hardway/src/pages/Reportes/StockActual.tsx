@@ -24,6 +24,7 @@ interface StockActual {
   nombre_producto: string;
   talle: string;
   color: string;
+  tela: string;
   rack: number;
   stock_actual: number;
 }
@@ -48,6 +49,7 @@ const StockActual: React.FC = () => {
             nombre_producto: s.producto,
             talle: s.talle,
             color: s.color,
+            tela: s.tela,
             rack: s.rack,
             stock_actual: s.stock_actual,
           }));
@@ -81,12 +83,23 @@ const StockActual: React.FC = () => {
     doc.text(`Total de ítems: ${stock.length}`, x, 37);
 
     autoTable(doc, {
-      head: [["Código", "Producto", "Talle", "Color", "Rack", "Stock Actual"]],
+      head: [
+        [
+          "Código",
+          "Producto",
+          "Talle",
+          "Color",
+          "Tela",
+          "Rack",
+          "Stock Actual",
+        ],
+      ],
       body: stock.map((s) => [
         s.codigoIndumentaria,
         s.nombre_producto,
         s.talle,
         s.color,
+        s.tela,
         s.rack,
         s.stock_actual,
       ]),
@@ -96,7 +109,7 @@ const StockActual: React.FC = () => {
       didParseCell: function (data) {
         if (
           data.section === "body" &&
-          Number(data.row.raw[5]) <= 30 // 5 es la columna de stock_actual
+          Number(data.row.raw[6]) <= 30 // 5 es la columna de stock_actual
         ) {
           data.cell.styles.textColor = [184, 0, 0];
           data.cell.styles.fillColor = [255, 224, 224];
@@ -137,22 +150,25 @@ const StockActual: React.FC = () => {
                 <IonCardContent>
                   <IonGrid>
                     <IonRow className="table-header">
-                      <IonCol size="2" className="celda-centrada">
+                      <IonCol size="1.71" className="celda-centrada">
                         Código
                       </IonCol>
-                      <IonCol size="2" className="celda-centrada">
+                      <IonCol size="1.71" className="celda-centrada">
                         Producto
                       </IonCol>
-                      <IonCol size="2" className="celda-centrada">
+                      <IonCol size="1.71" className="celda-centrada">
                         Talle
                       </IonCol>
-                      <IonCol size="2" className="celda-centrada">
+                      <IonCol size="1.71" className="celda-centrada">
                         Color
                       </IonCol>
-                      <IonCol size="2" className="celda-centrada">
+                      <IonCol size="1.71" className="celda-centrada">
+                        Tela
+                      </IonCol>
+                      <IonCol size="1.71" className="celda-centrada">
                         Rack
                       </IonCol>
-                      <IonCol size="2" className="celda-centrada">
+                      <IonCol size="1.71" className="celda-centrada">
                         Stock Actual
                       </IonCol>
                     </IonRow>
@@ -161,22 +177,25 @@ const StockActual: React.FC = () => {
                         key={s.codigoIndumentaria + "-" + s.rack}
                         className={s.stock_actual <= 30 ? "stock-bajo" : ""}
                       >
-                        <IonCol size="2" className="celda-centrada">
+                        <IonCol size="1.71" className="celda-centrada">
                           {s.codigoIndumentaria}
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
+                        <IonCol size="1.71" className="celda-centrada">
                           {s.nombre_producto}
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
+                        <IonCol size="1.71" className="celda-centrada">
                           {s.talle}
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
+                        <IonCol size="1.71" className="celda-centrada">
                           {s.color}
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
+                        <IonCol size="1.71" className="celda-centrada">
+                          {s.tela}
+                        </IonCol>
+                        <IonCol size="1.71" className="celda-centrada">
                           {s.rack}
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
+                        <IonCol size="1.71" className="celda-centrada">
                           {s.stock_actual}
                         </IonCol>
                       </IonRow>
