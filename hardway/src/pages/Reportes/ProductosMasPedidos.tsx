@@ -98,7 +98,7 @@ const ProductosMasPedidos: React.FC = () => {
       legend: { display: false },
       title: {
         display: true,
-        text: "Top 5 Productos Más Pedidos",
+        text: "Top 10 Productos Más Pedidos",
         font: { size: 18 },
         padding: { top: 10, bottom: 20 },
       },
@@ -150,7 +150,7 @@ const ProductosMasPedidos: React.FC = () => {
   const exportarPDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const title = "Top 5 Productos Más Pedidos";
+    const title = "Top 10 Productos Más Pedidos";
     const textWidth = doc.getTextWidth(title);
     const x = (pageWidth - textWidth) / 2;
 
@@ -202,7 +202,7 @@ const ProductosMasPedidos: React.FC = () => {
         <IonGrid>
           <IonRow>
             <IonCol size="12" className="ion-text-center">
-              <h2 className="reporte-titulo">Top 5 Productos Más Pedidos</h2>
+              <h2 className="reporte-titulo">Top 10 Productos Más Pedidos</h2>
               <div className="reporte-fecha">
                 Fecha de emisión: {fechaEmision}
               </div>
@@ -265,6 +265,7 @@ const ProductosMasPedidos: React.FC = () => {
                         </IonCol>
                       </IonRow>
                     ))}
+                    <hr />
                     <IonButton
                       size="small"
                       fill={incluirGrafico ? "solid" : "outline"}

@@ -8,46 +8,60 @@ import {
   IonButton,
   IonInput,
   IonItem,
-  IonLabel,
   IonAlert,
   IonGrid,
   IonRow,
   IonCol,
   IonIcon,
+  IonFooter,
+  IonText,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import axios from "axios";
 import { pencil, trash } from "ionicons/icons";
+import {
+  obtenerIndumentariaPaginada,
+  IndumentariaItem,
+} from "../../utils/indumentariaUtils";
+
+const PAGE_SIZE = 10;
 
 const Indumentaria: React.FC = () => {
   const history = useHistory();
-  const [indumentaria, setIndumentaria] = useState<any[]>([]);
+  const [prendas, setPrendas] = useState<IndumentariaItem[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // Cargar indumentaria
   const cargarIndumentaria = async () => {
+    setLoading(true);
     try {
-      const res = await axios.get("/api/indumentaria");
-      setIndumentaria(res.data);
+      const data = await obtenerIndumentariaPaginada(page, PAGE_SIZE, busqueda);
+      setPrendas(Array.isArray(data.prendas) ? data.prendas : []);
+      setTotal(typeof data.total === "number" ? data.total : 0);
     } catch (error) {
+      setPrendas([]); // fallback seguro
+      setTotal(0);
       setAlertMsg("Error al cargar indumentaria.");
       setShowAlert(true);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     cargarIndumentaria();
-  }, []);
+    // eslint-disable-next-line
+  }, [page, busqueda]);
 
   // Eliminar prenda
   const handleEliminar = async (id: string) => {
-    console.log("Eliminando prenda con código:", id);
     if (window.confirm("¿Seguro que desea eliminar esta prenda?")) {
       try {
-        await axios.delete(`/api/indumentaria/${id}`);
-        await cargarIndumentaria();
+        await fetch(`/api/indumentaria/${id}`, { method: "DELETE" });
+        cargarIndumentaria();
       } catch (error) {
         setAlertMsg("Error al eliminar prenda.");
         setShowAlert(true);
@@ -55,21 +69,7 @@ const Indumentaria: React.FC = () => {
     }
   };
 
-  // Filtro de búsqueda
-  const normalizar = (str: any) =>
-    String(str ?? "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-
-  const prendasFiltradas = indumentaria.filter(
-    (item) =>
-      normalizar(item.nombre).includes(normalizar(busqueda)) ||
-      normalizar(item.talle).includes(normalizar(busqueda)) ||
-      normalizar(item.color).includes(normalizar(busqueda)) ||
-      normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
-      (item.idIndumentaria && item.idIndumentaria.toString().includes(busqueda))
-  );
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <IonPage>
@@ -83,7 +83,10 @@ const Indumentaria: React.FC = () => {
           <IonInput
             placeholder="Buscar por descripción, código, color o talle"
             value={busqueda}
-            onIonChange={(e) => setBusqueda(e.detail.value!)}
+            onIonChange={(e) => {
+              setPage(1);
+              setBusqueda(e.detail.value!);
+            }}
             clearInput
           />
           <IonButton
@@ -93,6 +96,9 @@ const Indumentaria: React.FC = () => {
             Nueva Prenda
           </IonButton>
         </IonItem>
+        <IonText className="ion-padding">
+          Total de prendas: <b>{total}</b>
+        </IonText>
         <IonGrid>
           <IonRow>
             <IonCol>
@@ -126,7 +132,7 @@ const Indumentaria: React.FC = () => {
               <strong>Acciones</strong>
             </IonCol>
           </IonRow>
-          {prendasFiltradas.map((item) => (
+          {(prendas || []).map((item) => (
             <IonRow key={item.codigoIndumentaria}>
               <IonCol>{item.codigoIndumentaria}</IonCol>
               <IonCol>{item.nombre}</IonCol>
@@ -159,6 +165,24 @@ const Indumentaria: React.FC = () => {
             </IonRow>
           ))}
         </IonGrid>
+        {/* Paginación */}
+        <IonFooter className="ion-padding ion-text-center">
+          <IonButton
+            disabled={page === 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Anterior
+          </IonButton>
+          <IonText className="ion-padding-horizontal">
+            Página {page} de {totalPages}
+          </IonText>
+          <IonButton
+            disabled={page === totalPages || totalPages === 0}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Siguiente
+          </IonButton>
+        </IonFooter>
         <IonAlert
           isOpen={showAlert}
           message={alertMsg}

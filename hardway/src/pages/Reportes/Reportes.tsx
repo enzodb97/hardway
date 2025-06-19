@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   IonPage,
   IonHeader,
@@ -13,12 +13,40 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonSpinner,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
+import axios from "axios";
 import "./Reportes.css";
 
 const Reportes: React.FC = () => {
   const history = useHistory();
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [productos, setProductos] = useState<any[]>([]);
+  const [stock, setStock] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      axios.get("/api/reportes/clientes-mas-pedidos"),
+      axios.get("/api/reportes/productos-mas-pedidos"),
+      axios.get("/api/reportes/stock-actual"),
+    ])
+      .then(([clientesRes, productosRes, stockRes]) => {
+        setClientes(clientesRes.data || []);
+        setProductos(productosRes.data || []);
+        setStock(stockRes.data || []);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Top 3 clientes
+  const topClientes = clientes.slice(0, 3);
+  // Top 3 productos
+  const topProductos = productos.slice(0, 3);
+  // Productos con bajo stock (ejemplo: stock_actual <= 5)
+  const bajoStock = stock.filter((s: any) => s.stock_actual <= 30);
 
   return (
     <IonPage>
@@ -28,85 +56,91 @@ const Reportes: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding reportes-dashboard-content">
-        <IonGrid className="reportes-dashboard-grid">
-          <IonRow>
-            <IonCol size="6">
-              <IonCard className="reporte-tarjeta">
-                <IonCardHeader>
-                  <IonCardTitle>Clientes principales</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <ul className="reporte-lista">
-                    <li>
-                      Laura Fernandez <span>(15 Pedidos)</span>
-                    </li>
-                    <li>
-                      Juan Pérez <span>(13 Pedidos)</span>
-                    </li>
-                    <li>
-                      Martin Gomez <span>(12 Pedidos)</span>
-                    </li>
-                  </ul>
-                  <IonButton
-                    fill="clear"
-                    size="small"
-                    onClick={() =>
-                      history.push("/reportes/clientes-mas-pedidos")
-                    }
-                  >
-                    Ver reporte completo...
-                  </IonButton>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-            <IonCol size="6">
-              <IonCard className="reporte-tarjeta">
-                <IonCardHeader>
-                  <IonCardTitle>Resumen de stock</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <div>
-                    Productos con Bajo Stock: <strong>5</strong>
-                  </div>
-                  <IonButton
-                    fill="clear"
-                    size="small"
-                    onClick={() => history.push("/reportes/stock-actual")}
-                  >
-                    Ver detalle de stock...
-                  </IonButton>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-          </IonRow>
-          <IonRow>
-            <IonCol size="6">
-              <IonCard className="reporte-tarjeta">
-                <IonCardHeader>
-                  <IonCardTitle>Productos estrella</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <div className="reporte-barra-producto">
-                    Camisa <span className="barra barra-llena"></span>
-                  </div>
-                  <div className="reporte-barra-producto">
-                    Chaqueta <span className="barra barra-media"></span>
-                  </div>
-                  <div className="reporte-barra-producto">
-                    Pantalón <span className="barra barra-baja"></span>
-                  </div>
-                  <IonButton
-                    fill="clear"
-                    size="small"
-                    onClick={() =>
-                      history.push("/reportes/productos-mas-pedidos")
-                    }
-                  >
-                    Ver reporte completo...
-                  </IonButton>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
+        {loading ? (
+          <div style={{ textAlign: "center", marginTop: 40 }}>
+            <IonSpinner name="crescent" />
+          </div>
+        ) : (
+          <IonGrid className="reportes-dashboard-grid">
+            <IonRow>
+              <IonCol size="6">
+                <IonCard className="reporte-tarjeta">
+                  <IonCardHeader>
+                    <IonCardTitle>Clientes principales</IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <ul className="reporte-lista">
+                      {topClientes.length === 0 && <li>No hay datos</li>}
+                      {topClientes.map((c) => (
+                        <li key={c.idCliente}>
+                          {c.nombre} {c.apellido}{" "}
+                          <span>({c.total_pedidos} Pedidos)</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      onClick={() =>
+                        history.push("/reportes/clientes-mas-pedidos")
+                      }
+                    >
+                      Ver reporte completo...
+                    </IonButton>
+                  </IonCardContent>
+                </IonCard>
+              </IonCol>
+              <IonCol size="6">
+                <IonCard className="reporte-tarjeta">
+                  <IonCardHeader>
+                    <IonCardTitle>Resumen de stock</IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <div>
+                      Productos con Bajo Stock:{" "}
+                      <strong>{bajoStock.length}</strong>
+                    </div>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      onClick={() => history.push("/reportes/stock-actual")}
+                    >
+                      Ver detalle de stock...
+                    </IonButton>
+                  </IonCardContent>
+                </IonCard>
+              </IonCol>
+            </IonRow>
+            <IonRow>
+              <IonCol size="6">
+                <IonCard className="reporte-tarjeta">
+                  <IonCardHeader>
+                    <IonCardTitle>Productos estrella</IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <ul className="reporte-lista">
+                      {topProductos.length === 0 && <li>No hay datos</li>}
+                      {topProductos.map((p, idx) => (
+                        <li key={p.codigoIndumentaria}>
+                          {p.nombre_indumentaria} - Talle {p.talle} - {p.tela} -{" "}
+                          {p.color}
+                          <span>({p.cantidad_total_vendida} pedidos)</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      onClick={() =>
+                        history.push("/reportes/productos-mas-pedidos")
+                      }
+                    >
+                      Ver reporte completo...
+                    </IonButton>
+                  </IonCardContent>
+                </IonCard>
+              </IonCol>
+            </IonRow>
             {/*<IonCol size="6">
               <IonCard className="reporte-tarjeta">
                 <IonCardHeader>
@@ -126,8 +160,8 @@ const Reportes: React.FC = () => {
                 </IonCardContent>
               </IonCard>
             </IonCol>*/}
-          </IonRow>
-        </IonGrid>
+          </IonGrid>
+        )}
       </IonContent>
     </IonPage>
   );

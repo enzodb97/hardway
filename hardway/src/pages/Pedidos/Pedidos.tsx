@@ -433,7 +433,7 @@ const Pedidos: React.FC = () => {
             <IonCol size="12">
               <IonButton
                 expand="block"
-                onClick={() => exportarPDF(pedidosAMostrar)}
+                onClick={() => exportarPDF(pedidosFiltrados)}
               >
                 Exportar lista de pedidos a PDF
               </IonButton>

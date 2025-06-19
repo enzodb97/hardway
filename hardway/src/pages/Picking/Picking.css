@@ -1,4 +1,7 @@
 /* Picking.css */
+.picking-page {
+  --background-color: #feaf00;
+}
 .picking-admin-picker {
   color: #0054e9;
   font-weight: bold;

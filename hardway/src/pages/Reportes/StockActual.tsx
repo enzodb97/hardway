@@ -22,6 +22,8 @@ import "./Reportes.css";
 interface StockActual {
   codigoIndumentaria: string;
   nombre_producto: string;
+  talle: string;
+  color: string;
   rack: number;
   stock_actual: number;
 }
@@ -38,10 +40,17 @@ const StockActual: React.FC = () => {
     axios
       .get("/api/reportes/stock-actual")
       .then((res) => {
-        // Filtra solo prendas con stock > 0
-        const disponibles = (res.data as StockActual[]).filter(
-          (s) => s.stock_actual > 0
-        );
+        // Mapeo para adaptar los nombres del backend a los del frontend
+        const disponibles = (res.data as any[])
+          .filter((s) => s.stock_actual > 0)
+          .map((s) => ({
+            codigoIndumentaria: s.codigo,
+            nombre_producto: s.producto,
+            talle: s.talle,
+            color: s.color,
+            rack: s.rack,
+            stock_actual: s.stock_actual,
+          }));
         setStock(disponibles);
       })
       .catch(() => setStock([]));
@@ -68,23 +77,37 @@ const StockActual: React.FC = () => {
     doc.text(title, x, 18);
     doc.setFontSize(10);
     doc.text(`Fecha de emisión: ${fechaEmision}`, x, 25);
+    doc.text(`Productos con Bajo Stock: ${bajoStock.length}`, x, 31);
+    doc.text(`Total de ítems: ${stock.length}`, x, 37);
 
     autoTable(doc, {
-      head: [["Código", "Producto", "Rack", "Stock Actual"]],
-      body: stockAMostrar.map((s) => [
+      head: [["Código", "Producto", "Talle", "Color", "Rack", "Stock Actual"]],
+      body: stock.map((s) => [
         s.codigoIndumentaria,
         s.nombre_producto,
+        s.talle,
+        s.color,
         s.rack,
         s.stock_actual,
       ]),
-      startY: 32,
-      styles: { fontSize: 10, halign: "center" }, // <-- Centra el contenido
-      headStyles: { fillColor: [254, 175, 0], halign: "center" }, // <-- Centra los encabezados
+      startY: 42,
+      styles: { fontSize: 10, halign: "center" },
+      headStyles: { fillColor: [254, 175, 0], halign: "center" },
+      didParseCell: function (data) {
+        if (
+          data.section === "body" &&
+          Number(data.row.raw[5]) <= 30 // 5 es la columna de stock_actual
+        ) {
+          data.cell.styles.textColor = [184, 0, 0];
+          data.cell.styles.fillColor = [255, 224, 224];
+          data.cell.styles.fontStyle = "bold";
+        }
+      },
     });
 
     doc.save("Stock_actual.pdf");
   };
-
+  const bajoStock = stock.filter((s: any) => s.stock_actual <= 30);
   return (
     <IonPage>
       <IonHeader>
@@ -100,8 +123,11 @@ const StockActual: React.FC = () => {
               <div className="reporte-fecha">
                 Fecha de emisión: {fechaEmision}
               </div>
+              <div>
+                Productos con Bajo Stock: <strong>{bajoStock.length}</strong>
+              </div>
               <div style={{ fontWeight: "bold", margin: "8px 0" }}>
-                Total de ítems: {stockAMostrar.length}
+                Total de ítems: {stock.length}
               </div>
             </IonCol>
           </IonRow>
@@ -114,28 +140,43 @@ const StockActual: React.FC = () => {
                       <IonCol size="2" className="celda-centrada">
                         Código
                       </IonCol>
-                      <IonCol size="5" className="celda-centrada">
+                      <IonCol size="2" className="celda-centrada">
                         Producto
+                      </IonCol>
+                      <IonCol size="2" className="celda-centrada">
+                        Talle
+                      </IonCol>
+                      <IonCol size="2" className="celda-centrada">
+                        Color
                       </IonCol>
                       <IonCol size="2" className="celda-centrada">
                         Rack
                       </IonCol>
-                      <IonCol size="3" className="celda-centrada">
+                      <IonCol size="2" className="celda-centrada">
                         Stock Actual
                       </IonCol>
                     </IonRow>
                     {stockAMostrar.map((s) => (
-                      <IonRow key={s.codigoIndumentaria + "-" + s.rack}>
+                      <IonRow
+                        key={s.codigoIndumentaria + "-" + s.rack}
+                        className={s.stock_actual <= 30 ? "stock-bajo" : ""}
+                      >
                         <IonCol size="2" className="celda-centrada">
                           {s.codigoIndumentaria}
                         </IonCol>
-                        <IonCol size="5" className="celda-centrada">
+                        <IonCol size="2" className="celda-centrada">
                           {s.nombre_producto}
+                        </IonCol>
+                        <IonCol size="2" className="celda-centrada">
+                          {s.talle}
+                        </IonCol>
+                        <IonCol size="2" className="celda-centrada">
+                          {s.color}
                         </IonCol>
                         <IonCol size="2" className="celda-centrada">
                           {s.rack}
                         </IonCol>
-                        <IonCol size="3" className="celda-centrada">
+                        <IonCol size="2" className="celda-centrada">
                           {s.stock_actual}
                         </IonCol>
                       </IonRow>

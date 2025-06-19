@@ -171,3 +171,9 @@
   font-size: 1rem;
   color: #222;
 }
+
+.stock-bajo {
+  background-color: #ffe0e0 !important;
+  color: #b80000;
+  font-weight: bold;
+}

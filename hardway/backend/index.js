@@ -1704,26 +1704,36 @@ app.get("/api/reportes/stock-actual", async (req, res) => {
   try {
     const [result] = await sequelize.query(`
       SELECT
-        s.codigoIndumentaria,
-        ni.nombre AS nombre_producto,
-        r.numeroRack AS rack,
-        SUM(ms.cantidad) AS stock_actual
+          i.codigoIndumentaria AS codigo,
+          ni.nombre AS producto,
+          ta.talle,
+          co.color,
+          r.numeroRack AS rack, -- <-- COLUMNA AGREGADA
+          SUM(ms.cantidad) AS stock_actual
       FROM
-        movimientostock ms
+          movimientostock ms
       JOIN
-        stock s ON ms.idStock = s.idStock
+          stock s ON ms.idStock = s.idStock
       JOIN
-        indumentaria i ON s.codigoIndumentaria = i.codigoIndumentaria
+          rack r ON s.idRack = r.idRack -- <-- JOIN AGREGADO
       JOIN
-        detalleindumentaria di ON i.idDetalle = di.idDetalle
+          indumentaria i ON s.codigoIndumentaria = i.codigoIndumentaria
       JOIN
-        nombreindumentaria ni ON di.idNombre = ni.idNombre
+          detalleindumentaria di ON i.idDetalle = di.idDetalle
       JOIN
-        rack r ON s.idRack = r.idRack
+          nombreindumentaria ni ON di.idNombre = ni.idNombre
+      JOIN
+          talle ta ON di.idTalle = ta.idTalle
+      JOIN
+          color co ON di.idColor = co.idColor
       GROUP BY
-        s.codigoIndumentaria, ni.nombre, r.numeroRack
+          i.codigoIndumentaria,
+          ni.nombre,
+          ta.talle,
+          co.color,
+          r.numeroRack -- <-- COLUMNA AGREGADA AL GROUP BY
       ORDER BY
-        stock_actual ASC
+          stock_actual ASC;
     `);
     res.json(result);
   } catch (error) {
@@ -1767,7 +1777,7 @@ app.get("/api/reportes/productos-mas-pedidos", async (req, res) => {
         co.color
       ORDER BY
         cantidad_total_vendida DESC
-      LIMIT 5
+      LIMIT 10
     `);
     res.json(result);
   } catch (error) {
