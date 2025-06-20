@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-06-2025 a las 18:38:33
+-- Tiempo de generación: 20-06-2025 a las 02:19:25
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -87,15 +87,42 @@ VALUES
     'PED-2025-112',
     'LP005',
     '2025-06-18 06:35:53',
-    NULL,
+    '2025-06-18 20:14:32',
     'Asignación desde panel gerente',
-    0
+    1
   ),
   (
     30,
     'PED-2025-113',
     'LP006',
     '2025-06-18 06:36:03',
+    NULL,
+    'Asignación desde panel gerente',
+    0
+  ),
+  (
+    31,
+    'PED-2025-112',
+    'LP005',
+    '2025-06-18 20:14:32',
+    NULL,
+    'Asignación desde panel gerente',
+    0
+  ),
+  (
+    32,
+    'PED-2025-407',
+    'LP006',
+    '2025-06-19 05:26:00',
+    NULL,
+    'Asignación desde panel gerente',
+    0
+  ),
+  (
+    33,
+    'PED-2025-317',
+    'LP005',
+    '2025-06-20 00:02:40',
     NULL,
     'Asignación desde panel gerente',
     0
@@ -338,7 +365,32 @@ VALUES
   (8, 8, 8, 8, 8, 8, 1, 8),
   (9, 9, 9, 9, 9, 9, 1, 9),
   (10, 10, 10, 10, 10, 10, 1, 10),
-  (16, 10, 10, 3, 3, 6, 1, 3);
+  (16, 10, 10, 3, 3, 6, 1, 3),
+  (17, 1, 7, 7, 1, 1, 1, 10),
+  (18, 3, 5, 7, 3, 15, 1, 5),
+  (19, 2, 2, 6, 4, 2, 1, 7),
+  (20, 4, 4, 3, 2, 16, 1, 2),
+  (21, 5, 8, 5, 1, 3, 1, 5),
+  (22, 6, 6, 7, 7, 18, 1, 3),
+  (23, 7, 7, 2, 2, 14, 1, 6),
+  (24, 8, 9, 7, 3, 15, 1, 9),
+  (25, 9, 10, 1, 8, 16, 1, 5),
+  (26, 10, 1, 3, 4, 17, 1, 2),
+  (27, 1, 8, 1, 11, 1, 1, 4),
+  (28, 2, 5, 4, 7, 5, 1, 11),
+  (29, 3, 7, 12, 5, 12, 1, 12),
+  (30, 4, 3, 2, 9, 14, 1, 1),
+  (31, 5, 5, 3, 5, 4, 1, 5),
+  (32, 6, 9, 1, 10, 18, 1, 4),
+  (33, 1, 6, 2, 7, 15, 1, 7),
+  (34, 2, 7, 2, 2, 1, 1, 6),
+  (35, 3, 8, 11, 1, 16, 1, 2),
+  (36, 4, 9, 7, 3, 17, 1, 3),
+  (37, 5, 4, 2, 4, 5, 1, 1),
+  (38, 8, 3, 6, 5, 15, 1, 7),
+  (39, 3, 9, 1, 3, 16, 1, 9),
+  (40, 9, 6, 2, 1, 14, 1, 5),
+  (41, 7, 2, 7, 7, 17, 1, 10);
 
 -- --------------------------------------------------------
 --
@@ -381,7 +433,6 @@ VALUES
   ('DP-030', 'PED-2025-029', 'IND006', 1),
   ('DP-031', 'PED-2025-030', 'IND007', 3),
   ('DP-101', 'PED-2025-101', 'IND001', 2),
-  ('DP-102', 'PED-2025-102', 'IND002', 3),
   ('DP-103', 'PED-2025-103', 'IND003', 1),
   ('DP-104', 'PED-2025-104', 'IND004', 2),
   ('DP-105', 'PED-2025-105', 'IND005', 1),
@@ -390,7 +441,6 @@ VALUES
   ('DP-108', 'PED-2025-108', 'IND008', 1),
   ('DP-109', 'PED-2025-109', 'IND009', 2),
   ('DP-110', 'PED-2025-110', 'IND010', 1),
-  ('DP-112', 'PED-2025-112', 'IND002', 2),
   ('DP-113', 'PED-2025-113', 'IND003', 1),
   ('DP-114', 'PED-2025-114', 'IND004', 3),
   ('DP-115', 'PED-2025-115', 'IND005', 2),
@@ -398,15 +448,21 @@ VALUES
   ('DP-117', 'PED-2025-117', 'IND007', 2),
   ('DP-118', 'PED-2025-118', 'IND008', 1),
   ('DP-119', 'PED-2025-119', 'IND009', 3),
-  ('DP-120', 'PED-2025-120', 'IND010', 2),
   ('DPED-043831', 'PED-2025-429', 'IND001', 1),
-  ('DPED-242246', 'PED-2025-561', 'IND003', 3),
+  ('DPED-192243', 'PED-2025-102', 'IND002', 2),
+  ('DPED-253537', 'PED-2025-317', 'IND003', 4),
+  ('DPED-334604', 'PED-2025-407', 'IND001', 4),
   ('DPED-368986', 'PED-2025-333', 'IND001', 2),
+  ('DPED-369495', 'PED-2025-407', 'IND003', 3),
   ('DPED-472999', 'PED-2025-172', 'IND003', 6),
+  ('DPED-483076', 'PED-2025-112', 'IND002', 2),
   ('DPED-532448', 'PED-2025-172', 'IND002', 4),
   ('DPED-618710', 'PED-2025-429', 'IND002', 1),
+  ('DPED-635910', 'PED-2025-120', 'IND010', 10),
+  ('DPED-685220', 'PED-2025-317', 'IND001', 3),
   ('DPED-691464', 'PED-2025-172', 'IND001', 2),
-  ('DPED-693468', 'PED-2025-561', 'IND001', 3),
+  ('DPED-773018', 'PED-2025-317', 'IND039', 3),
+  ('DPED-844121', 'PED-2025-407', 'IND006', 3),
   ('DPED-911321', 'PED-2025-111', 'IND001', 1);
 
 -- --------------------------------------------------------
@@ -760,7 +816,32 @@ VALUES
   ('IND007', 7),
   ('IND008', 8),
   ('IND009', 9),
-  ('IND010', 16);
+  ('IND010', 16),
+  ('IND015', 17),
+  ('IND016', 18),
+  ('IND017', 19),
+  ('IND018', 20),
+  ('IND019', 21),
+  ('IND020', 22),
+  ('IND021', 23),
+  ('IND022', 24),
+  ('IND023', 25),
+  ('IND024', 26),
+  ('IND025', 27),
+  ('IND026', 28),
+  ('IND027', 29),
+  ('IND028', 30),
+  ('IND029', 31),
+  ('IND030', 32),
+  ('IND031', 33),
+  ('IND032', 34),
+  ('IND033', 35),
+  ('IND034', 36),
+  ('IND035', 37),
+  ('IND036', 38),
+  ('IND037', 39),
+  ('IND038', 40),
+  ('IND039', 41);
 
 -- --------------------------------------------------------
 --
@@ -823,11 +904,25 @@ VALUES
     'Devolución por eliminación de pedido PED-2025-663'
   ),
   (
+    'MOV-DEL-272563',
+    'STK001',
+    '2025-06-18',
+    3,
+    'Devolución por eliminación de pedido PED-2025-561'
+  ),
+  (
     'MOV-DEL-381517',
     'STK001',
     '2025-06-16',
     1,
     'Devolución por eliminación de pedido PED-2025-885'
+  ),
+  (
+    'MOV-DEL-418634',
+    'STK003',
+    '2025-06-18',
+    3,
+    'Devolución por eliminación de pedido PED-2025-561'
   ),
   (
     'MOV-DEL-423999',
@@ -907,6 +1002,20 @@ VALUES
     'Descuento por edición de pedido PED-2025-973'
   ),
   (
+    'MOV-EDIT-DESC-100080',
+    'STK002',
+    '2025-06-20',
+    -2,
+    'Descuento por edición de pedido PED-2025-112'
+  ),
+  (
+    'MOV-EDIT-DESC-108420',
+    'STK002',
+    '2025-06-20',
+    -2,
+    'Descuento por edición de pedido PED-2025-102'
+  ),
+  (
     'MOV-EDIT-DESC-122896',
     'STK001',
     '2025-06-16',
@@ -940,6 +1049,13 @@ VALUES
     '2025-06-16',
     -16,
     'Descuento por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DESC-215905',
+    'STK002',
+    '2025-06-20',
+    -2,
+    'Descuento por edición de pedido PED-2025-112'
   ),
   (
     'MOV-EDIT-DESC-234815',
@@ -982,6 +1098,13 @@ VALUES
     '2025-06-16',
     -10,
     'Descuento por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DESC-382177',
+    'STK010',
+    '2025-06-20',
+    -10,
+    'Descuento por edición de pedido PED-2025-120'
   ),
   (
     'MOV-EDIT-DESC-392085',
@@ -1045,6 +1168,13 @@ VALUES
     '2025-06-16',
     -2,
     'Descuento por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DESC-489201',
+    'STK001',
+    '2025-06-20',
+    -2,
+    'Descuento por edición de pedido PED-2025-112'
   ),
   (
     'MOV-EDIT-DESC-513756',
@@ -1180,6 +1310,13 @@ VALUES
     'Descuento por edición de pedido PED-2025-429'
   ),
   (
+    'MOV-EDIT-DESC-824333',
+    'STK010',
+    '2025-06-20',
+    -1,
+    'Descuento por edición de pedido PED-2025-120'
+  ),
+  (
     'MOV-EDIT-DESC-838648',
     'STK003',
     '2025-06-16',
@@ -1250,6 +1387,13 @@ VALUES
     'Devolución por edición de pedido PED-2025-973'
   ),
   (
+    'MOV-EDIT-DEV-038662',
+    'STK002',
+    '2025-06-20',
+    3,
+    'Devolución por edición de pedido PED-2025-102'
+  ),
+  (
     'MOV-EDIT-DEV-061252',
     'STK001',
     '2025-06-16',
@@ -1269,6 +1413,13 @@ VALUES
     '2025-06-16',
     16,
     'Devolución por edición de pedido PED-2025-663'
+  ),
+  (
+    'MOV-EDIT-DEV-128772',
+    'STK010',
+    '2025-06-20',
+    2,
+    'Devolución por edición de pedido PED-2025-120'
   ),
   (
     'MOV-EDIT-DEV-131152',
@@ -1348,6 +1499,13 @@ VALUES
     'Devolución por edición de pedido PED-2025-973'
   ),
   (
+    'MOV-EDIT-DEV-365563',
+    'STK002',
+    '2025-06-20',
+    2,
+    'Devolución por edición de pedido PED-2025-112'
+  ),
+  (
     'MOV-EDIT-DEV-376428',
     'STK001',
     '2025-06-16',
@@ -1381,6 +1539,13 @@ VALUES
     '2025-06-16',
     10,
     'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-510870',
+    'STK002',
+    '2025-06-20',
+    2,
+    'Devolución por edición de pedido PED-2025-112'
   ),
   (
     'MOV-EDIT-DEV-542624',
@@ -1444,6 +1609,13 @@ VALUES
     '2025-06-16',
     8,
     'Devolución por edición de pedido PED-2025-973'
+  ),
+  (
+    'MOV-EDIT-DEV-618804',
+    'STK001',
+    '2025-06-20',
+    2,
+    'Devolución por edición de pedido PED-2025-112'
   ),
   (
     'MOV-EDIT-DEV-622945',
@@ -1514,6 +1686,13 @@ VALUES
     '2025-06-16',
     2,
     'Devolución por edición de pedido PED-2025-002'
+  ),
+  (
+    'MOV-EDIT-DEV-814253',
+    'STK010',
+    '2025-06-20',
+    1,
+    'Devolución por edición de pedido PED-2025-120'
   ),
   (
     'MOV-EDIT-DEV-984975',
@@ -1598,6 +1777,181 @@ VALUES
     '2025-06-13',
     130,
     'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-015',
+    'STK015',
+    '2025-06-18',
+    95,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-016',
+    'STK016',
+    '2025-06-18',
+    75,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-017',
+    'STK017',
+    '2025-06-18',
+    90,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-018',
+    'STK018',
+    '2025-06-18',
+    110,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-019',
+    'STK019',
+    '2025-06-18',
+    40,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-020',
+    'STK020',
+    '2025-06-18',
+    150,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-021',
+    'STK021',
+    '2025-06-18',
+    65,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-022',
+    'STK022',
+    '2025-06-18',
+    180,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-023',
+    'STK023',
+    '2025-06-18',
+    130,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-024',
+    'STK024',
+    '2025-06-18',
+    250,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-025',
+    'STK025',
+    '2025-06-18',
+    60,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-026',
+    'STK026',
+    '2025-06-18',
+    100,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-027',
+    'STK027',
+    '2025-06-18',
+    85,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-028',
+    'STK028',
+    '2025-06-18',
+    140,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-029',
+    'STK029',
+    '2025-06-18',
+    70,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-030',
+    'STK030',
+    '2025-06-18',
+    115,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-031',
+    'STK031',
+    '2025-06-18',
+    95,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-032',
+    'STK032',
+    '2025-06-18',
+    125,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-033',
+    'STK033',
+    '2025-06-18',
+    88,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-034',
+    'STK034',
+    '2025-06-18',
+    105,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-035',
+    'STK035',
+    '2025-06-18',
+    90,
+    'Carga Inicial de Stock'
+  ),
+  (
+    'MOV-INIT-036',
+    'STK036',
+    '2025-06-18',
+    25,
+    'Carga Inicial de Stock (Bajo)'
+  ),
+  (
+    'MOV-INIT-037',
+    'STK037',
+    '2025-06-18',
+    15,
+    'Carga Inicial de Stock (Bajo)'
+  ),
+  (
+    'MOV-INIT-038',
+    'STK038',
+    '2025-06-18',
+    10,
+    'Carga Inicial de Stock (Bajo)'
+  ),
+  (
+    'MOV-INIT-039',
+    'STK039',
+    '2025-06-18',
+    5,
+    'Carga Inicial de Stock (Muy Bajo)'
   ),
   (
     'MOV-PED-014',
@@ -1717,6 +2071,13 @@ VALUES
     '2025-06-16',
     -3,
     'Venta Pedido PED-2025-030'
+  ),
+  (
+    'MOV-PED-076453',
+    'STK003',
+    '2025-06-20',
+    -4,
+    'Descuento por pedido PED-2025-317'
   ),
   (
     'MOV-PED-101',
@@ -1880,6 +2241,13 @@ VALUES
     'Descuento por pedido PED-2025-885'
   ),
   (
+    'MOV-PED-254626',
+    'STK001',
+    '2025-06-20',
+    -3,
+    'Descuento por pedido PED-2025-317'
+  ),
+  (
     'MOV-PED-263644',
     'STK003',
     '2025-06-16',
@@ -1901,11 +2269,32 @@ VALUES
     'Descuento por pedido PED-2025-172'
   ),
   (
+    'MOV-PED-339799',
+    'STK006',
+    '2025-06-18',
+    -3,
+    'Descuento por pedido PED-2025-407'
+  ),
+  (
+    'MOV-PED-409936',
+    'STK001',
+    '2025-06-18',
+    -4,
+    'Descuento por pedido PED-2025-407'
+  ),
+  (
     'MOV-PED-533530',
     'STK001',
     '2025-06-16',
     -1,
     'Descuento por pedido PED-2025-663'
+  ),
+  (
+    'MOV-PED-539885',
+    'STK003',
+    '2025-06-18',
+    -3,
+    'Descuento por pedido PED-2025-407'
   ),
   (
     'MOV-PED-563744',
@@ -1955,6 +2344,13 @@ VALUES
     '2025-06-16',
     -1,
     'Descuento por pedido PED-2025-429'
+  ),
+  (
+    'MOV-PED-821632',
+    'STK039',
+    '2025-06-20',
+    -3,
+    'Descuento por pedido PED-2025-317'
   ),
   (
     'MOV-PED-870580',
@@ -2065,9 +2461,9 @@ VALUES
     'PED-2025-017',
     30,
     '2025-06-16 15:34:33',
+    '2025-06-18 13:52:53',
     NULL,
-    NULL,
-    4,
+    3,
     NULL
   ),
   (
@@ -2119,9 +2515,9 @@ VALUES
     'PED-2025-023',
     33,
     '2025-06-16 15:34:33',
+    '2025-06-18 13:53:07',
     NULL,
-    NULL,
-    4,
+    3,
     NULL
   ),
   (
@@ -2155,7 +2551,7 @@ VALUES
     'PED-2025-027',
     39,
     '2025-06-16 15:34:33',
-    NULL,
+    '2025-06-18 13:51:00',
     NULL,
     3,
     NULL
@@ -2200,7 +2596,7 @@ VALUES
     'PED-2025-102',
     29,
     '2025-06-16 15:44:01',
-    NULL,
+    '2025-06-20 00:16:13',
     NULL,
     1,
     NULL
@@ -2227,9 +2623,9 @@ VALUES
     'PED-2025-105',
     31,
     '2025-06-16 15:44:01',
-    NULL,
-    NULL,
-    4,
+    '2025-06-18 20:13:57',
+    'HD-54545-AR',
+    5,
     NULL
   ),
   (
@@ -2272,25 +2668,25 @@ VALUES
     'PED-2025-110',
     36,
     '2025-06-16 15:44:02',
-    NULL,
-    NULL,
-    4,
+    '2025-06-18 20:07:18',
+    'HD112312345AR',
+    5,
     NULL
   ),
   (
     'PED-2025-111',
     37,
     '2025-06-16 15:44:02',
-    '2025-06-18 02:32:53',
+    '2025-06-18 20:08:48',
     NULL,
-    3,
+    5,
     NULL
   ),
   (
     'PED-2025-112',
     37,
     '2025-06-16 15:44:02',
-    '2025-06-18 03:35:41',
+    '2025-06-20 00:17:38',
     NULL,
     1,
     NULL
@@ -2308,18 +2704,18 @@ VALUES
     'PED-2025-114',
     39,
     '2025-06-16 15:44:02',
+    '2025-06-18 20:09:22',
     NULL,
-    NULL,
-    3,
+    5,
     NULL
   ),
   (
     'PED-2025-115',
     40,
     '2025-06-14 15:44:02',
-    '2025-06-16 15:47:35',
+    '2025-06-18 13:53:01',
     NULL,
-    4,
+    3,
     NULL
   ),
   (
@@ -2344,25 +2740,25 @@ VALUES
     'PED-2025-118',
     2,
     '2025-06-16 15:44:02',
+    '2025-06-18 20:09:51',
     NULL,
-    NULL,
-    2,
+    3,
     NULL
   ),
   (
     'PED-2025-119',
     3,
     '2025-06-16 15:44:02',
+    '2025-06-18 20:11:36',
     NULL,
-    NULL,
-    3,
+    5,
     NULL
   ),
   (
     'PED-2025-120',
     4,
     '2025-06-16 15:44:02',
-    NULL,
+    '2025-06-20 00:16:52',
     NULL,
     1,
     NULL
@@ -2377,6 +2773,15 @@ VALUES
     NULL
   ),
   (
+    'PED-2025-317',
+    1,
+    '2025-06-20 00:02:06',
+    '2025-06-20 00:04:43',
+    NULL,
+    6,
+    NULL
+  ),
+  (
     'PED-2025-333',
     4,
     '2025-06-16 04:01:30',
@@ -2386,21 +2791,21 @@ VALUES
     NULL
   ),
   (
-    'PED-2025-429',
-    28,
-    '2025-06-16 20:43:17',
-    '2025-06-18 13:26:38',
+    'PED-2025-407',
+    1,
+    '2025-06-18 21:30:36',
+    '2025-06-19 02:25:02',
     NULL,
-    2,
+    1,
     NULL
   ),
   (
-    'PED-2025-561',
-    8,
-    '2025-06-18 16:36:33',
+    'PED-2025-429',
+    28,
+    '2025-06-16 20:43:17',
+    '2025-06-18 19:59:09',
     NULL,
-    NULL,
-    1,
+    3,
     NULL
   );
 
@@ -2591,6 +2996,7 @@ INSERT INTO
 VALUES
   (1, 1),
   (2, 2),
+  (3, 3),
   (5, 5),
   (6, 6),
   (7, 7);
@@ -2621,7 +3027,32 @@ VALUES
   ('STK007', 'IND007', 7),
   ('STK008', 'IND008', 8),
   ('STK009', 'IND009', 9),
-  ('STK010', 'IND010', 10);
+  ('STK010', 'IND010', 10),
+  ('STK015', 'IND015', 5),
+  ('STK016', 'IND016', 1),
+  ('STK017', 'IND017', 2),
+  ('STK018', 'IND018', 3),
+  ('STK019', 'IND019', 4),
+  ('STK020', 'IND020', 5),
+  ('STK021', 'IND021', 6),
+  ('STK022', 'IND022', 7),
+  ('STK023', 'IND023', 8),
+  ('STK024', 'IND024', 9),
+  ('STK025', 'IND025', 10),
+  ('STK026', 'IND026', 1),
+  ('STK027', 'IND027', 2),
+  ('STK028', 'IND028', 3),
+  ('STK029', 'IND029', 4),
+  ('STK030', 'IND030', 5),
+  ('STK031', 'IND031', 6),
+  ('STK032', 'IND032', 7),
+  ('STK033', 'IND033', 8),
+  ('STK034', 'IND034', 9),
+  ('STK035', 'IND035', 10),
+  ('STK036', 'IND036', 7),
+  ('STK037', 'IND037', 8),
+  ('STK038', 'IND038', 9),
+  ('STK039', 'IND039', 10);
 
 -- --------------------------------------------------------
 --
@@ -2652,7 +3083,12 @@ VALUES
   (9, '52'),
   (10, '54'),
   (12, 'XXL'),
-  (13, 'XS');
+  (13, 'XS'),
+  (14, 'S'),
+  (15, 'M'),
+  (16, 'L'),
+  (17, 'XL'),
+  (18, 'P');
 
 -- --------------------------------------------------------
 --
@@ -2702,6 +3138,7 @@ INSERT INTO
 VALUES
   (1, 'Administrador', 'Acceso completo al sistema'),
   (2, 'Vendedor', 'Puede realizar ventas'),
+  (3, 'Envios', 'Encargado de Envios'),
   (5, 'Gerente', 'Supervisa operaciones'),
   (6, 'Picker', 'Encargado de picking'),
   (7, 'Encargado de Stock', 'Gestiona stock');
@@ -2735,7 +3172,8 @@ VALUES
   (2, 9, 'mariag', '123', 2),
   (5, 5, 'anamtz', '123', 6),
   (6, 6, 'luisrd', '123', 6),
-  (7, 7, 'sofiag', '123', 7);
+  (7, 7, 'sofiag', '123', 7),
+  (15, 8, 'envios', '123', 3);
 
 -- --------------------------------------------------------
 --
@@ -2964,7 +3402,7 @@ ADD KEY `idPersona` (`idPersona`);
 -- AUTO_INCREMENT de la tabla `asignacion_picking`
 --
 ALTER TABLE `asignacion_picking` MODIFY `idAsignacion` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 31;
+AUTO_INCREMENT = 34;
 
 --
 -- AUTO_INCREMENT de la tabla `barrio`
@@ -3000,7 +3438,7 @@ AUTO_INCREMENT = 12;
 -- AUTO_INCREMENT de la tabla `detalleindumentaria`
 --
 ALTER TABLE `detalleindumentaria` MODIFY `idDetalle` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 17;
+AUTO_INCREMENT = 42;
 
 --
 -- AUTO_INCREMENT de la tabla `domicilio`
@@ -3048,7 +3486,7 @@ AUTO_INCREMENT = 11;
 -- AUTO_INCREMENT de la tabla `talle`
 --
 ALTER TABLE `talle` MODIFY `idTalle` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 14;
+AUTO_INCREMENT = 20;
 
 --
 -- AUTO_INCREMENT de la tabla `tela`
@@ -3060,7 +3498,7 @@ AUTO_INCREMENT = 13;
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario` MODIFY `idUsuario` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 15;
+AUTO_INCREMENT = 16;
 
 --
 -- Restricciones para tablas volcadas

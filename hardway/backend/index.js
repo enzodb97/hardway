@@ -1673,6 +1673,9 @@ app.post("/api/stock/movimiento", async (req, res) => {
 
 app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
   try {
+    // Excluir pedidos cancelados (idEstado = 6) si se solicita
+    const incluirCancelados = req.query.incluirCancelados === "true";
+    const whereEstado = incluirCancelados ? "" : "WHERE ped.idEstado != 6";
     const [result] = await sequelize.query(`
       SELECT
         c.idCliente,
@@ -1686,6 +1689,7 @@ app.get("/api/reportes/clientes-mas-pedidos", async (req, res) => {
         cliente c ON ped.idCliente = c.idCliente
       JOIN
         persona p ON c.idPersona = p.idPersona
+      ${whereEstado}
       GROUP BY
         c.idCliente, p.nombre, p.apellido, c.email
       ORDER BY
@@ -2133,11 +2137,7 @@ app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
           },
           { transaction: t }
         );
-        // Actualizar la cantidad en la tabla de stock
-        await stock.increment("cantidad", {
-          by: detalle.cantidad,
-          transaction: t,
-        });
+        // No actualizar la tabla stock, solo registrar el movimiento
       }
     }
     await t.commit();

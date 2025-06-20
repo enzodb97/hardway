@@ -76,7 +76,7 @@ const ClientesMasPedidos: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get("/api/reportes/clientes-mas-pedidos")
+      .get("/api/reportes/clientes-mas-pedidos?incluirCancelados=false")
       .then((res) => setClientes(res.data))
       .catch(() => setClientes([]));
   }, []);
