@@ -208,7 +208,11 @@ const AltaPedido: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
-          <IonTitle>Nuevo Pedido</IonTitle>
+          <IonTitle>
+            {esEdicion
+              ? `Editar Pedido${id ? ` #${id}` : ""}`
+              : "Registrar Pedido"}
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="alta-pedido-content">

@@ -2088,23 +2088,65 @@ app.get("/api/reportes/ventas-ultimos-7-dias", async (req, res) => {
 // Cancelar pedido (cambiar estado a Cancelado, idEstado = 6)
 app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
   const { numeroPedido } = req.params;
+  const t = await sequelize.transaction();
   try {
-    const pedido = await Pedido.findOne({ where: { numeroPedido } });
+    const pedido = await Pedido.findOne({
+      where: { numeroPedido },
+      transaction: t,
+    });
     if (!pedido) {
+      await t.rollback();
       return res.status(404).json({ error: "Pedido no encontrado" });
     }
     // Solo permitir cancelar si está En Curso (idEstado=1) o Pendiente de Pago (idEstado=2)
     if (![1, 2].includes(pedido.idEstado)) {
+      await t.rollback();
       return res.status(400).json({
         error: "Solo se pueden cancelar pedidos En Curso o Pendiente de Pago",
       });
     }
+    // Cambiar estado a cancelado
     pedido.idEstado = 6; // Cancelado
-    await pedido.save();
-    res.json({ success: true });
+    await pedido.save({ transaction: t });
+
+    // Recuperar detalles del pedido
+    const detalles = await DetallePedido.findAll({
+      where: { numeroPedido },
+      transaction: t,
+    });
+    for (const detalle of detalles) {
+      // Buscar el stock correspondiente
+      const stock = await Stock.findOne({
+        where: { codigoIndumentaria: detalle.codigoIndumentaria },
+        transaction: t,
+      });
+      if (stock) {
+        // Registrar movimiento de devolución
+        await MovimientoStock.create(
+          {
+            idMovimientoStock:
+              "MOV-CANCEL-" + Math.random().toString().slice(2, 8),
+            idStock: stock.idStock,
+            fechaMovimiento: new Date(),
+            cantidad: detalle.cantidad, // Devuelve al stock
+            observaciones: `Devolución por cancelación de pedido ${numeroPedido}`,
+          },
+          { transaction: t }
+        );
+        // Actualizar la cantidad en la tabla de stock
+        await stock.increment("cantidad", {
+          by: detalle.cantidad,
+          transaction: t,
+        });
+      }
+    }
+    await t.commit();
+    res.json({ success: true, mensaje: "Pedido cancelado y stock devuelto." });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Error al cancelar el pedido", detalle: error.message });
+    await t.rollback();
+    res.status(500).json({
+      error: "Error al cancelar el pedido y devolver stock",
+      detalle: error.message,
+    });
   }
 });

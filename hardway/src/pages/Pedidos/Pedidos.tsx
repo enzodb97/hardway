@@ -124,20 +124,13 @@ const Pedidos: React.FC = () => {
                   value={busqueda === " " ? "" : busqueda}
                   onIonChange={(e) => setBusqueda(e.detail.value!)}
                   clearInput
-                  onKeyDown={(e) => {
-                    if (
-                      e.key === "Enter" &&
-                      (!busqueda || busqueda.trim() === "")
-                    ) {
-                      setBusqueda(" ");
-                    }
-                  }}
                 />
               </div>
             </IonCol>
             <IonCol size="2" className="ion-text-right pedidos-total-col">
               <span className="pedidos-total-badge">
-                Total: {pedidosFiltrados.length}
+                {/*Total: {pedidosFiltrados.length}*/}
+                Total: {pedidos.length}
               </span>
             </IonCol>
           </IonRow>
