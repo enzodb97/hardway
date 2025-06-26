@@ -3,6 +3,15 @@
   background: #0054e9 !important;
 }
 
+.toolbar-background {
+  background: #0054e9 !important;
+  color: white !important;
+}
+
+.reportes-dashboard-content {
+  --ion-background-color: #fdb40b;
+}
+
 .table-header ion-col {
   font-size: 16px;
   text-align: center;

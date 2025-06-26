@@ -1,0 +1,15 @@
+.indumentaria-page,
+.ion-page.indumentaria-page,
+.ion-content.indumentaria-page,
+.ion-content {
+  background-color: #feaf00 !important;
+  --background: #feaf00 !important;
+}
+
+.tabla-indumentaria {
+  background-color: #f2eae1;
+}
+
+.ion-padding {
+  background-color: #f2eae1;
+}

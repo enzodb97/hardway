@@ -1,7 +1,12 @@
 /* Picking.css */
-.picking-page {
-  --background-color: #feaf00;
+.picking-page,
+.ion-page.picking-page,
+.ion-content.picking-page,
+.ion-content {
+  background-color: #feaf00 !important;
+  --background: #feaf00 !important;
 }
+
 .picking-admin-picker {
   color: #0054e9;
   font-weight: bold;

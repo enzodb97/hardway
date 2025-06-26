@@ -75,12 +75,6 @@ const Envios: React.FC = () => {
               <span className="envios-total-badge">
                 Total pendientes: {pedidos.length}
               </span>
-              <span className="envios-paginacion-info">
-                Mostrando{" "}
-                {pedidos.length === 0 ? 0 : (pagina - 1) * porPagina + 1}-
-                {Math.min(pagina * porPagina, pedidos.length)} de{" "}
-                {pedidos.length}
-              </span>
             </IonCol>
           </IonRow>
           <IonRow>
@@ -153,6 +147,13 @@ const Envios: React.FC = () => {
                 </IonButton>
                 <span className="envios-paginacion-text">
                   Página {pagina} de {totalPaginas}
+                </span>
+                <span>|</span>
+                <span className="envios-paginacion-info">
+                  Mostrando{" "}
+                  {pedidos.length === 0 ? 0 : (pagina - 1) * porPagina + 1}-
+                  {Math.min(pagina * porPagina, pedidos.length)} de{" "}
+                  {pedidos.length}
                 </span>
                 <IonButton
                   size="small"

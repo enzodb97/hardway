@@ -51,9 +51,9 @@ const Reportes: React.FC = () => {
   const bajoStock = stock.filter((s: any) => s.stock_actual <= 30);
 
   return (
-    <IonPage>
+    <IonPage className="reportes-dashboard-page">
       <IonHeader>
-        <IonToolbar color="warning">
+        <IonToolbar>
           <IonTitle>Reportes</IonTitle>
         </IonToolbar>
       </IonHeader>

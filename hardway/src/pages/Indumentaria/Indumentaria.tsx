@@ -22,6 +22,7 @@ import {
   obtenerIndumentariaPaginada,
   IndumentariaItem,
 } from "../../utils/indumentariaUtils";
+import "./Indumentaria.css";
 
 const PAGE_SIZE = 10;
 
@@ -72,13 +73,13 @@ const Indumentaria: React.FC = () => {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
-    <IonPage>
+    <IonPage className="indumentaria-page">
       <IonHeader>
         <IonToolbar>
           <IonTitle>Indumentaria</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
+      <IonContent className="indumentaria-page">
         <IonItem>
           <IonInput
             placeholder="Buscar por descripción, código, color o talle"
@@ -96,10 +97,14 @@ const Indumentaria: React.FC = () => {
             Nueva Prenda
           </IonButton>
         </IonItem>
-        <IonText className="ion-padding">
-          Total de prendas: <b>{total}</b>
-        </IonText>
-        <IonGrid>
+
+        <IonGrid className="tabla-indumentaria">
+          <br />
+          <IonText className="ion-padding">
+            Total de prendas: <b>{total}</b>
+          </IonText>
+          <br />
+          <br />
           <IonRow>
             <IonCol>
               <strong>Código</strong>

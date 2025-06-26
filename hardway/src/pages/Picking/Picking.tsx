@@ -84,13 +84,13 @@ const Picking: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage className="picking-page">
       <IonHeader>
         <IonToolbar>
           <IonTitle>Mis Tareas de Picking</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
+      <IonContent className="picking-page">
         {loading ? (
           <IonSpinner name="crescent" style={{ margin: 32 }} />
         ) : (
