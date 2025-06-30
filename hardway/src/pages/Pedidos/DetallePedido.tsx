@@ -26,9 +26,10 @@ const DetallePedido: React.FC = () => {
     const cargarPedido = async () => {
       try {
         const res = await axios.get(`/api/pedidos/${id}/detalle-plano`);
-        setPrendas(res.data);
+        setPrendas(res.data.items || []);
+        setPedido(res.data.pedido);
       } catch (error) {
-        // Manejo de error
+        console.error('Error al cargar pedido:', error);
       }
     };
     cargarPedido();
@@ -60,8 +61,25 @@ const DetallePedido: React.FC = () => {
       <IonContent>
         <h2 className="detalle-pedido-titulo">
           <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />{" "}
-          Detalle de Pedido #{pedido?.id || id}
+          Detalle de Pedido #{pedido?.numeroPedido || id}
         </h2>
+        
+        {/* Información del estado del pedido */}
+        {pedido && (
+          <div className="pedido-info-card">
+            <p><strong>Estado:</strong> {pedido.tipoEstado}</p>
+            <p><strong>Fecha del pedido:</strong> {pedido.fechaPedido ? new Date(pedido.fechaPedido).toLocaleString("es-AR") : "-"}</p>
+          </div>
+        )}
+
+        {/* Mostrar motivo de cancelación solo si el pedido está cancelado */}
+        {pedido && pedido.idEstado === 6 && pedido.motivoCancelacion && (
+          <div className="motivo-cancelacion-card">
+            <h3>Motivo de Cancelación</h3>
+            <p>{pedido.motivoCancelacion}</p>
+          </div>
+        )}
+
         <IonGrid>
           <IonRow className="table-header">
             <IonCol size="2">

@@ -37,3 +37,76 @@ ion-content h2 {
 .detalle-pedido-page ion-row {
   justify-content: center;
 }
+
+/* Estilos para el recuadro de información del pedido */
+.pedido-info-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  padding: 16px;
+}
+
+.pedido-info-card p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.pedido-info-card strong {
+  color: #0054e9;
+}
+
+/* Estilos para el recuadro de motivo de cancelación */
+.motivo-cancelacion-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  margin-bottom: 20px;
+  padding: 16px;
+  border-left: 4px solid #991b1b;
+  border: 1px solid #fee2e2;
+}
+
+.motivo-cancelacion-card h3 {
+  color: #991b1b;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+}
+
+.motivo-cancelacion-card h3::before {
+  content: "⚠️";
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.motivo-cancelacion-card p {
+  color: #991b1b;
+  margin: 0;
+  font-size: 14px;
+  background-color: #fee2e2;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pedido-info-card,
+  .motivo-cancelacion-card {
+    margin: 0 8px 16px 8px;
+    padding: 12px;
+  }
+  
+  .motivo-cancelacion-card h3 {
+    font-size: 15px;
+  }
+  
+  .motivo-cancelacion-card p,
+  .pedido-info-card p {
+    font-size: 13px;
+  }
+}

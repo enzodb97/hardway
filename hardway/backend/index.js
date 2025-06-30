@@ -138,6 +138,8 @@ const Pedido = sequelize.define(
     idEstado: DataTypes.INTEGER,
     fechaPedido: DataTypes.DATE, // <-- asegúrate de tener esto
     codigoSeguimiento: DataTypes.STRING, // <-- necesario para update correcto
+    idMotivoCancelacion: DataTypes.INTEGER, // <-- Para el motivo de cancelación
+    estaActivo: DataTypes.TINYINT, // <-- Para borrado lógico
   },
   { tableName: "pedido", timestamps: false }
 );
@@ -1555,7 +1557,24 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
 app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
   const { numeroPedido } = req.params;
   try {
-    const [result] = await sequelize.query(
+    // Obtener información del pedido y motivo de cancelación
+    const [pedidoInfo] = await sequelize.query(
+      `
+      SELECT 
+        p.numeroPedido,
+        p.fechaPedido,
+        p.idEstado,
+        ep.tipoEstado,
+        mc.descripcion AS motivoCancelacion
+      FROM pedido p
+      JOIN estadopedido ep ON p.idEstado = ep.idEstado
+      LEFT JOIN motivo_cancelacion mc ON p.idMotivoCancelacion = mc.idMotivo
+      WHERE p.numeroPedido = ?
+      `,
+      { replacements: [numeroPedido] }
+    );
+
+    const [detalleItems] = await sequelize.query(
       `
       SELECT
         ni.nombre AS nombre_producto,
@@ -1583,7 +1602,13 @@ app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
       `,
       { replacements: [numeroPedido] }
     );
-    res.json(result);
+
+    const response = {
+      pedido: pedidoInfo[0] || null,
+      items: detalleItems
+    };
+
+    res.json(response);
   } catch (error) {
     res
       .status(500)
@@ -2089,11 +2114,13 @@ app.get("/api/reportes/ventas-ultimos-7-dias", async (req, res) => {
   }
 });
 
-// Cancelar pedido (cambiar estado a Cancelado, idEstado = 6)
+// Cancelar pedido (cambiar estado a Cancelado, idEstado = 6, borrado lógico y motivo)
 app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
   const { numeroPedido } = req.params;
+  const { idMotivo } = req.body;
   const t = await sequelize.transaction();
   try {
+    // Validar pedido existe
     const pedido = await Pedido.findOne({
       where: { numeroPedido },
       transaction: t,
@@ -2102,12 +2129,18 @@ app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
       await t.rollback();
       return res.status(404).json({ error: "Pedido no encontrado" });
     }
-    // Solo permitir cancelar si está En Curso (idEstado=1) o Pendiente de Pago (idEstado=2)
-    if (![1, 2].includes(pedido.idEstado)) {
+    
+    // Validar que el pedido no esté finalizado o ya cancelado
+    if (pedido.idEstado === 5) {
       await t.rollback();
       return res.status(400).json({
-        error: "Solo se pueden cancelar pedidos En Curso o Pendiente de Pago",
+        error: "No se pueden cancelar pedidos finalizados",
       });
+    }
+    
+    if (pedido.idEstado === 6) {
+      await t.rollback();
+      return res.status(400).json({ error: "El pedido ya está cancelado" });
     }
     // Cambiar estado a cancelado
     pedido.idEstado = 6; // Cancelado
@@ -2140,6 +2173,17 @@ app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
         // No actualizar la tabla stock, solo registrar el movimiento
       }
     }
+    
+    // Borrado lógico y motivo
+    await Pedido.update(
+      {
+        estaActivo: 0,
+        idEstado: 6,
+        idMotivoCancelacion: idMotivo,
+      },
+      { where: { numeroPedido }, transaction: t }
+    );
+    
     await t.commit();
     res.json({ success: true, mensaje: "Pedido cancelado y stock devuelto." });
   } catch (error) {
@@ -2150,3 +2194,28 @@ app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
     });
   }
 });
+
+// Modelo MotivoCancelacion
+const MotivoCancelacion = sequelize.define(
+  "MotivoCancelacion",
+  {
+    idMotivo: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    descripcion: DataTypes.STRING,
+  },
+  { tableName: "motivo_cancelacion", timestamps: false }
+);
+
+// Endpoint para obtener motivos de cancelación
+app.get("/api/motivos-cancelacion", async (req, res) => {
+  try {
+    const motivos = await MotivoCancelacion.findAll({
+      attributes: ["idMotivo", "descripcion"],
+      order: [["idMotivo", "ASC"]],
+    });
+    res.json(motivos);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener motivos de cancelación" });
+  }
+});
+
+//# sourceMappingURL=index.js.map

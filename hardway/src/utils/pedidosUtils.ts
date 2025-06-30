@@ -47,6 +47,12 @@ export interface PickerAsignado {
   nombre: string;
 }
 
+// Motivo de cancelación
+export interface MotivoCancelacion {
+  idMotivo: number;
+  descripcion: string;
+}
+
 // Obtener todos los pedidos
 export const cargarPedidos = async (): Promise<Pedido[]> => {
   const res = await axios.get("/api/pedidos");
@@ -76,6 +82,20 @@ export const marcarPedidoComoAbonado = async (numeroPedido: string) => {
 // Cambia el estado de un pedido a Finalizado (idEstado = 5)
 export const marcarPedidoComoFinalizado = async (numeroPedido: string) => {
   return await axios.put(`/api/pedidos/${numeroPedido}/finalizado`);
+};
+
+// Obtener motivos de cancelación
+export const obtenerMotivosCancelacion = async (): Promise<MotivoCancelacion[]> => {
+  const res = await axios.get("/api/motivos-cancelacion");
+  return res.data;
+};
+
+// Cancelar pedido con motivo
+export const cancelarPedidoConMotivo = async (
+  numeroPedido: string,
+  idMotivo: number
+) => {
+  await axios.put(`/api/pedidos/${numeroPedido}/cancelar`, { idMotivo });
 };
 
 // Filtrar pedidos por texto (cliente, fecha, numeroPedido, DNI)

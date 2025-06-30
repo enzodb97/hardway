@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+/* Aplicar fuente Roboto a todos los elementos */
+.pedidos-page,
+.pedidos-page * {
+  font-family: 'Roboto', sans-serif;
+}
+
 .pedidos-page {
   --ion-background-color: #feaf00;
   min-height: 100vh;
@@ -157,4 +165,314 @@
   font-size: 15px;
   font-weight: 500;
   color: #333;
+}
+
+/* Estilos para el modal de motivo de cancelación */
+.motivo-cancelacion-modal {
+  --backdrop-opacity: 0.6;
+  font-family: 'Roboto', sans-serif;
+}
+
+.motivo-cancelacion-modal *,
+.motivo-cancelacion-modal ion-modal,
+.motivo-cancelacion-modal ion-button {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.motivo-cancelacion-modal ion-modal {
+  --width: 90%;
+  --max-width: 400px;
+  --height: auto;
+  --max-height: 85vh;
+  --border-radius: 12px;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.motivo-cancelacion-content {
+  background: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  max-height: 85vh;
+  overflow-y: auto;
+  min-height: auto;
+}
+
+.motivo-cancelacion-header {
+  color: #991b1b;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  border-bottom: 2px solid #fee2e2;
+  padding-bottom: 12px;
+}
+
+.motivo-cancelacion-header::before {
+  content: "⚠️";
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.motivo-cancelacion-pedido-info {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #991b1b;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Opciones de motivo como cards seleccionables */
+.motivo-cancelacion-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0 16px 0;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 40vh;
+}
+
+.motivo-option {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.motivo-option:hover {
+  border-color: #feaf00;
+  background: #fef9ec;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(254, 175, 0, 0.1);
+}
+
+/*
+.motivo-option.selected {
+  border-color: #feaf00;
+  background: linear-gradient(135deg, #feaf00 0%, #ff8c00 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(254, 175, 0, 0.2);
+}*/
+
+.motivo-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.motivo-option-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.motivo-option-radio {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  margin-right: 12px;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.motivo-option.selected .motivo-option-radio {
+  border-color: white;
+  background: white;
+}
+
+.motivo-option.selected .motivo-option-radio::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #feaf00;
+}
+
+.motivo-option-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.motivo-option.selected .motivo-option-text {
+  color: rgb(0, 0, 0);
+  font-weight: 600;
+}
+
+.motivo-cancelacion-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  background: white;
+  position: sticky;
+  bottom: 0;
+}
+
+.motivo-cancelacion-modal .motivo-cancelacion-btn-cancelar {
+  --background: #f3f4f6 !important;
+  --background-hover: #e5e7eb !important;
+  --background-activated: #d1d5db !important;
+  --color: #374151 !important;
+  --border-radius: 8px !important;
+  --padding-start: 20px !important;
+  --padding-end: 20px !important;
+  --padding-top: 12px !important;
+  --padding-bottom: 12px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-transform: none !important;
+  flex: 1;
+  height: 44px !important;
+  border: 1px solid #d1d5db !important;
+  margin: 0 !important;
+}
+
+.motivo-cancelacion-modal .motivo-cancelacion-btn-cancelar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.motivo-cancelacion-modal .motivo-cancelacion-btn-confirmar {
+  --background: #991b1b !important;
+  --background-hover: #7f1d1d !important;
+  --background-activated: #7f1d1d !important;
+  --color: white !important;
+  --border-radius: 8px !important;
+  --padding-start: 20px !important;
+  --padding-end: 20px !important;
+  --padding-top: 12px !important;
+  --padding-bottom: 12px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-transform: none !important;
+  flex: 1;
+  height: 44px !important;
+  box-shadow: 0 2px 4px rgba(153, 27, 27, 0.2) !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.motivo-cancelacion-modal .motivo-cancelacion-btn-confirmar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(153, 27, 27, 0.3) !important;
+}
+
+.motivo-cancelacion-modal .motivo-cancelacion-btn-confirmar:disabled {
+  --background: #d1d5db !important;
+  --color: #9ca3af !important;
+  opacity: 0.6 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .motivo-cancelacion-modal ion-modal {
+    --width: 95%;
+    --max-width: none;
+    --max-height: 90vh;
+  }
+
+  .motivo-cancelacion-content {
+    padding: 16px;
+    max-height: 90vh;
+  }
+
+  .motivo-cancelacion-header {
+    font-size: 18px;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+  }
+
+  .motivo-cancelacion-header::before {
+    font-size: 18px;
+    margin-right: 6px;
+  }
+
+  .motivo-cancelacion-pedido-info {
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .motivo-cancelacion-options {
+    margin: 8px 0 12px 0;
+    gap: 8px;
+    max-height: 50vh;
+  }
+
+  .motivo-option {
+    padding: 10px;
+  }
+
+  .motivo-option-radio {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+  }
+
+  .motivo-option.selected .motivo-option-radio::after {
+    width: 6px;
+    height: 6px;
+  }
+
+  .motivo-option-text {
+    font-size: 14px;
+  }
+
+  .motivo-cancelacion-buttons {
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+  }
+
+  .motivo-cancelacion-modal .motivo-cancelacion-btn-cancelar,
+  .motivo-cancelacion-modal .motivo-cancelacion-btn-confirmar {
+    width: 100% !important;
+    height: 36px !important;
+    --padding-start: 16px !important;
+    --padding-end: 16px !important;
+    --padding-top: 8px !important;
+    --padding-bottom: 8px !important;
+    font-size: 13px !important;
+    flex: none;
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .motivo-cancelacion-modal ion-modal {
+    --width: 98%;
+  }
+
+  .motivo-cancelacion-content {
+    padding: 16px 12px;
+  }
 }

@@ -32,18 +32,20 @@ import {
   obtenerPickerAsignado,
   exportarPDF,
   marcarPedidoComoFinalizado,
+  obtenerMotivosCancelacion,
+  cancelarPedidoConMotivo,
+  MotivoCancelacion,
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 import { pencil, trash, documentText, chevronDown, cash } from "ionicons/icons";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
-  IonSelect,
-  IonSelectOption,
   IonPopover,
   IonLabel,
   IonList,
   IonItem,
+  IonModal,
 } from "@ionic/react";
 import "./Pedidos.css";
 
@@ -67,10 +69,14 @@ const Pedidos: React.FC = () => {
   const [pedidoParaFinalizar, setPedidoParaFinalizar] = useState<string | null>(
     null
   );
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [pedidoParaCancelar, setPedidoParaCancelar] = useState<string | null>(
     null
   );
+  const [motivosCancelacion, setMotivosCancelacion] = useState<any[]>([]);
+  const [motivoSeleccionado, setMotivoSeleccionado] = useState<number | null>(
+    null
+  );
+  const [showMotivoModal, setShowMotivoModal] = useState(false);
   const porPagina = 6;
   const history = useHistory();
 
@@ -102,7 +108,16 @@ const Pedidos: React.FC = () => {
   // Todas las funciones de negocio se delegan a pedidosUtils.ts
   const handleCancelarPedido = async (numeroPedido: string) => {
     setPedidoParaCancelar(numeroPedido);
-    setShowCancelConfirm(true);
+    try {
+      const response = await fetch("/api/motivos-cancelacion");
+      const motivos = await response.json();
+      setMotivosCancelacion(motivos);
+      setMotivoSeleccionado(null);
+      setShowMotivoModal(true);
+    } catch {
+      setAlertMsg("No se pudieron cargar los motivos de cancelación.");
+      setShowAlert(true);
+    }
   };
 
   return (
@@ -199,7 +214,9 @@ const Pedidos: React.FC = () => {
                             const puedeEditar =
                               estado === "en curso" ||
                               estado === "pendiente de pago";
-                            const puedeCancelar = idEstado !== 5; // No mostrar si está Finalizado
+                            // Solo NO puede cancelar si está Finalizado (5) o ya Cancelado (6)
+                            const puedeCancelar =
+                              idEstado !== 5 && idEstado !== 6;
                             return (
                               <>
                                 {puedeEditar && (
@@ -543,37 +560,96 @@ const Pedidos: React.FC = () => {
             },
           ]}
         />
-        <IonAlert
-          isOpen={showCancelConfirm}
-          onDidDismiss={() => setShowCancelConfirm(false)}
-          header="Cancelar pedido"
-          message={`¿Desea cancelar el pedido N° ${pedidoParaCancelar}?`}
-          buttons={[
-            {
-              text: "Cancelar",
-              role: "cancel",
-              handler: () => setShowCancelConfirm(false),
-            },
-            {
-              text: "Aceptar",
-              handler: async () => {
-                try {
-                  await fetch(`/api/pedidos/${pedidoParaCancelar}/cancelar`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ idEstado: 6 }),
-                  });
-                  setShowDeleteSuccess(true);
-                  cargarPedidos().then(setPedidos);
-                } catch (error) {
-                  setAlertMsg("Error al cancelar el pedido.");
-                  setShowAlert(true);
-                }
-                setShowCancelConfirm(false);
-              },
-            },
-          ]}
-        />
+        <IonModal
+          isOpen={showMotivoModal}
+          onDidDismiss={() => setShowMotivoModal(false)}
+          className="motivo-cancelacion-modal"
+        >
+          <div className="motivo-cancelacion-content">
+            <h2 className="motivo-cancelacion-header">Motivo de cancelación</h2>
+            <div className="motivo-cancelacion-pedido-info">
+              Pedido: {pedidoParaCancelar}
+            </div>
+            <div className="motivo-cancelacion-options">
+              {motivosCancelacion.map((motivo) => (
+                <div
+                  key={motivo.idMotivo}
+                  className={`motivo-option ${
+                    motivoSeleccionado === motivo.idMotivo ? 'selected' : ''
+                  }`}
+                  onClick={() => setMotivoSeleccionado(motivo.idMotivo)}
+                >
+                  <input
+                    type="radio"
+                    name="motivo"
+                    value={motivo.idMotivo}
+                    checked={motivoSeleccionado === motivo.idMotivo}
+                    onChange={() => setMotivoSeleccionado(motivo.idMotivo)}
+                  />
+                  <div className="motivo-option-content">
+                    <div className="motivo-option-radio"></div>
+                    <div className="motivo-option-text">{motivo.descripcion}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="motivo-cancelacion-buttons">
+              <IonButton
+                onClick={() => {
+                  setShowMotivoModal(false);
+                  setPedidoParaCancelar(null);
+                  setMotivoSeleccionado(null);
+                }}
+                className="motivo-cancelacion-btn-cancelar"
+              >
+                Cancelar
+              </IonButton>
+              <IonButton
+                disabled={!motivoSeleccionado || !pedidoParaCancelar}
+                className="motivo-cancelacion-btn-confirmar"
+                onClick={async () => {
+                  if (!motivoSeleccionado || !pedidoParaCancelar) return;
+                  try {
+                    const response = await fetch(
+                      `/api/pedidos/${pedidoParaCancelar}/cancelar`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ idMotivo: motivoSeleccionado }),
+                      }
+                    );
+
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      setAlertMsg(
+                        errorData.error || "Error al cancelar el pedido."
+                      );
+                      setShowAlert(true);
+                      setShowMotivoModal(false);
+                      setPedidoParaCancelar(null);
+                      setMotivoSeleccionado(null);
+                      return;
+                    }
+
+                    setShowDeleteSuccess(true);
+                    cargarPedidos().then(setPedidos);
+                    setShowMotivoModal(false);
+                    setPedidoParaCancelar(null);
+                    setMotivoSeleccionado(null);
+                  } catch (error) {
+                    setAlertMsg("Error de conexión al cancelar el pedido.");
+                    setShowAlert(true);
+                    setShowMotivoModal(false);
+                    setPedidoParaCancelar(null);
+                    setMotivoSeleccionado(null);
+                  }
+                }}
+              >
+                Confirmar Cancelación
+              </IonButton>
+            </div>
+          </div>
+        </IonModal>
       </IonContent>
     </IonPage>
   );
