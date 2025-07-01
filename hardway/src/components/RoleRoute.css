@@ -1,0 +1,45 @@
+/* RoleRoute.css */
+
+.access-denied-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.access-denied-card {
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.access-denied-icon-container {
+  margin-bottom: 20px;
+}
+
+.access-denied-lock-icon {
+  font-size: 64px;
+  color: #ff6b6b;
+  margin-bottom: 16px;
+}
+
+.access-denied-title {
+  color: #333;
+  margin-bottom: 12px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.access-denied-message {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.access-denied-warning-icon {
+  margin-right: 8px;
+  color: #ffa726;
+}

@@ -1,5 +1,6 @@
 // src/pages/Pedidos/Pedidos.tsx
 import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
 import { obtenerIconoEstado } from "../../utils/pedidosUtils";
 import {
@@ -50,6 +51,7 @@ import {
 import "./Pedidos.css";
 
 const Pedidos: React.FC = () => {
+  const { username } = useAuth(); // Obtener el usuario autenticado
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [showAlert, setShowAlert] = useState(false);
@@ -77,11 +79,22 @@ const Pedidos: React.FC = () => {
     null
   );
   const [showMotivoModal, setShowMotivoModal] = useState(false);
+  
+  // Estados para manejar errores de autorización
+  const [showAuthError, setShowAuthError] = useState(false);
+  const [authErrorMsg, setAuthErrorMsg] = useState("");
+  
   const porPagina = 6;
   const history = useHistory();
 
   useIonViewWillEnter(() => {
-    cargarPedidos().then(setPedidos);
+    cargarPedidos()
+      .then(setPedidos)
+      .catch((error) => {
+        console.error("Error al cargar pedidos:", error);
+        setAuthErrorMsg(error.message);
+        setShowAuthError(true);
+      });
   });
 
   const mostrarTodos = busqueda === " ";
@@ -608,14 +621,41 @@ const Pedidos: React.FC = () => {
                 disabled={!motivoSeleccionado || !pedidoParaCancelar}
                 className="motivo-cancelacion-btn-confirmar"
                 onClick={async () => {
-                  if (!motivoSeleccionado || !pedidoParaCancelar) return;
+                  if (!motivoSeleccionado || !pedidoParaCancelar || !username) return;
+                  
                   try {
+                    // Primero obtener el ID del usuario por su nombre de usuario
+                    const userResponse = await fetch(`/api/usuarios/buscar-por-nombre/${username}`, {
+                      headers: {
+                        "nombreUsuario": username  // Agregar header de autorización si es necesario
+                      }
+                    });
+                    let idUsuarioCancelo = null;
+                    
+                    if (userResponse.ok) {
+                      const userData = await userResponse.json();
+                      idUsuarioCancelo = userData.idUsuario;
+                    }
+                    
+                    if (!idUsuarioCancelo) {
+                      setAlertMsg("Error: No se pudo identificar el usuario que cancela");
+                      setShowAlert(true);
+                      return;
+                    }
+                    
+                    // Proceder con la cancelación
                     const response = await fetch(
                       `/api/pedidos/${pedidoParaCancelar}/cancelar`,
                       {
                         method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ idMotivo: motivoSeleccionado }),
+                        headers: { 
+                          "Content-Type": "application/json",
+                          "nombreUsuario": username  // Agregar header de autorización
+                        },
+                        body: JSON.stringify({ 
+                          idMotivo: motivoSeleccionado,
+                          idUsuarioCancelo: idUsuarioCancelo 
+                        }),
                       }
                     );
 
@@ -650,6 +690,24 @@ const Pedidos: React.FC = () => {
             </div>
           </div>
         </IonModal>
+
+        {/* Alerta de Error de Autorización */}
+        <IonAlert
+          isOpen={showAuthError}
+          onDidDismiss={() => setShowAuthError(false)}
+          header="Acceso Denegado"
+          message={authErrorMsg}
+          buttons={[
+            {
+              text: "Entendido",
+              handler: () => {
+                setShowAuthError(false);
+                // Opcional: redirigir al dashboard o página principal
+                history.push("/dashboard");
+              },
+            },
+          ]}
+        />
       </IonContent>
     </IonPage>
   );

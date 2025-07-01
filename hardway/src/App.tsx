@@ -48,13 +48,13 @@ const AppRouter = () => {
               exact
               path="/clientes"
               component={Clientes}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador", "Vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-cliente/:id?"
               component={AltaCliente}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador", "Vendedor"]}
             />
             <RoleRoute
               exact
@@ -66,37 +66,37 @@ const AppRouter = () => {
               exact
               path="/pedidos"
               component={Pedidos}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador", "Vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-pedido"
               component={AltaPedido}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador", "Vendedor"]}
             />
             <RoleRoute
               exact
               path="/alta-pedido/:id"
               component={AltaPedido}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador", "Vendedor"]}
             />
             <RoleRoute
               exact
               path="/indumentaria"
               component={Indumentaria}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador"]}
             />
             <RoleRoute
               exact
               path="/alta-indumentaria"
               component={AltaIndumentaria}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador"]}
             />
             <RoleRoute
               exact
               path="/alta-indumentaria/:id"
               component={AltaIndumentaria}
-              requiredRoles={["Administrador", "vendedor"]}
+              requiredRoles={["Administrador"]}
             />
             <RoleRoute
               exact
@@ -120,7 +120,9 @@ const AppRouter = () => {
             <Route exact path="/">
               <Redirect to="/dashboard" />
             </Route>
-            <Route path="/reportes" component={Reportes} exact />
+            <RoleRoute path="/reportes" component={Reportes} 
+            requiredRoles={["Administrador"]}
+            exact />
             <Route
               path="/reportes/clientes-mas-pedidos"
               component={ClientesMasPedidos}

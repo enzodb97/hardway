@@ -17,7 +17,7 @@ import {
 } from "@ionic/react";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 import "./AltaPedido.css";
 import zepelin from "../../assets/images/zepelin.png";
 import { useClientes } from "../../context/ClientesContext";
@@ -72,7 +72,7 @@ const AltaPedido: React.FC = () => {
 
   // Cargar indumentaria
   useEffect(() => {
-    axios.get("/api/indumentaria").then((res) => setIndumentaria(res.data));
+    axiosInstance.get("/api/indumentaria").then((res) => setIndumentaria(res.data));
   }, []);
 
   // Cargar datos si es edición
@@ -80,7 +80,7 @@ const AltaPedido: React.FC = () => {
     if (esEdicion && id) {
       const cargarPedido = async () => {
         try {
-          const res = await axios.get(`/api/pedidos/${id}`);
+          const res = await axiosInstance.get(`/api/pedidos/${id}`);
           setForm({
             idCliente: res.data.idCliente?.toString() || "",
             clienteNombre: res.data.Cliente?.Persona

@@ -6,7 +6,7 @@ import {
   ReactNode,
   FC,
 } from "react";
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -39,10 +39,51 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [username, setUsername] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
 
+  // Configurar interceptor de axios una sola vez al inicio
+  useEffect(() => {
+    // Los interceptores ya están configurados en la instancia de axios
+    // Solo necesitamos manejar la validación de usuario al cargar la app
+    
+    const authStatus = localStorage.getItem("isAuthenticated");
+    const storedUsername = localStorage.getItem("username");
+    let storedRol = localStorage.getItem("rol");
+    
+    // Normaliza el valor del rol para pickers al recargar
+    if (storedRol && storedRol.toLowerCase().includes("picker")) {
+      storedRol = "Picker";
+      localStorage.setItem("rol", "Picker");
+    }
+    if (authStatus === "true" && storedUsername && storedRol) {
+      // Verifica con el backend si el usuario sigue siendo válido
+      axiosInstance
+        .get("/api/usuarios/validate", {
+          params: { username: storedUsername },
+        })
+        .then((res: any) => {
+          if (res.data.valid) {
+            setIsAuthenticated(true);
+            setRol(storedRol);
+            setUsername(storedUsername);
+          } else {
+            // Si no es válido, forzar logout
+            logout();
+          }
+        })
+        .catch(() => {
+          logout();
+        });
+    } else {
+      setIsAuthenticated(false);
+      setRol(null);
+      setUsername(null);
+      localStorage.removeItem("legajoPicker");
+    }
+  }, []);
+
   const login = async (usernameInput: string, password: string) => {
     setError(null);
     try {
-      const response = await axios.post("/api/login", {
+      const response = await axiosInstance.post("/api/login", {
         nombreUsuario: usernameInput,
         contrasena: password,
       });
@@ -76,43 +117,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setRol(null);
     setUsername(null);
   };
-
-  // En el useEffect de AuthProvider, recupera legajoPicker
-  useEffect(() => {
-    const authStatus = localStorage.getItem("isAuthenticated");
-    const storedUsername = localStorage.getItem("username");
-    let storedRol = localStorage.getItem("rol");
-    // Normaliza el valor del rol para pickers al recargar
-    if (storedRol && storedRol.toLowerCase().includes("picker")) {
-      storedRol = "Picker";
-      localStorage.setItem("rol", "Picker");
-    }
-    if (authStatus === "true" && storedUsername && storedRol) {
-      // Verifica con el backend si el usuario sigue siendo válido
-      axios
-        .get("/api/usuarios/validate", {
-          params: { username: storedUsername },
-        })
-        .then((res) => {
-          if (res.data.valid) {
-            setIsAuthenticated(true);
-            setRol(storedRol);
-            setUsername(storedUsername);
-          } else {
-            // Si no es válido, forzar logout
-            logout();
-          }
-        })
-        .catch(() => {
-          logout();
-        });
-    } else {
-      setIsAuthenticated(false);
-      setRol(null);
-      setUsername(null);
-      localStorage.removeItem("legajoPicker");
-    }
-  }, []);
 
   // Exporta legajoPicker en el contexto
   const legajoPicker = localStorage.getItem("legajoPicker") || null;

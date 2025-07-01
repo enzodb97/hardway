@@ -1,5 +1,5 @@
 // src/utils/pedidosUtils.ts
-import axios from "axios";
+import axiosInstance from "../config/axios";
 import {
   checkmarkCircle,
   closeCircle,
@@ -10,6 +10,15 @@ import {
 } from "ionicons/icons";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+// Función utilitaria para obtener headers de autorización
+const getAuthHeaders = () => {
+  const username = localStorage.getItem("username");
+  if (!username) {
+    throw new Error("No hay usuario autenticado");
+  }
+  return { nombreUsuario: username };
+};
 
 // Interfaces según tu backend
 export interface Persona {
@@ -55,38 +64,57 @@ export interface MotivoCancelacion {
 
 // Obtener todos los pedidos
 export const cargarPedidos = async (): Promise<Pedido[]> => {
-  const res = await axios.get("/api/pedidos");
-  return res.data;
+  try {
+    const res = await axiosInstance.get("/api/pedidos");
+    return res.data;
+  } catch (error: any) {
+    console.error("Error en cargarPedidos:", error);
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      const errorMsg = error.response?.data?.error || "Acceso denegado: necesitas permisos para gestionar pedidos";
+      throw new Error(errorMsg);
+    }
+    throw new Error(error.message || "Error al cargar pedidos");
+  }
 };
 
 // Crear un pedido
 export const crearPedido = async (pedido: Omit<Pedido, "numeroPedido">) => {
-  return await axios.post("/api/pedidos", pedido);
+  return await axiosInstance.post("/api/pedidos", pedido, {
+    headers: getAuthHeaders()
+  });
 };
 
 // Eliminar un pedido por numeroPedido
 export const eliminarPedido = async (numeroPedido: string) => {
-  await axios.delete(`/api/pedidos/${numeroPedido}`);
+  await axiosInstance.delete(`/api/pedidos/${numeroPedido}`, {
+    headers: getAuthHeaders()
+  });
 };
 
 // Editar un pedido por numeroPedido
 export const editarPedido = async (numeroPedido: string, datos: any) => {
-  await axios.put(`/api/pedidos/${numeroPedido}`, datos);
+  await axiosInstance.put(`/api/pedidos/${numeroPedido}`, datos, {
+    headers: getAuthHeaders()
+  });
 };
 
 // Cambia el estado de un pedido a Abonado (idEstado = 3)
 export const marcarPedidoComoAbonado = async (numeroPedido: string) => {
-  return await axios.put(`/api/pedidos/${numeroPedido}/abonado`);
+  return await axiosInstance.put(`/api/pedidos/${numeroPedido}/abonado`, {}, {
+    headers: getAuthHeaders()
+  });
 };
 
 // Cambia el estado de un pedido a Finalizado (idEstado = 5)
 export const marcarPedidoComoFinalizado = async (numeroPedido: string) => {
-  return await axios.put(`/api/pedidos/${numeroPedido}/finalizado`);
+  return await axiosInstance.put(`/api/pedidos/${numeroPedido}/finalizado`, {}, {
+    headers: getAuthHeaders()
+  });
 };
 
 // Obtener motivos de cancelación
 export const obtenerMotivosCancelacion = async (): Promise<MotivoCancelacion[]> => {
-  const res = await axios.get("/api/motivos-cancelacion");
+  const res = await axiosInstance.get("/api/motivos-cancelacion");
   return res.data;
 };
 
@@ -95,7 +123,7 @@ export const cancelarPedidoConMotivo = async (
   numeroPedido: string,
   idMotivo: number
 ) => {
-  await axios.put(`/api/pedidos/${numeroPedido}/cancelar`, { idMotivo });
+  await axiosInstance.put(`/api/pedidos/${numeroPedido}/cancelar`, { idMotivo });
 };
 
 // Filtrar pedidos por texto (cliente, fecha, numeroPedido, DNI)
@@ -190,9 +218,8 @@ export const fetchPickers = async (
   setShowAlert: any
 ) => {
   try {
-    const res = await fetch("/api/pickers");
-    const data = await res.json();
-    setPickers(data);
+    const res = await axiosInstance.get("/api/pickers");
+    setPickers(res.data);
   } catch (err) {
     setAlertMsg("Error al obtener pickers");
     setShowAlert(true);
@@ -213,15 +240,10 @@ export const asignarPicker = async (
 ) => {
   if (!pedidoParaAsignar || !selectedPicker) return;
   try {
-    const res = await fetch(
+    const res = await axiosInstance.post(
       `/api/pedidos/${pedidoParaAsignar}/asignar-picker`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pickerId: selectedPicker.id }),
-      }
+      { pickerId: selectedPicker.id }
     );
-    if (!res.ok) throw new Error();
     setAlertMsg("Picker asignado correctamente");
     setShowAlert(true);
     setShowConfirmAsignar(false);
@@ -284,10 +306,8 @@ export const handleConfirmFinalizar = async (
 // Obtener picker asignado a un pedido
 export const obtenerPickerAsignado = async (numeroPedido: string) => {
   try {
-    const res = await fetch(`/api/pedidos/${numeroPedido}/picker-asignado`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data;
+    const res = await axiosInstance.get(`/api/pedidos/${numeroPedido}/picker-asignado`);
+    return res.data;
   } catch {
     return null;
   }

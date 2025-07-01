@@ -8,7 +8,7 @@ console.log("Iniciando backend...");
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173", // URL de tu frontend
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"], // URLs posibles del frontend
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -139,6 +139,7 @@ const Pedido = sequelize.define(
     fechaPedido: DataTypes.DATE, // <-- asegúrate de tener esto
     codigoSeguimiento: DataTypes.STRING, // <-- necesario para update correcto
     idMotivoCancelacion: DataTypes.INTEGER, // <-- Para el motivo de cancelación
+    idUsuarioCancelo: DataTypes.INTEGER, // <-- Para el usuario que canceló
     estaActivo: DataTypes.TINYINT, // <-- Para borrado lógico
   },
   { tableName: "pedido", timestamps: false }
@@ -400,6 +401,66 @@ const Ciudad = sequelize.define(
 Persona.belongsTo(Domicilio, { foreignKey: "idDomicilio" });
 Domicilio.belongsTo(Barrio, { foreignKey: "idBarrio" });
 Domicilio.belongsTo(Ciudad, { foreignKey: "idCiudad" });
+
+// Middleware de autorización para endpoints de pedidos
+const verificarAccesoPedidos = async (req, res, next) => {
+  // Los headers HTTP se convierten automáticamente a minúsculas
+  const nombreUsuario = req.headers.nombreusuario;
+
+  if (!nombreUsuario) {
+    return res.status(401).json({
+      error: "Acceso denegado: necesitas iniciar sesión para gestionar pedidos",
+      codigo: "NO_AUTH",
+    });
+  }
+
+  try {
+    const usuario = await Usuario.findOne({
+      where: { nombreUsuario },
+      include: {
+        model: Rol,
+        include: {
+          model: TipoRol,
+          attributes: ["idTipoRol", "tipoRol"],
+        },
+      },
+    });
+
+    if (!usuario) {
+      return res.status(401).json({
+        error: "Usuario no encontrado",
+        codigo: "USER_NOT_FOUND",
+      });
+    }
+
+    const idTipoRol = usuario.Rol?.TipoRol?.idTipoRol;
+
+    // Solo Administrador (1) y Vendedor (2) pueden acceder a pedidos
+    if (idTipoRol !== 1 && idTipoRol !== 2) {
+      return res.status(403).json({
+        error: "Acceso denegado: permisos insuficientes para gestionar pedidos",
+        codigo: "INSUFFICIENT_PERMISSIONS",
+        rolActual: usuario.Rol?.TipoRol?.tipoRol,
+      });
+    }
+
+    // Pasar información del usuario al siguiente middleware/endpoint
+    req.usuarioAutenticado = {
+      idUsuario: usuario.idUsuario,
+      nombreUsuario: usuario.nombreUsuario,
+      idTipoRol: idTipoRol,
+      tipoRol: usuario.Rol?.TipoRol?.tipoRol,
+    };
+
+    next();
+  } catch (error) {
+    console.error("Error en verificarAccesoPedidos:", error);
+    return res.status(500).json({
+      error: "Error interno al verificar permisos",
+      codigo: "INTERNAL_ERROR",
+    });
+  }
+};
 
 // Endpoints básicos
 app.get("/api/clientes", async (req, res) => {
@@ -703,6 +764,28 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Endpoint para buscar usuario por nombre de usuario (para cancelaciones)
+app.get("/api/usuarios/buscar-por-nombre/:nombreUsuario", async (req, res) => {
+  const { nombreUsuario } = req.params;
+  try {
+    const usuario = await Usuario.findOne({
+      where: { nombreUsuario },
+      attributes: ["idUsuario", "nombreUsuario"],
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json({
+      idUsuario: usuario.idUsuario,
+      nombreUsuario: usuario.nombreUsuario,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al buscar usuario" });
+  }
+});
+
 // Obtener todos los usuarios (solo para admin)
 app.get("/api/usuarios", async (req, res) => {
   try {
@@ -808,7 +891,7 @@ app.put("/api/usuarios/:id/password", async (req, res) => {
 });
 
 // Obtener todos los pedidos con prendas
-app.get("/api/pedidos", async (req, res) => {
+app.get("/api/pedidos", verificarAccesoPedidos, async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
       include: [
@@ -837,7 +920,7 @@ app.get("/api/pedidos", async (req, res) => {
 });
 
 // Crear pedido con prendas
-app.post("/api/pedidos", async (req, res) => {
+app.post("/api/pedidos", verificarAccesoPedidos, async (req, res) => {
   const { idCliente, idEstado, prendas } = req.body;
   const t = await sequelize.transaction();
   try {
@@ -904,7 +987,7 @@ app.post("/api/pedidos", async (req, res) => {
 });
 
 // Eliminar pedido
-app.delete("/api/pedidos/:numeroPedido", async (req, res) => {
+app.delete("/api/pedidos/:numeroPedido", verificarAccesoPedidos, async (req, res) => {
   const { numeroPedido } = req.params;
   const t = await sequelize.transaction();
   try {
@@ -964,7 +1047,7 @@ app.delete("/api/pedidos/:numeroPedido", async (req, res) => {
 });
 
 // Editar pedido
-app.put("/api/pedidos/:numeroPedido", async (req, res) => {
+app.put("/api/pedidos/:numeroPedido", verificarAccesoPedidos, async (req, res) => {
   const { idCliente, idEstado, prendas } = req.body;
   const { numeroPedido } = req.params;
   const t = await sequelize.transaction();
@@ -1503,7 +1586,7 @@ app.post("/api/precios", async (req, res) => {
   }
 });
 
-app.get("/api/pedidos/:numeroPedido", async (req, res) => {
+app.get("/api/pedidos/:numeroPedido", verificarAccesoPedidos, async (req, res) => {
   try {
     const pedido = await Pedido.findOne({
       where: { numeroPedido: req.params.numeroPedido },
@@ -1554,7 +1637,7 @@ app.get("/api/pedidos/:numeroPedido", async (req, res) => {
   }
 });
 
-app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
+app.get("/api/pedidos/:numeroPedido/detalle-plano", verificarAccesoPedidos, async (req, res) => {
   const { numeroPedido } = req.params;
   try {
     // Obtener información del pedido y motivo de cancelación
@@ -1565,10 +1648,12 @@ app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
         p.fechaPedido,
         p.idEstado,
         ep.tipoEstado,
-        mc.descripcion AS motivoCancelacion
+        mc.descripcion AS motivoCancelacion,
+        u.nombreUsuario AS usuarioCancelo
       FROM pedido p
       JOIN estadopedido ep ON p.idEstado = ep.idEstado
       LEFT JOIN motivo_cancelacion mc ON p.idMotivoCancelacion = mc.idMotivo
+      LEFT JOIN usuario u ON p.idUsuarioCancelo = u.idUsuario
       WHERE p.numeroPedido = ?
       `,
       { replacements: [numeroPedido] }
@@ -1605,7 +1690,7 @@ app.get("/api/pedidos/:numeroPedido/detalle-plano", async (req, res) => {
 
     const response = {
       pedido: pedidoInfo[0] || null,
-      items: detalleItems
+      items: detalleItems,
     };
 
     res.json(response);
@@ -1840,7 +1925,7 @@ app.get("/api/pickers", async (req, res) => {
 });
 
 // --- PICKING: Asignar picker a pedido ---
-app.post("/api/pedidos/:numeroPedido/asignar-picker", async (req, res) => {
+app.post("/api/pedidos/:numeroPedido/asignar-picker", verificarAccesoPedidos, async (req, res) => {
   const { numeroPedido } = req.params;
   const { pickerId } = req.body;
   try {
@@ -1977,7 +2062,7 @@ app.post("/api/picking/completar", async (req, res) => {
 });
 
 // --- PICKING: Obtener picker asignado a un pedido ---
-app.get("/api/pedidos/:numeroPedido/picker-asignado", async (req, res) => {
+app.get("/api/pedidos/:numeroPedido/picker-asignado", verificarAccesoPedidos, async (req, res) => {
   const { numeroPedido } = req.params;
   try {
     const [result] = await sequelize.query(
@@ -2001,7 +2086,7 @@ app.get("/api/pedidos/:numeroPedido/picker-asignado", async (req, res) => {
 });
 
 // Cambiar estado a Abonado
-app.put("/api/pedidos/:numeroPedido/abonado", async (req, res) => {
+app.put("/api/pedidos/:numeroPedido/abonado", verificarAccesoPedidos, async (req, res) => {
   const { numeroPedido } = req.params;
   try {
     await sequelize.query(
@@ -2015,7 +2100,7 @@ app.put("/api/pedidos/:numeroPedido/abonado", async (req, res) => {
 });
 
 // Cambia el estado de un pedido a Finalizado (idEstado = 5)
-app.put("/api/pedidos/:numeroPedido/finalizado", async (req, res) => {
+app.put("/api/pedidos/:numeroPedido/finalizado", verificarAccesoPedidos, async (req, res) => {
   try {
     const { numeroPedido } = req.params;
     // Actualiza el pedido a estado finalizado (idEstado = 5)
@@ -2114,87 +2199,6 @@ app.get("/api/reportes/ventas-ultimos-7-dias", async (req, res) => {
   }
 });
 
-// Cancelar pedido (cambiar estado a Cancelado, idEstado = 6, borrado lógico y motivo)
-app.put("/api/pedidos/:numeroPedido/cancelar", async (req, res) => {
-  const { numeroPedido } = req.params;
-  const { idMotivo } = req.body;
-  const t = await sequelize.transaction();
-  try {
-    // Validar pedido existe
-    const pedido = await Pedido.findOne({
-      where: { numeroPedido },
-      transaction: t,
-    });
-    if (!pedido) {
-      await t.rollback();
-      return res.status(404).json({ error: "Pedido no encontrado" });
-    }
-    
-    // Validar que el pedido no esté finalizado o ya cancelado
-    if (pedido.idEstado === 5) {
-      await t.rollback();
-      return res.status(400).json({
-        error: "No se pueden cancelar pedidos finalizados",
-      });
-    }
-    
-    if (pedido.idEstado === 6) {
-      await t.rollback();
-      return res.status(400).json({ error: "El pedido ya está cancelado" });
-    }
-    // Cambiar estado a cancelado
-    pedido.idEstado = 6; // Cancelado
-    await pedido.save({ transaction: t });
-
-    // Recuperar detalles del pedido
-    const detalles = await DetallePedido.findAll({
-      where: { numeroPedido },
-      transaction: t,
-    });
-    for (const detalle of detalles) {
-      // Buscar el stock correspondiente
-      const stock = await Stock.findOne({
-        where: { codigoIndumentaria: detalle.codigoIndumentaria },
-        transaction: t,
-      });
-      if (stock) {
-        // Registrar movimiento de devolución
-        await MovimientoStock.create(
-          {
-            idMovimientoStock:
-              "MOV-CANCEL-" + Math.random().toString().slice(2, 8),
-            idStock: stock.idStock,
-            fechaMovimiento: new Date(),
-            cantidad: detalle.cantidad, // Devuelve al stock
-            observaciones: `Devolución por cancelación de pedido ${numeroPedido}`,
-          },
-          { transaction: t }
-        );
-        // No actualizar la tabla stock, solo registrar el movimiento
-      }
-    }
-    
-    // Borrado lógico y motivo
-    await Pedido.update(
-      {
-        estaActivo: 0,
-        idEstado: 6,
-        idMotivoCancelacion: idMotivo,
-      },
-      { where: { numeroPedido }, transaction: t }
-    );
-    
-    await t.commit();
-    res.json({ success: true, mensaje: "Pedido cancelado y stock devuelto." });
-  } catch (error) {
-    await t.rollback();
-    res.status(500).json({
-      error: "Error al cancelar el pedido y devolver stock",
-      detalle: error.message,
-    });
-  }
-});
-
 // Modelo MotivoCancelacion
 const MotivoCancelacion = sequelize.define(
   "MotivoCancelacion",
@@ -2218,4 +2222,109 @@ app.get("/api/motivos-cancelacion", async (req, res) => {
   }
 });
 
-//# sourceMappingURL=index.js.map
+/**
+ * @summary Cancela un pedido, devuelve su stock al inventario, registra el motivo y el usuario que realizó la acción
+ * @description Utiliza borrado lógico. Marca el pedido como inactivo y cambia su estado a 'Cancelado'.
+ * @param {string} numeroPedido - ID del pedido a cancelar
+ * @param {number} idMotivo - ID del motivo de cancelación
+ * @param {number} idUsuarioCancelo - ID del usuario que está realizando la cancelación
+ */
+app.put("/api/pedidos/:numeroPedido/cancelar", verificarAccesoPedidos, async (req, res) => {
+  const { numeroPedido } = req.params;
+  const { idMotivo, idUsuarioCancelo } = req.body;
+
+  // Validar parámetros requeridos
+  if (!idMotivo || !idUsuarioCancelo) {
+    return res.status(400).json({
+      error: "Se requieren idMotivo e idUsuarioCancelo",
+    });
+  }
+
+  const t = await sequelize.transaction();
+
+  try {
+    // Paso 2: Validar el Pedido
+    const pedido = await Pedido.findOne({
+      where: {
+        numeroPedido,
+        estaActivo: 1,
+        idEstado: {
+          [Sequelize.Op.notIn]: [5, 6], // No permitir cancelar pedidos Finalizados (5) o ya Cancelados (6)
+        },
+      },
+      transaction: t,
+    });
+
+    if (!pedido) {
+      await t.rollback();
+      return res.status(404).json({
+        error: "Pedido no encontrado o no se puede cancelar (ya finalizado o cancelado)",
+      });
+    }
+
+    // Paso 3: Devolver Productos al Stock
+    // A. Consultar los detalles del pedido
+    const detalles = await DetallePedido.findAll({
+      where: { numeroPedido },
+      transaction: t,
+    });
+
+    // B. Para cada producto, crear movimiento de stock (devolución)
+    for (const detalle of detalles) {
+      // Buscar el stock correspondiente
+      const stock = await Stock.findOne({
+        where: { codigoIndumentaria: detalle.codigoIndumentaria },
+        transaction: t,
+      });
+
+      if (stock) {
+        // Generar ID único para el movimiento
+        const idMovimiento = `MOV-CANC-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
+        // Registrar movimiento de devolución (cantidad positiva = ingreso al stock)
+        await MovimientoStock.create(
+          {
+            idMovimientoStock: idMovimiento,
+            idStock: stock.idStock,
+            fechaMovimiento: new Date(),
+            cantidad: detalle.cantidad, // Cantidad positiva = devuelve al stock
+            observaciones: `Devolución por cancelación de pedido ${numeroPedido}`,
+          },
+          { transaction: t }
+        );
+      }
+    }
+
+    // Paso 4: Actualizar el Pedido (con el Usuario que cancela)
+    await Pedido.update(
+      {
+        estaActivo: 0, // Borrado lógico
+        idEstado: 6, // Estado 'Cancelado'
+        idMotivoCancelacion: idMotivo, // Motivo de cancelación
+        idUsuarioCancelo: idUsuarioCancelo, // Usuario que canceló
+      },
+      {
+        where: { numeroPedido },
+        transaction: t,
+      }
+    );
+
+    // Paso 5: Finalizar la Transacción
+    await t.commit();
+
+    res.json({
+      success: true,
+      mensaje: "Pedido cancelado exitosamente",
+      numeroPedido,
+      motivoCancelacion: idMotivo,
+      usuarioCancelo: idUsuarioCancelo,
+    });
+  } catch (error) {
+    await t.rollback();
+    console.error("Error al cancelar pedido:", error);
+    res.status(500).json({
+      error: "Error interno al cancelar el pedido",
+      detalle: error.message,
+    });
+  }
+});

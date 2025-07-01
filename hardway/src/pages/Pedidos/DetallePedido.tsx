@@ -14,7 +14,7 @@ import {
 import { useParams, useHistory } from "react-router-dom";
 import "./DetallePedido.css";
 import zepelin from "../../assets/images/zepelin.png";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 
 const DetallePedido: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +25,7 @@ const DetallePedido: React.FC = () => {
   useEffect(() => {
     const cargarPedido = async () => {
       try {
-        const res = await axios.get(`/api/pedidos/${id}/detalle-plano`);
+        const res = await axiosInstance.get(`/api/pedidos/${id}/detalle-plano`);
         setPrendas(res.data.items || []);
         setPedido(res.data.pedido);
       } catch (error) {
@@ -77,6 +77,11 @@ const DetallePedido: React.FC = () => {
           <div className="motivo-cancelacion-card">
             <h3>Motivo de Cancelación</h3>
             <p>{pedido.motivoCancelacion}</p>
+            {pedido.usuarioCancelo && (
+              <p className="usuario-cancelacion">
+                <strong>Cancelado por:</strong> {pedido.usuarioCancelo}
+              </p>
+            )}
           </div>
         )}
 
