@@ -137,9 +137,12 @@ const Pedido = sequelize.define(
     idCliente: DataTypes.INTEGER,
     idEstado: DataTypes.INTEGER,
     fechaPedido: DataTypes.DATE, // <-- asegúrate de tener esto
+    fechaModificacion: DataTypes.DATE, // <-- Para registrar modificaciones
     codigoSeguimiento: DataTypes.STRING, // <-- necesario para update correcto
     idMotivoCancelacion: DataTypes.INTEGER, // <-- Para el motivo de cancelación
     idUsuarioCancelo: DataTypes.INTEGER, // <-- Para el usuario que canceló
+    idUsuarioCreo: DataTypes.INTEGER, // <-- Para el usuario que creó el pedido
+    idUsuarioModifico: DataTypes.INTEGER, // <-- Para el usuario que modificó el pedido
     estaActivo: DataTypes.TINYINT, // <-- Para borrado lógico
   },
   { tableName: "pedido", timestamps: false }
@@ -939,6 +942,7 @@ app.post("/api/pedidos", verificarAccesoPedidos, async (req, res) => {
         numeroPedido,
         idCliente,
         idEstado,
+        idUsuarioCreo: req.usuarioAutenticado.idUsuario, // Registrar quien creó el pedido
       },
       { transaction: t }
     );
@@ -1126,23 +1130,19 @@ app.put("/api/pedidos/:numeroPedido", verificarAccesoPedidos, async (req, res) =
       }
     }
 
-    // 5. Forzar UPDATE real para que se actualice fechaModificacion
+    // 5. Actualizar el pedido con el usuario que modifica y forzar fechaModificacion
     await sequelize.query(
-      `UPDATE pedido SET idEstado = idEstado + 1 WHERE numeroPedido = ?`,
+      `UPDATE pedido SET 
+         idCliente = ?, 
+         idEstado = ?, 
+         idUsuarioModifico = ?, 
+         fechaModificacion = NOW() 
+       WHERE numeroPedido = ?`,
       {
-        replacements: [numeroPedido],
+        replacements: [idCliente, idEstado, req.usuarioAutenticado.idUsuario, numeroPedido],
         transaction: t,
       }
     );
-    await sequelize.query(
-      `UPDATE pedido SET idEstado = idEstado - 1 WHERE numeroPedido = ?`,
-      {
-        replacements: [numeroPedido],
-        transaction: t,
-      }
-    );
-    // Esto asegura que MySQL SIEMPRE modifique la fila y dispare el trigger ON UPDATE
-    // Esto SIEMPRE ejecuta el UPDATE y MySQL actualizará fechaModificacion
 
     await t.commit();
     res.json({ success: true });
@@ -1646,14 +1646,19 @@ app.get("/api/pedidos/:numeroPedido/detalle-plano", verificarAccesoPedidos, asyn
       SELECT 
         p.numeroPedido,
         p.fechaPedido,
+        p.fechaModificacion,
         p.idEstado,
         ep.tipoEstado,
         mc.descripcion AS motivoCancelacion,
-        u.nombreUsuario AS usuarioCancelo
+        uc.nombreUsuario AS usuarioCancelo,
+        ucr.nombreUsuario AS usuarioCreo,
+        um.nombreUsuario AS usuarioModifico
       FROM pedido p
       JOIN estadopedido ep ON p.idEstado = ep.idEstado
       LEFT JOIN motivo_cancelacion mc ON p.idMotivoCancelacion = mc.idMotivo
-      LEFT JOIN usuario u ON p.idUsuarioCancelo = u.idUsuario
+      LEFT JOIN usuario uc ON p.idUsuarioCancelo = uc.idUsuario
+      LEFT JOIN usuario ucr ON p.idUsuarioCreo = ucr.idUsuario
+      LEFT JOIN usuario um ON p.idUsuarioModifico = um.idUsuario
       WHERE p.numeroPedido = ?
       `,
       { replacements: [numeroPedido] }

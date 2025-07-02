@@ -68,7 +68,34 @@ const DetallePedido: React.FC = () => {
         {pedido && (
           <div className="pedido-info-card">
             <p><strong>Estado:</strong> {pedido.tipoEstado}</p>
-            <p><strong>Fecha del pedido:</strong> {pedido.fechaPedido ? new Date(pedido.fechaPedido).toLocaleString("es-AR") : "-"}</p>
+
+          </div>
+        )}
+
+        {/* Mostrar información del usuario que creó el pedido */}
+        {pedido && pedido.usuarioCreo && (
+          <div className="usuario-creacion-card">
+            <h3>Información de Creación</h3>
+            <p className="usuario-creacion">
+              <strong>Creado por:</strong> {pedido.usuarioCreo}
+            </p>
+             <p className="usuario-creacion"><strong>Fecha del pedido:</strong> {pedido.fechaPedido ? new Date(pedido.fechaPedido).toLocaleString("es-AR") : "-"}</p>
+          </div>
+        )}
+
+        {/* Mostrar información de modificación si existe y es diferente a la fecha de creación */}
+        {pedido && pedido.fechaModificacion && pedido.fechaPedido && 
+         new Date(pedido.fechaModificacion).getTime() !== new Date(pedido.fechaPedido).getTime() && (
+          <div className="modificacion-pedido-card">
+            <h3>Historial de Modificaciones</h3>
+            <p className="fecha-modificacion">
+              <strong>Última modificación:</strong> {new Date(pedido.fechaModificacion).toLocaleString("es-AR")}
+            </p>
+            {pedido.usuarioModifico && (
+              <p className="fecha-modificacion">
+                <strong>Modificado por:</strong> {pedido.usuarioModifico}
+              </p>
+            )}
           </div>
         )}
 
@@ -78,7 +105,7 @@ const DetallePedido: React.FC = () => {
             <h3>Motivo de Cancelación</h3>
             <p>{pedido.motivoCancelacion}</p>
             {pedido.usuarioCancelo && (
-              <p className="usuario-cancelacion">
+              <p className="motivo-cancelacion">
                 <strong>Cancelado por:</strong> {pedido.usuarioCancelo}
               </p>
             )}

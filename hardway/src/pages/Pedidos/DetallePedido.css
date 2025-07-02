@@ -105,20 +105,119 @@ ion-content h2 {
   color: #6b7280;
 }
 
+/* Estilos para el recuadro de información de creación */
+.usuario-creacion-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  margin-bottom: 20px;
+  padding: 16px;
+  border-left: 4px solid #16a34a;
+  border: 1px solid #dcfce7;
+}
+
+.usuario-creacion-card h3 {
+  color: #16a34a;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+}
+
+.usuario-creacion-card h3::before {
+  content: "✅";
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.usuario-creacion {
+  color: #16a34a !important;
+  margin: 0;
+  font-size: 14px;
+  background-color: #dcfce7;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.usuario-creacion strong {
+  color: #15803d;
+}
+
+/* Estilos para el recuadro de información de modificación */
+.modificacion-pedido-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  margin-bottom: 20px;
+  padding: 16px;
+  border-left: 4px solid #f59e0b;
+  border: 1px solid #fef3c7;
+}
+
+.modificacion-pedido-card h3 {
+  color: #f59e0b;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+}
+
+.modificacion-pedido-card h3::before {
+  content: "📝";
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.fecha-modificacion {
+  color: #f59e0b !important;
+  margin: 0;
+  font-size: 14px;
+  background-color: #fef3c7;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.fecha-modificacion strong {
+  color: #d97706;
+}
+
+.usuario-modificacion {
+  margin-top: 8px !important;
+  background-color: #fefbf2 !important;
+  color: #92400e !important;
+  border: 1px solid #fbbf24;
+  font-style: italic;
+}
+
+.usuario-modificacion strong {
+  color: #78350f;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .pedido-info-card,
-  .motivo-cancelacion-card {
+  .motivo-cancelacion-card,
+  .usuario-creacion-card,
+  .modificacion-pedido-card {
     margin: 0 8px 16px 8px;
     padding: 12px;
   }
   
-  .motivo-cancelacion-card h3 {
+  .motivo-cancelacion-card h3,
+  .usuario-creacion-card h3,
+  .modificacion-pedido-card h3 {
     font-size: 15px;
   }
   
   .motivo-cancelacion-card p,
-  .pedido-info-card p {
+  .pedido-info-card p,
+  .usuario-creacion,
+  .fecha-modificacion,
+  .usuario-modificacion {
     font-size: 13px;
   }
 }
