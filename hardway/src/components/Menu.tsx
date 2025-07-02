@@ -13,9 +13,13 @@ import {
   homeOutline,
   bookmarkOutline,
   peopleOutline,
+  personOutline,
   logOutOutline,
   shirtOutline,
   archiveOutline,
+  bagHandleOutline,
+  cubeOutline,
+  carOutline,
 } from "ionicons/icons";
 import "./Menu.css";
 import persona from "../assets/images/people.png";
@@ -33,11 +37,11 @@ const Menu: React.FC = () => {
   const { logout, username, rol } = useAuth();
 
   const appPages: AppPage[] = [
-    { title: "Inicio", url: "/Inicio", icon: homeOutline },
+    /*{ title: "Inicio", url: "/Inicio", icon: homeOutline },*/
     { title: "Reportes", url: "/Reportes", icon: bookmarkOutline },
-    { title: "Pedidos", url: "/pedidos", icon: archiveOutline },
+    { title: "Pedidos", url: "/pedidos", icon: bagHandleOutline },
     { title: "Clientes", url: "/Clientes", icon: peopleOutline },
-    { title: "Usuarios", url: "/usuarios", icon: peopleOutline },
+    { title: "Usuarios", url: "/usuarios", icon: personOutline },
     { title: "Indumentaria", url: "/indumentaria", icon: shirtOutline },
   ];
   // Botón de gestión de Picking visible para Picker, Encargado de Picking y Administrador
@@ -46,7 +50,7 @@ const Menu: React.FC = () => {
     rol === "Administrador" ||
     rol === "Picker"
   ) {
-    appPages.push({ title: "Picking", url: "/picking", icon: archiveOutline });
+    appPages.push({ title: "Picking", url: "/picking", icon: cubeOutline });
   }
   // Botón de gestión de Envíos visible para Administrador y Usuario Envios
   if (
@@ -54,7 +58,7 @@ const Menu: React.FC = () => {
     rol === "Administrador" ||
     rol === "Envios"
   ) {
-    appPages.push({ title: "Envíos", url: "/envios", icon: archiveOutline });
+    appPages.push({ title: "Envíos", url: "/envios", icon: carOutline });
   }
 
   const handleLogout = () => {
