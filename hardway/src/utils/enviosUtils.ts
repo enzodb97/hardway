@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 export interface PedidoEnvio {
   numeroPedido: string;
@@ -13,8 +13,15 @@ export interface PedidoEnvio {
 
 // Trae todos los pedidos con estado 'Abonado' (idEstado = 3)
 export const obtenerPedidosAbonados = async (): Promise<PedidoEnvio[]> => {
-  const res = await axios.get("/api/envios/pendientes"); // endpoint sugerido
-  return res.data;
+  console.log("🚚 Iniciando obtenerPedidosAbonados...");
+  try {
+    const res = await axiosInstance.get("/api/envios/pendientes");
+    console.log("✅ Respuesta de envíos:", res.data.length, "pedidos");
+    return res.data;
+  } catch (error) {
+    console.error("❌ Error en obtenerPedidosAbonados:", error);
+    throw error;
+  }
 };
 
 // Marca un pedido como despachado y guarda el código de seguimiento
@@ -22,7 +29,7 @@ export const despacharPedido = async (
   numeroPedido: string,
   codigoSeguimiento: string
 ) => {
-  await axios.put(`/api/envios/despachar/${numeroPedido}`, {
+  await axiosInstance.put(`/api/envios/despachar/${numeroPedido}`, {
     codigoSeguimiento,
   });
 };

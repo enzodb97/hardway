@@ -13,7 +13,7 @@ import {
   IonCardContent,
   IonIcon,
 } from "@ionic/react";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { documentText } from "ionicons/icons";
@@ -38,7 +38,7 @@ const StockActual: React.FC = () => {
   const fechaEmision = new Date().toLocaleString("es-AR");
 
   useEffect(() => {
-    axios
+    axiosInstance
       .get("/api/reportes/stock-actual")
       .then((res) => {
         // Mapeo para adaptar los nombres del backend a los del frontend

@@ -38,6 +38,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [rol, setRol] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [legajoPicker, setLegajoPicker] = useState<string | null>(null);
 
   // Configurar interceptor de axios una sola vez al inicio
   useEffect(() => {
@@ -47,12 +48,14 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const authStatus = localStorage.getItem("isAuthenticated");
     const storedUsername = localStorage.getItem("username");
     let storedRol = localStorage.getItem("rol");
+    const storedLegajoPicker = localStorage.getItem("legajoPicker");
     
     // Normaliza el valor del rol para pickers al recargar
     if (storedRol && storedRol.toLowerCase().includes("picker")) {
       storedRol = "Picker";
       localStorage.setItem("rol", "Picker");
     }
+    
     if (authStatus === "true" && storedUsername && storedRol) {
       // Verifica con el backend si el usuario sigue siendo válido
       axiosInstance
@@ -64,12 +67,14 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             setIsAuthenticated(true);
             setRol(storedRol);
             setUsername(storedUsername);
+            setLegajoPicker(storedLegajoPicker);
           } else {
             // Si no es válido, forzar logout
             logout();
           }
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("AuthContext: Error en validación", error);
           logout();
         });
     } else {
@@ -99,6 +104,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setIsAuthenticated(true);
       setRol(response.data.tipoRol || "");
       setUsername(response.data.nombreUsuario);
+      setLegajoPicker(response.data.legajoPicker || null);
       setShowWelcome(true); // Activa el mensaje tras login exitoso
       return true;
     } catch (error) {
@@ -106,6 +112,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setIsAuthenticated(false);
       setRol(null);
       setUsername(null);
+      setLegajoPicker(null);
       localStorage.removeItem("legajoPicker");
       return false;
     }
@@ -116,10 +123,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setIsAuthenticated(false);
     setRol(null);
     setUsername(null);
+    setLegajoPicker(null);
   };
-
-  // Exporta legajoPicker en el contexto
-  const legajoPicker = localStorage.getItem("legajoPicker") || null;
 
   return (
     <AuthContext.Provider
@@ -132,7 +137,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         username,
         showWelcome,
         setShowWelcome,
-        legajoPicker, // NUEVO
+        legajoPicker,
       }}
     >
       {children}

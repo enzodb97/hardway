@@ -14,7 +14,7 @@ import {
   IonIcon,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { documentText } from "ionicons/icons";
@@ -75,10 +75,13 @@ const ClientesMasPedidos: React.FC = () => {
   const history = useHistory();
 
   useEffect(() => {
-    axios
+    axiosInstance
       .get("/api/reportes/clientes-mas-pedidos?incluirCancelados=false")
       .then((res) => setClientes(res.data))
-      .catch(() => setClientes([]));
+      .catch((error) => {
+        console.error("Error al cargar clientes con más pedidos:", error);
+        setClientes([]);
+      });
   }, []);
 
   const clientesAMostrar = mostrarTodos

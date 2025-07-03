@@ -1,46 +1,52 @@
 // pickingUtils.ts
+import axiosInstance from "../config/axios";
 
 export const cargarTareasPicking = async (rol: string, username: string) => {
-  let url = "/api/picking/tareas";
-  if (rol === "Administrador") {
-    url += "?rol=Administrador";
-  } else {
-    url += `?legajo=${username}`;
+  try {
+    if (rol === "Administrador") {
+      // Para administradores, usar endpoint especial que no requiere legajo
+      const res = await axiosInstance.get("/api/picking/tareas-admin");
+      return res.data;
+    } else {
+      // Para pickers, el legajo se extrae automáticamente del token
+      const res = await axiosInstance.get("/api/picking/tareas");
+      return res.data;
+    }
+  } catch (error) {
+    console.error("Error en cargarTareasPicking:", error);
+    throw error;
   }
-  const res = await fetch(url);
-  let data = await res.json();
-  if (rol === "Administrador") {
-    data = await Promise.all(
-      data.map(async (tarea: any) => {
-        try {
-          const pickerRes = await fetch(
-            `/api/pedidos/${tarea.numeroPedido}/picker-asignado`
-          );
-          const picker = await pickerRes.json();
-          return { ...tarea, pickerAsignado: picker?.nombre || null };
-        } catch {
-          return { ...tarea, pickerAsignado: null };
-        }
-      })
-    );
-  }
-  return data;
 };
 
 export const verPickingList = async (numeroPedido: string) => {
-  const res = await fetch(`/api/picking/lista?numeroPedido=${numeroPedido}`);
-  return await res.json();
+  try {
+    const res = await axiosInstance.get(`/api/picking/tareas/${numeroPedido}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error en verPickingList:", error);
+    throw error;
+  }
 };
 
 export const completarTareaPicking = async (
   idAsignacion: number,
   numeroPedido: string
 ) => {
-  const res = await fetch(`/api/picking/completar`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idAsignacion, numeroPedido }),
-  });
-  if (!res.ok) throw new Error();
-  return await res.json();
+  try {
+    console.log('Completando tarea:', { idAsignacion, numeroPedido });
+    
+    const res = await axiosInstance.post(`/api/picking/tareas/${numeroPedido}/completar`, {
+      idAsignacion,
+      observaciones: 'Tarea completada desde frontend'
+    });
+    
+    console.log('Respuesta completar tarea:', res.data);
+    return res.data;
+  } catch (error: any) {
+    console.error("Error en completarTareaPicking:", error);
+    console.error("Response data:", error.response?.data);
+    console.error("Response status:", error.response?.status);
+    console.error("Request URL:", error.config?.url);
+    throw error;
+  }
 };

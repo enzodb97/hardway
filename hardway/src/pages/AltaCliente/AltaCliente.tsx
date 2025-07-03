@@ -25,7 +25,7 @@ import {
   validarCamposCliente,
   soloNumeros,
 } from "../../utils/clientesUtils";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 
 const AltaCliente: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -58,10 +58,13 @@ const AltaCliente: React.FC = () => {
     if (id) {
       const clienteExistente = clientes.find((c) => c.id === Number(id));
       if (clienteExistente) {
+
         setFormData(clienteExistente);
         setEsEdicion(true);
         setPreviousNumeroDocumento(clienteExistente.numeroDocumento || "");
         setPreviousTelefono(clienteExistente.telefono || "");
+      } else {
+        console.log("❌ Cliente no encontrado con ID:", id);
       }
     }
   }, [id, clientes]);
@@ -100,7 +103,7 @@ const AltaCliente: React.FC = () => {
 
     try {
       // 1. Obtener o crear ciudad
-      const ciudadRes = await axios.post("/api/ciudades/find-or-create", {
+      const ciudadRes = await axiosInstance.post("/api/ciudades/find-or-create", {
         nombreCiudad: formData.localidad,
         codigoPostal: formData.cp,
       });
@@ -108,7 +111,7 @@ const AltaCliente: React.FC = () => {
       const idCiudad = ciudadRes.data.idCiudad;
 
       // 2. Obtener o crear barrio
-      const barrioRes = await axios.post("/api/barrios/find-or-create", {
+      const barrioRes = await axiosInstance.post("/api/barrios/find-or-create", {
         nombreBarrio: formData.barrio,
         idCiudad,
       });

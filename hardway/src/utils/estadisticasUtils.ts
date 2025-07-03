@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 export interface ProductoMasPedido {
   nombreProducto: string;
@@ -8,6 +8,6 @@ export interface ProductoMasPedido {
 export const obtenerProductosMasPedidos = async (): Promise<
   ProductoMasPedido[]
 > => {
-  const res = await axios.get("/api/reportes/productos-mas-pedidos");
+  const res = await axiosInstance.get("/api/reportes/productos-mas-pedidos");
   return res.data;
 };

@@ -16,6 +16,7 @@ import {
   IonLabel,
   IonSpinner,
   IonModal,
+  IonInput,
 } from "@ionic/react";
 import { checkmarkCircleOutline, closeOutline } from "ionicons/icons";
 import { useAuth } from "../../context/AuthContext";
@@ -58,10 +59,51 @@ const Picking: React.FC = () => {
 
   const handleVerPickingList = async (numeroPedido: string) => {
     try {
-      const data = await verPickingList(numeroPedido);
-      setPickingList(data);
+      const response = await verPickingList(numeroPedido);
+      
+      // Log para diagnóstico de la estructura de datos
+      console.log('Respuesta del endpoint picking list:', response);
+      if (response?.pedido?.DetallePedidos?.length > 0) {
+        console.log('Primer item detalle:', response.pedido.DetallePedidos[0]);
+        console.log('Indumentarium del primer item:', response.pedido.DetallePedidos[0].Indumentarium);
+        console.log('DetalleIndumentarium:', response.pedido.DetallePedidos[0].Indumentarium?.DetalleIndumentarium);
+        console.log('Stock del primer item:', response.pedido.DetallePedidos[0].Indumentarium?.Stock);
+        console.log('Rack del primer item:', response.pedido.DetallePedidos[0].Indumentarium?.Stock?.Rack);
+      }
+      
+      // Transformamos los datos para tener un formato compatible con el componente
+      if (response && response.pedido && response.pedido.DetallePedidos) {
+        // Convertir los detalles del pedido al formato esperado por el componente
+        const itemsFormateados = response.pedido.DetallePedidos.map((detalle: any) => {
+          // Extraemos los datos anidados
+          const indumentaria = detalle.Indumentarium || {};
+          const detalleInd = indumentaria.DetalleIndumentarium || {};
+          const nombreInd = detalleInd.NombreIndumentarium || {};
+          const color = detalleInd.Color || {};
+          const talle = detalleInd.Talle || {};
+          const categoria = detalleInd.CategoriaIndumentarium || {};
+          
+          return {
+            nombre_producto: nombreInd.nombre || 'Sin nombre',
+            codigoIndumentaria: detalle.codigoIndumentaria,
+            referencia: indumentaria.codigoIndumentaria,
+            cantidad: detalle.cantidad,
+            rack: indumentaria.Stock?.Rack?.numeroRack || indumentaria.Stock?.idRack?.toString() || 'Sin asignar',
+            categoria: categoria.categoria || 'Sin categoría',
+            color: color.color || 'N/A',
+            talle: talle.talle || 'N/A'
+          };
+        });
+        
+        setPickingList(itemsFormateados);
+      } else {
+        // Si no hay datos o el formato es inesperado, inicializamos como array vacío
+        setPickingList([]);
+      }
+      
       setShowPickingList(true);
     } catch (err) {
+      console.error('Error detallado:', err);
       setAlertMsg("Error al obtener picking list");
       setShowAlert(true);
     }
@@ -146,6 +188,8 @@ const Picking: React.FC = () => {
             </IonRow>
           </IonGrid>
         )}
+        
+        {/* Modal para ver picking list */}
         {/* Modal Picking List con Ionic/React */}
         <IonModal
           isOpen={showPickingList}

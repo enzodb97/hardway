@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 export interface VentaDia {
   dia: string; // formato YYYY-MM-DD
@@ -6,6 +6,6 @@ export interface VentaDia {
 }
 
 export const obtenerVentasUltimos7Dias = async (): Promise<VentaDia[]> => {
-  const res = await axios.get("/api/reportes/ventas-ultimos-7-dias");
+  const res = await axiosInstance.get("/api/reportes/ventas-ultimos-7-dias");
   return res.data;
 };

@@ -16,7 +16,7 @@ import {
   IonCol,
 } from "@ionic/react";
 import { useHistory, useParams } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 
 const camposIniciales = {
   codigoIndumentaria: "",
@@ -61,13 +61,13 @@ const AltaIndumentaria: React.FC = () => {
           preciosRes,
           nombresRes,
         ] = await Promise.all([
-          axios.get("/api/colores"),
-          axios.get("/api/talles"),
-          axios.get("/api/telas"),
-          axios.get("/api/categorias"),
-          axios.get("/api/estados-indumentaria"),
-          axios.get("/api/precios"),
-          axios.get("/api/nombres-indumentaria"),
+          axiosInstance.get("/api/colores"),
+          axiosInstance.get("/api/talles"),
+          axiosInstance.get("/api/telas"),
+          axiosInstance.get("/api/categorias"),
+          axiosInstance.get("/api/estados-indumentaria"),
+          axiosInstance.get("/api/precios"),
+          axiosInstance.get("/api/nombres-indumentaria"),
         ]);
         setColores(coloresRes.data);
         setTalles(tallesRes.data);
@@ -88,21 +88,21 @@ const AltaIndumentaria: React.FC = () => {
     if (esEdicion && id) {
       const cargarPrenda = async () => {
         try {
-          const res = await axios.get(`/api/indumentaria/${id}`);
+          const res = await axiosInstance.get(`/api/indumentaria/${id}`);
+          const data = res.data;
           setForm({
-            codigoIndumentaria: res.data.codigoIndumentaria || "",
-            nombre: res.data.nombre || "",
-            idColor: res.data.idColor || "",
-            idTalle: res.data.idTalle || "",
-            idTela: res.data.idTela || "",
-            idCategoria: res.data.idCategoria || "",
-            idEstado: res.data.idEstado || "",
-            idPrecio: res.data.idPrecio || "",
-            precio:
-              res.data.precio || res.data.PrecioIndumentarium?.precio || "", // <-- Ajusta según tu backend
-            cantidad: res.data.cantidad ?? "",
-            idDetalle: res.data.idDetalle || "",
-            cantidadAnterior: res.data.cantidad ?? "", // <--- AGREGA ESTO
+            codigoIndumentaria: data.codigoIndumentaria || "",
+            nombre: data.DetalleIndumentarium?.NombreIndumentarium?.nombre || "",
+            idColor: data.DetalleIndumentarium?.idColor?.toString() || "",
+            idTalle: data.DetalleIndumentarium?.idTalle?.toString() || "",
+            idTela: data.DetalleIndumentarium?.idTela?.toString() || "",
+            idCategoria: data.DetalleIndumentarium?.idCategoria?.toString() || "",
+            idEstado: data.DetalleIndumentarium?.idEstado?.toString() || "",
+            idPrecio: data.DetalleIndumentarium?.idPrecio?.toString() || "",
+            precio: data.DetalleIndumentarium?.PrecioIndumentarium?.precio || "",
+            cantidad: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
+            idDetalle: data.idDetalle?.toString() || "",
+            cantidadAnterior: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
           });
         } catch (error) {
           setAlertMsg("Error al cargar la prenda.");
@@ -126,14 +126,14 @@ const AltaIndumentaria: React.FC = () => {
 
       // Si el usuario ingresó un precio manualmente (no seleccionó uno existente)
       if (form.precio && !form.idPrecio) {
-        const precioRes = await axios.post("/api/precios", {
+        const precioRes = await axiosInstance.post("/api/precios", {
           precio: form.precio,
         });
         idPrecio = precioRes.data.idPrecio;
       }
 
       // 1. Busca o crea el nombre
-      const nombreRes = await axios.post(
+      const nombreRes = await axiosInstance.post(
         "/api/nombres-indumentaria/find-or-create",
         {
           nombre: form.nombre,
@@ -142,7 +142,7 @@ const AltaIndumentaria: React.FC = () => {
       const idNombre = nombreRes.data.idNombre;
 
       // 2. Busca o crea el detalle
-      const detalleRes = await axios.post(
+      const detalleRes = await axiosInstance.post(
         "/api/detalle-indumentaria/find-or-create",
         {
           idNombre,
@@ -160,17 +160,17 @@ const AltaIndumentaria: React.FC = () => {
       if (esEdicion && id) {
         // Si el idDetalle es el mismo que el actual, actualiza el precio
         if (idDetalle === form.idDetalle) {
-          await axios.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+          await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
             precio: form.precio,
           });
         } else {
           // Si cambió algún atributo, actualiza el detalle de la prenda
-          await axios.put(`/api/indumentaria/${id}`, {
+          await axiosInstance.put(`/api/indumentaria/${id}`, {
             codigoIndumentaria: form.codigoIndumentaria,
             idDetalle,
           });
           // Y actualiza el precio del nuevo detalle
-          await axios.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+          await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
             precio: form.precio,
           });
         }
@@ -180,7 +180,7 @@ const AltaIndumentaria: React.FC = () => {
         const cantidadAnterior = Number(form.cantidadAnterior);
         const diferencia = cantidadActual - cantidadAnterior;
         if (diferencia !== 0) {
-          await axios.post("/api/stock/movimiento", {
+          await axiosInstance.post("/api/stock/movimiento", {
             codigoIndumentaria: form.codigoIndumentaria,
             cantidad: diferencia,
             observaciones: "Ajuste manual desde edición",
@@ -188,13 +188,13 @@ const AltaIndumentaria: React.FC = () => {
         }
         // --- FIN BLOQUE STOCK ---
       } else {
-        await axios.post("/api/indumentaria", {
+        await axiosInstance.post("/api/indumentaria", {
           codigoIndumentaria: form.codigoIndumentaria,
           idDetalle,
           cantidad: form.cantidad,
         });
         // Y actualiza el precio del nuevo detalle
-        await axios.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+        await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
           precio: form.precio,
         });
       }
@@ -244,7 +244,7 @@ const AltaIndumentaria: React.FC = () => {
                 if (e.detail.value === "nuevo") {
                   const nuevoColor = prompt("Ingrese el nuevo color:");
                   if (nuevoColor) {
-                    axios
+                    axiosInstance
                       .post("/api/colores", { color: nuevoColor })
                       .then((res) => {
                         setColores([...colores, res.data]);
@@ -275,7 +275,7 @@ const AltaIndumentaria: React.FC = () => {
                 if (e.detail.value === "nuevo") {
                   const nuevoTalle = prompt("Ingrese el nuevo talle:");
                   if (nuevoTalle) {
-                    axios
+                    axiosInstance
                       .post("/api/talles", { talle: nuevoTalle })
                       .then((res) => {
                         setTalles([...talles, res.data]);
@@ -306,7 +306,7 @@ const AltaIndumentaria: React.FC = () => {
                 if (e.detail.value === "nuevo") {
                   const nuevaTela = prompt("Ingrese el nuevo tipo de tela:");
                   if (nuevaTela) {
-                    axios
+                    axiosInstance
                       .post("/api/telas", { tipoTela: nuevaTela })
                       .then((res) => {
                         setTelas([...telas, res.data]);
@@ -337,7 +337,7 @@ const AltaIndumentaria: React.FC = () => {
                 if (e.detail.value === "nuevo") {
                   const nuevaCategoria = prompt("Ingrese la nueva categoría:");
                   if (nuevaCategoria) {
-                    axios
+                    axiosInstance
                       .post("/api/categorias", { categoria: nuevaCategoria })
                       .then((res) => {
                         setCategorias([...categorias, res.data]);
@@ -368,7 +368,7 @@ const AltaIndumentaria: React.FC = () => {
                 if (e.detail.value === "nuevo") {
                   const nuevoEstado = prompt("Ingrese el nuevo estado:");
                   if (nuevoEstado) {
-                    axios
+                    axiosInstance
                       .post("/api/estados-indumentaria", {
                         estadoIndumentaria: nuevoEstado,
                       })

@@ -38,6 +38,7 @@ import {
   MotivoCancelacion,
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
+import axiosInstance from "../../config/axios";
 import { pencil, trash, documentText, chevronDown, cash } from "ionicons/icons";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -122,8 +123,8 @@ const Pedidos: React.FC = () => {
   const handleCancelarPedido = async (numeroPedido: string) => {
     setPedidoParaCancelar(numeroPedido);
     try {
-      const response = await fetch("/api/motivos-cancelacion");
-      const motivos = await response.json();
+      const response = await axiosInstance.get("/api/motivos-cancelacion");
+      const motivos = response.data;
       setMotivosCancelacion(motivos);
       setMotivoSeleccionado(null);
       setShowMotivoModal(true);
@@ -376,19 +377,29 @@ const Pedidos: React.FC = () => {
                                 </IonLabel>
                               </IonItem>
                               {pickers.length === 0 && (
-                                <IonItem>No hay pickers disponibles</IonItem>
+                                <IonItem>
+                                  <IonLabel>No hay pickers disponibles</IonLabel>
+                                </IonItem>
                               )}
-                              {pickers.map((picker) => (
+                              {pickers.map((picker, index) => (
                                 <IonItem
                                   button
-                                  key={picker.id}
+                                  key={picker.id || index}
                                   onClick={() => {
+                                    console.log("📌 Picker seleccionado:", picker);
                                     setSelectedPicker(picker);
                                     setShowConfirmAsignar(true);
                                     setShowPickerDropdown(null);
                                   }}
                                 >
-                                  <IonLabel>{picker.nombre}</IonLabel>
+                                  <IonLabel>
+                                    <div style={{ fontWeight: 'bold' }}>
+                                      {picker.nombre}
+                                    </div>
+                                    <div style={{ fontSize: '0.8em', color: '#666' }}>
+                                      Legajo: {picker.legajo}
+                                    </div>
+                                  </IonLabel>
                                 </IonItem>
                               ))}
                             </IonList>

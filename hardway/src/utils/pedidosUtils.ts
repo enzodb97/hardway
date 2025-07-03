@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
   if (!username) {
     throw new Error("No hay usuario autenticado");
   }
-  return { nombreUsuario: username };
+  return { nombreusuario: username };
 };
 
 // Interfaces según tu backend
@@ -218,9 +218,20 @@ export const fetchPickers = async (
   setShowAlert: any
 ) => {
   try {
-    const res = await axiosInstance.get("/api/pickers");
-    setPickers(res.data);
+    const res = await axiosInstance.get("/api/picking/pickers");
+    
+    // Validar que los datos tengan la estructura correcta
+    const validPickers = res.data.map((picker: any) => ({
+      id: picker.id || picker.legajo,
+      legajo: picker.legajo,
+      nombre: picker.nombre || 'Sin nombre',
+      nombreCompleto: picker.nombreCompleto || picker.nombre || 'Sin nombre'
+    }));
+    
+    console.log("✅ Pickers procesados para frontend:", validPickers);
+    setPickers(validPickers);
   } catch (err) {
+    console.error("❌ Error en fetchPickers:", err);
     setAlertMsg("Error al obtener pickers");
     setShowAlert(true);
   }

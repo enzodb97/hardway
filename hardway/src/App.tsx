@@ -29,6 +29,8 @@ import StockActual from "./pages/Reportes/StockActual";
 import ProductosMasPedidos from "./pages/Reportes/ProductosMasPedidos";
 import Picking from "./pages/Picking/Picking";
 import Envios from "./pages/Envios/Envios";
+import DebugAuth from "./pages/DebugAuth";
+import UsuariosSimple from "./pages/UsuariosSimple";
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -117,6 +119,9 @@ const AppRouter = () => {
             <Route exact path="/detalle-pedido/:id">
               <DetallePedido />
             </Route>
+            <Route exact path="/debug-auth">
+              <DebugAuth />
+            </Route>
             <Route exact path="/">
               <Redirect to="/dashboard" />
             </Route>
@@ -143,6 +148,7 @@ const AppRouter = () => {
               component={UltimaSemanaVenta}
               exact
             />
+            <Route exact path="/debug-auth" component={DebugAuth} />
           </IonRouterOutlet>
         </IonSplitPane>
       ) : (

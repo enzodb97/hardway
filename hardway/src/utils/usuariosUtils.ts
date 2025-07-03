@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 export interface Usuario {
   id: number;
@@ -39,23 +39,23 @@ export function validarUnicidadUsuario(
 
 // Obtener usuarios
 export const cargarUsuarios = async (): Promise<Usuario[]> => {
-  const res = await axios.get("/api/usuarios");
+  const res = await axiosInstance.get("/api/usuarios");
   return res.data;
 };
 
 // Crear usuario
 export const crearUsuario = async (nuevoUsuario: Omit<Usuario, "id">) => {
-  return await axios.post("/api/usuarios", nuevoUsuario);
+  return await axiosInstance.post("/api/usuarios", nuevoUsuario);
 };
 
 // Eliminar usuario
 export const eliminarUsuario = async (id: number) => {
-  return await axios.delete(`/api/usuarios/${id}`);
+  return await axiosInstance.delete(`/api/usuarios/${id}`);
 };
 
 // Editar usuario
 export const editarUsuario = async (usuario: Usuario) => {
-  return await axios.put(`/api/usuarios/${usuario.id}`, {
+  return await axiosInstance.put(`/api/usuarios/${usuario.id}`, {
     username: usuario.username,
     rol: usuario.rol,
   });
@@ -63,5 +63,5 @@ export const editarUsuario = async (usuario: Usuario) => {
 
 // Cambiar contraseña
 export async function cambiarPassword(id: number, password: string) {
-  await axios.put(`/api/usuarios/${id}/password`, { password });
+  await axiosInstance.put(`/api/usuarios/${id}/password`, { password });
 }

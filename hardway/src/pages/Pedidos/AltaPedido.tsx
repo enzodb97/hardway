@@ -72,7 +72,22 @@ const AltaPedido: React.FC = () => {
 
   // Cargar indumentaria
   useEffect(() => {
-    axiosInstance.get("/api/indumentaria").then((res) => setIndumentaria(res.data));
+    axiosInstance.get("/api/indumentaria").then((res) => {
+      // Mapear datos anidados del backend a estructura plana
+      const indumentariaMapeada = res.data.map((item: any) => ({
+        codigoIndumentaria: item.codigoIndumentaria,
+        nombre: item.DetalleIndumentarium?.NombreIndumentarium?.nombre || "Sin nombre",
+        color: item.DetalleIndumentarium?.Color?.color || "Sin color",
+        nombreTela: item.DetalleIndumentarium?.TelaIndumentarium?.tipoTela || "Sin tela",
+        talle: item.DetalleIndumentarium?.Talle?.talle || "Sin talle",
+        categoria: item.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "Sin categoría",
+        precio: parseFloat(item.DetalleIndumentarium?.PrecioIndumentarium?.precio || "0"),
+        estado: item.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "Sin estado",
+        cantidadIndumentaria: item.DetalleIndumentarium?.cantidadIndumentaria || 0,
+        idIndumentaria: item.idDetalle
+      }));
+      setIndumentaria(indumentariaMapeada);
+    });
   }, []);
 
   // Cargar datos si es edición
@@ -98,14 +113,23 @@ const AltaPedido: React.FC = () => {
                 nombre:
                   detalle.Indumentarium?.DetalleIndumentarium
                     ?.NombreIndumentarium?.nombre ||
-                  detalle.Indumentarium?.codigoIndumentaria ||
-                  "",
+                  detalle.codigoIndumentaria ||
+                  "Sin nombre",
                 cantidad: detalle.cantidad,
               }))
             );
           }
-        } catch (error) {
-          setAlertMsg("Error al cargar el pedido.");
+        } catch (error: any) {
+          console.error("Error al cargar el pedido:", error);
+          if (error.response?.status === 401) {
+            setAlertMsg("Error de autenticación. Por favor, inicie sesión nuevamente.");
+          } else if (error.response?.status === 404) {
+            setAlertMsg("Pedido no encontrado.");
+          } else if (error.response?.data?.error) {
+            setAlertMsg(`Error: ${error.response.data.error}`);
+          } else {
+            setAlertMsg("Error al cargar el pedido.");
+          }
           setShowAlert(true);
         }
       };

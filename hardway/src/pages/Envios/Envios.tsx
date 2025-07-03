@@ -39,7 +39,24 @@ const Envios: React.FC = () => {
   );
 
   useEffect(() => {
-    obtenerPedidosAbonados().then(setPedidos);
+    const cargarPedidos = async () => {
+      try {
+        console.log("🔍 Cargando pedidos de envío...");
+        const username = localStorage.getItem("username");
+        const isAuthenticated = localStorage.getItem("isAuthenticated");
+        console.log("📋 Estado de autenticación:", { username, isAuthenticated });
+        
+        const pedidosData = await obtenerPedidosAbonados();
+        console.log("✅ Pedidos cargados:", pedidosData.length);
+        setPedidos(pedidosData);
+      } catch (error) {
+        console.error("❌ Error cargando pedidos:", error);
+        setAlertMsg("Error al cargar pedidos pendientes de envío");
+        setShowAlert(true);
+      }
+    };
+    
+    cargarPedidos();
   }, []);
 
   const handleDespachar = async () => {

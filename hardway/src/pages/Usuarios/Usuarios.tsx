@@ -29,10 +29,11 @@ import {
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
 import zepelin from "../../assets/images/zepelin.png";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 
 const Usuarios: React.FC = () => {
   const { rol } = useAuth();
+  
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [nuevoUsuario, setNuevoUsuario] = useState<Omit<Usuario, "id">>({
     username: "",
@@ -49,12 +50,14 @@ const Usuarios: React.FC = () => {
   );
   const [rolesDisponibles, setRolesDisponibles] = useState<string[]>([]);
 
+  // TEMPORALMENTE COMENTAMOS LA VALIDACIÓN DE ROL PARA DEBUGGEAR
   // Solo admin puede ver esta página
-  if (rol !== "Administrador") {
+  if (rol !== "Administrador" && rol !== null) {
     return (
       <IonPage>
         <IonHeader>
           <IonToolbar>
+            <IonMenuButton slot="start" />
             <IonTitle>Usuarios</IonTitle>
           </IonToolbar>
         </IonHeader>
@@ -62,6 +65,31 @@ const Usuarios: React.FC = () => {
           <h2 style={{ color: "red", textAlign: "center" }}>
             No tienes acceso a esta sección
           </h2>
+          <p style={{ textAlign: "center" }}>
+            Tu rol actual: {rol || "No definido"}
+          </p>
+          <p style={{ textAlign: "center" }}>
+            Rol requerido: Administrador
+          </p>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+  // Si rol es null, mostrar cargando
+  if (rol === null) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonMenuButton slot="start" />
+            <IonTitle>Usuarios</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div style={{ textAlign: "center", marginTop: "50px" }}>
+            <p>Verificando permisos...</p>
+          </div>
         </IonContent>
       </IonPage>
     );
@@ -69,10 +97,30 @@ const Usuarios: React.FC = () => {
 
   // Cargar usuarios y roles al montar
   useEffect(() => {
-    cargarUsuarios().then(setUsuarios);
+    if (rol !== "Administrador") {
+      return;
+    }
+    
+    cargarUsuarios().then((usuariosData) => {
+      setUsuarios(usuariosData);
+    }).catch((error) => {
+      console.error("Usuarios.tsx: Error al cargar usuarios:", error);
+      setAlertMsg("Error al cargar usuarios");
+      setShowAlert(true);
+    });
+    
     // Cargar roles desde el backend
-    axios.get("/api/tiporoles").then((res) => setRolesDisponibles(res.data));
-  }, []);
+    axiosInstance.get("/api/tiporoles")
+      .then((res: any) => {
+        const roles = res.data.map((r: any) => r.tipoRol);
+        setRolesDisponibles(roles);
+      })
+      .catch((error) => {
+        console.error("Usuarios.tsx: Error al cargar roles:", error);
+        setAlertMsg("Error al cargar roles disponibles");
+        setShowAlert(true);
+      });
+  }, [rol]); // Agregar rol como dependencia
 
   // Crear usuario
   const handleCrear = async (e: React.FormEvent) => {

@@ -17,7 +17,7 @@ import {
   IonIcon,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 import { people, cube, trendingUp } from "ionicons/icons";
 import "./Reportes.css";
 
@@ -31,9 +31,9 @@ const Reportes: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      axios.get("/api/reportes/clientes-mas-pedidos"),
-      axios.get("/api/reportes/productos-mas-pedidos"),
-      axios.get("/api/reportes/stock-actual"),
+      axiosInstance.get("/api/reportes/clientes-mas-pedidos"),
+      axiosInstance.get("/api/reportes/productos-mas-pedidos"),
+      axiosInstance.get("/api/reportes/stock-actual"),
     ])
       .then(([clientesRes, productosRes, stockRes]) => {
         setClientes(clientesRes.data || []);

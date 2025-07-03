@@ -19,10 +19,16 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const username = localStorage.getItem("username");
     const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+    const token = localStorage.getItem("token");
     
-    // Agregar header para endpoints de pedidos si el usuario está autenticado
-    if (username && isAuthenticated && config.url?.includes("/pedidos")) {
-      config.headers.nombreUsuario = username;
+    // Agregar header para todos los endpoints que requieren autenticación
+    if (username && isAuthenticated) {
+      config.headers.nombreusuario = username;
+      
+      // Incluir el token JWT en el header Authorization
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     
     return config;

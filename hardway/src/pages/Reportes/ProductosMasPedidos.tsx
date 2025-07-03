@@ -13,7 +13,7 @@ import {
   IonCardContent,
   IonIcon,
 } from "@ionic/react";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { documentText } from "ionicons/icons";
@@ -57,10 +57,13 @@ const ProductosMasPedidos: React.FC = () => {
   const fechaEmision = new Date().toLocaleString("es-AR");
 
   useEffect(() => {
-    axios
+    axiosInstance
       .get("/api/reportes/productos-mas-pedidos")
       .then((res) => setProductos(res.data))
-      .catch(() => setProductos([]));
+      .catch((error) => {
+        console.error("Error al cargar productos más pedidos:", error);
+        setProductos([]);
+      });
   }, []);
 
   // Etiqueta combinada para cada producto

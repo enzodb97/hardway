@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 export interface Cliente {
   id: number;
@@ -41,15 +41,15 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
     const fetchClientes = async () => {
       try {
         console.log('Intentando obtener clientes del backend...');
-        const response = await axios.get("/api/clientes");
+        const response = await axiosInstance.get("/api/clientes");
         console.log('Respuesta del servidor:', response.data);
         setClientes(response.data);
       } catch (error) {
         console.error("Error al cargar clientes:", error);
         // Mostrar más detalles del error
-        if (axios.isAxiosError(error)) {
-          console.error('Status:', error.response?.status);
-          console.error('Data:', error.response?.data);
+        if (error instanceof Error) {
+          console.error('Status:', (error as any).response?.status);
+          console.error('Data:', (error as any).response?.data);
         }
       }
     };
@@ -59,7 +59,7 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
 
   const agregarCliente = async (nuevoCliente: Omit<Cliente, "id">) => {
     try {
-      const response = await axios.post("/api/clientes", nuevoCliente);
+      const response = await axiosInstance.post("/api/clientes", nuevoCliente);
       setClientes((prev) => [...prev, response.data]);
     } catch (error) {
       console.error("Error al agregar cliente:", error);
@@ -68,7 +68,7 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
 
   const modificarCliente = async (clienteActualizado: Cliente) => {
     try {
-      await axios.put(
+      await axiosInstance.put(
         `/api/clientes/${clienteActualizado.id}`,
         clienteActualizado
       );
@@ -83,13 +83,13 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const obtenerClientes = async () => {
-    const res = await axios.get("/api/clientes");
+    const res = await axiosInstance.get("/api/clientes");
     setClientes(res.data);
   };
 
   const eliminarCliente = async (id: number) => {
     try {
-      await axios.delete(`/api/clientes/${id}`);
+      await axiosInstance.delete(`/api/clientes/${id}`);
       await obtenerClientes(); // Recarga la lista después de eliminar
     } catch (error) {
       throw error;
