@@ -88,7 +88,7 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 - Implementa lógica de negocio separada de las rutas
 - Coordina operaciones entre múltiples modelos
 - Gestiona transacciones de base de datos
-- Procesa datos y realiza cálculos
+- Procesa datos y realiza cálculoss
 
 ### 6. 📂 `/utils`
 
