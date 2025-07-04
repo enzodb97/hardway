@@ -169,6 +169,21 @@
 .client-main-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.client-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.client-doc-list {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .client-name {
@@ -186,6 +201,17 @@
   --color: #fdb40b;
   margin-top: 8px;
   font-size: 0.85em;
+}
+
+/* Estilos para chips de estado */
+ion-chip[color="success"] {
+  --background: #d4edda;
+  --color: #155724;
+}
+
+ion-chip[color="danger"] {
+  --background: #f8d7da;
+  --color: #721c24;
 }
 
 .client-details {

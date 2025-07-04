@@ -39,7 +39,9 @@ import {
   document,
   funnel,
   grid,
-  list
+  list,
+  checkmarkCircle,
+  closeCircle
 } from "ionicons/icons";
 import { useState } from "react";
 import { useClientes } from "../../context/ClientesContext";
@@ -47,7 +49,7 @@ import "./Clientes.css";
 import { exportarClientesPDF } from "../../utils/clientesUtils";
 
 const Clientes: React.FC = () => {
-  const { clientes, eliminarCliente } = useClientes();
+  const { clientes, eliminarCliente, darDeBajaCliente, darDeAltaCliente } = useClientes();
   const [busqueda, setBusqueda] = useState("");
   const [vistaGrid, setVistaGrid] = useState(true);
   const [filtroLocalidad, setFiltroLocalidad] = useState("");
@@ -59,6 +61,10 @@ const Clientes: React.FC = () => {
   const [alertMsg, setAlertMsg] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [clienteAEliminar, setClienteAEliminar] = useState<number | null>(null);
+  const [showConfirmBaja, setShowConfirmBaja] = useState(false);
+  const [showConfirmAlta, setShowConfirmAlta] = useState(false);
+  const [clienteADarBaja, setClienteADarBaja] = useState<number | null>(null);
+  const [clienteADarAlta, setClienteADarAlta] = useState<number | null>(null);
 
   // Obtener localidades únicas para el filtro
   const localidadesUnicas = [...new Set(clientes.map(c => c.localidad).filter(Boolean))];
@@ -99,7 +105,7 @@ const Clientes: React.FC = () => {
     if (clienteAEliminar === null) return;
     try {
       await eliminarCliente(clienteAEliminar);
-      setAlertMsg("Cliente eliminado correctamente");
+      setAlertMsg("Cliente dado de baja correctamente");
       setShowAlert(true);
     } catch (error: any) {
       const backendMsg =
@@ -110,15 +116,57 @@ const Clientes: React.FC = () => {
         error.response.status === 400 &&
         backendMsg.includes("No se puede eliminar el cliente")
       ) {
-        setAlertMsg("No se puede eliminar el cliente, tiene pedidos asociados.");
+        setAlertMsg("No se puede dar de baja el cliente, tiene pedidos asociados.");
         setShowAlert(true);
       } else {
-        setAlertMsg("Error al eliminar el cliente, tiene pedidos asociados.");
+        setAlertMsg("Error al dar de baja el cliente.");
         setShowAlert(true);
       }
     } finally {
-      setShowConfirm(false);
       setClienteAEliminar(null);
+      setShowConfirm(false);
+    }
+  };
+
+  // Dar de baja cliente
+  const pedirConfirmacionBaja = (id: number) => {
+    setClienteADarBaja(id);
+    setShowConfirmBaja(true);
+  };
+
+  const handleDarBaja = async () => {
+    if (clienteADarBaja === null) return;
+    try {
+      await darDeBajaCliente(clienteADarBaja);
+      setAlertMsg("Cliente dado de baja correctamente");
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg("Error al dar de baja el cliente");
+      setShowAlert(true);
+    } finally {
+      setClienteADarBaja(null);
+      setShowConfirmBaja(false);
+    }
+  };
+
+  // Dar de alta cliente
+  const pedirConfirmacionAlta = (id: number) => {
+    setClienteADarAlta(id);
+    setShowConfirmAlta(true);
+  };
+
+  const handleDarAlta = async () => {
+    if (clienteADarAlta === null) return;
+    try {
+      await darDeAltaCliente(clienteADarAlta);
+      setAlertMsg("Cliente dado de alta correctamente");
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg("Error al dar de alta el cliente");
+      setShowAlert(true);
+    } finally {
+      setClienteADarAlta(null);
+      setShowConfirmAlta(false);
     }
   };
 
@@ -147,6 +195,13 @@ const Clientes: React.FC = () => {
                 <IonChip color="primary" className="doc-chip">
                   <IonIcon icon={document} />
                   <IonLabel>{cliente.tipoDocumento}: {cliente.numeroDocumento}</IonLabel>
+                </IonChip>
+                {/* Chip de estado del cliente */}
+                <IonChip 
+                  color={cliente.estaActivo === 0 ? "danger" : "success"} 
+                  style={{ fontSize: "0.8rem" }}
+                >
+                  {cliente.estaActivo === 0 ? "Inactivo" : "Activo"}
                 </IonChip>
               </div>
             </div>
@@ -190,16 +245,30 @@ const Clientes: React.FC = () => {
                 <IonIcon icon={pencil} slot="start" />
                 Editar
               </IonButton>
-              <IonButton
-                fill="clear"
-                size="small"
-                color="danger"
-                onClick={() => pedirConfirmacionEliminar(cliente.id)}
-                className="delete-action"
-              >
-                <IonIcon icon={trash} slot="start" />
-                Eliminar
-              </IonButton>
+              {/* Mostrar botón de alta o baja según el estado del cliente */}
+              {cliente.estaActivo === 0 ? (
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  color="success"
+                  onClick={() => pedirConfirmacionAlta(cliente.id)}
+                  className="alta-action"
+                >
+                  <IonIcon icon={checkmarkCircle} slot="start" />
+                  Dar de Alta
+                </IonButton>
+              ) : (
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  color="warning"
+                  onClick={() => pedirConfirmacionBaja(cliente.id)}
+                  className="baja-action"
+                >
+                  <IonIcon icon={closeCircle} slot="start" />
+                  Dar de Baja
+                </IonButton>
+              )}
             </div>
           </IonCardContent>
         </IonCard>
@@ -215,7 +284,15 @@ const Clientes: React.FC = () => {
           <div className="list-item-content">
             <div className="client-basic-info">
               <h3 className="client-name-list">{`${cliente.nombre} ${cliente.apellido}`}</h3>
-              <p className="client-doc-list">{cliente.tipoDocumento}: {cliente.numeroDocumento}</p>
+              <div className="client-info-row">
+                <p className="client-doc-list">{cliente.tipoDocumento}: {cliente.numeroDocumento}</p>
+                <IonChip 
+                  color={cliente.estaActivo === 0 ? "danger" : "success"} 
+                  style={{ fontSize: "0.7rem", marginLeft: "8px" }}
+                >
+                  {cliente.estaActivo === 0 ? "Inactivo" : "Activo"}
+                </IonChip>
+              </div>
             </div>
             <div className="client-contact-info">
               <span className="phone-info">{cliente.telefono}</span>
@@ -233,14 +310,26 @@ const Clientes: React.FC = () => {
             >
               <IonIcon icon={pencil} />
             </IonButton>
-            <IonButton
-              fill="clear"
-              size="small"
-              color="danger"
-              onClick={() => pedirConfirmacionEliminar(cliente.id)}
-            >
-              <IonIcon icon={trash} />
-            </IonButton>
+            {/* Mostrar botón de alta o baja según el estado del cliente */}
+            {cliente.estaActivo === 0 ? (
+              <IonButton
+                fill="clear"
+                size="small"
+                color="success"
+                onClick={() => pedirConfirmacionAlta(cliente.id)}
+              >
+                <IonIcon icon={checkmarkCircle} />
+              </IonButton>
+            ) : (
+              <IonButton
+                fill="clear"
+                size="small"
+                color="warning"
+                onClick={() => pedirConfirmacionBaja(cliente.id)}
+              >
+                <IonIcon icon={closeCircle} />
+              </IonButton>
+            )}
           </div>
         </div>
       ))}
@@ -431,6 +520,46 @@ const Clientes: React.FC = () => {
                 text: "Eliminar",
                 handler: handleEliminar,
                 cssClass: "danger",
+              },
+            ]}
+          />
+          
+          {/* Confirmación de dar de baja */}
+          <IonAlert
+            isOpen={showConfirmBaja}
+            onDidDismiss={() => setShowConfirmBaja(false)}
+            header="¿Dar de baja cliente?"
+            message="¿Estás seguro de que deseas dar de baja este cliente? Podrás reactivarlo más tarde."
+            buttons={[
+              {
+                text: "Cancelar",
+                role: "cancel",
+                handler: () => setShowConfirmBaja(false),
+              },
+              {
+                text: "Dar de Baja",
+                handler: handleDarBaja,
+                cssClass: "warning",
+              },
+            ]}
+          />
+
+          {/* Confirmación de dar de alta */}
+          <IonAlert
+            isOpen={showConfirmAlta}
+            onDidDismiss={() => setShowConfirmAlta(false)}
+            header="¿Dar de alta cliente?"
+            message="¿Estás seguro de que deseas reactivar este cliente?"
+            buttons={[
+              {
+                text: "Cancelar",
+                role: "cancel",
+                handler: () => setShowConfirmAlta(false),
+              },
+              {
+                text: "Dar de Alta",
+                handler: handleDarAlta,
+                cssClass: "success",
               },
             ]}
           />

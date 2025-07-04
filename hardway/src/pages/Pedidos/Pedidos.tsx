@@ -40,8 +40,6 @@ import {
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import { pencil, trash, documentText, chevronDown, cash } from "ionicons/icons";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import {
   IonPopover,
   IonLabel,
@@ -84,6 +82,11 @@ const Pedidos: React.FC = () => {
   // Estados para manejar errores de autorización
   const [showAuthError, setShowAuthError] = useState(false);
   const [authErrorMsg, setAuthErrorMsg] = useState("");
+  
+  // Estados para las alertas de abono
+  const [showConfirmAbono, setShowConfirmAbono] = useState(false);
+  const [showAbonoExitoso, setShowAbonoExitoso] = useState(false);
+  const [pedidoParaAbonar, setPedidoParaAbonar] = useState<string | null>(null);
   
   const porPagina = 6;
   const history = useHistory();
@@ -132,6 +135,34 @@ const Pedidos: React.FC = () => {
       setAlertMsg("No se pudieron cargar los motivos de cancelación.");
       setShowAlert(true);
     }
+  };
+
+  // Función para iniciar el flujo de abono
+  const iniciarFlujoPago = (numeroPedido: string) => {
+    setPedidoParaAbonar(numeroPedido);
+    setShowConfirmAbono(true);
+  };
+
+  // Función para confirmar el abono
+  const confirmarAbono = async () => {
+    if (!pedidoParaAbonar) return;
+    
+    try {
+      await marcarPedidoComoAbonado(pedidoParaAbonar);
+      setShowConfirmAbono(false);
+      setShowAbonoExitoso(true);
+      cargarPedidos().then(setPedidos);
+    } catch (err) {
+      setShowConfirmAbono(false);
+      setAlertMsg("Error al marcar el pedido como abonado.");
+      setShowAlert(true);
+    }
+  };
+
+  // Función para limpiar el estado después del éxito
+  const limpiarEstadoAbono = () => {
+    setShowAbonoExitoso(false);
+    setPedidoParaAbonar(null);
   };
 
   return (
@@ -331,10 +362,7 @@ const Pedidos: React.FC = () => {
                                 <IonButton
                                   fill="outline"
                                   color="warning"
-                                  onClick={() => {
-                                    setPedidoParaAsignar(pedido.numeroPedido);
-                                    setShowConfirmAsignar(true);
-                                  }}
+                                  onClick={() => iniciarFlujoPago(pedido.numeroPedido)}
                                   className="abonar-btn"
                                 >
                                   <IonIcon icon={cash} slot="icon-only" />
@@ -499,69 +527,30 @@ const Pedidos: React.FC = () => {
         <IonAlert
           isOpen={showConfirmAsignar}
           onDidDismiss={() => setShowConfirmAsignar(false)}
-          header={(() => {
-            const estado = pedidos
-              .find((p) => p.numeroPedido === pedidoParaAsignar)
-              ?.EstadoPedido?.tipoEstado?.trim()
-              .toLowerCase();
-            if (estado === "pendiente de pago") return "Confirmar abono";
-            return "Confirmar asignación";
-          })()}
-          message={(() => {
-            const estado = pedidos
-              .find((p) => p.numeroPedido === pedidoParaAsignar)
-              ?.EstadoPedido?.tipoEstado?.trim()
-              .toLowerCase();
-            if (estado === "pendiente de pago")
-              return `¿El pedido '${pedidoParaAsignar}' fue abonado?`;
-            return `¿Asignar picker '${selectedPicker?.nombre}' al pedido ${pedidoParaAsignar}?`;
-          })()}
-          buttons={(() => {
-            const estado = pedidos
-              .find((p) => p.numeroPedido === pedidoParaAsignar)
-              ?.EstadoPedido?.tipoEstado?.trim()
-              .toLowerCase();
-            if (estado === "pendiente de pago") {
-              return [
-                {
-                  text: "Aceptar",
-                  handler: async () => {
-                    await handleConfirmAbonar(
-                      pedidoParaAsignar,
-                      setAlertMsg,
-                      setShowAlert,
-                      setShowConfirmAsignar,
-                      setPedidoParaAsignar,
-                      setPedidos
-                    );
-                    setShowConfirmAsignar(false);
-                  },
-                },
-              ];
-            }
-            return [
-              {
-                text: "Cancelar",
-                role: "cancel",
-                handler: () => setShowConfirmAsignar(false),
-              },
-              {
-                text: "Asignar",
-                handler: () =>
-                  asignarPicker(
-                    pedidoParaAsignar,
-                    selectedPicker,
-                    setAlertMsg,
-                    setShowAlert,
-                    setShowConfirmAsignar,
-                    setShowPickerDropdown,
-                    setSelectedPicker,
-                    setPedidoParaAsignar,
-                    setPedidos
-                  ),
-              },
-            ];
-          })()}
+          header="Confirmar asignación"
+          message={`¿Asignar picker '${selectedPicker?.nombre}' al pedido ${pedidoParaAsignar}?`}
+          buttons={[
+            {
+              text: "Cancelar",
+              role: "cancel",
+              handler: () => setShowConfirmAsignar(false),
+            },
+            {
+              text: "Asignar",
+              handler: () =>
+                asignarPicker(
+                  pedidoParaAsignar,
+                  selectedPicker,
+                  setAlertMsg,
+                  setShowAlert,
+                  setShowConfirmAsignar,
+                  setShowPickerDropdown,
+                  setSelectedPicker,
+                  setPedidoParaAsignar,
+                  setPedidos
+                ),
+            },
+          ]}
         />
         <IonAlert
           isOpen={showFinalizarConfirm}
@@ -715,6 +704,41 @@ const Pedidos: React.FC = () => {
                 setShowAuthError(false);
                 // Opcional: redirigir al dashboard o página principal
                 history.push("/dashboard");
+              },
+            },
+          ]}
+        />
+        {/* Alerta de Confirmación de Abono */}
+        <IonAlert
+          isOpen={showConfirmAbono}
+          onDidDismiss={() => setShowConfirmAbono(false)}
+          header="Confirmar Abono"
+          message={`¿Está seguro de que desea marcar como abonado el pedido '${pedidoParaAbonar}'?`}
+          buttons={[
+            {
+              text: "Cancelar",
+              role: "cancel",
+              handler: () => setShowConfirmAbono(false),
+            },
+            {
+              text: "Aceptar",
+              handler: () => {
+                confirmarAbono();
+              },
+            },
+          ]}
+        />
+        {/* Alerta de Éxito al Abonar */}
+        <IonAlert
+          isOpen={showAbonoExitoso}
+          onDidDismiss={limpiarEstadoAbono}
+          header="Éxito"
+          message="El pedido fue abonado correctamente."
+          buttons={[
+            {
+              text: "Aceptar",
+              handler: () => {
+                limpiarEstadoAbono();
               },
             },
           ]}

@@ -18,6 +18,7 @@ export interface Cliente {
   cp: string;
   telefono: string;
   email?: string;
+  estaActivo?: number; // 1 = activo, 0 = inactivo
 }
 
 interface ClientesContextType {
@@ -25,6 +26,8 @@ interface ClientesContextType {
   agregarCliente: (nuevoCliente: Omit<Cliente, "id">) => void;
   modificarCliente: (clienteActualizado: Cliente) => void;
   eliminarCliente: (id: number) => void;
+  darDeBajaCliente: (id: number) => void;
+  darDeAltaCliente: (id: number) => void;
 }
 
 const ClientesContext = createContext<ClientesContextType>({
@@ -32,6 +35,8 @@ const ClientesContext = createContext<ClientesContextType>({
   agregarCliente: () => {},
   modificarCliente: () => {},
   eliminarCliente: () => {},
+  darDeBajaCliente: () => {},
+  darDeAltaCliente: () => {},
 });
 
 export const ClientesProvider = ({ children }: { children: React.ReactNode }) => {
@@ -97,6 +102,36 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
+  const darDeBajaCliente = async (id: number) => {
+    try {
+      await axiosInstance.put(`/api/clientes/${id}/baja`);
+      // Actualizar el estado local
+      setClientes((prev) =>
+        prev.map((cliente) =>
+          cliente.id === id ? { ...cliente, estaActivo: 0 } : cliente
+        )
+      );
+    } catch (error) {
+      console.error("Error al dar de baja cliente:", error);
+      throw error;
+    }
+  };
+
+  const darDeAltaCliente = async (id: number) => {
+    try {
+      await axiosInstance.put(`/api/clientes/${id}/alta`);
+      // Actualizar el estado local
+      setClientes((prev) =>
+        prev.map((cliente) =>
+          cliente.id === id ? { ...cliente, estaActivo: 1 } : cliente
+        )
+      );
+    } catch (error) {
+      console.error("Error al dar de alta cliente:", error);
+      throw error;
+    }
+  };
+
   return (
     <ClientesContext.Provider
       value={{
@@ -104,6 +139,8 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
         agregarCliente,
         modificarCliente,
         eliminarCliente,
+        darDeBajaCliente,
+        darDeAltaCliente,
       }}
     >
       {children}

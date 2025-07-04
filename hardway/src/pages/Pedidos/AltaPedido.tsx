@@ -20,7 +20,7 @@ import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
 import axiosInstance from "../../config/axios";
 import "./AltaPedido.css";
 import zepelin from "../../assets/images/zepelin.png";
-import { useClientes } from "../../context/ClientesContext";
+import { useClientes, Cliente } from "../../context/ClientesContext";
 
 // --- Tipo para el pedido ---
 type PedidoInput = {
@@ -232,6 +232,15 @@ const AltaPedido: React.FC = () => {
       setShowAlert(true);
       return;
     }
+    
+    // Validar que el cliente esté activo
+    const validacion = validarClienteActivo(Number(form.idCliente));
+    if (!validacion.esValido) {
+      setAlertMsg(validacion.mensaje);
+      setShowAlert(true);
+      return;
+    }
+    
     if (prendasSeleccionadas.length === 0) {
       setAlertMsg("Debes agregar al menos un producto al pedido.");
       setShowAlert(true);
@@ -278,6 +287,38 @@ const AltaPedido: React.FC = () => {
       (c.numeroDocumento && c.numeroDocumento.toString().includes(filtroNorm))
     );
   });
+
+  // --- Validación de cliente activo ---
+  const validarClienteActivo = (clienteId: number) => {
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (!cliente) {
+      return { esValido: false, mensaje: "Cliente no encontrado" };
+    }
+    if (cliente.estaActivo === 0) {
+      return { 
+        esValido: false, 
+        mensaje: `El cliente ${cliente.nombre} ${cliente.apellido || ''} está dado de baja, no se le puede asignar un pedido.`.trim()
+      };
+    }
+    return { esValido: true, mensaje: "" };
+  };
+
+  // --- Función para seleccionar cliente ---
+  const seleccionarCliente = (cliente: Cliente) => {
+    const validacion = validarClienteActivo(cliente.id);
+    if (!validacion.esValido) {
+      setAlertMsg(validacion.mensaje);
+      setShowAlert(true);
+      return;
+    }
+    
+    setForm({
+      ...form,
+      idCliente: cliente.id.toString(),
+      clienteNombre: `${cliente.nombre} ${cliente.apellido || ""}`.trim(),
+    });
+    setShowClienteModal(false);
+  };
 
   return (
     <IonPage className="alta-pedido-page">
@@ -453,17 +494,22 @@ const AltaPedido: React.FC = () => {
                 <IonItem
                   key={c.id}
                   button
-                  onClick={() => {
-                    setForm({
-                      ...form,
-                      idCliente: c.id.toString(),
-                      clienteNombre: `${c.nombre} ${c.apellido || ""}`.trim(),
-                    });
-                    setShowClienteModal(false);
-                  }}
+                  onClick={() => seleccionarCliente(c)}
+                  className={c.estaActivo === 0 ? 'cliente-inactivo' : 'cliente-activo'}
                 >
                   <IonLabel>
-                    {`${c.nombre} ${c.apellido || ""}`} ({c.numeroDocumento})
+                    <div className="cliente-info">
+                      <div className="cliente-nombre">
+                        {`${c.nombre} ${c.apellido || ""}`} ({c.numeroDocumento})
+                      </div>
+                      <div className="cliente-estado">
+                        {c.estaActivo === 0 ? (
+                          <span className="estado-chip inactivo">Inactivo</span>
+                        ) : (
+                          <span className="estado-chip activo">Activo</span>
+                        )}
+                      </div>
+                    </div>
                   </IonLabel>
                 </IonItem>
               ))}

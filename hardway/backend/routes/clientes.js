@@ -65,6 +65,7 @@ router.get("/", async (req, res) => {
         ciudad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // Mantener ambos para compatibilidad
         cp: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Cambiado de codigoPostal a cp
         codigoPostal: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Mantener ambos para compatibilidad
+        estaActivo: c.estaActivo || 1, // Mapear el estado activo
       };
       
       
@@ -113,6 +114,7 @@ router.post("/", async (req, res) => {
       {
         email: req.body.email,
         telefono: req.body.telefono,
+        estaActivo: 1, // Cliente activo por defecto
         idPersona: persona.idPersona,
       },
       { transaction: t }
@@ -204,29 +206,115 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Eliminar cliente
+// Dar de baja a un cliente (cambiar estaActivo a 0)
+router.put("/:id/baja", async (req, res) => {
+  const { id } = req.params;
+  console.log(`🔄 Intentando dar de baja al cliente con ID: ${id}`);
+  
+  try {
+    // Primero verificamos si el cliente existe
+    const clienteExistente = await Cliente.findByPk(id);
+    if (!clienteExistente) {
+      console.log(`❌ Cliente con ID ${id} no encontrado`);
+      return res.status(404).json({ error: "Cliente no encontrado" });
+    }
+    
+    console.log(`✅ Cliente encontrado: ${clienteExistente.idCliente}, Estado actual: ${clienteExistente.estaActivo}`);
+    
+    const [updated] = await Cliente.update(
+      { estaActivo: 0 },
+      { where: { idCliente: id } }
+    );
+    
+    console.log(`📝 Filas actualizadas: ${updated}`);
+    
+    if (updated) {
+      console.log(`✅ Cliente ${id} dado de baja exitosamente`);
+      res.json({ 
+        success: true, 
+        message: "Cliente dado de baja exitosamente",
+        idCliente: id 
+      });
+    } else {
+      console.log(`❌ No se pudo actualizar el cliente ${id}`);
+      res.status(404).json({ error: "Cliente no encontrado" });
+    }
+  } catch (error) {
+    console.error("❌ Error al dar de baja cliente:", error);
+    res.status(500).json({ 
+      error: "Error al dar de baja cliente", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Dar de alta a un cliente (cambiar estaActivo a 1)
+router.put("/:id/alta", async (req, res) => {
+  const { id } = req.params;
+  console.log(`🔄 Intentando dar de alta al cliente con ID: ${id}`);
+  
+  try {
+    // Primero verificamos si el cliente existe
+    const clienteExistente = await Cliente.findByPk(id);
+    if (!clienteExistente) {
+      console.log(`❌ Cliente con ID ${id} no encontrado`);
+      return res.status(404).json({ error: "Cliente no encontrado" });
+    }
+    
+    console.log(`✅ Cliente encontrado: ${clienteExistente.idCliente}, Estado actual: ${clienteExistente.estaActivo}`);
+    
+    const [updated] = await Cliente.update(
+      { estaActivo: 1 },
+      { where: { idCliente: id } }
+    );
+    
+    console.log(`📝 Filas actualizadas: ${updated}`);
+    
+    if (updated) {
+      console.log(`✅ Cliente ${id} dado de alta exitosamente`);
+      res.json({ 
+        success: true, 
+        message: "Cliente dado de alta exitosamente",
+        idCliente: id 
+      });
+    } else {
+      console.log(`❌ No se pudo actualizar el cliente ${id}`);
+      res.status(404).json({ error: "Cliente no encontrado" });
+    }
+  } catch (error) {
+    console.error("❌ Error al dar de alta cliente:", error);
+    res.status(500).json({ 
+      error: "Error al dar de alta cliente", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Eliminar cliente (mantener por compatibilidad, pero ahora solo da de baja)
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    // Verifica si tiene pedidos asociados
-    const pedidos = await Pedido.findAll({ where: { idCliente: id } });
-    if (pedidos.length > 0) {
-      return res
-        .status(400)
-        .json({ error: "No se puede eliminar: cliente tiene pedidos asociados" });
-    }
+    // En lugar de eliminar físicamente, damos de baja al cliente
+    const [updated] = await Cliente.update(
+      { estaActivo: 0 },
+      { where: { idCliente: id } }
+    );
     
-    const deleted = await Cliente.destroy({ where: { idCliente: id } });
-    if (deleted) {
-      res.json({ success: true });
+    if (updated) {
+      res.json({ 
+        success: true, 
+        message: "Cliente dado de baja exitosamente (borrado lógico)",
+        idCliente: id 
+      });
     } else {
       res.status(404).json({ error: "Cliente no encontrado" });
     }
   } catch (error) {
-    console.error("Error al eliminar cliente:", error);
-    res
-      .status(500)
-      .json({ error: "Error al eliminar cliente", detalle: error.message });
+    console.error("Error al dar de baja cliente:", error);
+    res.status(500).json({ 
+      error: "Error al dar de baja cliente", 
+      detalle: error.message 
+    });
   }
 });
 

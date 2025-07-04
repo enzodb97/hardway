@@ -149,6 +149,53 @@
   padding: 16px;
 }
 
+/* Estilos para clientes en el modal */
+.cliente-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cliente-nombre {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.cliente-estado {
+  display: flex;
+  align-items: center;
+}
+
+.estado-chip {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.estado-chip.activo {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.estado-chip.inactivo {
+  background-color: #ffcdd2;
+  color: #c62828;
+}
+
+.cliente-inactivo {
+  opacity: 0.7;
+}
+
+.cliente-inactivo ion-label {
+  color: #666;
+}
+
+.cliente-activo {
+  opacity: 1;
+}
+
 .alta-pedido-content::part(scroll) {
   display: flex;
   justify-content: center;

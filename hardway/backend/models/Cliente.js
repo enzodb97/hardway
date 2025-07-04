@@ -11,6 +11,10 @@ const Cliente = sequelize.define(
     },
     email: DataTypes.STRING,
     telefono: DataTypes.STRING,
+    estaActivo: {
+      type: DataTypes.TINYINT,
+      defaultValue: 1,
+    },
     idPersona: DataTypes.INTEGER,
   },
   {
