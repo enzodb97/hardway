@@ -24,6 +24,7 @@ router.get("/tareas-admin", async (req, res) => {
   try {
     const [results] = await sequelize.query(`
       SELECT 
+        ap.idAsignacion,
         ap.numeroPedido,
         p.fechaPedido,
         CONCAT(per.nombre, ' ', COALESCE(per.apellido, '')) AS nombreCliente,
@@ -44,7 +45,7 @@ router.get("/tareas-admin", async (req, res) => {
       WHERE ap.completado = 0
         AND p.estaActivo = 1
       GROUP BY 
-        ap.numeroPedido, p.fechaPedido, per.nombre, per.apellido,
+        ap.idAsignacion, ap.numeroPedido, p.fechaPedido, per.nombre, per.apellido,
         c.email, c.telefono, ap.fechaAsignacion, ap.observaciones,
         ap.legajoPicker, p_picker.nombre, p_picker.apellido
       ORDER BY ap.fechaAsignacion ASC
@@ -88,6 +89,7 @@ router.get("/tareas", verificarAccesoPicking, async (req, res) => {
   try {
     const [results] = await sequelize.query(`
       SELECT 
+        ap.idAsignacion,
         ap.numeroPedido,
         p.fechaPedido,
         CONCAT(per.nombre, ' ', COALESCE(per.apellido, '')) AS nombreCliente,
@@ -105,7 +107,7 @@ router.get("/tareas", verificarAccesoPicking, async (req, res) => {
         AND ap.completado = 0
         AND p.estaActivo = 1
       GROUP BY 
-        ap.numeroPedido, p.fechaPedido, per.nombre, per.apellido,
+        ap.idAsignacion, ap.numeroPedido, p.fechaPedido, per.nombre, per.apellido,
         c.email, c.telefono, ap.fechaAsignacion, ap.observaciones
       ORDER BY ap.fechaAsignacion ASC
     `, { replacements: [legajoPicker] });
@@ -223,30 +225,96 @@ router.get("/tareas/:numeroPedido", verificarAccesoPicking, async (req, res) => 
 // Completar tarea de picking
 router.post("/tareas/:numeroPedido/completar", verificarAccesoPicking, async (req, res) => {
   const { numeroPedido } = req.params;
-  const { observaciones } = req.body;
-  // El legajo ya fue validado por el middleware y está en req.pickerAutenticado
-  const legajoPicker = req.pickerAutenticado.legajo;
+  const { observaciones, idAsignacion } = req.body;
+  
+  // Log para diagnóstico
+  console.log('📦 Cuerpo de la petición recibido:', JSON.stringify(req.body));
+  console.log('🔑 idAsignacion recibido:', idAsignacion, 'tipo:', typeof idAsignacion);
 
+  // Iniciar transacción
   const t = await sequelize.transaction();
+  
   try {
-    // Marcar la tarea como completada
-    await sequelize.query(`
-      UPDATE asignacion_picking 
-      SET completado = 1, fechaCompletado = NOW(), observaciones = ?
-      WHERE numeroPedido = ? AND legajoPicker = ? AND completado = 0
-    `, { 
-      replacements: [observaciones || 'Tarea completada', numeroPedido, legajoPicker],
-      transaction: t 
-    });
+    // Manejar caso especial para administradores
+    if (req.esAdmin) {
+      console.log('🔑 Usuario administrador completando tarea de picking');
+      
+      // Si es admin, necesitamos completar la tarea sin especificar legajo (usando idAsignacion)
+      // Asegurarnos de que idAsignacion sea un número válido
+      const idAsignacionNum = idAsignacion ? parseInt(idAsignacion, 10) : null;
+      console.log('🔍 idAsignacion recibido y convertido:', { 
+        original: idAsignacion, 
+        tipo: typeof idAsignacion, 
+        convertido: idAsignacionNum, 
+        tipoConvertido: typeof idAsignacionNum,
+        esValido: idAsignacionNum && !isNaN(idAsignacionNum)
+      });
+      
+      if (idAsignacionNum && !isNaN(idAsignacionNum)) {
+        // Buscar primero la asignación para obtener el legajo correcto
+        const [asignacionResults] = await sequelize.query(`
+          SELECT legajoPicker FROM asignacion_picking 
+          WHERE numeroPedido = ? AND idAsignacion = ? AND completado = 0
+        `, { 
+          replacements: [numeroPedido, idAsignacionNum],
+          transaction: t 
+        });
 
-    // Actualizar estado del pedido a "Listo para Envío" (estado 4)
+        if (asignacionResults.length === 0) {
+          throw new Error('No se encontró la asignación especificada o ya está completada');
+        }
+
+        // Marcar tarea específica como completada
+        await sequelize.query(`
+          UPDATE asignacion_picking 
+          SET completado = 1, fechaCompletado = NOW(), observaciones = ?
+          WHERE numeroPedido = ? AND idAsignacion = ? AND completado = 0
+        `, { 
+          replacements: [observaciones || 'Completada por administrador', numeroPedido, idAsignacionNum],
+          transaction: t 
+        });
+        
+        console.log(`✅ Admin completó tarea con ID ${idAsignacionNum} para pedido ${numeroPedido}`);
+      } else {
+        console.log('❌ Error: idAsignacion no válido:', idAsignacion, 'tipo:', typeof idAsignacion);
+        throw new Error('Como administrador, debe especificar idAsignacion válido para completar una tarea');
+      }
+    } else if (req.pickerAutenticado && req.pickerAutenticado.legajo) {
+      // Caso normal para pickers regulares
+      const legajoPicker = req.pickerAutenticado.legajo;
+      console.log(`🔑 Picker ${legajoPicker} completando tarea`);
+
+      // Marcar la tarea como completada
+      await sequelize.query(`
+        UPDATE asignacion_picking 
+        SET completado = 1, fechaCompletado = NOW(), observaciones = ?
+        WHERE numeroPedido = ? AND legajoPicker = ? AND completado = 0
+      `, { 
+        replacements: [observaciones || 'Tarea completada', numeroPedido, legajoPicker],
+        transaction: t 
+      });
+    } else {
+      // Caso de error: ni administrador con idAsignacion ni picker con legajo
+      throw new Error('No se pudo identificar el picker ni se proporcionó idAsignacion como administrador');
+    }
+
+    // Actualizar estado del pedido a "Pendiente de Pago" (estado 2)
+    // FLUJO CORRECTO según base de datos:
+    // 1. En curso -> 2. Pendiente de Pago -> 3. Abonado -> 4. Despachado -> 5. Finalizado -> 6. Cancelado
+    // Después de que el picker completa la recolección, el pedido debe pasar a "Pendiente de Pago" (idEstado=2)
+    console.log(`🔄 Actualizando estado del pedido ${numeroPedido} a Pendiente de Pago (idEstado=2)`);
+    
     await Pedido.update(
-      { idEstado: 4, fechaModificacion: new Date() },
+      { idEstado: 2, fechaModificacion: new Date() },
       { where: { numeroPedido }, transaction: t }
     );
 
     await t.commit();
-    res.json({ message: "Tarea de picking completada correctamente" });
+    res.json({ 
+      message: "Tarea de picking completada correctamente", 
+      estado: "Pendiente de Pago",
+      idEstado: 2
+    });
   } catch (error) {
     await t.rollback();
     console.error("Error al completar tarea:", error);

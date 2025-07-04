@@ -33,10 +33,19 @@ export const completarTareaPicking = async (
   numeroPedido: string
 ) => {
   try {
-    console.log('Completando tarea:', { idAsignacion, numeroPedido });
+    // Asegurarnos de que idAsignacion sea un número
+    const idAsignacionNum = Number(idAsignacion);
+    
+    console.log('Completando tarea:', { 
+      idAsignacion: idAsignacionNum, 
+      idAsignacionOriginal: idAsignacion,
+      tipoOriginal: typeof idAsignacion,
+      tipoConvertido: typeof idAsignacionNum,
+      numeroPedido 
+    });
     
     const res = await axiosInstance.post(`/api/picking/tareas/${numeroPedido}/completar`, {
-      idAsignacion,
+      idAsignacion: idAsignacionNum,
       observaciones: 'Tarea completada desde frontend'
     });
     

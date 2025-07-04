@@ -235,6 +235,14 @@ const verificarAccesoPicking = async (req, res, next) => {
         console.log('✅ Usuario administrador verificado, permitiendo acceso sin legajo de picker');
         // Crear un legajo especial para administradores
         req.esAdmin = true;  // Flag para indicar que es administrador
+        
+        // Establecer un objeto pickerAutenticado vacío para administradores
+        // para evitar errores de referencia nula
+        req.pickerAutenticado = {
+          esAdmin: true,
+          idPersona: usuario.idPersona || null
+        };
+        
         next();
         return;  // Importante: salir de la función aquí para evitar verificaciones adicionales
       }

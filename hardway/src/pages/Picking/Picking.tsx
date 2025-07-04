@@ -114,13 +114,22 @@ const Picking: React.FC = () => {
     numeroPedido: string
   ) => {
     try {
-      await completarTareaPicking(idAsignacion, numeroPedido);
-      setAlertMsg("Tarea completada y pedido actualizado");
+      console.log('Enviando completar tarea con idAsignacion:', idAsignacion, 'tipo:', typeof idAsignacion);
+      if (!idAsignacion && rol === "Administrador") {
+        console.error('Error: Se requiere idAsignacion para completar tarea como admin');
+        setAlertMsg("Error: Se requiere ID de asignación para completar tarea como administrador");
+        setShowAlert(true);
+        return;
+      }
+      
+      const resultado = await completarTareaPicking(idAsignacion, numeroPedido);
+      setAlertMsg(`Tarea completada. El pedido ahora está en estado "${resultado.estado || 'Pendiente de Pago'}"`);
       setShowAlert(true);
       cargarTareas();
       setShowPickingList(false);
     } catch (err) {
-      setAlertMsg("Error al completar tarea");
+      console.error('Error en handleCompletarTarea:', err);
+      setAlertMsg("Error al completar tarea. Verifica la consola para más detalles.");
       setShowAlert(true);
     }
   };
@@ -175,6 +184,8 @@ const Picking: React.FC = () => {
                         color="success"
                         className="picking-action-btn"
                         onClick={() => {
+                          console.log('Seleccionando tarea:', tarea);
+                          console.log('ID Asignación:', tarea.idAsignacion, 'tipo:', typeof tarea.idAsignacion);
                           setTareaSeleccionada(tarea);
                           setShowConfirm(true);
                         }}
@@ -265,11 +276,19 @@ const Picking: React.FC = () => {
             },
             {
               text: "Completar",
-              handler: () =>
-                handleCompletarTarea(
+              handler: () => {
+                console.log('Tarea seleccionada al completar:', tareaSeleccionada);
+                if (!tareaSeleccionada || !tareaSeleccionada.idAsignacion) {
+                  console.error('Error: No hay idAsignacion en la tarea seleccionada');
+                  setAlertMsg("Error: No se encontró ID de asignación para esta tarea");
+                  setShowAlert(true);
+                  return false;
+                }
+                return handleCompletarTarea(
                   tareaSeleccionada.idAsignacion,
                   tareaSeleccionada.numeroPedido
-                ),
+                );
+              },
             },
           ]}
         />
