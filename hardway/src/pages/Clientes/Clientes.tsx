@@ -6,9 +6,6 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  IonGrid,
-  IonRow,
-  IonCol,
   IonSearchbar,
   IonButton,
   IonIcon,
@@ -16,43 +13,94 @@ import {
   IonFab,
   IonFabButton,
   IonAlert,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonChip,
+  IonText,
+  IonSelect,
+  IonSelectOption,
+  IonItem,
+  IonLabel,
+  IonRefresher,
+  IonRefresherContent,
+  IonSkeletonText,
 } from "@ionic/react";
-import { add, pencil, trash, print } from "ionicons/icons";
+import { 
+  add, 
+  pencil, 
+  trash, 
+  print, 
+  person, 
+  call, 
+  mail, 
+  location, 
+  document,
+  funnel,
+  grid,
+  list
+} from "ionicons/icons";
 import { useState } from "react";
 import { useClientes } from "../../context/ClientesContext";
 import "./Clientes.css";
+import { exportarClientesPDF } from "../../utils/clientesUtils";
 
 const Clientes: React.FC = () => {
   const { clientes, eliminarCliente } = useClientes();
   const [busqueda, setBusqueda] = useState("");
-  const [mostrarListado, setMostrarListado] = useState(false);
+  const [vistaGrid, setVistaGrid] = useState(true);
+  const [filtroLocalidad, setFiltroLocalidad] = useState("");
+  const [filtroDocumento, setFiltroDocumento] = useState("");
+  const [cargando, setCargando] = useState(false);
 
-  // NUEVO: Estados para alertas
+  // Estados para alertas
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
-  const [showConfirm, setShowConfirm] = useState(false); // NUEVO
-  const [clienteAEliminar, setClienteAEliminar] = useState<number | null>(null); // NUEVO
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [clienteAEliminar, setClienteAEliminar] = useState<number | null>(null);
 
-  const clientesFiltrados = clientes.filter(
-    (cliente) =>
+  // Obtener localidades únicas para el filtro
+  const localidadesUnicas = [...new Set(clientes.map(c => c.localidad).filter(Boolean))];
+
+  const clientesFiltrados = clientes.filter((cliente) => {
+    const cumpleBusqueda = 
       (cliente.nombre?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
+      (cliente.apellido?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
       (cliente.email?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
-      (cliente.numeroDocumento || "").includes(busqueda)
-  );
+      (cliente.numeroDocumento || "").includes(busqueda) ||
+      (cliente.telefono || "").includes(busqueda);
+    
+    const cumpleLocalidad = !filtroLocalidad || cliente.localidad === filtroLocalidad;
+    const cumpleDocumento = !filtroDocumento || cliente.tipoDocumento === filtroDocumento;
+    
+    return cumpleBusqueda && cumpleLocalidad && cumpleDocumento;
+  });
 
   const totalClientes = clientes.length;
 
-  // NUEVO: Mostrar IonAlert de confirmación
+  // Manejo de refresh
+  const doRefresh = (event: CustomEvent) => {
+    setCargando(true);
+    setTimeout(() => {
+      setCargando(false);
+      event.detail.complete();
+    }, 1000);
+  };
+
+  // Confirmación de eliminación
   const pedirConfirmacionEliminar = (id: number) => {
     setClienteAEliminar(id);
     setShowConfirm(true);
   };
 
-  // Modifica handleEliminar para usar el IonAlert
+  // Eliminar cliente
   const handleEliminar = async () => {
     if (clienteAEliminar === null) return;
     try {
       await eliminarCliente(clienteAEliminar);
+      setAlertMsg("Cliente eliminado correctamente");
+      setShowAlert(true);
     } catch (error: any) {
       const backendMsg =
         error.response?.data?.error || error.response?.data?.detalle || "";
@@ -62,10 +110,10 @@ const Clientes: React.FC = () => {
         error.response.status === 400 &&
         backendMsg.includes("No se puede eliminar el cliente")
       ) {
-        setAlertMsg("Error al eliminar el cliente, tiene pedidos.");
+        setAlertMsg("No se puede eliminar el cliente, tiene pedidos asociados.");
         setShowAlert(true);
       } else {
-        setAlertMsg("Error al eliminar al cliente, tiene pedidos.");
+        setAlertMsg("Error al eliminar el cliente, tiene pedidos asociados.");
         setShowAlert(true);
       }
     } finally {
@@ -74,12 +122,130 @@ const Clientes: React.FC = () => {
     }
   };
 
-  const handleImprimir = () => {
-    setMostrarListado(true);
-    setTimeout(() => {
-      window.print();
-    }, 100);
+  // Limpiar filtros
+  const limpiarFiltros = () => {
+    setBusqueda("");
+    setFiltroLocalidad("");
+    setFiltroDocumento("");
   };
+
+
+
+
+  // Render de vista en tarjetas
+  const renderVistaCards = () => (
+    <div className="clients-grid">
+      {clientesFiltrados.map((cliente) => (
+        <IonCard key={cliente.id} className="client-card">
+          <IonCardHeader>
+            <div className="card-header-content">
+              <div className="client-avatar">
+                <IonIcon icon={person} />
+              </div>
+              <div className="client-main-info">
+                <IonCardTitle className="client-name">{`${cliente.nombre} ${cliente.apellido}`}</IonCardTitle>
+                <IonChip color="primary" className="doc-chip">
+                  <IonIcon icon={document} />
+                  <IonLabel>{cliente.tipoDocumento}: {cliente.numeroDocumento}</IonLabel>
+                </IonChip>
+              </div>
+            </div>
+          </IonCardHeader>
+          
+          <IonCardContent>
+            <div className="client-details">
+              {cliente.telefono && (
+                <div className="detail-item">
+                  <IonIcon icon={call} color="primary" />
+                  <span>{cliente.telefono}</span>
+                </div>
+              )}
+              
+              {cliente.email && (
+                <div className="detail-item">
+                  <IonIcon icon={mail} color="primary" />
+                  <span>{cliente.email}</span>
+                </div>
+              )}
+              
+              {(cliente.localidad || cliente.barrio) && (
+                <div className="detail-item">
+                  <IonIcon icon={location} color="primary" />
+                  <span>
+                    {cliente.localidad}
+                    {cliente.barrio && ` - ${cliente.barrio}`}
+                    {cliente.cp && ` (CP: ${cliente.cp})`}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            <div className="card-actions">
+              <IonButton
+                fill="clear"
+                size="small"
+                routerLink={`/alta-cliente/${cliente.id}`}
+                className="edit-action"
+              >
+                <IonIcon icon={pencil} slot="start" />
+                Editar
+              </IonButton>
+              <IonButton
+                fill="clear"
+                size="small"
+                color="danger"
+                onClick={() => pedirConfirmacionEliminar(cliente.id)}
+                className="delete-action"
+              >
+                <IonIcon icon={trash} slot="start" />
+                Eliminar
+              </IonButton>
+            </div>
+          </IonCardContent>
+        </IonCard>
+      ))}
+    </div>
+  );
+
+  // Render de vista en lista compacta
+  const renderVistaLista = () => (
+    <div className="clients-list">
+      {clientesFiltrados.map((cliente) => (
+        <div key={cliente.id} className="client-list-item">
+          <div className="list-item-content">
+            <div className="client-basic-info">
+              <h3 className="client-name-list">{`${cliente.nombre} ${cliente.apellido}`}</h3>
+              <p className="client-doc-list">{cliente.tipoDocumento}: {cliente.numeroDocumento}</p>
+            </div>
+            <div className="client-contact-info">
+              <span className="phone-info">{cliente.telefono}</span>
+              <span className="location-info">
+                {cliente.localidad}
+                {cliente.cp && ` (CP: ${cliente.cp})`}
+              </span>
+            </div>
+          </div>
+          <div className="list-item-actions">
+            <IonButton
+              fill="clear"
+              size="small"
+              routerLink={`/alta-cliente/${cliente.id}`}
+            >
+              <IonIcon icon={pencil} />
+            </IonButton>
+            <IonButton
+              fill="clear"
+              size="small"
+              color="danger"
+              onClick={() => pedirConfirmacionEliminar(cliente.id)}
+            >
+              <IonIcon icon={trash} />
+            </IonButton>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <IonPage className="clientes-page">
@@ -88,7 +254,7 @@ const Clientes: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>Lista de Clientes</IonTitle>
+          <IonTitle>Clientes</IonTitle>
           <IonButtons slot="end">
             <IonButton routerLink="/alta-cliente" routerDirection="forward">
               <IonIcon slot="icon-only" icon={add} />
@@ -98,107 +264,163 @@ const Clientes: React.FC = () => {
       </IonHeader>
 
       <IonContent className="clientes-content">
-        <div className="clientes-container">
-          <div className="controls-section">
-            <IonButton
-              color="tertiary"
-              onClick={() => setMostrarListado(!mostrarListado)}
-              className="toggle-list-btn force-orange"
-            >
-              {mostrarListado ? "Ocultar listado" : "Mostrar listado"}
-            </IonButton>
+        <IonRefresher slot="fixed" onIonRefresh={doRefresh}>
+          <IonRefresherContent />
+        </IonRefresher>
 
-            <IonBadge color="primary" className="total-badge">
-              Registrados: {totalClientes}
-            </IonBadge>
+        <div className="clientes-container">
+          {/* Header con estadísticas y controles */}
+          <div className="header-section">
+            <div className="stats-section">
+              <IonBadge color="primary" className="total-badge">
+                Total: {totalClientes}
+              </IonBadge>
+              <IonBadge color="secondary" className="filtered-badge">
+                Mostrando: {clientesFiltrados.length}
+              </IonBadge>
+            </div>
+            
+            <div className="view-controls">
+              <IonButton
+                fill={vistaGrid ? "solid" : "outline"}
+                size="small"
+                onClick={() => setVistaGrid(true)}
+                className="view-btn"
+              >
+                <IonIcon icon={grid} />
+              </IonButton>
+              <IonButton
+                fill={!vistaGrid ? "solid" : "outline"}
+                size="small"
+                onClick={() => setVistaGrid(false)}
+                className="view-btn"
+              >
+                <IonIcon icon={list} />
+              </IonButton>
+            </div>
           </div>
 
+          {/* Barra de búsqueda */}
           <IonSearchbar
             className="clientes-search"
             value={busqueda}
             onIonChange={(e) => setBusqueda(e.detail.value!)}
-            placeholder="Buscar clientes..."
+            placeholder="Buscar por nombre, documento, teléfono o email..."
+            showClearButton="focus"
           />
 
-          {mostrarListado && (
-            <IonGrid className="clientes-table">
-              <div className="print-title">
-                <h2>Listado de Clientes</h2>
-                <p>Fecha: {new Date().toLocaleDateString()}</p>
+          {/* Filtros */}
+          <div className="filters-section">
+            <IonItem className="filter-item">
+              <IonIcon icon={funnel} slot="start" color="medium" />
+              <IonSelect
+                value={filtroLocalidad}
+                placeholder="Todas las localidades"
+                onIonChange={(e) => setFiltroLocalidad(e.detail.value)}
+                interface="popover"
+              >
+                <IonSelectOption value="">Todas las localidades</IonSelectOption>
+                {localidadesUnicas.map((localidad) => (
+                  <IonSelectOption key={localidad} value={localidad}>
+                    {localidad}
+                  </IonSelectOption>
+                ))}
+              </IonSelect>
+            </IonItem>
+
+            <IonItem className="filter-item">
+              <IonSelect
+                value={filtroDocumento}
+                placeholder="Tipo de documento"
+                onIonChange={(e) => setFiltroDocumento(e.detail.value)}
+                interface="popover"
+              >
+                <IonSelectOption value="">Todos los documentos</IonSelectOption>
+                <IonSelectOption value="DNI">DNI</IonSelectOption>
+                <IonSelectOption value="CUIL">CUIL</IonSelectOption>
+                <IonSelectOption value="CUIT">CUIT</IonSelectOption>
+              </IonSelect>
+            </IonItem>
+
+            <div className="filter-actions">
+              {(busqueda || filtroLocalidad || filtroDocumento) && (
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  onClick={limpiarFiltros}
+                  className="clear-filters-btn"
+                >
+                  Limpiar filtros
+                </IonButton>
+              )}
+              
+              {clientesFiltrados.length > 0 && (
+                <IonButton
+                  fill="solid"
+                  size="small"
+                  onClick={() => exportarClientesPDF(clientesFiltrados)}
+                  className="export-pdf-btn"
+                >
+                  <IonIcon icon={print} slot="start" />
+                  Exportar a PDF
+                </IonButton>
+              )}
+            </div>
+          </div>
+
+          {/* Contenido principal */}
+          <div className="content-section">
+            {cargando ? (
+              <div className="skeleton-container">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <IonCard key={index}>
+                    <IonCardHeader>
+                      <IonSkeletonText animated style={{ width: '60%' }} />
+                    </IonCardHeader>
+                    <IonCardContent>
+                      <IonSkeletonText animated style={{ width: '80%' }} />
+                      <IonSkeletonText animated style={{ width: '40%' }} />
+                    </IonCardContent>
+                  </IonCard>
+                ))}
               </div>
+            ) : clientesFiltrados.length === 0 ? (
+              <div className="empty-state">
+                <IonIcon icon={person} className="empty-icon" />
+                <h2>No hay clientes</h2>
+                <p>
+                  {clientes.length === 0
+                    ? "Aún no has registrado ningún cliente"
+                    : "No se encontraron clientes con los filtros aplicados"}
+                </p>
+                <IonButton routerLink="/alta-cliente" className="add-first-btn">
+                  <IonIcon icon={add} slot="start" />
+                  Agregar primer cliente
+                </IonButton>
+              </div>
+            ) : (
+              vistaGrid ? renderVistaCards() : renderVistaLista()
+            )}
+          </div>
 
-              <IonRow className="table-header">
-                <IonCol className="text-center">
-                  <strong>ID</strong>
-                </IonCol>
-                <IonCol className="text-center">
-                  <strong>Nombre</strong>
-                </IonCol>
-                <IonCol className="text-center">
-                  <strong>Documento</strong>
-                </IonCol>
-                <IonCol className="text-center">
-                  <strong>Teléfono</strong>
-                </IonCol>
-                <IonCol className="text-center">
-                  <strong>Localidad</strong>
-                </IonCol>
-                <IonCol className="text-center">
-                  <strong>Email</strong>
-                </IonCol>
-                <IonCol className="text-center">
-                  <strong>Barrio</strong>
-                </IonCol>
-                <IonCol className="print-hide text-center">
-                  <strong>Acciones</strong>
-                </IonCol>
-              </IonRow>
-
-              {clientesFiltrados.map((cliente) => (
-                <IonRow key={cliente.id} className="table-row">
-                  <IonCol className="text-center">{cliente.id}</IonCol>
-                  <IonCol className="text-center">{cliente.nombre}</IonCol>
-                  <IonCol className="text-center">{`${cliente.tipoDocumento}: ${cliente.numeroDocumento}`}</IonCol>
-                  <IonCol className="text-center">{cliente.telefono}</IonCol>
-                  <IonCol className="text-center">{cliente.localidad}</IonCol>
-                  <IonCol className="text-center">
-                    {cliente.email || "-"}
-                  </IonCol>
-                  <IonCol className="text-center">{cliente.barrio}</IonCol>
-                  <IonCol className="print-hide text-center">
-                    <div className="action-buttons">
-                      <IonButton
-                        fill="clear"
-                        routerLink={`/alta-cliente/${cliente.id}`}
-                        className="edit-btn"
-                      >
-                        <IonIcon icon={pencil} color="primary" />
-                      </IonButton>
-                      <IonButton
-                        fill="clear"
-                        onClick={() => pedirConfirmacionEliminar(cliente.id)}
-                        className="delete-btn"
-                      >
-                        <IonIcon icon={trash} color="danger" />
-                      </IonButton>
-                    </div>
-                  </IonCol>
-                </IonRow>
-              ))}
-            </IonGrid>
-          )}
-
-          <IonFab vertical="bottom" horizontal="end" slot="fixed">
-            <IonFabButton className="print-btn" onClick={handleImprimir}>
+          {/* FAB para exportar a PDF */}
+          {/*<IonFab vertical="bottom" horizontal="end" slot="fixed">
+            <IonFabButton 
+              className="print-btn" 
+              onClick={() => clientesFiltrados.length > 0 && exportarClientesPDF(clientesFiltrados)}
+              disabled={clientesFiltrados.length === 0}
+              title="Exportar listado de clientes a PDF"
+            >
               <IonIcon icon={print} />
             </IonFabButton>
-          </IonFab>
+          </IonFab>*/}
 
+          {/* Alertas */}
           <IonAlert
             isOpen={showConfirm}
             onDidDismiss={() => setShowConfirm(false)}
             header="Confirmar eliminación"
-            message="¿Está seguro que desea eliminar este cliente?"
+            message="¿Está seguro que desea eliminar este cliente? Esta acción no se puede deshacer."
             buttons={[
               {
                 text: "Cancelar",
@@ -212,6 +434,7 @@ const Clientes: React.FC = () => {
               },
             ]}
           />
+          
           <IonAlert
             isOpen={showAlert}
             onDidDismiss={() => setShowAlert(false)}

@@ -45,26 +45,31 @@ router.get("/", async (req, res) => {
     });
 
     // Formatea la respuesta para el frontend
-    const clientesFormateados = clientes.map((c) => ({
-      id: c.idCliente,
-      email: c.email || "",
-      telefono: c.telefono || "",
-      tipoDocumento: "DNI", // Tipo de documento por defecto
-      numeroDocumento: String(c.Persona?.dni || ""), // Convertir a string
-      nombre: (c.Persona?.nombre || "").trim(), // Eliminar espacios extra
-      apellido: (c.Persona?.apellido || "").trim(),
-      domicilio: c.Persona?.direccion || "",
-      calle: c.Persona?.Domicilio?.calle || "",
-      altura: c.Persona?.Domicilio?.altura || "",
-      piso: c.Persona?.Domicilio?.piso || "",
-      numeroDepartamento: c.Persona?.Domicilio?.departamento || "",
-      observaciones: c.Persona?.Domicilio?.observaciones || "",
-      barrio: c.Persona?.Domicilio?.Barrio?.nombreBarrio || "",
-      localidad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // Cambiado de ciudad a localidad
-      ciudad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // Mantener ambos para compatibilidad
-      cp: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Cambiado de codigoPostal a cp
-      codigoPostal: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Mantener ambos para compatibilidad
-    }));
+    const clientesFormateados = clientes.map((c) => {
+      const clienteFormateado = {
+        id: c.idCliente,
+        email: c.email || "",
+        telefono: c.telefono || "",
+        tipoDocumento: "DNI", // Tipo de documento por defecto
+        numeroDocumento: String(c.Persona?.dni || ""), // Convertir a string
+        nombre: (c.Persona?.nombre || "").trim(), // Eliminar espacios extra
+        apellido: (c.Persona?.apellido || "").trim(),
+        domicilio: c.Persona?.direccion || "",
+        calle: c.Persona?.Domicilio?.calle || "",
+        altura: c.Persona?.Domicilio?.altura || "",
+        piso: c.Persona?.Domicilio?.piso || "",
+        numeroDepartamento: c.Persona?.Domicilio?.departamento || "",
+        observaciones: c.Persona?.Domicilio?.observaciones || "",
+        barrio: c.Persona?.Domicilio?.Barrio?.nombreBarrio || "",
+        localidad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // Cambiado de ciudad a localidad
+        ciudad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // Mantener ambos para compatibilidad
+        cp: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Cambiado de codigoPostal a cp
+        codigoPostal: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Mantener ambos para compatibilidad
+      };
+      
+      
+      return clienteFormateado;
+    });
 
     res.json(clientesFormateados);
   } catch (error) {

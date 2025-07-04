@@ -36,6 +36,7 @@ const AltaCliente: React.FC = () => {
     tipoDocumento: "DNI",
     numeroDocumento: "",
     nombre: "",
+    apellido: "",
     domicilio: "",
     calle: "",
     altura: "",
@@ -133,6 +134,7 @@ const AltaCliente: React.FC = () => {
           tipoDocumento: formData.tipoDocumento ?? "",
           numeroDocumento: formData.numeroDocumento ?? "",
           nombre: formData.nombre ?? "",
+          apellido: formData.apellido ?? "",
           domicilio: formData.domicilio ?? "",
           calle: formData.calle ?? "",
           altura: formData.altura ?? "",
@@ -186,14 +188,18 @@ const AltaCliente: React.FC = () => {
               <span>ID Cliente: {formData.id}</span>
             </div>
           )}
-          <div className="two-column-grid">
-            {/* Columna Izquierda */}
-            <div className="form-column">
-              <div className="form-section">
-                {/* Solo muestra ID en modo edición */}
-
+          {/* Sección: Datos Personales */}
+          <div className="form-section">
+            <h3 className="section-title">
+              <span className="section-icon">👤</span>
+              Datos Personales
+            </h3>
+            <div className="two-column-grid">
+              <div className="form-column">
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Tipo Documento </IonLabel>
+                  <IonLabel position="floating">
+                    Tipo Documento <span className="required">*</span>
+                  </IonLabel>
                   <IonSelect
                     value={formData.tipoDocumento}
                     onIonChange={(e) =>
@@ -209,9 +215,10 @@ const AltaCliente: React.FC = () => {
                   </IonSelect>
                 </IonItem>
 
-                {/* N° Documento */}
                 <IonItem className="form-item">
-                  <IonLabel position="floating">N° Documento</IonLabel>
+                  <IonLabel position="floating">
+                    N° Documento <span className="required">*</span>
+                  </IonLabel>
                   <IonInput
                     required
                     type="number"
@@ -231,9 +238,13 @@ const AltaCliente: React.FC = () => {
                     }
                   />
                 </IonItem>
+              </div>
 
+              <div className="form-column">
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Nombre y Apellido</IonLabel>
+                  <IonLabel position="floating">
+                    Nombre <span className="required">*</span>
+                  </IonLabel>
                   <IonInput
                     type="text"
                     required
@@ -251,7 +262,38 @@ const AltaCliente: React.FC = () => {
                 </IonItem>
 
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Localidad </IonLabel>
+                  <IonLabel position="floating">
+                    Apellido <span className="required">*</span>
+                  </IonLabel>
+                  <IonInput
+                    type="text"
+                    required
+                    value={formData.apellido}
+                    onIonChange={(e) =>
+                      setFormData({ ...formData, apellido: e.detail.value! })
+                    }
+                    placeholder={
+                      esEdicion && !formData.apellido ? "Dato obligatorio." : ""
+                    }
+                    className={
+                      esEdicion && !formData.apellido ? "input-obligatorio" : ""
+                    }
+                  />
+                </IonItem>
+              </div>
+            </div>
+          </div>
+
+          {/* Sección: Domicilio */}
+          <div className="form-section">
+            <h3 className="section-title">
+              <span className="section-icon">🏠</span>
+              Domicilio
+            </h3>
+            <div className="two-column-grid">
+              <div className="form-column">
+                <IonItem className="form-item">
+                  <IonLabel position="floating">Localidad</IonLabel>
                   <IonInput
                     value={formData.localidad}
                     onIonChange={(e) =>
@@ -261,7 +303,9 @@ const AltaCliente: React.FC = () => {
                 </IonItem>
 
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Barrio</IonLabel>
+                  <IonLabel position="floating">
+                    Barrio <span className="required">*</span>
+                  </IonLabel>
                   <IonInput
                     required
                     value={formData.barrio}
@@ -282,35 +326,7 @@ const AltaCliente: React.FC = () => {
                 </IonItem>
 
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Piso</IonLabel>
-                  <IonInput
-                    value={formData.piso}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, piso: e.detail.value! })
-                    }
-                  />
-                </IonItem>
-              </div>
-            </div>
-
-            {/* Columna Derecha */}
-            <div className="form-column">
-              <div className="form-section">
-                <IonItem className="form-item">
-                  <IonLabel position="floating">Observaciones</IonLabel>
-                  <IonInput
-                    value={formData.observaciones}
-                    onIonChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        observaciones: e.detail.value!,
-                      })
-                    }
-                  />
-                </IonItem>
-
-                <IonItem className="form-item">
-                  <IonLabel position="floating">Domicilio</IonLabel>
+                  <IonLabel position="floating">Domicilio (Alternativo)</IonLabel>
                   <IonInput
                     value={formData.domicilio}
                     onIonChange={(e) =>
@@ -318,7 +334,9 @@ const AltaCliente: React.FC = () => {
                     }
                   />
                 </IonItem>
+              </div>
 
+              <div className="form-column">
                 <IonItem className="form-item">
                   <IonLabel position="floating">Altura</IonLabel>
                   <IonInput
@@ -328,6 +346,16 @@ const AltaCliente: React.FC = () => {
                     value={formData.altura}
                     onIonChange={(e) =>
                       setFormData({ ...formData, altura: e.detail.value! })
+                    }
+                  />
+                </IonItem>
+
+                <IonItem className="form-item">
+                  <IonLabel position="floating">Piso</IonLabel>
+                  <IonInput
+                    value={formData.piso}
+                    onIonChange={(e) =>
+                      setFormData({ ...formData, piso: e.detail.value! })
                     }
                   />
                 </IonItem>
@@ -346,18 +374,32 @@ const AltaCliente: React.FC = () => {
                 </IonItem>
 
                 <IonItem className="form-item">
-                  <IonLabel position="floating">CP </IonLabel>
+                  <IonLabel position="floating">Código Postal</IonLabel>
                   <IonInput
-                    type="number"
+                    type="text"
                     value={formData.cp}
                     onIonChange={(e) =>
                       setFormData({ ...formData, cp: e.detail.value! })
                     }
+                    placeholder="Ej: C1000, X5000, 1234"
                   />
                 </IonItem>
+              </div>
+            </div>
+          </div>
 
+          {/* Sección: Contacto */}
+          <div className="form-section">
+            <h3 className="section-title">
+              <span className="section-icon">📞</span>
+              Información de Contacto
+            </h3>
+            <div className="two-column-grid">
+              <div className="form-column">
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Teléfono </IonLabel>
+                  <IonLabel position="floating">
+                    Teléfono <span className="required">*</span>
+                  </IonLabel>
                   <IonInput
                     required
                     type="number"
@@ -367,7 +409,9 @@ const AltaCliente: React.FC = () => {
                     onIonChange={handleTelefonoChange}
                   />
                 </IonItem>
+              </div>
 
+              <div className="form-column">
                 <IonItem className="form-item">
                   <IonLabel position="floating">Email</IonLabel>
                   <IonInput
@@ -380,6 +424,26 @@ const AltaCliente: React.FC = () => {
                 </IonItem>
               </div>
             </div>
+          </div>
+
+          {/* Sección: Observaciones */}
+          <div className="form-section">
+            <h3 className="section-title">
+              <span className="section-icon">📝</span>
+              Observaciones Adicionales
+            </h3>
+            <IonItem className="form-item full-width">
+              <IonLabel position="floating">Observaciones</IonLabel>
+              <IonInput
+                value={formData.observaciones}
+                onIonChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    observaciones: e.detail.value!,
+                  })
+                }
+              />
+            </IonItem>
           </div>
 
           <IonButton expand="block" type="submit" className="guardar-btn">

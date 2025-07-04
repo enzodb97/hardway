@@ -9,7 +9,8 @@
   --padding-top: 15px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  min-height: 100vh;
 }
 
 .encb {
@@ -23,42 +24,92 @@
 .alta-cliente-form {
   background: white !important;
   width: 100%;
-  max-width: 700px !important; /* Antes 1200px, ahora más chico */
+  max-width: 800px !important;
   border-radius: 20px;
-  padding: 20px;
+  padding: 25px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 0 auto; /* Centrado horizontal */
-  box-sizing: border-box; /* Previene desbordes */
+  margin: 20px auto;
+  box-sizing: border-box;
   height: auto;
-  margin-top: auto; /* O 64px según el alto de tu header */
+  overflow: visible;
+}
+
+/* Secciones del Formulario */
+.form-section {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #fafbfc;
+  border-radius: 12px;
+  overflow: visible;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 20px 0;
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #2d3436;
+  gap: 10px;
+}
+
+.section-icon {
+  font-size: 1.3em;
+  color: #fdb40b;
+}
+
+/* Campos Obligatorios */
+.required {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+/* Item de ancho completo */
+.full-width {
+  grid-column: 1 / -1;
 }
 
 /* Grid de Columnas */
 .two-column-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px; /* Menor separación */
-  margin: 20px 0;
+  gap: 15px;
+  margin: 0;
+  width: 100%;
 }
 
 /* Items del Formulario */
 .alta-cliente-form ion-item {
-  --min-height: 75px;
-  height: 100%;
+  --min-height: 55px;
+  height: auto;
   --padding-start: 15px;
   --padding-end: 15px;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  margin-bottom: 25px;
-  --background: #f8f9fa;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  margin-bottom: 12px;
+  --background: #ffffff;
   --border-radius: 8px;
   width: 100%;
+  border: 1px solid #e1e8ed;
+  transition: all 0.2s ease;
+  overflow: visible;
+}
+
+.alta-cliente-form ion-item:hover {
+  --background: #f8f9fa;
+  border-color: #fdb40b;
+}
+
+.alta-cliente-form ion-item.item-has-focus {
+  border-color: #fdb40b;
+  box-shadow: 0 0 0 2px rgba(253, 180, 11, 0.2);
 }
 
 /* Estilos Unificados para Inputs y Selects */
 .alta-cliente-form ion-input,
 .alta-cliente-form ion-select {
-  min-height: 64px;
+  min-height: 50px;
   display: flex;
   align-items: center;
 }
@@ -85,11 +136,21 @@
   --background: #fdb40b !important;
   --color: #2d3436 !important;
   --background-activated: #ffd358 !important;
-  margin: 25px auto 0;
-  width: 70%;
+  --background-hover: #ffc732 !important;
+  margin: 25px auto 20px;
+  width: 60%;
+  max-width: 300px;
   min-height: 50px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-size: 1.1em;
+  box-shadow: 0 4px 8px rgba(253, 180, 11, 0.3);
+  transition: all 0.3s ease;
+}
+
+.guardar-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(253, 180, 11, 0.4);
 }
 
 /* Subformulario Domicilio */
@@ -117,14 +178,56 @@
 }
 
 /* Responsive Design */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .alta-cliente-form {
-    max-width: 98vw !important;
-    padding: 10px;
+    max-width: 95vw !important;
+    padding: 20px;
+    margin: 10px auto;
   }
+  
+  .form-section {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .section-title {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+  }
+  
   .two-column-grid {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+  
+  .alta-cliente-form ion-item {
+    margin-bottom: 10px;
+    --min-height: 50px;
+  }
+}
+
+@media (max-width: 600px) {
+  .encb {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .form-title {
+    font-size: 1.3em;
+    text-align: center;
+  }
+  
+  .brand-logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .alta-cliente-form {
+    padding: 15px;
+  }
+  
+  .form-section {
+    padding: 12px;
   }
 }
 
@@ -139,4 +242,37 @@
   opacity: 1 !important;
   font-size: 0.95em;
   font-weight: 500;
+}
+
+/* Mejoras adicionales para campos obligatorios */
+.input-obligatorio {
+  --border-color: #e67e22 !important;
+  --color: #e67e22 !important;
+}
+
+/* Estilo para labels con asterisco */
+ion-label .required {
+  color: #e74c3c;
+  font-size: 1.2em;
+}
+
+/* Animación suave para transiciones */
+.alta-cliente-form ion-item,
+.form-section,
+.guardar-btn {
+  transition: all 0.3s ease;
+}
+
+/* Mejora visual para el header del formulario */
+.form-title {
+  color: #2d3436;
+  font-weight: 700;
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.brand-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }

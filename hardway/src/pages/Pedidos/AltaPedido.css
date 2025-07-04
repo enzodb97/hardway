@@ -29,6 +29,82 @@
   flex-wrap: wrap;
 }
 
+/* Estilos para prendas seleccionadas */
+.prendas-seleccionadas {
+  margin: 15px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prenda-item {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  margin-bottom: 8px;
+  border-left: 3px solid #feaf00;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.prenda-info {
+  flex: 1;
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.prenda-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prenda-title small {
+  color: #666;
+  font-weight: normal;
+  font-size: 12px;
+}
+
+.prenda-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.detail-tag {
+  background-color: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #333;
+}
+
+.detail-tag.color {
+  background-color: #ffe0b2;
+}
+
+.detail-tag.talle {
+  background-color: #c8e6c9;
+}
+
+.detail-tag.tela {
+  background-color: #bbdefb;
+}
+
+.detail-tag.cantidad {
+  background-color: #e1bee7;
+  font-weight: bold;
+}
+
+.prenda-actions {
+  display: flex;
+  gap: 5px;
+}
+
 .alta-pedido-form ion-title {
   font-size: 24px;
   font-weight: bold;

@@ -6,6 +6,7 @@ export interface Cliente {
   tipoDocumento: string;
   numeroDocumento: string;
   nombre: string;
+  apellido: string;
   domicilio: string;
   calle: string;
   altura: string;
@@ -13,7 +14,7 @@ export interface Cliente {
   numeroDepartamento: string;
   observaciones: string;
   localidad: string;
-  barrio: string; // <-- Agregado
+  barrio: string;
   cp: string;
   telefono: string;
   email?: string;

@@ -45,7 +45,14 @@ const AltaPedido: React.FC = () => {
 
   const [form, setForm] = useState(estadoInicial);
   const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
-    { codigoIndumentaria: string; nombre: string; cantidad: number }[]
+    { 
+      codigoIndumentaria: string; 
+      nombre: string; 
+      color: string;
+      talle: string;
+      nombreTela: string;
+      cantidad: number 
+    }[]
   >([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
@@ -90,6 +97,9 @@ const AltaPedido: React.FC = () => {
     });
   }, []);
 
+  // Almacenar datos de pedido para procesamiento posterior
+  const [datosDelPedido, setDatosDelPedido] = useState<any>(null);
+  
   // Cargar datos si es edición
   useEffect(() => {
     if (esEdicion && id) {
@@ -105,20 +115,12 @@ const AltaPedido: React.FC = () => {
               : "",
             idEstado: res.data.idEstado?.toString() || "",
           });
-          // Cargar prendas asociadas al pedido
+          
+          // Guardar los datos del pedido para procesarlos cuando tengamos el catálogo
           if (res.data.DetallePedidos) {
-            setPrendasSeleccionadas(
-              res.data.DetallePedidos.map((detalle: any) => ({
-                codigoIndumentaria: detalle.codigoIndumentaria,
-                nombre:
-                  detalle.Indumentarium?.DetalleIndumentarium
-                    ?.NombreIndumentarium?.nombre ||
-                  detalle.codigoIndumentaria ||
-                  "Sin nombre",
-                cantidad: detalle.cantidad,
-              }))
-            );
+            setDatosDelPedido(res.data.DetallePedidos);
           }
+        
         } catch (error: any) {
           console.error("Error al cargar el pedido:", error);
           if (error.response?.status === 401) {
@@ -136,6 +138,52 @@ const AltaPedido: React.FC = () => {
       cargarPedido();
     }
   }, [id, esEdicion]);
+
+  // Procesar las prendas cuando tengamos tanto los datos del pedido como el catálogo de indumentaria
+  useEffect(() => {
+    if (datosDelPedido && indumentaria.length > 0) {
+      const prendasDelPedido = datosDelPedido.map((detalle: any) => {
+        // Buscamos en el catálogo la información completa de esta indumentaria
+        const indumentariaEnCatalogo = indumentaria.find(
+          item => item.codigoIndumentaria === detalle.codigoIndumentaria
+        );
+        
+        // Si la encontramos en el catálogo, usamos los datos más completos
+        if (indumentariaEnCatalogo) {
+          return {
+            codigoIndumentaria: detalle.codigoIndumentaria,
+            nombre: indumentariaEnCatalogo.nombre || "Sin nombre",
+            color: indumentariaEnCatalogo.color || "Sin color",
+            talle: indumentariaEnCatalogo.talle || "Sin talle",
+            nombreTela: indumentariaEnCatalogo.nombreTela || "Sin tela",
+            cantidad: detalle.cantidad
+          };
+        } else {
+          // Si no está en el catálogo, usamos los datos del detalle
+          return {
+            codigoIndumentaria: detalle.codigoIndumentaria,
+            nombre:
+              detalle.Indumentarium?.DetalleIndumentarium
+                ?.NombreIndumentarium?.nombre ||
+              detalle.codigoIndumentaria ||
+              "Sin nombre",
+            color: 
+              detalle.Indumentarium?.DetalleIndumentarium
+                ?.Color?.color || "Sin color",
+            talle:
+              detalle.Indumentarium?.DetalleIndumentarium
+                ?.Talle?.talle || "Sin talle",
+            nombreTela:
+              detalle.Indumentarium?.DetalleIndumentarium
+                ?.TelaIndumentarium?.tipoTela || "Sin tela",
+            cantidad: detalle.cantidad,
+          };
+        }
+      });
+      
+      setPrendasSeleccionadas(prendasDelPedido);
+    }
+  }, [datosDelPedido, indumentaria]);
 
   // --- Lógica de prendas ---
   const agregarPrenda = (prenda: any, cantidad: number) => {
@@ -160,6 +208,9 @@ const AltaPedido: React.FC = () => {
       {
         codigoIndumentaria: prenda.codigoIndumentaria,
         nombre: prenda.nombre,
+        color: prenda.color || 'Sin color',
+        talle: prenda.talle || 'Sin talle',
+        nombreTela: prenda.nombreTela || 'Sin tela',
         cantidad,
       },
     ]);
@@ -214,7 +265,7 @@ const AltaPedido: React.FC = () => {
 
   // --- Filtro de clientes ---
   const clientesFiltrados = (clientes ?? []).filter((c) => {
-    if (!c || typeof c.nombre !== "string") return false; // Evita elementos undefined o sin nombre string
+    if (!c || (typeof c.nombre !== "string" && typeof c.apellido !== "string")) return false; // Evita elementos undefined o sin nombre/apellido string
     const normalizar = (str: string) =>
       (str ?? "")
         .toLowerCase()
@@ -222,7 +273,8 @@ const AltaPedido: React.FC = () => {
         .replace(/[\u0300-\u036f]/g, "");
     const filtroNorm = normalizar(filtroCliente);
     return (
-      normalizar(c.nombre).includes(filtroNorm) ||
+      normalizar(c.nombre || "").includes(filtroNorm) ||
+      normalizar(c.apellido || "").includes(filtroNorm) ||
       (c.numeroDocumento && c.numeroDocumento.toString().includes(filtroNorm))
     );
   });
@@ -261,66 +313,79 @@ const AltaPedido: React.FC = () => {
             />
           </IonItem>
           {/* --- Prendas seleccionadas --- */}
-          <IonList>
+          <IonList className="prendas-seleccionadas">
             {prendasSeleccionadas.map((prenda, idx) => (
-              <IonItem key={prenda.codigoIndumentaria}>
-                <IonLabel>
-                  {prenda.nombre} (Cantidad: {prenda.cantidad})
-                </IonLabel>
-                <IonButton
-                  onClick={() => {
-                    setPrendasSeleccionadas((prev) =>
-                      prev.map((p, i) =>
-                        i === idx && p.cantidad > 1
-                          ? { ...p, cantidad: p.cantidad - 1 }
-                          : p
-                      )
-                    );
-                  }}
-                  disabled={prenda.cantidad <= 1}
-                  color="medium"
-                  type="button"
-                >
-                  -
-                </IonButton>
-                <IonButton
-                  onClick={() => {
-                    // Stock real en base de datos
-                    const stockReal =
-                      indumentaria.find(
-                        (i) =>
-                          i.codigoIndumentaria === prenda.codigoIndumentaria
-                      )?.cantidadIndumentaria ?? 0;
-
-                    // Stock disponible = stock real - cantidad seleccionada actualmente
-                    const stockDisponible = stockReal - prenda.cantidad;
-
-                    if (stockDisponible <= 0) {
-                      setAlertMsg(
-                        `Stock del producto insuficiente, el stock actual es: ${stockReal}`
+              <IonItem key={prenda.codigoIndumentaria} className="prenda-item">
+                <div className="prenda-info">
+                  <div className="prenda-title">
+                    <strong>{prenda.nombre}</strong> <small>({prenda.codigoIndumentaria})</small>
+                  </div>
+                  <div className="prenda-details">
+                    <span className="detail-tag color">Color: {prenda.color}</span>
+                    <span className="detail-tag talle">Talle: {prenda.talle}</span>
+                    <span className="detail-tag tela">Tela: {prenda.nombreTela}</span>
+                    <span className="detail-tag cantidad">Cant: {prenda.cantidad}</span>
+                  </div>
+                </div>
+                <div className="prenda-actions">
+                  <IonButton
+                    onClick={() => {
+                      setPrendasSeleccionadas((prev) =>
+                        prev.map((p, i) =>
+                          i === idx && p.cantidad > 1
+                            ? { ...p, cantidad: p.cantidad - 1 }
+                            : p
+                        )
                       );
-                      setShowAlert(true);
-                      return;
-                    }
+                    }}
+                    disabled={prenda.cantidad <= 1}
+                    color="medium"
+                    type="button"
+                    size="small"
+                  >
+                    -
+                    </IonButton>
+                  <IonButton
+                    onClick={() => {
+                      // Stock real en base de datos
+                      const stockReal =
+                        indumentaria.find(
+                          (i) =>
+                            i.codigoIndumentaria === prenda.codigoIndumentaria
+                        )?.cantidadIndumentaria ?? 0;
 
-                    setPrendasSeleccionadas((prev) =>
-                      prev.map((p, i) =>
-                        i === idx ? { ...p, cantidad: p.cantidad + 1 } : p
-                      )
-                    );
-                  }}
-                  color="medium"
-                  type="button"
-                >
-                  +
-                </IonButton>
-                <IonButton
-                  color="danger"
-                  onClick={() => eliminarPrenda(prenda.codigoIndumentaria)}
-                  type="button"
-                >
-                  Quitar
-                </IonButton>
+                      // Stock disponible = stock real - cantidad seleccionada actualmente
+                      const stockDisponible = stockReal - prenda.cantidad;
+
+                      if (stockDisponible <= 0) {
+                        setAlertMsg(
+                          `Stock del producto insuficiente, el stock actual es: ${stockReal}`
+                        );
+                        setShowAlert(true);
+                        return;
+                      }
+
+                      setPrendasSeleccionadas((prev) =>
+                        prev.map((p, i) =>
+                          i === idx ? { ...p, cantidad: p.cantidad + 1 } : p
+                        )
+                      );
+                    }}
+                    color="medium"
+                    type="button"
+                    size="small"
+                  >
+                    +
+                  </IonButton>
+                  <IonButton
+                    color="danger"
+                    onClick={() => eliminarPrenda(prenda.codigoIndumentaria)}
+                    type="button"
+                    size="small"
+                  >
+                    Quitar
+                  </IonButton>
+                </div>
               </IonItem>
             ))}
           </IonList>
@@ -368,7 +433,7 @@ const AltaPedido: React.FC = () => {
           <IonContent>
             <IonItem>
               <IonInput
-                placeholder="Buscar por nombre o DNI"
+                placeholder="Buscar por nombre, apellido o DNI"
                 value={filtroCliente}
                 onIonChange={(e) => setFiltroCliente(e.detail.value!)}
                 clearInput
@@ -392,13 +457,13 @@ const AltaPedido: React.FC = () => {
                     setForm({
                       ...form,
                       idCliente: c.id.toString(),
-                      clienteNombre: c.nombre,
+                      clienteNombre: `${c.nombre} ${c.apellido || ""}`.trim(),
                     });
                     setShowClienteModal(false);
                   }}
                 >
                   <IonLabel>
-                    {c.nombre} ({c.numeroDocumento})
+                    {`${c.nombre} ${c.apellido || ""}`} ({c.numeroDocumento})
                   </IonLabel>
                 </IonItem>
               ))}
