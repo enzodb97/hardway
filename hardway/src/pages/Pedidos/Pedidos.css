@@ -1,170 +1,361 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Aplicar fuente Roboto a todos los elementos */
+/* Aplicar fuente Inter a todos los elementos */
 .pedidos-page,
 .pedidos-page * {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .pedidos-page {
-  --ion-background-color: #feaf00;
+  --ion-background-color: #f8fafc;
   min-height: 100vh;
 }
 
+.pedidos-content {
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+}
+
 .pedidos-buscador {
-  margin: 0 0 16px 0; /* Solo margen inferior */
+  margin: 0 0 24px 0;
   background: white;
-  border-radius: 7px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
 }
 
-.alta-pedido-page ion-item {
-  --background: white; /* Cambia este color al que desees */
+.pedidos-buscador ion-input {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --placeholder-color: #64748b;
+  --color: #1e293b;
+  font-size: 15px;
+  font-weight: 400;
 }
 
-.pedidos-list strong {
-  color: var(--ion-color-primary);
+.pedidos-buscador ion-input::part(native) {
+  border: none;
+  outline: none;
 }
 
 .pedidos-table-wrapper {
   width: 100%;
-  max-width: 100%;
-  height: 100%; /* Limita la altura máxima de la tabla */
-  overflow-x: auto;
-  overflow-y: auto;
-  margin-bottom: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-.table-header.md {
-  border-radius: 6px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
 }
 
 .pedidos-table {
   width: 100%;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
 }
 
-.pedidos-table ion-col {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-sizing: border-box;
-  width: 100%;
-  white-space: wrap;
+.table-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0;
+  margin: 0;
+}
+
+.table-header ion-col {
+  padding: 20px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-header ion-col:last-child {
+  border-right: none;
+}
+
+.table-row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  background: white;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.table-row:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.table-row:last-child {
+  border-bottom: none;
 }
 
 .table-row ion-col {
-  padding: 12px;
-  text-align: center;
-  height: 100%;
+  padding: 20px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  vertical-align: middle;
 }
 
+.table-row ion-col:first-child {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+/* Botones de acción mejorados */
 .action-buttons {
   display: flex;
   gap: 8px;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.grafico-barras-container {
-  min-height: 300px;
-  min-width: 300px;
-  width: 100%;
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-sizing: border-box;
-  /* Si necesitas, puedes agregar: */
-  position: static !important;
-  justify-content: center;
+.action-buttons ion-button {
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: none;
+  margin: 2px;
+  transition: all 0.2s ease;
 }
 
-/* Estilo base para todas las etiquetas de estado */
+.action-buttons ion-button:hover {
+  transform: translateY(-1px);
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Botón editar */
+.action-buttons ion-button[color="primary"] {
+  --background: #3b82f6;
+  --background-hover: #2563eb;
+  --color: white;
+}
+
+/* Botón cancelar */
+.action-buttons .cancel-btn {
+  --background: #ef4444;
+  --background-hover: #dc2626;
+  --color: white;
+}
+
+/* Botón detalle */
+.action-buttons .detail-btn {
+  --background: #64748b;
+  --background-hover: #475569;
+  --color: white;
+}
+
+/* Botón asignar picker */
+.action-buttons .asignar-picker-btn {
+  --background: #10b981;
+  --background-hover: #059669;
+  --color: white;
+  font-size: 12px;
+}
+
+/* Botón abonar */
+.action-buttons .abonar-btn {
+  --background: #f59e0b;
+  --background-hover: #d97706;
+  --color: white;
+}
+
+/* Botón finalizar */
+.action-buttons .finalizar-btn {
+  --background: #8b5cf6;
+  --background-hover: #7c3aed;
+  --color: white;
+}
+
+/* Estados de pedido mejorados */
 .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 600;
-  color: #fff;
-  min-width: 110px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 120px;
   justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
-/* --- Colores Específicos por Estado --- */
+.status-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Colores mejorados para los estados */
 .status--en-curso {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-.status--pendiente-pago {
-  background-color: #fef9c3;
-  color: #854d0e;
-}
-.status--abonado {
-  background-color: #dcfce7;
-  color: #166534;
-}
-.status--despachado {
-  background-color: #cffafe;
-  color: #0e7490;
-}
-.status--finalizado {
-  background-color: #ffedd5;
-  color: #9a3412;
-}
-.status--cancelado {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
 }
 
+.status--pendiente-pago {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.status--abonado {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.status--despachado {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+}
+
+.status--finalizado {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.status--cancelado {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+/* Badge de total mejorado */
 .pedidos-total-col {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-.pedidos-total-badge {
-  background: #0054e9;
-  border-radius: 5px;
-  padding: 14px 70px;
-  font-weight: 600;
-  font-size: 15px;
-  color: #fff;
+  justify-content: flex-end;
+  padding: 0;
 }
 
+.pedidos-total-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Iconos de estado mejorados */
 .estado-icono {
   margin-right: 8px;
-  font-size: 18px;
+  font-size: 16px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
-.asignar-picker-btn {
-  margin: 0;
-}
-
-.abonar-btn {
-  margin: 0;
-}
-
-.picker-label {
-  width: 100%;
-  font-weight: 600;
-}
-
+/* Paginación mejorada */
 .pedidos-paginacion-row {
-  margin-top: 12px;
+  margin-top: 24px;
+  padding: 0 8px;
 }
+
 .pedidos-paginacion-col {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
-.pedidos-paginacion-text {
-  font-size: 15px;
+
+.pedidos-paginacion-col ion-button {
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
   font-weight: 500;
-  color: #333;
+  text-transform: none;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pedidos-paginacion-col ion-button:not([disabled]):hover {
+  transform: translateY(-1px);
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pedidos-paginacion-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  padding: 0 8px;
+}
+
+/* Botones principales mejorados */
+.pedidos-content ion-button[expand="block"] {
+  --border-radius: 12px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: none;
+  margin: 8px 0;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.pedidos-content ion-button[expand="block"]:hover {
+  transform: translateY(-2px);
+  --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.pedidos-content ion-button[expand="block"]:first-of-type {
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --color: white;
+}
+
+.pedidos-content ion-button[expand="block"]:last-of-type {
+  --background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  --color: white;
+}
+
+/* Popover del picker mejorado */
+.picker-label {
+  width: 100%;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+  padding: 12px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+ion-popover ion-list {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+ion-popover ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+ion-popover ion-item:hover {
+  --background: #f8fafc;
 }
 
 /* Estilos para el modal de motivo de cancelación */
@@ -392,6 +583,222 @@
   transform: none !important;
 }
 
+/* Estilos para el filtro de estados */
+.estado-filter-button {
+  --color: white !important;
+  --color-hover: rgba(255, 255, 255, 0.8) !important;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+  text-transform: none;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.estado-filter-button ion-icon {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.estado-filter-button:hover ion-icon {
+  transform: rotate(180deg);
+}
+
+.filter-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.estado-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Estilos para el filtro de fechas eliminados */
+
+/* Filtro de fechas eliminado */
+
+
+
+
+
+
+
+/* Animaciones y transiciones suaves */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+/* Calendario y datetime eliminados */
+
+@media (max-width: 768px) {
+  .pedidos-content {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-top: 16px;
+  }
+  
+  .pedidos-buscador {
+    margin-bottom: 16px;
+  }
+  
+  .table-header ion-col,
+  .table-row ion-col {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  
+  .status-badge {
+    min-width: 90px;
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+  
+  .action-buttons {
+    gap: 4px;
+  }
+  
+  .action-buttons ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+    font-size: 11px;
+  }
+  
+  .pedidos-total-badge {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .pedidos-paginacion-col {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .pedidos-paginacion-text {
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+/* Efecto hover para filas en desktop */
+@media (min-width: 769px) {
+  .table-row:hover .status-badge {
+    transform: scale(1.05);
+  }
+  
+  .table-row:hover .action-buttons ion-button {
+    transform: scale(1.05);
+  }
+}
+
+/* Mejoras para el header */
+.pedidos-page ion-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pedidos-page ion-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+}
+
+.pedidos-page ion-title {
+  font-weight: 600;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Estilo para cuando no hay datos */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+}
+
+.empty-state ion-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #334155;
+}
+
+.empty-state p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+/* Indicadores de carga */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+  height: 20px;
+  margin: 4px 0;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* Responsive para móviles */
 @media (max-width: 768px) {
   .motivo-cancelacion-modal ion-modal {
@@ -474,5 +881,405 @@
 
   .motivo-cancelacion-content {
     padding: 16px 12px;
+  }
+}
+
+/* Mejoras específicas para el checkbox marcado */
+.estado-filter-checkbox:not(:empty) {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: #10b981;
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transform: scale(1.05);
+}
+
+/* Animación de entrada del popover */
+@keyframes popoverSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+ion-popover.estado-filter-popover::part(content) {
+  animation: popoverSlideIn 0.2s ease-out;
+}
+
+/* Estilo específico para el botón de estado en el header */
+.estado-filter-button {
+  --background: transparent !important;
+  --color: white !important;
+  --color-hover: rgba(255, 255, 255, 0.9) !important;
+  --border-radius: 8px;
+  --box-shadow: none;
+  position: relative;
+  transition: all 0.2s ease;
+  max-width: 100%;
+  min-height: 40px;
+}
+
+.estado-filter-button:hover {
+  --background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.estado-filter-button.popover-open {
+  --background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-1px);
+}
+
+/* Mejorar la visualización del badge de filtro activo */
+.filter-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Mejoras para la selección de fecha */
+.fecha-button.selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+  --color: var(--ion-color-primary);
+  --border-color: var(--ion-color-primary);
+  font-weight: 500;
+}
+
+.fecha-button.selected ion-icon {
+  color: var(--ion-color-primary);
+}
+
+.fecha-button {
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  height: 44px;
+  font-size: 14px;
+  margin-top: 8px;
+  width: 100%;
+  --border-color: var(--ion-color-light-shade);
+  --color: var(--ion-color-medium);
+  transition: all 0.2s ease;
+}
+
+.fecha-button:hover {
+  --background: rgba(var(--ion-color-primary-rgb), 0.05);
+  --border-color: var(--ion-color-primary-tint);
+}
+
+.fecha-filter-item {
+  margin-bottom: 16px;
+}
+
+.fecha-filter-item ion-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.datetime-modal ion-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.datetime-modal ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: white;
+}
+
+.datetime-modal ion-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Estilos globales para el calendario IonDatetime */
+.fecha-datetime-calendar {
+  --ion-color-base: #667eea;
+  --ion-color-contrast: white;
+  --ion-color-tint: #764ba2;
+  --ion-color-shade: #5a6fd8;
+}
+
+/* Estilos específicos para el componente de calendario */
+.fecha-datetime-calendar .datetime-calendar {
+  background: white;
+  border-radius: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.fecha-datetime-calendar .calendar-month-year {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.fecha-datetime-calendar .calendar-month-year button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fecha-datetime-calendar .calendar-month-year button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fecha-datetime-calendar .calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.fecha-datetime-calendar .calendar-header button {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fecha-datetime-calendar .calendar-header button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.fecha-datetime-calendar .calendar-body {
+  background: white;
+  padding: 20px;
+}
+
+.fecha-datetime-calendar .calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.fecha-datetime-calendar .calendar-weekday {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  padding: 12px 0;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.fecha-datetime-calendar .calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.fecha-datetime-calendar .calendar-day {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 2px;
+  font-family: 'Inter', sans-serif;
+}
+
+.fecha-datetime-calendar .calendar-day:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: scale(1.05);
+}
+
+.fecha-datetime-calendar .calendar-day.calendar-day-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+  font-weight: 600;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.fecha-datetime-calendar .calendar-day.calendar-day-today {
+  background: #fef3c7;
+  color: #d97706;
+  border-color: #f59e0b;
+  font-weight: 600;
+}
+
+.fecha-datetime-calendar .calendar-day.calendar-day-disabled {
+  background: #f9fafb;
+  color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.fecha-datetime-calendar .calendar-day.calendar-day-disabled:hover {
+  background: #f9fafb;
+  transform: none;
+}
+
+/* Sobrescribir estilos específicos de Ionic */
+.fecha-datetime-calendar ion-datetime {
+  --background: white;
+  --color: #1e293b;
+  font-family: 'Inter', sans-serif;
+}
+
+.fecha-datetime-calendar ion-datetime button {
+  font-family: 'Inter', sans-serif;
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 20px;
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-month-year {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-prev,
+.fecha-datetime-calendar ion-datetime .datetime-calendar-next {
+  color: white;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-prev:hover,
+.fecha-datetime-calendar ion-datetime .datetime-calendar-next:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-day {
+  background: white;
+  color: #374151;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  margin: 2px;
+  font-family: 'Inter', sans-serif;
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-day:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: scale(1.05);
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+  font-weight: 600;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-today {
+  background: #fef3c7;
+  color: #d97706;
+  border-color: #f59e0b;
+  font-weight: 600;
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-disabled {
+  background: #f9fafb;
+  color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-disabled:hover {
+  background: #f9fafb;
+  transform: none;
+}
+
+/* Estilos para móviles */
+@media (max-width: 768px) {
+  .fecha-datetime-calendar .calendar-day,
+  .fecha-datetime-calendar ion-datetime .datetime-calendar-day {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+  
+  .fecha-datetime-calendar .calendar-month-year,
+  .fecha-datetime-calendar ion-datetime .datetime-calendar-month-year {
+    font-size: 16px;
+    padding: 12px 16px;
+  }
+  
+  .fecha-datetime-calendar .calendar-header button,
+  .fecha-datetime-calendar ion-datetime .datetime-calendar-prev,
+  .fecha-datetime-calendar ion-datetime .datetime-calendar-next {
+    width: 32px;
+    height: 32px;
   }
 }

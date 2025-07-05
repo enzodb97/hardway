@@ -88,6 +88,22 @@ const Pedidos: React.FC = () => {
   const [showAbonoExitoso, setShowAbonoExitoso] = useState(false);
   const [pedidoParaAbonar, setPedidoParaAbonar] = useState<string | null>(null);
   
+  // Estados para el filtro por estados
+  const [estadosFiltrados, setEstadosFiltrados] = useState<string[]>([]);
+  const [showEstadoDropdown, setShowEstadoDropdown] = useState(false);
+  
+
+  
+  // Lista de todos los estados posibles
+  const todosLosEstados = [
+    { id: 1, nombre: "En Curso", clase: "en-curso" },
+    { id: 2, nombre: "Pendiente de Pago", clase: "pendiente-pago" },
+    { id: 3, nombre: "Abonado", clase: "abonado" },
+    { id: 4, nombre: "Despachado", clase: "despachado" },
+    { id: 5, nombre: "Finalizado", clase: "finalizado" },
+    { id: 6, nombre: "Cancelado", clase: "cancelado" }
+  ];
+  
   const porPagina = 6;
   const history = useHistory();
 
@@ -105,7 +121,13 @@ const Pedidos: React.FC = () => {
   const pedidosFiltrados = filtrarPedidos(
     pedidos,
     busqueda === " " ? "" : busqueda
-  ).sort(
+  ).filter(pedido => {
+    // Filtro por estados
+    const cumpleEstado = estadosFiltrados.length === 0 || 
+      estadosFiltrados.includes(pedido.idEstado.toString());
+    
+    return cumpleEstado;
+  }).sort(
     (a, b) =>
       (b.fechaPedido ? new Date(b.fechaPedido).getTime() : 0) -
       (a.fechaPedido ? new Date(a.fechaPedido).getTime() : 0)
@@ -165,6 +187,32 @@ const Pedidos: React.FC = () => {
     setPedidoParaAbonar(null);
   };
 
+  // Función para manejar el filtro por estados
+  const toggleEstadoFiltro = (estadoId: string) => {
+    setEstadosFiltrados(prev => {
+      if (prev.includes(estadoId)) {
+        // Si ya está incluido, lo removemos
+        return prev.filter(id => id !== estadoId);
+      } else {
+        // Si no está incluido, lo agregamos
+        return [...prev, estadoId];
+      }
+    });
+  };
+
+  // Función para limpiar todos los filtros de estado
+  const limpiarFiltrosEstado = () => {
+    setEstadosFiltrados([]);
+  };
+
+  // Función para obtener el nombre del estado por ID
+  const obtenerNombreEstado = (idEstado: string) => {
+    const estado = todosLosEstados.find(e => e.id.toString() === idEstado);
+    return estado ? estado.nombre : 'Desconocido';
+  };
+
+
+
   return (
     <IonPage className="pedidos-page">
       <IonHeader>
@@ -204,7 +252,18 @@ const Pedidos: React.FC = () => {
                       <strong>N° Pedido</strong>
                     </IonCol>
                     <IonCol className="text-center">
-                      <strong>Estado</strong>
+                      <IonButton
+                        fill="clear"
+                        className="estado-filter-button"
+                        id="estado-filter-trigger"
+                        onClick={() => setShowEstadoDropdown(!showEstadoDropdown)}
+                      >
+                        <strong>Estado</strong>
+                        <IonIcon icon={chevronDown} />
+                        {estadosFiltrados.length > 0 && (
+                          <span className="filter-badge">{estadosFiltrados.length}</span>
+                        )}
+                      </IonButton>
                     </IonCol>
                     <IonCol className="text-center">
                       <strong>Cliente</strong>
@@ -743,6 +802,55 @@ const Pedidos: React.FC = () => {
             },
           ]}
         />
+        
+        {/* Popover para filtrar por estados */}
+        <IonPopover
+          isOpen={showEstadoDropdown}
+          onDidDismiss={() => setShowEstadoDropdown(false)}
+          trigger="estado-filter-trigger"
+          showBackdrop={true}
+          className="estado-filter-popover"
+        >
+          <IonContent>
+            <div className="estado-filter-header">
+              <strong>Filtrar por Estado</strong>
+              {estadosFiltrados.length > 0 && (
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  onClick={limpiarFiltrosEstado}
+                  className="clear-filter-btn"
+                >
+                  Limpiar
+                </IonButton>
+              )}
+            </div>
+            <IonList>
+              {todosLosEstados.map((estado) => (
+                <IonItem
+                  key={estado.id}
+                  button
+                  onClick={() => toggleEstadoFiltro(estado.id.toString())}
+                >
+                  <IonLabel>
+                    <div className="estado-filter-item">
+                      <span className="estado-filter-checkbox">
+                        {estadosFiltrados.includes(estado.id.toString()) ? '✓' : ''}
+                      </span>
+                      <span className={`status-badge status--${estado.clase}`}>
+                        {estado.nombre}
+                      </span>
+                    </div>
+                  </IonLabel>
+                </IonItem>
+              ))}
+            </IonList>
+          </IonContent>
+        </IonPopover>
+
+
+
+
       </IonContent>
     </IonPage>
   );
