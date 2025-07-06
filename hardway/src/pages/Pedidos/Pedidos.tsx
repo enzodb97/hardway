@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
 import { obtenerIconoEstado } from "../../utils/pedidosUtils";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   IonPage,
   IonHeader,
@@ -22,6 +24,7 @@ import {
 import {
   cargarPedidos,
   filtrarPedidos,
+  filtrarPedidosPorFecha,
   Pedido,
   eliminarPedido,
   marcarPedidoComoAbonado,
@@ -40,13 +43,7 @@ import {
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import { pencil, trash, documentText, chevronDown, cash } from "ionicons/icons";
-import {
-  IonPopover,
-  IonLabel,
-  IonList,
-  IonItem,
-  IonModal,
-} from "@ionic/react";
+import { IonPopover, IonLabel, IonList, IonItem, IonModal } from "@ionic/react";
 import "./Pedidos.css";
 
 const Pedidos: React.FC = () => {
@@ -78,22 +75,24 @@ const Pedidos: React.FC = () => {
     null
   );
   const [showMotivoModal, setShowMotivoModal] = useState(false);
-  
+
   // Estados para manejar errores de autorización
   const [showAuthError, setShowAuthError] = useState(false);
   const [authErrorMsg, setAuthErrorMsg] = useState("");
-  
+
   // Estados para las alertas de abono
   const [showConfirmAbono, setShowConfirmAbono] = useState(false);
   const [showAbonoExitoso, setShowAbonoExitoso] = useState(false);
   const [pedidoParaAbonar, setPedidoParaAbonar] = useState<string | null>(null);
-  
+
   // Estados para el filtro por estados
   const [estadosFiltrados, setEstadosFiltrados] = useState<string[]>([]);
   const [showEstadoDropdown, setShowEstadoDropdown] = useState(false);
-  
 
-  
+  // Estados para el filtro de fechas
+  const [fechaDesde, setFechaDesde] = useState<Date | null>(null);
+  const [fechaHasta, setFechaHasta] = useState<Date | null>(null);
+
   // Lista de todos los estados posibles
   const todosLosEstados = [
     { id: 1, nombre: "En Curso", clase: "en-curso" },
@@ -101,9 +100,9 @@ const Pedidos: React.FC = () => {
     { id: 3, nombre: "Abonado", clase: "abonado" },
     { id: 4, nombre: "Despachado", clase: "despachado" },
     { id: 5, nombre: "Finalizado", clase: "finalizado" },
-    { id: 6, nombre: "Cancelado", clase: "cancelado" }
+    { id: 6, nombre: "Cancelado", clase: "cancelado" },
   ];
-  
+
   const porPagina = 6;
   const history = useHistory();
 
@@ -118,16 +117,30 @@ const Pedidos: React.FC = () => {
   });
 
   const mostrarTodos = busqueda === " ";
-  const pedidosFiltrados = filtrarPedidos(
+
+  // Aplicar filtros en secuencia: texto, estados y fechas
+  let pedidosFiltradosTemp = filtrarPedidos(
     pedidos,
     busqueda === " " ? "" : busqueda
-  ).filter(pedido => {
-    // Filtro por estados
-    const cumpleEstado = estadosFiltrados.length === 0 || 
+  );
+
+  // Filtro por estados
+  pedidosFiltradosTemp = pedidosFiltradosTemp.filter((pedido) => {
+    const cumpleEstado =
+      estadosFiltrados.length === 0 ||
       estadosFiltrados.includes(pedido.idEstado.toString());
-    
     return cumpleEstado;
-  }).sort(
+  });
+
+  // Filtro por fechas
+  pedidosFiltradosTemp = filtrarPedidosPorFecha(
+    pedidosFiltradosTemp,
+    fechaDesde,
+    fechaHasta
+  );
+
+  // Ordenar por fecha
+  const pedidosFiltrados = pedidosFiltradosTemp.sort(
     (a, b) =>
       (b.fechaPedido ? new Date(b.fechaPedido).getTime() : 0) -
       (a.fechaPedido ? new Date(a.fechaPedido).getTime() : 0)
@@ -168,7 +181,7 @@ const Pedidos: React.FC = () => {
   // Función para confirmar el abono
   const confirmarAbono = async () => {
     if (!pedidoParaAbonar) return;
-    
+
     try {
       await marcarPedidoComoAbonado(pedidoParaAbonar);
       setShowConfirmAbono(false);
@@ -189,10 +202,10 @@ const Pedidos: React.FC = () => {
 
   // Función para manejar el filtro por estados
   const toggleEstadoFiltro = (estadoId: string) => {
-    setEstadosFiltrados(prev => {
+    setEstadosFiltrados((prev) => {
       if (prev.includes(estadoId)) {
         // Si ya está incluido, lo removemos
-        return prev.filter(id => id !== estadoId);
+        return prev.filter((id) => id !== estadoId);
       } else {
         // Si no está incluido, lo agregamos
         return [...prev, estadoId];
@@ -207,11 +220,9 @@ const Pedidos: React.FC = () => {
 
   // Función para obtener el nombre del estado por ID
   const obtenerNombreEstado = (idEstado: string) => {
-    const estado = todosLosEstados.find(e => e.id.toString() === idEstado);
-    return estado ? estado.nombre : 'Desconocido';
+    const estado = todosLosEstados.find((e) => e.id.toString() === idEstado);
+    return estado ? estado.nombre : "Desconocido";
   };
-
-
 
   return (
     <IonPage className="pedidos-page">
@@ -242,6 +253,37 @@ const Pedidos: React.FC = () => {
               </span>
             </IonCol>
           </IonRow>
+
+          {/* Fila 1.5: Filtros de fecha */}
+          <IonRow className="fecha-filtros-row">
+            <IonCol size="6">
+              <div className="fecha-filtro-container">
+                <label className="fecha-filtro-label">Desde:</label>
+                <DatePicker
+                  selected={fechaDesde}
+                  onChange={(date: Date | null) => setFechaDesde(date)}
+                  placeholderText="Seleccionar fecha desde"
+                  dateFormat="dd/MM/yyyy"
+                  className="fecha-picker-input"
+                  isClearable
+                />
+              </div>
+            </IonCol>
+            <IonCol size="6">
+              <div className="fecha-filtro-container">
+                <label className="fecha-filtro-label">Hasta:</label>
+                <DatePicker
+                  selected={fechaHasta}
+                  onChange={(date: Date | null) => setFechaHasta(date)}
+                  placeholderText="Seleccionar fecha hasta"
+                  dateFormat="dd/MM/yyyy"
+                  className="fecha-picker-input"
+                  isClearable
+                  minDate={fechaDesde || undefined}
+                />
+              </div>
+            </IonCol>
+          </IonRow>
           {/* Fila 2: Tabla */}
           <IonRow>
             <IonCol size="12">
@@ -256,12 +298,16 @@ const Pedidos: React.FC = () => {
                         fill="clear"
                         className="estado-filter-button"
                         id="estado-filter-trigger"
-                        onClick={() => setShowEstadoDropdown(!showEstadoDropdown)}
+                        onClick={() =>
+                          setShowEstadoDropdown(!showEstadoDropdown)
+                        }
                       >
                         <strong>Estado</strong>
                         <IonIcon icon={chevronDown} />
                         {estadosFiltrados.length > 0 && (
-                          <span className="filter-badge">{estadosFiltrados.length}</span>
+                          <span className="filter-badge">
+                            {estadosFiltrados.length}
+                          </span>
                         )}
                       </IonButton>
                     </IonCol>
@@ -421,7 +467,9 @@ const Pedidos: React.FC = () => {
                                 <IonButton
                                   fill="outline"
                                   color="warning"
-                                  onClick={() => iniciarFlujoPago(pedido.numeroPedido)}
+                                  onClick={() =>
+                                    iniciarFlujoPago(pedido.numeroPedido)
+                                  }
                                   className="abonar-btn"
                                 >
                                   <IonIcon icon={cash} slot="icon-only" />
@@ -465,7 +513,9 @@ const Pedidos: React.FC = () => {
                               </IonItem>
                               {pickers.length === 0 && (
                                 <IonItem>
-                                  <IonLabel>No hay pickers disponibles</IonLabel>
+                                  <IonLabel>
+                                    No hay pickers disponibles
+                                  </IonLabel>
                                 </IonItem>
                               )}
                               {pickers.map((picker, index) => (
@@ -473,17 +523,25 @@ const Pedidos: React.FC = () => {
                                   button
                                   key={picker.id || index}
                                   onClick={() => {
-                                    console.log("📌 Picker seleccionado:", picker);
+                                    console.log(
+                                      "📌 Picker seleccionado:",
+                                      picker
+                                    );
                                     setSelectedPicker(picker);
                                     setShowConfirmAsignar(true);
                                     setShowPickerDropdown(null);
                                   }}
                                 >
                                   <IonLabel>
-                                    <div style={{ fontWeight: 'bold' }}>
+                                    <div style={{ fontWeight: "bold" }}>
                                       {picker.nombre}
                                     </div>
-                                    <div style={{ fontSize: '0.8em', color: '#666' }}>
+                                    <div
+                                      style={{
+                                        fontSize: "0.8em",
+                                        color: "#666",
+                                      }}
+                                    >
                                       Legajo: {picker.legajo}
                                     </div>
                                   </IonLabel>
@@ -647,7 +705,7 @@ const Pedidos: React.FC = () => {
                 <div
                   key={motivo.idMotivo}
                   className={`motivo-option ${
-                    motivoSeleccionado === motivo.idMotivo ? 'selected' : ''
+                    motivoSeleccionado === motivo.idMotivo ? "selected" : ""
                   }`}
                   onClick={() => setMotivoSeleccionado(motivo.idMotivo)}
                 >
@@ -660,7 +718,9 @@ const Pedidos: React.FC = () => {
                   />
                   <div className="motivo-option-content">
                     <div className="motivo-option-radio"></div>
-                    <div className="motivo-option-text">{motivo.descripcion}</div>
+                    <div className="motivo-option-text">
+                      {motivo.descripcion}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -680,40 +740,46 @@ const Pedidos: React.FC = () => {
                 disabled={!motivoSeleccionado || !pedidoParaCancelar}
                 className="motivo-cancelacion-btn-confirmar"
                 onClick={async () => {
-                  if (!motivoSeleccionado || !pedidoParaCancelar || !username) return;
-                  
+                  if (!motivoSeleccionado || !pedidoParaCancelar || !username)
+                    return;
+
                   try {
                     // Primero obtener el ID del usuario por su nombre de usuario
-                    const userResponse = await fetch(`/api/usuarios/buscar-por-nombre/${username}`, {
-                      headers: {
-                        "nombreUsuario": username  // Agregar header de autorización si es necesario
+                    const userResponse = await fetch(
+                      `/api/usuarios/buscar-por-nombre/${username}`,
+                      {
+                        headers: {
+                          nombreUsuario: username, // Agregar header de autorización si es necesario
+                        },
                       }
-                    });
+                    );
                     let idUsuarioCancelo = null;
-                    
+
                     if (userResponse.ok) {
                       const userData = await userResponse.json();
                       idUsuarioCancelo = userData.idUsuario;
                     }
-                    
+
                     if (!idUsuarioCancelo) {
-                      setAlertMsg("Error: No se pudo identificar el usuario que cancela");
+                      setAlertMsg(
+                        "Error: No se pudo identificar el usuario que cancela"
+                      );
                       setShowAlert(true);
                       return;
                     }
-                    
+
                     // Proceder con la cancelación
                     const response = await fetch(
                       `/api/pedidos/${pedidoParaCancelar}/cancelar`,
                       {
                         method: "PUT",
-                        headers: { 
+                        headers: {
                           "Content-Type": "application/json",
-                          "nombreUsuario": username  // Agregar header de autorización
+                          nombreUsuario: username, // Agregar header de autorización
                         },
-                        body: JSON.stringify({ 
+                        body: JSON.stringify({
                           idMotivo: motivoSeleccionado,
-                          idUsuarioCancelo: idUsuarioCancelo 
+                          idUsuarioCancelo: idUsuarioCancelo,
                         }),
                       }
                     );
@@ -802,7 +868,7 @@ const Pedidos: React.FC = () => {
             },
           ]}
         />
-        
+
         {/* Popover para filtrar por estados */}
         <IonPopover
           isOpen={showEstadoDropdown}
@@ -835,7 +901,9 @@ const Pedidos: React.FC = () => {
                   <IonLabel>
                     <div className="estado-filter-item">
                       <span className="estado-filter-checkbox">
-                        {estadosFiltrados.includes(estado.id.toString()) ? '✓' : ''}
+                        {estadosFiltrados.includes(estado.id.toString())
+                          ? "✓"
+                          : ""}
                       </span>
                       <span className={`status-badge status--${estado.clase}`}>
                         {estado.nombre}
@@ -847,10 +915,6 @@ const Pedidos: React.FC = () => {
             </IonList>
           </IonContent>
         </IonPopover>
-
-
-
-
       </IonContent>
     </IonPage>
   );

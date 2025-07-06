@@ -70,7 +70,9 @@ export const cargarPedidos = async (): Promise<Pedido[]> => {
   } catch (error: any) {
     console.error("Error en cargarPedidos:", error);
     if (error.response?.status === 401 || error.response?.status === 403) {
-      const errorMsg = error.response?.data?.error || "Acceso denegado: necesitas permisos para gestionar pedidos";
+      const errorMsg =
+        error.response?.data?.error ||
+        "Acceso denegado: necesitas permisos para gestionar pedidos";
       throw new Error(errorMsg);
     }
     throw new Error(error.message || "Error al cargar pedidos");
@@ -80,40 +82,50 @@ export const cargarPedidos = async (): Promise<Pedido[]> => {
 // Crear un pedido
 export const crearPedido = async (pedido: Omit<Pedido, "numeroPedido">) => {
   return await axiosInstance.post("/api/pedidos", pedido, {
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   });
 };
 
 // Eliminar un pedido por numeroPedido
 export const eliminarPedido = async (numeroPedido: string) => {
   await axiosInstance.delete(`/api/pedidos/${numeroPedido}`, {
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   });
 };
 
 // Editar un pedido por numeroPedido
 export const editarPedido = async (numeroPedido: string, datos: any) => {
   await axiosInstance.put(`/api/pedidos/${numeroPedido}`, datos, {
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   });
 };
 
 // Cambia el estado de un pedido a Abonado (idEstado = 3)
 export const marcarPedidoComoAbonado = async (numeroPedido: string) => {
-  return await axiosInstance.put(`/api/pedidos/${numeroPedido}/abonado`, {}, {
-    headers: getAuthHeaders()
-  });
+  return await axiosInstance.put(
+    `/api/pedidos/${numeroPedido}/abonado`,
+    {},
+    {
+      headers: getAuthHeaders(),
+    }
+  );
 };
 
 // Cambia el estado de un pedido a Finalizado (idEstado = 5)
 export const marcarPedidoComoFinalizado = async (numeroPedido: string) => {
-  return await axiosInstance.put(`/api/pedidos/${numeroPedido}/finalizado`, {}, {
-    headers: getAuthHeaders()
-  });
+  return await axiosInstance.put(
+    `/api/pedidos/${numeroPedido}/finalizado`,
+    {},
+    {
+      headers: getAuthHeaders(),
+    }
+  );
 };
 
 // Obtener motivos de cancelación
-export const obtenerMotivosCancelacion = async (): Promise<MotivoCancelacion[]> => {
+export const obtenerMotivosCancelacion = async (): Promise<
+  MotivoCancelacion[]
+> => {
   const res = await axiosInstance.get("/api/motivos-cancelacion");
   return res.data;
 };
@@ -123,7 +135,9 @@ export const cancelarPedidoConMotivo = async (
   numeroPedido: string,
   idMotivo: number
 ) => {
-  await axiosInstance.put(`/api/pedidos/${numeroPedido}/cancelar`, { idMotivo });
+  await axiosInstance.put(`/api/pedidos/${numeroPedido}/cancelar`, {
+    idMotivo,
+  });
 };
 
 // Filtrar pedidos por texto (cliente, fecha, numeroPedido, DNI)
@@ -155,6 +169,36 @@ export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
       (dni && normalizar(dni).includes(filtroNorm)) ||
       (fecha && normalizar(fecha).includes(filtroNorm))
     );
+  });
+}
+
+// Filtrar pedidos por rango de fechas
+export function filtrarPedidosPorFecha(
+  pedidos: Pedido[],
+  fechaDesde?: Date | null,
+  fechaHasta?: Date | null
+): Pedido[] {
+  if (!fechaDesde && !fechaHasta) return pedidos;
+
+  return pedidos.filter((pedido) => {
+    if (!pedido.fechaPedido) return false;
+
+    const fechaPedido = new Date(pedido.fechaPedido);
+
+    // Establecer las horas para comparar solo las fechas
+    if (fechaDesde) {
+      const desde = new Date(fechaDesde);
+      desde.setHours(0, 0, 0, 0);
+      if (fechaPedido < desde) return false;
+    }
+
+    if (fechaHasta) {
+      const hasta = new Date(fechaHasta);
+      hasta.setHours(23, 59, 59, 999);
+      if (fechaPedido > hasta) return false;
+    }
+
+    return true;
   });
 }
 
@@ -219,15 +263,15 @@ export const fetchPickers = async (
 ) => {
   try {
     const res = await axiosInstance.get("/api/picking/pickers");
-    
+
     // Validar que los datos tengan la estructura correcta
     const validPickers = res.data.map((picker: any) => ({
       id: picker.id || picker.legajo,
       legajo: picker.legajo,
-      nombre: picker.nombre || 'Sin nombre',
-      nombreCompleto: picker.nombreCompleto || picker.nombre || 'Sin nombre'
+      nombre: picker.nombre || "Sin nombre",
+      nombreCompleto: picker.nombreCompleto || picker.nombre || "Sin nombre",
     }));
-    
+
     console.log("✅ Pickers procesados para frontend:", validPickers);
     setPickers(validPickers);
   } catch (err) {
@@ -317,7 +361,9 @@ export const handleConfirmFinalizar = async (
 // Obtener picker asignado a un pedido
 export const obtenerPickerAsignado = async (numeroPedido: string) => {
   try {
-    const res = await axiosInstance.get(`/api/pedidos/${numeroPedido}/picker-asignado`);
+    const res = await axiosInstance.get(
+      `/api/pedidos/${numeroPedido}/picker-asignado`
+    );
     return res.data;
   } catch {
     return null;
