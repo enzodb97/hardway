@@ -45,13 +45,13 @@ const AltaPedido: React.FC = () => {
 
   const [form, setForm] = useState(estadoInicial);
   const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
-    { 
-      codigoIndumentaria: string; 
-      nombre: string; 
+    {
+      codigoIndumentaria: string;
+      nombre: string;
       color: string;
       talle: string;
       nombreTela: string;
-      cantidad: number 
+      cantidad: number;
     }[]
   >([]);
   const [showAlert, setShowAlert] = useState(false);
@@ -83,15 +83,25 @@ const AltaPedido: React.FC = () => {
       // Mapear datos anidados del backend a estructura plana
       const indumentariaMapeada = res.data.map((item: any) => ({
         codigoIndumentaria: item.codigoIndumentaria,
-        nombre: item.DetalleIndumentarium?.NombreIndumentarium?.nombre || "Sin nombre",
+        nombre:
+          item.DetalleIndumentarium?.NombreIndumentarium?.nombre ||
+          "Sin nombre",
         color: item.DetalleIndumentarium?.Color?.color || "Sin color",
-        nombreTela: item.DetalleIndumentarium?.TelaIndumentarium?.tipoTela || "Sin tela",
+        nombreTela:
+          item.DetalleIndumentarium?.TelaIndumentarium?.tipoTela || "Sin tela",
         talle: item.DetalleIndumentarium?.Talle?.talle || "Sin talle",
-        categoria: item.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "Sin categoría",
-        precio: parseFloat(item.DetalleIndumentarium?.PrecioIndumentarium?.precio || "0"),
-        estado: item.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "Sin estado",
-        cantidadIndumentaria: item.DetalleIndumentarium?.cantidadIndumentaria || 0,
-        idIndumentaria: item.idDetalle
+        categoria:
+          item.DetalleIndumentarium?.CategoriaIndumentarium?.categoria ||
+          "Sin categoría",
+        precio: parseFloat(
+          item.DetalleIndumentarium?.PrecioIndumentarium?.precio || "0"
+        ),
+        estado:
+          item.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria ||
+          "Sin estado",
+        cantidadIndumentaria:
+          item.DetalleIndumentarium?.cantidadIndumentaria || 0,
+        idIndumentaria: item.idDetalle,
       }));
       setIndumentaria(indumentariaMapeada);
     });
@@ -99,7 +109,7 @@ const AltaPedido: React.FC = () => {
 
   // Almacenar datos de pedido para procesamiento posterior
   const [datosDelPedido, setDatosDelPedido] = useState<any>(null);
-  
+
   // Cargar datos si es edición
   useEffect(() => {
     if (esEdicion && id) {
@@ -115,16 +125,17 @@ const AltaPedido: React.FC = () => {
               : "",
             idEstado: res.data.idEstado?.toString() || "",
           });
-          
+
           // Guardar los datos del pedido para procesarlos cuando tengamos el catálogo
           if (res.data.DetallePedidos) {
             setDatosDelPedido(res.data.DetallePedidos);
           }
-        
         } catch (error: any) {
           console.error("Error al cargar el pedido:", error);
           if (error.response?.status === 401) {
-            setAlertMsg("Error de autenticación. Por favor, inicie sesión nuevamente.");
+            setAlertMsg(
+              "Error de autenticación. Por favor, inicie sesión nuevamente."
+            );
           } else if (error.response?.status === 404) {
             setAlertMsg("Pedido no encontrado.");
           } else if (error.response?.data?.error) {
@@ -145,9 +156,9 @@ const AltaPedido: React.FC = () => {
       const prendasDelPedido = datosDelPedido.map((detalle: any) => {
         // Buscamos en el catálogo la información completa de esta indumentaria
         const indumentariaEnCatalogo = indumentaria.find(
-          item => item.codigoIndumentaria === detalle.codigoIndumentaria
+          (item) => item.codigoIndumentaria === detalle.codigoIndumentaria
         );
-        
+
         // Si la encontramos en el catálogo, usamos los datos más completos
         if (indumentariaEnCatalogo) {
           return {
@@ -156,31 +167,31 @@ const AltaPedido: React.FC = () => {
             color: indumentariaEnCatalogo.color || "Sin color",
             talle: indumentariaEnCatalogo.talle || "Sin talle",
             nombreTela: indumentariaEnCatalogo.nombreTela || "Sin tela",
-            cantidad: detalle.cantidad
+            cantidad: detalle.cantidad,
           };
         } else {
           // Si no está en el catálogo, usamos los datos del detalle
           return {
             codigoIndumentaria: detalle.codigoIndumentaria,
             nombre:
-              detalle.Indumentarium?.DetalleIndumentarium
-                ?.NombreIndumentarium?.nombre ||
+              detalle.Indumentarium?.DetalleIndumentarium?.NombreIndumentarium
+                ?.nombre ||
               detalle.codigoIndumentaria ||
               "Sin nombre",
-            color: 
-              detalle.Indumentarium?.DetalleIndumentarium
-                ?.Color?.color || "Sin color",
+            color:
+              detalle.Indumentarium?.DetalleIndumentarium?.Color?.color ||
+              "Sin color",
             talle:
-              detalle.Indumentarium?.DetalleIndumentarium
-                ?.Talle?.talle || "Sin talle",
+              detalle.Indumentarium?.DetalleIndumentarium?.Talle?.talle ||
+              "Sin talle",
             nombreTela:
-              detalle.Indumentarium?.DetalleIndumentarium
-                ?.TelaIndumentarium?.tipoTela || "Sin tela",
+              detalle.Indumentarium?.DetalleIndumentarium?.TelaIndumentarium
+                ?.tipoTela || "Sin tela",
             cantidad: detalle.cantidad,
           };
         }
       });
-      
+
       setPrendasSeleccionadas(prendasDelPedido);
     }
   }, [datosDelPedido, indumentaria]);
@@ -208,9 +219,9 @@ const AltaPedido: React.FC = () => {
       {
         codigoIndumentaria: prenda.codigoIndumentaria,
         nombre: prenda.nombre,
-        color: prenda.color || 'Sin color',
-        talle: prenda.talle || 'Sin talle',
-        nombreTela: prenda.nombreTela || 'Sin tela',
+        color: prenda.color || "Sin color",
+        talle: prenda.talle || "Sin talle",
+        nombreTela: prenda.nombreTela || "Sin tela",
         cantidad,
       },
     ]);
@@ -232,7 +243,7 @@ const AltaPedido: React.FC = () => {
       setShowAlert(true);
       return;
     }
-    
+
     // Validar que el cliente esté activo
     const validacion = validarClienteActivo(Number(form.idCliente));
     if (!validacion.esValido) {
@@ -240,7 +251,7 @@ const AltaPedido: React.FC = () => {
       setShowAlert(true);
       return;
     }
-    
+
     if (prendasSeleccionadas.length === 0) {
       setAlertMsg("Debes agregar al menos un producto al pedido.");
       setShowAlert(true);
@@ -274,7 +285,8 @@ const AltaPedido: React.FC = () => {
 
   // --- Filtro de clientes ---
   const clientesFiltrados = (clientes ?? []).filter((c) => {
-    if (!c || (typeof c.nombre !== "string" && typeof c.apellido !== "string")) return false; // Evita elementos undefined o sin nombre/apellido string
+    if (!c || (typeof c.nombre !== "string" && typeof c.apellido !== "string"))
+      return false; // Evita elementos undefined o sin nombre/apellido string
     const normalizar = (str: string) =>
       (str ?? "")
         .toLowerCase()
@@ -290,14 +302,16 @@ const AltaPedido: React.FC = () => {
 
   // --- Validación de cliente activo ---
   const validarClienteActivo = (clienteId: number) => {
-    const cliente = clientes.find(c => c.id === clienteId);
+    const cliente = clientes.find((c) => c.id === clienteId);
     if (!cliente) {
       return { esValido: false, mensaje: "Cliente no encontrado" };
     }
     if (cliente.estaActivo === 0) {
-      return { 
-        esValido: false, 
-        mensaje: `El cliente ${cliente.nombre} ${cliente.apellido || ''} está dado de baja, no se le puede asignar un pedido.`.trim()
+      return {
+        esValido: false,
+        mensaje: `El cliente ${cliente.nombre} ${
+          cliente.apellido || ""
+        } está dado de baja, no se le puede asignar un pedido.`.trim(),
       };
     }
     return { esValido: true, mensaje: "" };
@@ -311,7 +325,7 @@ const AltaPedido: React.FC = () => {
       setShowAlert(true);
       return;
     }
-    
+
     setForm({
       ...form,
       idCliente: cliente.id.toString(),
@@ -337,7 +351,9 @@ const AltaPedido: React.FC = () => {
           <div className="titulo">
             <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
             <IonTitle>
-              {esEdicion ? "Editar Pedido" : "Registrar Pedido"}
+              {esEdicion
+                ? `Editar Pedido${id ? ` #${id}` : ""}`
+                : "Registrar Pedido"}
             </IonTitle>
           </div>
           <IonItem>
@@ -359,13 +375,22 @@ const AltaPedido: React.FC = () => {
               <IonItem key={prenda.codigoIndumentaria} className="prenda-item">
                 <div className="prenda-info">
                   <div className="prenda-title">
-                    <strong>{prenda.nombre}</strong> <small>({prenda.codigoIndumentaria})</small>
+                    <strong>{prenda.nombre}</strong>{" "}
+                    <small>({prenda.codigoIndumentaria})</small>
                   </div>
                   <div className="prenda-details">
-                    <span className="detail-tag color">Color: {prenda.color}</span>
-                    <span className="detail-tag talle">Talle: {prenda.talle}</span>
-                    <span className="detail-tag tela">Tela: {prenda.nombreTela}</span>
-                    <span className="detail-tag cantidad">Cant: {prenda.cantidad}</span>
+                    <span className="detail-tag color">
+                      Color: {prenda.color}
+                    </span>
+                    <span className="detail-tag talle">
+                      Talle: {prenda.talle}
+                    </span>
+                    <span className="detail-tag tela">
+                      Tela: {prenda.nombreTela}
+                    </span>
+                    <span className="detail-tag cantidad">
+                      Cant: {prenda.cantidad}
+                    </span>
                   </div>
                 </div>
                 <div className="prenda-actions">
@@ -385,7 +410,7 @@ const AltaPedido: React.FC = () => {
                     size="small"
                   >
                     -
-                    </IonButton>
+                  </IonButton>
                   <IonButton
                     onClick={() => {
                       // Stock real en base de datos
@@ -495,12 +520,15 @@ const AltaPedido: React.FC = () => {
                   key={c.id}
                   button
                   onClick={() => seleccionarCliente(c)}
-                  className={c.estaActivo === 0 ? 'cliente-inactivo' : 'cliente-activo'}
+                  className={
+                    c.estaActivo === 0 ? "cliente-inactivo" : "cliente-activo"
+                  }
                 >
                   <IonLabel>
                     <div className="cliente-info">
                       <div className="cliente-nombre">
-                        {`${c.nombre} ${c.apellido || ""}`} ({c.numeroDocumento})
+                        {`${c.nombre} ${c.apellido || ""}`} ({c.numeroDocumento}
+                        )
                       </div>
                       <div className="cliente-estado">
                         {c.estaActivo === 0 ? (
