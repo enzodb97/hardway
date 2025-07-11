@@ -46,7 +46,7 @@ import {
 } from "ionicons/icons";
 import { useState } from "react";
 import { useClientes } from "../../context/ClientesContext";
-import HistorialCliente from "../../components/HistorialCliente";
+import HistorialCliente from "./HistorialCliente";
 import "./Clientes.css";
 import { exportarClientesPDF } from "../../utils/clientesUtils";
 
