@@ -17,8 +17,8 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(253, 180, 11, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.08) 0%, transparent 50%),
     linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   z-index: -1;
 }
@@ -30,9 +30,9 @@
 }
 
 .alta-pedido-page ion-header ion-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   --color: white;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -83,7 +83,7 @@
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   padding: 40px 20px;
   margin: -20px -20px 30px -20px;
   position: relative;
@@ -225,7 +225,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #fdb40b 0%, #ff9500 100%);
 }
 
 .card-title {
@@ -240,7 +240,7 @@
 
 .card-title ion-icon {
   font-size: 1.3em;
-  color: #667eea;
+  color: #fdb40b;
 }
 
 .card-subtitle {
@@ -272,8 +272,8 @@
 .form-item:hover,
 .form-item.item-has-focus {
   
-  --border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  --border-color: #fdb40b;
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.1);
   transform: translateY(-1px);
 }
 
@@ -292,27 +292,27 @@
 
 /* Botones principales */
 .button-primary {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --background-activated: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --background-activated: linear-gradient(135deg, #e6a309 0%, #e68500 100%);
   --color: white;
   --border-radius: 12px;
   font-weight: 600;
   font-size: 1em;
   height: 48px;
   margin: 8px 0;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
   transition: all 0.3s ease;
 }
 
 .button-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 24px rgba(253, 180, 11, 0.4);
 }
 
 .button-secondary {
   --background: white;
-  --color: #667eea;
-  --border-color: #667eea;
+  --color: #fdb40b;
+  --border-color: #fdb40b;
   --border-width: 2px;
   --border-radius: 12px;
   font-weight: 600;
@@ -323,10 +323,10 @@
 }
 
 .button-secondary:hover {
-  --background: #667eea;
+  --background: #fdb40b;
   --color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.2);
 }
 
 .button-success {
@@ -384,11 +384,11 @@
 }
 
 .prendas-title ion-icon {
-  color: #667eea;
+  color: #fdb40b;
 }
 
 .prendas-counter {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -426,9 +426,9 @@
 }
 
 .prenda-card:hover {
-  border-color: #667eea;
+  border-color: #fdb40b;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 8px 24px rgba(253, 180, 11, 0.15);
 }
 
 .prenda-header {
@@ -495,7 +495,7 @@
 }
 
 .quantity-value {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   color: white;
   padding: 4px 12px;
   border-radius: 20px;
@@ -754,8 +754,8 @@
 
 /* Focus states mejorados */
 .form-item:focus-within {
-  --border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  --border-color: #fdb40b;
+  box-shadow: 0 0 0 3px rgba(253, 180, 11, 0.1);
 }
 
 /* Mejoras de accesibilidad */
@@ -856,24 +856,24 @@
 }
 
 .alta-pedido-form ion-button[expand="block"]:not([color]) {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   --color: white;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
 }
 
 .alta-pedido-form ion-button[expand="block"]:not([color]):hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
 }
 
 .alta-pedido-form ion-button[type="submit"] {
-  --background: linear-gradient(135deg, #feaf00 0%, #f59e0b 100%);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   margin-top: 24px;
-  box-shadow: 0 4px 16px rgba(254, 175, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
 }
 
 .alta-pedido-form ion-button[type="submit"]:hover {
-  box-shadow: 0 6px 20px rgba(254, 175, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
 }
 
 /* Sección de prendas seleccionadas */
@@ -891,7 +891,7 @@
   --padding-top: 16px;
   --padding-bottom: 16px;
   margin-bottom: 0;
-  border-left: 4px solid #feaf00;
+  border-left: 4px solid #fdb40b;
   border-radius: 0;
   background: white;
   border-bottom: 1px solid #f1f5f9;
@@ -1014,7 +1014,7 @@ ion-modal {
 
 /* Modal headers */
 ion-modal ion-header ion-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   --color: white;
   --border-radius: 20px 20px 0 0;
 }
@@ -1063,8 +1063,8 @@ ion-modal ion-item:hover {
 }
 
 .indumentaria-item:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+  border-color: #fdb40b;
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.1);
   transform: translateY(-2px);
 }
 

@@ -17,7 +17,7 @@
 
 /* Header del modal */
 .historial-header ion-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   --color: white;
   --border-radius: 16px 16px 0 0;
 }
@@ -50,7 +50,7 @@
 
 /* Header del cliente */
 .cliente-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   color: white;
   padding: 20px;
   display: flex;
@@ -61,7 +61,7 @@
 }
 
 .cliente-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -141,6 +141,10 @@
   padding: 60px 20px;
   text-align: center;
   min-height: 300px;
+  height: 100%;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
 }
 
 .empty-icon {
@@ -436,39 +440,39 @@
     --height: 100vh;
     --border-radius: 0;
   }
-  
+
   .cliente-header {
     padding: 16px;
   }
-  
+
   .cliente-avatar {
     width: 50px;
     height: 50px;
   }
-  
+
   .cliente-info h2 {
     font-size: 1.2em;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .timeline-header-content {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .marker-icon {
     width: 32px;
     height: 32px;
   }
-  
+
   .marker-icon ion-icon {
     font-size: 1em;
   }
-  
+
   .historial-container {
     padding: 16px;
   }
@@ -480,15 +484,15 @@
     text-align: center;
     gap: 12px;
   }
-  
+
   .timeline-marker {
     margin-right: 12px;
   }
-  
+
   .fecha-info {
     padding: 8px;
   }
-  
+
   .fecha-relativa {
     margin-left: 16px;
   }
@@ -510,11 +514,21 @@
   animation: slideInUp 0.4s ease-out;
 }
 
-.timeline-item:nth-child(1) { animation-delay: 0.1s; }
-.timeline-item:nth-child(2) { animation-delay: 0.2s; }
-.timeline-item:nth-child(3) { animation-delay: 0.3s; }
-.timeline-item:nth-child(4) { animation-delay: 0.4s; }
-.timeline-item:nth-child(5) { animation-delay: 0.5s; }
+.timeline-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.timeline-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.timeline-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.timeline-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.timeline-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
 
 /* Scroll personalizado */
 .historial-content::-webkit-scrollbar {

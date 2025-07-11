@@ -239,7 +239,7 @@
 }*/
 
 .input-obligatorio::placeholder {
-  color: #e67e22 !important;
+  color: #fdb40b !important;
   opacity: 1 !important;
   font-size: 0.95em;
   font-weight: 500;
@@ -247,8 +247,8 @@
 
 /* Mejoras adicionales para campos obligatorios */
 .input-obligatorio {
-  --border-color: #e67e22 !important;
-  --color: #e67e22 !important;
+  --border-color: #fdb40b !important;
+  --color: #fdb40b !important;
 }
 
 /* Estilo para labels con asterisco */
