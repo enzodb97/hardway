@@ -94,6 +94,7 @@
   border: 1px solid #e1e8ed;
   transition: all 0.2s ease;
   overflow: visible;
+  color: #2d3436;
 }
 
 .alta-cliente-form ion-item:hover {

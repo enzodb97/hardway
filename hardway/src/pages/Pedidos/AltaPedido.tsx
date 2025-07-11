@@ -14,7 +14,18 @@ import {
   IonMenuButton,
   IonModal,
   IonList,
+  IonIcon,
 } from "@ionic/react";
+import { 
+  person, 
+  shirt, 
+  list, 
+  shirtOutline, 
+  add, 
+  arrowBack, 
+  checkmark, 
+  save 
+} from "ionicons/icons";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
 import axiosInstance from "../../config/axios";
@@ -341,131 +352,171 @@ const AltaPedido: React.FC = () => {
           <IonMenuButton slot="start" />
           <IonTitle>
             {esEdicion
-              ? `Editar Pedido${id ? ` #${id}` : ""}`
-              : "Registrar Pedido"}
+              ? `Editar Pedido`
+              : "Nuevo Pedido"}
           </IonTitle>
         </IonToolbar>
       </IonHeader>
+      
       <IonContent className="alta-pedido-content">
-        <form className="alta-pedido-form" onSubmit={handleSubmit}>
-          <div className="titulo">
-            <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
-            <IonTitle>
-              {esEdicion
-                ? `Editar Pedido${id ? ` #${id}` : ""}`
-                : "Registrar Pedido"}
-            </IonTitle>
+        <div className="form-container">
+          {/* Hero Section */}
+          <div className="hero-section">
+            <div className="hero-content">
+              <img src={zepelin} alt="Hardway Logo" className="brand-logo" />
+              <h1 className="hero-title">
+                            {esEdicion
+              ? `Editar Pedido #${id}`
+              : " Crear Nuevo Pedido"}
+              </h1>
+              <p className="hero-subtitle">
+                {esEdicion 
+                  ? "Modifica los detalles del pedido existente"
+                  : "Registra un nuevo pedido para tu cliente"
+                }
+              </p>
+            </div>
           </div>
-          <IonItem>
-            <IonLabel position="floating">Cliente ID</IonLabel>
-            <IonInput value={form.idCliente} readonly />
-          </IonItem>
-          <IonItem button onClick={() => setShowClienteModal(true)}>
-            <IonLabel position="floating">Cliente</IonLabel>
-            <IonInput
-              value={form.clienteNombre}
-              placeholder="Seleccionar cliente"
-              readonly
-              required
-            />
-          </IonItem>
-          {/* --- Prendas seleccionadas --- */}
-          <IonList className="prendas-seleccionadas">
-            {prendasSeleccionadas.map((prenda, idx) => (
-              <IonItem key={prenda.codigoIndumentaria} className="prenda-item">
-                <div className="prenda-info">
-                  <div className="prenda-title">
-                    <strong>{prenda.nombre}</strong>{" "}
-                    <small>({prenda.codigoIndumentaria})</small>
-                  </div>
-                  <div className="prenda-details">
-                    <span className="detail-tag color">
-                      Color: {prenda.color}
-                    </span>
-                    <span className="detail-tag talle">
-                      Talle: {prenda.talle}
-                    </span>
-                    <span className="detail-tag tela">
-                      Tela: {prenda.nombreTela}
-                    </span>
-                    <span className="detail-tag cantidad">
-                      Cant: {prenda.cantidad}
-                    </span>
-                  </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid">
+              {/* Card de Cliente */}
+              <div className="form-card cliente-card">
+                <div className="card-header">
+                  <h3 className="card-title">
+                    <IonIcon icon={person} />
+                    Información del Cliente
+                  </h3>
+                  <p className="card-subtitle">Selecciona el cliente para este pedido</p>
                 </div>
-                <div className="prenda-actions">
-                  <IonButton
-                    onClick={() => {
-                      setPrendasSeleccionadas((prev) =>
-                        prev.map((p, i) =>
-                          i === idx && p.cantidad > 1
-                            ? { ...p, cantidad: p.cantidad - 1 }
-                            : p
-                        )
-                      );
-                    }}
-                    disabled={prenda.cantidad <= 1}
-                    color="medium"
-                    type="button"
-                    size="small"
+                <div className="card-content">
+                  <IonItem 
+                    className={`form-item ${esEdicion ? 'disabled' : ''}`} 
+                    button={!esEdicion}
+                    onClick={esEdicion ? undefined : () => setShowClienteModal(true)}
                   >
-                    -
-                  </IonButton>
+                    <IonLabel position="floating">Cliente</IonLabel>
+                    <IonInput
+                      value={form.clienteNombre}
+                      placeholder={esEdicion ? "Cliente del pedido" : "Toca para seleccionar un cliente"}
+                      readonly
+                      required
+                    />
+                  </IonItem>
+                  {form.idCliente && (
+                    <IonItem className="form-item">
+                      <IonLabel position="floating">ID del Cliente</IonLabel>
+                      <IonInput value={form.idCliente} readonly />
+                    </IonItem>
+                  )}
+                </div>
+              </div>
+
+              {/* Card de Prendas */}
+              <div className="form-card full-width">
+                <div className="card-header">
+                  <h3 className="card-title">
+                    <IonIcon icon={shirt} />
+                    Indumentaria del Pedido
+                  </h3>
+                  <p className="card-subtitle">Agrega las Indumentaira que incluirá este pedido</p>
+                </div>
+                <div className="card-content">
+                  <div className="prendas-header">
+                    <div className="prendas-title">
+                      <IonIcon icon={list} />
+                      Indumentarias Seleccionadas
+                    </div>
+                    <div className="prendas-counter">
+                      {prendasSeleccionadas.length} {prendasSeleccionadas.length === 1 ? 'prenda' : 'prendas'}
+                    </div>
+                  </div>
+
+                  {prendasSeleccionadas.length === 0 ? (
+                    <div className="empty-state">
+                      <IonIcon icon={shirtOutline} className="empty-icon" />
+                      <h4 className="empty-title">No hay prendas agregadas</h4>
+                      <p className="empty-description">
+                        Haz clic en "Agregar Indumentria" para comenzar a construir tu pedido
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="prendas-list">
+                      {prendasSeleccionadas.map((prenda) => (
+                        <div key={prenda.codigoIndumentaria} className="prenda-card">
+                          <button
+                            className="remove-button"
+                            onClick={() => eliminarPrenda(prenda.codigoIndumentaria)}
+                            title="Quitar prenda"
+                          >
+                            ×
+                          </button>
+                          
+                          <div className="prenda-header">
+                            <div className="prenda-title-section">
+                              <h4 className="prenda-name">{prenda.nombre}</h4>
+                              <div className="prenda-code">{prenda.codigoIndumentaria}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="prenda-details">
+                            <div className="prenda-detail">
+                              <strong>Color:</strong> {prenda.color}
+                            </div>
+                            <div className="prenda-detail">
+                              <strong>Talle:</strong> {prenda.talle}
+                            </div>
+                            <div className="prenda-detail">
+                              <strong>Tela:</strong> {prenda.nombreTela}
+                            </div>
+                          </div>
+                          
+                          <div className="prenda-quantity">
+                            <span className="quantity-label">Cantidad:</span>
+                            <div className="quantity-value">{prenda.cantidad}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <IonButton
-                    onClick={() => {
-                      // Stock real en base de datos
-                      const stockReal =
-                        indumentaria.find(
-                          (i) =>
-                            i.codigoIndumentaria === prenda.codigoIndumentaria
-                        )?.cantidadIndumentaria ?? 0;
-
-                      // Stock disponible = stock real - cantidad seleccionada actualmente
-                      const stockDisponible = stockReal - prenda.cantidad;
-
-                      if (stockDisponible <= 0) {
-                        setAlertMsg(
-                          `Stock del producto insuficiente, el stock actual es: ${stockReal}`
-                        );
-                        setShowAlert(true);
-                        return;
-                      }
-
-                      setPrendasSeleccionadas((prev) =>
-                        prev.map((p, i) =>
-                          i === idx ? { ...p, cantidad: p.cantidad + 1 } : p
-                        )
-                      );
-                    }}
-                    color="medium"
-                    type="button"
-                    size="small"
+                    className="button-secondary"
+                    expand="block"
+                    onClick={() => setShowIndumentariaModal(true)}
                   >
-                    +
-                  </IonButton>
-                  <IonButton
-                    color="danger"
-                    onClick={() => eliminarPrenda(prenda.codigoIndumentaria)}
-                    type="button"
-                    size="small"
-                  >
-                    Quitar
+                    <IonIcon icon={add} slot="start" />
+                    Agregar Indumentaria
                   </IonButton>
                 </div>
-              </IonItem>
-            ))}
-          </IonList>
-          <IonButton
-            expand="block"
-            onClick={() => setShowIndumentariaModal(true)}
-            type="button"
-          >
-            Agregar Indumentaria
-          </IonButton>
-          <IonButton expand="block" type="submit">
-            {esEdicion ? "Guardar Cambios" : "Guardar Pedido"}
-          </IonButton>
-        </form>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <IonButton
+                className="button-danger"
+                fill="outline"
+                expand="block"
+                onClick={() => history.goBack()}
+              >
+                <IonIcon icon={arrowBack} slot="start" />
+                Cancelar
+              </IonButton>
+              
+              <IonButton
+                className="button-success"
+                type="submit"
+                expand="block"
+                disabled={!form.idCliente || prendasSeleccionadas.length === 0}
+              >
+                <IonIcon icon={esEdicion ? save : checkmark} slot="start" />
+                {esEdicion ? "Guardar Cambios" : "Crear Pedido"}
+              </IonButton>
+            </div>
+          </form>
+        </div>
+
+        {/* Alertas */}
         <IonAlert
           isOpen={showAlert}
           message={alertMsg}

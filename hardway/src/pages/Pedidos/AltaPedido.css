@@ -1,164 +1,1108 @@
-/* Estructura principal */
+/* ========================================
+   ALTA DE PEDIDOS - ESTILOS PROFESIONALES
+   ======================================== */
 
+/* Página principal */
 .alta-pedido-page {
-  --ion-background-color: #feaf00;
+  --ion-background-color: #f8fafc;
   min-height: 100vh;
+  position: relative;
 }
 
-.titulo {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-}
-.indumentaria-modal {
-  --width: 700px;
-}
-
-.cantidad-input {
-  width: 100px;
-}
-.indumentaria-label {
-  width: 80% !important; /* Ocupa todo el ancho disponible */
-  /*min-width: 450px !important; /* Puedes aumentar este valor si quieres aún más ancho */
-  font-size: 1.2rem !important; /* Aumenta el tamaño de la fuente */
-  font-weight: 500;
-  display: block !important;
-  white-space: normal;
-  flex-wrap: wrap;
+.alta-pedido-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  z-index: -1;
 }
 
-/* Estilos para prendas seleccionadas */
-.prendas-seleccionadas {
-  margin: 15px 0;
-  border-radius: 8px;
+/* Header personalizado */
+.alta-pedido-page ion-header {
+  position: relative;
+  z-index: 10;
+}
+
+.alta-pedido-page ion-header ion-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  position: relative;
   overflow: hidden;
 }
 
-.prenda-item {
-  --padding-start: 12px;
-  --padding-end: 12px;
-  --padding-top: 10px;
-  --padding-bottom: 10px;
-  margin-bottom: 8px;
-  border-left: 3px solid #feaf00;
+.alta-pedido-page ion-header ion-toolbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+  pointer-events: none;
+}
+
+.alta-pedido-page ion-title {
+  font-weight: 700;
+  font-size: 1.3em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alta-pedido-page ion-menu-button,
+.alta-pedido-page ion-button {
+  position: relative;
+  z-index: 1;
+}
+
+/* Contenido principal */
+.alta-pedido-content {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 20px;
+  background: transparent;
+}
+
+/* Container principal */
+.form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+  margin: -20px -20px 30px -20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="hero-pattern" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="10" cy="30" r="1" fill="white" opacity="0.08"/><circle cx="30" cy="10" r="1.5" fill="white" opacity="0.06"/></pattern></defs><rect width="100" height="100" fill="url(%23hero-pattern)"/></svg>');
+  pointer-events: none;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-logo {
+  width: 90px;
+  height: 90px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
+  transition: all 0.3s ease;
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+.brand-logo:hover {
+  transform: scale(1.08) rotateY(15deg);
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.hero-title {
+  color: white;
+  font-size: 2.2em;
+  font-weight: 800;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1em;
+  font-weight: 400;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Cards Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 0;
+}
+
+@media (min-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .form-grid .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Card del cliente - Siempre 100% del ancho */
+.form-card.cliente-card {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  flex: 1 1 100% !important;
+}
+
+/* Separación específica para la card del cliente */
+.cliente-card .card-content {
+  padding: 32px 24px 28px 24px;
+}
+
+.cliente-card .form-item {
+  margin-bottom: 26px;
+}
+
+.cliente-card .form-item:last-child {
+  margin-bottom: 0;
+}
+
+.cliente-card .card-title {
+  gap: 14px;
+  margin-bottom: 2px;
+}
+
+/* Card Styles */
+.form-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(230, 235, 245, 0.8);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.form-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 20px 24px 18px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #334155;
+  margin: 0;
+}
+
+.card-title ion-icon {
+  font-size: 1.3em;
+  color: #667eea;
+}
+
+.card-subtitle {
+  font-size: 0.9em;
+  color: #64748b;
+  margin: 6px 0 0 0;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.card-content {
+  padding: 28px 24px 24px 24px;
+}
+
+/* Form Items */
+.form-item {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  --border-radius: 12px;
+  --background: #f8fafc;
+  --border-color: #e2e8f0;
+  --border-width: 1px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.form-item:hover,
+.form-item.item-has-focus {
+  
+  --border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.form-item ion-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95em;
+}
+
+.form-item ion-input,
+.form-item ion-textarea {
+  --color: #1f2937;
+  font-size: 1em;
+  font-weight: 500;
+}
+
+/* Botones principales */
+.button-primary {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background-activated: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%);
+  --color: white;
+  --border-radius: 12px;
+  font-weight: 600;
+  font-size: 1em;
+  height: 48px;
+  margin: 8px 0;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.button-secondary {
+  --background: white;
+  --color: #667eea;
+  --border-color: #667eea;
+  --border-width: 2px;
+  --border-radius: 12px;
+  font-weight: 600;
+  font-size: 1em;
+  height: 48px;
+  margin: 8px 0;
+  transition: all 0.3s ease;
+}
+
+.button-secondary:hover {
+  --background: #667eea;
+  --color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+}
+
+.button-success {
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --background-activated: linear-gradient(135deg, #0ea975 0%, #047857 100%);
+  --color: white;
+  --border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+}
+
+.button-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.button-danger {
+  --background: transparent;
+  --background-activated: #fef2f2;
+  --color: #ef4444;
+  --border-color: #ef4444;
+  --border-width: 2px;
+  --border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+  transition: all 0.3s ease;
+}
+
+.button-danger:hover {
+  --background: #ef4444;
+  --color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+}
+
+/* Sección de prendas */
+.prendas-section {
+  margin-top: 32px;
+}
+
+.prendas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 8px;
+}
+
+.prendas-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #334155;
+}
+
+.prendas-title ion-icon {
+  color: #667eea;
+}
+
+.prendas-counter {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+/* Lista de prendas */
+.prendas-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .prendas-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .prendas-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.prenda-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.prenda-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+}
+
+.prenda-header {
+  margin-bottom: 12px;
+  padding-right: 36px; /* Espacio para el botón de quitar */
+}
+
+.prenda-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prenda-name {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.1em;
+  margin: 0;
+  line-height: 1.3;
+  word-wrap: break-word;
+}
+
+.prenda-code {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8em;
+  font-weight: 600;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.prenda-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.prenda-detail {
+  font-size: 0.9em;
+  color: #b2b4b8;
+}
+
+.prenda-detail strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.prenda-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.quantity-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9em;
+}
+
+.quantity-value {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.1em;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Botón quitar prenda - Simple X */
+.remove-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: #ef4444;
+  color: white;
+  border: none;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.2s ease;
+  z-index: 10;
+  --background: #ef4444;
+  --color: white;
+  --border-radius: 4px;
+  --box-shadow: none;
+}
+
+.remove-button:hover {
+  background: #dc2626;
+  --background: #dc2626;
+}
+
+.remove-button:active {
+  background: #b91c1c;
+  --background: #b91c1c;
+}
+
+/* Estados vacíos */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+  margin: 20px 0;
+}
+
+.empty-icon {
+  font-size: 3em;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.empty-description {
+  color: #94a3b8;
+  font-size: 0.95em;
+  margin: 0;
+}
+
+/* Acciones del formulario */
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.form-actions ion-button {
+  flex: 1;
+  height: 52px !important;
+  margin: 0 !important;
+  --height: 52px;
+  font-size: 1.05em;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-actions ion-button {
+    height: 48px !important;
+    --height: 48px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .form-container {
+    padding: 16px;
+  }
+  
+  .hero-section {
+    padding: 30px 16px;
+    margin: -16px -16px 24px -16px;
+  }
+  
+  .brand-logo {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .hero-title {
+    font-size: 1.8em;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    padding: 12px;
+  }
+  
+  .hero-section {
+    padding: 24px 12px;
+    margin: -12px -12px 20px -12px;
+  }
+  
+  .brand-logo {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .hero-title {
+    font-size: 1.6em;
+  }
+  
+  .hero-subtitle {
+    font-size: 1em;
+  }
+  
+  .card-content {
+    padding: 24px 20px 20px 20px;
+  }
+  
+  .card-header {
+    padding: 16px 20px 14px 20px;
+  }
+
+  .cliente-card .card-content {
+    padding: 28px 20px 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 8px;
+  }
+  
+  .hero-section {
+    padding: 20px 8px;
+    margin: -8px -8px 16px -8px;
+  }
+  
+  .brand-logo {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .hero-title {
+    font-size: 1.4em;
+  }
+  
+  .card-content {
+    padding: 20px 16px 16px 16px;
+  }
+  
+  .card-header {
+    padding: 12px 16px 10px 16px;
+  }
+
+  .cliente-card .card-content {
+    padding: 24px 16px 20px 16px;
+  }
+  
+  .card-title {
+    font-size: 1.1em;
+  }
+  
+  .prendas-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+}
+
+/* Animaciones mejoradas */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.form-card {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.form-card:nth-child(1) { animation-delay: 0.1s; }
+.form-card:nth-child(2) { animation-delay: 0.2s; }
+.form-card:nth-child(3) { animation-delay: 0.3s; }
+
+.prenda-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.hero-content {
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Loading states */
+.form-item.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.button-primary.loading,
+.button-success.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Focus states mejorados */
+.form-item:focus-within {
+  --border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .brand-logo {
+    animation: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .alta-pedido-page::before {
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+      linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  }
+  
+  .form-card {
+    background: #334155;
+    border-color: #475569;
+  }
+  
+  .card-header {
+    background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+    border-color: #64748b;
+  }
+  
+  .card-title {
+    color: #f1f5f9;
+  }
+  
+  .card-subtitle {
+    color: #cbd5e1;
+  }
+  
+  .form-item {
+    --background: #475569;
+    --border-color: #64748b;
+    --color: #f1f5f9;
+  }
+  
+  .prenda-card {
+    background: #475569;
+    border-color: #64748b;
+  }
+  
+  .prenda-name {
+    color: #f1f5f9;
+  }
+  
+  .empty-state {
+    background: #475569;
+    border-color: #64748b;
+  }
+  
+  .empty-title {
+    color: #e2e8f0;
+  }
+  
+  .empty-description {
+    color: #cbd5e1;
+  }
+}
+
+.alta-pedido-form ion-label {
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.alta-pedido-form ion-input {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.alta-pedido-form ion-input[readonly] {
+  opacity: 0.7;
+  background: #f3f4f6;
+}
+
+/* Botones principales */
+.alta-pedido-form ion-button[expand="block"] {
+  margin-top: 16px;
+  height: 48px;
+  font-weight: 600;
+  font-size: 1em;
+  --border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.alta-pedido-form ion-button[expand="block"]:not([color]) {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.alta-pedido-form ion-button[expand="block"]:not([color]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.alta-pedido-form ion-button[type="submit"] {
+  --background: linear-gradient(135deg, #feaf00 0%, #f59e0b 100%);
+  margin-top: 24px;
+  box-shadow: 0 4px 16px rgba(254, 175, 0, 0.3);
+}
+
+.alta-pedido-form ion-button[type="submit"]:hover {
+  box-shadow: 0 6px 20px rgba(254, 175, 0, 0.4);
+}
+
+/* Sección de prendas seleccionadas */
+.prendas-seleccionadas {
+  margin: 20px 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.prenda-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  margin-bottom: 0;
+  border-left: 4px solid #feaf00;
+  border-radius: 0;
+  background: white;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.prenda-item:last-child {
+  border-bottom: none;
+}
+
+.prenda-item:hover {
+  background: #f8fafc;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .prenda-info {
   flex: 1;
   min-width: 0;
-  padding-right: 10px;
+  padding-right: 16px;
 }
 
 .prenda-title {
-  font-size: 16px;
+  font-size: 1.1em;
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  color: #1f2937;
 }
 
 .prenda-title small {
-  color: #666;
-  font-weight: normal;
-  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.85em;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 8px;
 }
 
 .prenda-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 5px;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .detail-tag {
-  background-color: #f5f5f5;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  color: #333;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 500;
+  border: 1px solid;
+  transition: all 0.2s ease;
 }
 
 .detail-tag.color {
-  background-color: #ffe0b2;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #f59e0b;
+  color: #92400e;
 }
 
 .detail-tag.talle {
-  background-color: #c8e6c9;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #10b981;
+  color: #065f46;
 }
 
 .detail-tag.tela {
-  background-color: #bbdefb;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #3b82f6;
+  color: #1e40af;
 }
 
 .detail-tag.cantidad {
-  background-color: #e1bee7;
-  font-weight: bold;
+  background: linear-gradient(135deg, #e879f9 0%, #d946ef 100%);
+  border-color: #c026d3;
+  color: white;
+  font-weight: 600;
 }
 
 .prenda-actions {
   display: flex;
-  gap: 5px;
-}
-
-.alta-pedido-form ion-title {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.alta-pedido-content {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
+  gap: 8px;
   align-items: center;
 }
 
-.alta-pedido-form {
+.prenda-actions ion-button {
+  --border-radius: 8px;
+  font-weight: 500;
+  height: 36px;
+  min-width: 36px;
+}
+
+.prenda-actions ion-button[color="medium"] {
+  --background: #f3f4f6;
+  --color: #374151;
+  --border: 1px solid #d1d5db;
+}
+
+.prenda-actions ion-button[color="danger"] {
+  --background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+/* Modales */
+.indumentaria-modal,
+ion-modal {
+  --border-radius: 20px;
+  --box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.indumentaria-modal {
+  --width: 90vw;
+  --max-width: 800px;
+  --height: 80vh;
+}
+
+/* Modal headers */
+ion-modal ion-header ion-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-radius: 20px 20px 0 0;
+}
+
+ion-modal ion-title {
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal content */
+ion-modal ion-content {
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  --background: #f8fafc;
+}
+
+/* Items del modal */
+ion-modal ion-item {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  --background: white;
+  --border-color: #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
+ion-modal ion-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Lista de indumentaria */
+.indumentaria-list {
+  background: transparent;
+}
+
+.indumentaria-item {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-  width: 100%;
-  max-width: 500px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.alta-pedido-form ion-item {
-  margin-bottom: 18px;
+.indumentaria-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
 }
 
-.alta-pedido-form ion-item ion-input {
-  margin-top: 12px;
+.indumentaria-label {
+  width: 60% !important;
+  font-size: 1em !important;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+  padding: 8px 0;
 }
 
-.alta-pedido-form ion-input[readonly] {
-  opacity: 0.7;
+.cantidad-input {
+  width: 120px;
+  text-align: center;
+  font-weight: 600;
 }
 
-.guardar-btn {
-  margin-top: 24px;
-  --background: var(--ion-color-primary);
-  --background-activated: var(--ion-color-primary-shade);
-}
-
-/* Modal de clientes */
-.cliente-modal ion-content {
-  padding: 16px;
+.cantidad-input ion-input {
+  --color: #1f2937;
+  --background: #f9fafb;
+  --border-radius: 8px;
+  border: 1px solid #d1d5db;
+  text-align: center;
 }
 
 /* Estilos para clientes en el modal */
 .cliente-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  padding: 8px 0;
 }
 
 .cliente-nombre {
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 1em;
+  color: #1f2937;
 }
 
 .cliente-estado {
@@ -167,44 +1111,168 @@
 }
 
 .estado-chip {
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.8em;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .estado-chip.activo {
-  background-color: #c8e6c9;
-  color: #2e7d32;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
 }
 
 .estado-chip.inactivo {
-  background-color: #ffcdd2;
-  color: #c62828;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
 }
 
 .cliente-inactivo {
-  opacity: 0.7;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .cliente-inactivo ion-label {
-  color: #666;
+  color: #9ca3af;
 }
 
-.cliente-activo {
-  opacity: 1;
+.cliente-activo:hover {
+  --background: #f0f9ff;
 }
 
-.alta-pedido-content::part(scroll) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: static;
-  height: 100%;
-  width: 100%;
+/* Botones del modal */
+ion-modal ion-button[expand="block"] {
+  margin-top: 20px;
+  height: 48px;
+  font-weight: 600;
+  --border-radius: 12px;
 }
 
-ion-list {
-  --ion-background-color: white;
+ion-modal ion-button[color="medium"] {
+  --background: #6b7280;
+  --color: white;
+}
+
+/* Input de búsqueda */
+ion-modal ion-item ion-input[placeholder] {
+  --placeholder-color: #9ca3af;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .alta-pedido-form {
+    padding: 24px;
+    margin: 0 10px;
+  }
+  
+  .brand-logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .titulo ion-title {
+    font-size: 1.5em;
+  }
+  
+  .prenda-details {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .prenda-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .indumentaria-modal {
+    --width: 95vw;
+    --height: 90vh;
+  }
+  
+  .indumentaria-label {
+    width: 100% !important;
+    font-size: 0.9em !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .alta-pedido-content {
+    padding: 16px;
+  }
+  
+  .alta-pedido-form {
+    padding: 20px;
+  }
+  
+  .prenda-item {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+  }
+  
+  .prenda-title {
+    font-size: 1em;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* Animaciones */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alta-pedido-form {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.prenda-item {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.prenda-item:nth-child(1) { animation-delay: 0.1s; }
+.prenda-item:nth-child(2) { animation-delay: 0.2s; }
+.prenda-item:nth-child(3) { animation-delay: 0.3s; }
+.prenda-item:nth-child(4) { animation-delay: 0.4s; }
+.prenda-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Scroll personalizado */
+.alta-pedido-content::-webkit-scrollbar,
+ion-modal ion-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.alta-pedido-content::-webkit-scrollbar-track,
+ion-modal ion-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.alta-pedido-content::-webkit-scrollbar-thumb,
+ion-modal ion-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.alta-pedido-content::-webkit-scrollbar-thumb:hover,
+ion-modal ion-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+
+.native-input.sc-ion-input-md{
+  padding-top: 15px !important;
 }
