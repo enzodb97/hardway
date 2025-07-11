@@ -41,15 +41,17 @@ import {
   grid,
   list,
   checkmarkCircle,
-  closeCircle
+  closeCircle,
+  time
 } from "ionicons/icons";
 import { useState } from "react";
 import { useClientes } from "../../context/ClientesContext";
+import HistorialCliente from "../../components/HistorialCliente";
 import "./Clientes.css";
 import { exportarClientesPDF } from "../../utils/clientesUtils";
 
 const Clientes: React.FC = () => {
-  const { clientes, eliminarCliente, darDeBajaCliente, darDeAltaCliente } = useClientes();
+  const { clientes, eliminarCliente, darDeBajaCliente, darDeAltaCliente, recargarClientes } = useClientes();
   const [busqueda, setBusqueda] = useState("");
   const [vistaGrid, setVistaGrid] = useState(true);
   const [filtroLocalidad, setFiltroLocalidad] = useState("");
@@ -65,6 +67,10 @@ const Clientes: React.FC = () => {
   const [showConfirmAlta, setShowConfirmAlta] = useState(false);
   const [clienteADarBaja, setClienteADarBaja] = useState<number | null>(null);
   const [clienteADarAlta, setClienteADarAlta] = useState<number | null>(null);
+
+  // Estados para historial
+  const [showHistorial, setShowHistorial] = useState(false);
+  const [clienteHistorial, setClienteHistorial] = useState<{id: number, nombre: string} | null>(null);
 
   // Obtener localidades únicas para el filtro
   const localidadesUnicas = [...new Set(clientes.map(c => c.localidad).filter(Boolean))];
@@ -86,12 +92,16 @@ const Clientes: React.FC = () => {
   const totalClientes = clientes.length;
 
   // Manejo de refresh
-  const doRefresh = (event: CustomEvent) => {
+  const doRefresh = async (event: CustomEvent) => {
     setCargando(true);
-    setTimeout(() => {
+    try {
+      await recargarClientes();
+    } catch (error) {
+      console.error('Error al recargar clientes:', error);
+    } finally {
       setCargando(false);
       event.detail.complete();
-    }, 1000);
+    }
   };
 
   // Confirmación de eliminación
@@ -177,6 +187,20 @@ const Clientes: React.FC = () => {
     setFiltroDocumento("");
   };
 
+  // Mostrar historial de cliente
+  const mostrarHistorial = (cliente: any) => {
+    setClienteHistorial({
+      id: cliente.id,
+      nombre: `${cliente.nombre} ${cliente.apellido}`
+    });
+    setShowHistorial(true);
+  };
+
+  const cerrarHistorial = () => {
+    setShowHistorial(false);
+    setClienteHistorial(null);
+  };
+
 
 
 
@@ -245,6 +269,16 @@ const Clientes: React.FC = () => {
                 <IonIcon icon={pencil} slot="start" />
                 Editar
               </IonButton>
+              <IonButton
+                fill="clear"
+                size="small"
+                color="medium"
+                onClick={() => mostrarHistorial(cliente)}
+                className="historial-action"
+              >
+                <IonIcon icon={time} slot="start" />
+                Historial
+              </IonButton>
               {/* Mostrar botón de alta o baja según el estado del cliente */}
               {cliente.estaActivo === 0 ? (
                 <IonButton
@@ -309,6 +343,14 @@ const Clientes: React.FC = () => {
               routerLink={`/alta-cliente/${cliente.id}`}
             >
               <IonIcon icon={pencil} />
+            </IonButton>
+            <IonButton
+              fill="clear"
+              size="small"
+              color="medium"
+              onClick={() => mostrarHistorial(cliente)}
+            >
+              <IonIcon icon={time} />
             </IonButton>
             {/* Mostrar botón de alta o baja según el estado del cliente */}
             {cliente.estaActivo === 0 ? (
@@ -570,6 +612,16 @@ const Clientes: React.FC = () => {
             message={alertMsg}
             buttons={["Aceptar"]}
           />
+
+          {/* Modal de historial */}
+          {clienteHistorial && (
+            <HistorialCliente
+              isOpen={showHistorial}
+              onDidDismiss={cerrarHistorial}
+              clienteId={clienteHistorial.id}
+              clienteNombre={clienteHistorial.nombre}
+            />
+          )}
         </div>
       </IonContent>
     </IonPage>

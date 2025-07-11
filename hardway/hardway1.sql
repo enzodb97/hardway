@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-07-2025 a las 17:23:33
+-- Tiempo de generación: 10-07-2025 a las 23:15:48
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -341,6 +341,38 @@ VALUES
   (45, 'matias.romero1@test.com', '555-1118', 1, 51),
   (46, 'paula.suarez1@test.com', '555-1119', 1, 52),
   (47, 'martin.gomez4@test.com', '555-1120', 1, 53);
+
+-- --------------------------------------------------------
+--
+-- Estructura de tabla para la tabla `cliente_estados`
+--
+CREATE TABLE
+  `cliente_estados` (
+    `idEstado` tinyint (1) NOT NULL,
+    `descripcion` varchar(50) NOT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `cliente_estados`
+--
+INSERT INTO
+  `cliente_estados` (`idEstado`, `descripcion`)
+VALUES
+  (0, 'Inactivo'),
+  (1, 'Activo');
+
+-- --------------------------------------------------------
+--
+-- Estructura de tabla para la tabla `cliente_historial_estado`
+--
+CREATE TABLE
+  `cliente_historial_estado` (
+    `idHistorial` int (11) NOT NULL,
+    `idCliente` int (11) NOT NULL,
+    `idEstado` tinyint (1) NOT NULL,
+    `fechaCambio` datetime NOT NULL DEFAULT current_timestamp(),
+    `idUsuarioModifico` int (11) NOT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
 
 -- --------------------------------------------------------
 --
@@ -4180,7 +4212,21 @@ ALTER TABLE `ciudad` ADD PRIMARY KEY (`idCiudad`);
 -- Indices de la tabla `cliente`
 --
 ALTER TABLE `cliente` ADD PRIMARY KEY (`idCliente`),
-ADD KEY `idPersona` (`idPersona`);
+ADD KEY `idPersona` (`idPersona`),
+ADD KEY `fk_cliente_estado` (`estaActivo`);
+
+--
+-- Indices de la tabla `cliente_estados`
+--
+ALTER TABLE `cliente_estados` ADD PRIMARY KEY (`idEstado`);
+
+--
+-- Indices de la tabla `cliente_historial_estado`
+--
+ALTER TABLE `cliente_historial_estado` ADD PRIMARY KEY (`idHistorial`),
+ADD KEY `fk_historial_cliente` (`idCliente`),
+ADD KEY `fk_historial_estado` (`idEstado`),
+ADD KEY `fk_historial_usuario` (`idUsuarioModifico`);
 
 --
 -- Indices de la tabla `color`
@@ -4379,6 +4425,12 @@ ALTER TABLE `cliente` MODIFY `idCliente` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 48;
 
 --
+-- AUTO_INCREMENT de la tabla `cliente_historial_estado`
+--
+ALTER TABLE `cliente_historial_estado` MODIFY `idHistorial` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 10;
+
+--
 -- AUTO_INCREMENT de la tabla `color`
 --
 ALTER TABLE `color` MODIFY `idColor` int (11) NOT NULL AUTO_INCREMENT,
@@ -4478,7 +4530,15 @@ ALTER TABLE `barrio` ADD CONSTRAINT `barrio_ibfk_1` FOREIGN KEY (`idCiudad`) REF
 --
 -- Filtros para la tabla `cliente`
 --
-ALTER TABLE `cliente` ADD CONSTRAINT `cliente_ibfk_1` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`);
+ALTER TABLE `cliente` ADD CONSTRAINT `cliente_ibfk_1` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`),
+ADD CONSTRAINT `fk_cliente_estado` FOREIGN KEY (`estaActivo`) REFERENCES `cliente_estados` (`idEstado`);
+
+--
+-- Filtros para la tabla `cliente_historial_estado`
+--
+ALTER TABLE `cliente_historial_estado` ADD CONSTRAINT `fk_historial_cliente` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idCliente`),
+ADD CONSTRAINT `fk_historial_estado` FOREIGN KEY (`idEstado`) REFERENCES `cliente_estados` (`idEstado`),
+ADD CONSTRAINT `fk_historial_usuario` FOREIGN KEY (`idUsuarioModifico`) REFERENCES `usuario` (`idUsuario`);
 
 --
 -- Filtros para la tabla `detalleindumentaria`
