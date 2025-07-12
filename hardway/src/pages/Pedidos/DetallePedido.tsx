@@ -103,7 +103,25 @@ const DetallePedido: React.FC = () => {
         {pedido && pedido.idEstado === 6 && pedido.motivoCancelacion && (
           <div className="motivo-cancelacion-card">
             <h3>Motivo de Cancelación</h3>
-            <p>{pedido.motivoCancelacion}</p>
+            <p><strong>Motivo:</strong> {pedido.motivoCancelacion}</p>
+            
+            {/* Mostrar fecha de cancelación */}
+            {pedido.fechaCancelacion && (
+              <p className="fecha-cancelacion">
+                <strong>Fecha de cancelación:</strong> {new Date(pedido.fechaCancelacion).toLocaleString("es-AR")}
+              </p>
+            )}
+            
+            {/* Mostrar observación personalizada si existe */}
+            {pedido.observacionCancelacion && (
+              <div className="observacion-cancelacion">
+                <p><strong>Observación:</strong></p>
+                <div className="observacion-texto">
+                  {pedido.observacionCancelacion}
+                </div>
+              </div>
+            )}
+            
             {pedido.usuarioCancelo && (
               <p className="motivo-cancelacion">
                 <strong>Cancelado por:</strong> {pedido.usuarioCancelo}

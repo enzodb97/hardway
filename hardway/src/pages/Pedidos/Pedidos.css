@@ -582,6 +582,50 @@ ion-popover ion-item:hover {
   transform: none !important;
 }
 
+/* Estilos para el campo de observación personalizada */
+.observacion-personalizada {
+  margin-top: 20px;
+  margin-bottom: 16px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.observacion-input-item {
+  --background: #f9fafb;
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-top: 8px;
+  --inner-padding-bottom: 8px;
+  --border-color: #d1d5db;
+  --border-width: 1px;
+  --highlight-color-focused: #fdb40b;
+  margin: 0;
+}
+
+.observacion-input-item ion-label {
+  --color: #374151;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.observacion-textarea {
+  --background: transparent;
+  --color: #1f2937;
+  --placeholder-color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.observacion-textarea::part(native) {
+  border: none;
+  outline: none;
+  padding: 8px 0;
+}
+
 /* Estilos para el filtro de estados */
 .estado-filter-button {
   --color: white !important;

@@ -19,6 +19,9 @@ import {
   IonCol,
   IonIcon,
   IonAlert,
+  IonItem,
+  IonLabel,
+  IonTextarea,
   useIonViewWillEnter,
 } from "@ionic/react";
 import {
@@ -43,7 +46,7 @@ import {
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import { pencil, trash, documentText, chevronDown, cash } from "ionicons/icons";
-import { IonPopover, IonLabel, IonList, IonItem, IonModal } from "@ionic/react";
+import { IonPopover, IonList, IonModal } from "@ionic/react";
 import "./Pedidos.css";
 
 const Pedidos: React.FC = () => {
@@ -74,6 +77,7 @@ const Pedidos: React.FC = () => {
   const [motivoSeleccionado, setMotivoSeleccionado] = useState<number | null>(
     null
   );
+  const [observacionPersonalizada, setObservacionPersonalizada] = useState<string>("");
   const [showMotivoModal, setShowMotivoModal] = useState(false);
 
   // Estados para manejar errores de autorización
@@ -692,7 +696,11 @@ const Pedidos: React.FC = () => {
         />
         <IonModal
           isOpen={showMotivoModal}
-          onDidDismiss={() => setShowMotivoModal(false)}
+          onDidDismiss={() => {
+            setShowMotivoModal(false);
+            setMotivoSeleccionado(null);
+            setObservacionPersonalizada("");
+          }}
           className="motivo-cancelacion-modal"
         >
           <div className="motivo-cancelacion-content">
@@ -725,23 +733,49 @@ const Pedidos: React.FC = () => {
                 </div>
               ))}
             </div>
+            
+            {/* Campo de observación personalizada - solo visible cuando el motivo es "Otro" (id 6) */}
+            {motivoSeleccionado === 6 && (
+              <div className="observacion-personalizada">
+                <IonItem className="observacion-input-item">
+                  <IonLabel position="stacked">Observación personalizada *</IonLabel>
+                  <IonTextarea
+                    value={observacionPersonalizada}
+                    onIonInput={(e: any) => setObservacionPersonalizada(e.detail.value!)}
+                    placeholder="Ingrese el motivo de cancelación..."
+                    rows={3}
+                    maxlength={500}
+                    counter={true}
+                    className="observacion-textarea"
+                  />
+                </IonItem>
+              </div>
+            )}
             <div className="motivo-cancelacion-buttons">
               <IonButton
                 onClick={() => {
                   setShowMotivoModal(false);
                   setPedidoParaCancelar(null);
                   setMotivoSeleccionado(null);
+                  setObservacionPersonalizada("");
                 }}
                 className="motivo-cancelacion-btn-cancelar"
               >
                 Cancelar
               </IonButton>
               <IonButton
-                disabled={!motivoSeleccionado || !pedidoParaCancelar}
+                disabled={!motivoSeleccionado || !pedidoParaCancelar || (motivoSeleccionado === 6 && !observacionPersonalizada.trim())}
                 className="motivo-cancelacion-btn-confirmar"
                 onClick={async () => {
                   if (!motivoSeleccionado || !pedidoParaCancelar || !username)
                     return;
+
+                  // Validar observación si el motivo es "Otro" (id 6)
+                  if (motivoSeleccionado === 6 && !observacionPersonalizada.trim()) {
+                    setAlertMsg("La observación es requerida cuando el motivo es 'Otro'");
+                    setShowAlert(true);
+                    return;
+                  }
 
                   try {
                     // Primero obtener el ID del usuario por su nombre de usuario
@@ -768,6 +802,17 @@ const Pedidos: React.FC = () => {
                       return;
                     }
 
+                    // Preparar el cuerpo de la petición
+                    const requestBody: any = {
+                      idMotivo: motivoSeleccionado,
+                      idUsuarioCancelo: idUsuarioCancelo,
+                    };
+
+                    // Solo incluir observación si el motivo es "Otro" y hay texto
+                    if (motivoSeleccionado === 6 && observacionPersonalizada.trim()) {
+                      requestBody.observacionCancelacion = observacionPersonalizada.trim();
+                    }
+
                     // Proceder con la cancelación
                     const response = await fetch(
                       `/api/pedidos/${pedidoParaCancelar}/cancelar`,
@@ -777,10 +822,7 @@ const Pedidos: React.FC = () => {
                           "Content-Type": "application/json",
                           nombreUsuario: username, // Agregar header de autorización
                         },
-                        body: JSON.stringify({
-                          idMotivo: motivoSeleccionado,
-                          idUsuarioCancelo: idUsuarioCancelo,
-                        }),
+                        body: JSON.stringify(requestBody),
                       }
                     );
 
@@ -793,6 +835,7 @@ const Pedidos: React.FC = () => {
                       setShowMotivoModal(false);
                       setPedidoParaCancelar(null);
                       setMotivoSeleccionado(null);
+                      setObservacionPersonalizada("");
                       return;
                     }
 
@@ -801,12 +844,14 @@ const Pedidos: React.FC = () => {
                     setShowMotivoModal(false);
                     setPedidoParaCancelar(null);
                     setMotivoSeleccionado(null);
+                    setObservacionPersonalizada("");
                   } catch (error) {
                     setAlertMsg("Error de conexión al cancelar el pedido.");
                     setShowAlert(true);
                     setShowMotivoModal(false);
                     setPedidoParaCancelar(null);
                     setMotivoSeleccionado(null);
+                    setObservacionPersonalizada("");
                   }
                 }}
               >

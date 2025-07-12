@@ -185,6 +185,8 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
         p.idEstado,
         ep.tipoEstado,
         mc.descripcion AS motivoCancelacion,
+        p.observacionCancelacion,
+        p.fechaCancelacion,
         uc.nombreUsuario AS usuarioCancelo,
         ucr.nombreUsuario AS usuarioCreo,
         um.nombreUsuario AS usuarioModifico
@@ -401,12 +403,19 @@ router.delete("/:numeroPedido", async (req, res) => {
 // Cancelar pedido con trazabilidad
 router.put("/:numeroPedido/cancelar", async (req, res) => {
   const { numeroPedido } = req.params;
-  const { idMotivo, idUsuarioCancelo } = req.body;
+  const { idMotivo, idUsuarioCancelo, observacionCancelacion } = req.body;
 
   // Validar parámetros requeridos
   if (!idMotivo || !idUsuarioCancelo) {
     return res.status(400).json({
       error: "Se requieren idMotivo e idUsuarioCancelo",
+    });
+  }
+
+  // Validar observación si el motivo es "Otro" (asumiendo que id 6 es "Otro")
+  if (idMotivo === 6 && (!observacionCancelacion || observacionCancelacion.trim() === '')) {
+    return res.status(400).json({
+      error: "Se requiere observación cuando el motivo es 'Otro'",
     });
   }
 
@@ -462,13 +471,21 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
     }
 
     // Actualizar el Pedido (con el Usuario que cancela)
+    const updateData = {
+      estaActivo: 0, // Borrado lógico
+      idEstado: 6, // Estado 'Cancelado'
+      idMotivoCancelacion: idMotivo, // Motivo de cancelación
+      idUsuarioCancelo: idUsuarioCancelo, // Usuario que canceló
+      fechaCancelacion: new Date(), // Fecha y hora exactas de la cancelación
+    };
+
+    // Solo agregar observación si se proporcionó
+    if (observacionCancelacion && observacionCancelacion.trim() !== '') {
+      updateData.observacionCancelacion = observacionCancelacion.trim();
+    }
+
     await Pedido.update(
-      {
-        estaActivo: 0, // Borrado lógico
-        idEstado: 6, // Estado 'Cancelado'
-        idMotivoCancelacion: idMotivo, // Motivo de cancelación
-        idUsuarioCancelo: idUsuarioCancelo, // Usuario que canceló
-      },
+      updateData,
       {
         where: { numeroPedido },
         transaction: t,
@@ -483,6 +500,7 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
       numeroPedido,
       motivoCancelacion: idMotivo,
       usuarioCancelo: idUsuarioCancelo,
+      observacionCancelacion: observacionCancelacion || null,
     });
   } catch (error) {
     await t.rollback();
