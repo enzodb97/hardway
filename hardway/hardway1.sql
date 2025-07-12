@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 10-07-2025 a las 23:15:48
+-- Tiempo de generación: 12-07-2025 a las 16:12:40
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 SET
@@ -415,7 +415,8 @@ CREATE TABLE
     `idColor` int (11) DEFAULT NULL,
     `idTalle` int (11) DEFAULT NULL,
     `idEstado` int (11) DEFAULT NULL,
-    `idTela` int (11) DEFAULT NULL
+    `idTela` int (11) DEFAULT NULL,
+    `idUnidadMedida` int (11) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
 
 --
@@ -430,45 +431,46 @@ INSERT INTO
     `idColor`,
     `idTalle`,
     `idEstado`,
-    `idTela`
+    `idTela`,
+    `idUnidadMedida`
   )
 VALUES
-  (1, 1, 1, 1, 1, 1, 1, 1),
-  (2, 2, 2, 2, 2, 2, 1, 2),
-  (3, 3, 3, 3, 3, 3, 1, 3),
-  (4, 4, 4, 4, 4, 4, 1, 4),
-  (5, 5, 5, 5, 5, 5, 1, 5),
-  (6, 6, 6, 6, 6, 6, 1, 6),
-  (7, 7, 7, 7, 7, 7, 1, 7),
-  (8, 8, 8, 8, 8, 8, 1, 8),
-  (9, 9, 9, 9, 9, 9, 1, 9),
-  (10, 10, 10, 10, 10, 10, 1, 10),
-  (16, 10, 10, 3, 3, 6, 1, 3),
-  (17, 1, 7, 7, 1, 1, 1, 10),
-  (18, 3, 5, 7, 3, 15, 1, 5),
-  (19, 2, 2, 6, 4, 2, 1, 7),
-  (20, 4, 4, 3, 2, 16, 1, 2),
-  (21, 5, 8, 5, 1, 3, 1, 5),
-  (22, 6, 6, 7, 7, 18, 1, 3),
-  (23, 7, 7, 2, 2, 14, 1, 6),
-  (24, 8, 9, 7, 3, 15, 1, 9),
-  (25, 9, 10, 1, 8, 16, 1, 5),
-  (26, 10, 1, 3, 4, 17, 1, 2),
-  (27, 1, 8, 1, 11, 1, 1, 4),
-  (28, 2, 5, 4, 7, 5, 1, 11),
-  (29, 3, 7, 12, 5, 12, 1, 12),
-  (30, 4, 3, 2, 9, 14, 1, 1),
-  (31, 5, 5, 3, 5, 4, 1, 5),
-  (32, 6, 9, 1, 10, 18, 1, 4),
-  (33, 1, 6, 2, 7, 15, 1, 7),
-  (34, 2, 7, 2, 2, 1, 1, 6),
-  (35, 3, 8, 11, 1, 16, 1, 2),
-  (36, 4, 9, 7, 3, 17, 1, 3),
-  (37, 5, 4, 2, 4, 5, 1, 1),
-  (38, 8, 3, 6, 5, 15, 1, 7),
-  (39, 3, 9, 1, 3, 16, 1, 9),
-  (40, 9, 6, 2, 1, 14, 1, 5),
-  (41, 7, 2, 7, 7, 17, 1, 10);
+  (1, 1, 1, 1, 1, 1, 1, 1, 1),
+  (2, 2, 2, 2, 2, 2, 1, 2, 1),
+  (3, 3, 3, 3, 3, 3, 1, 3, 1),
+  (4, 4, 4, 4, 4, 4, 1, 4, 1),
+  (5, 5, 5, 5, 5, 5, 1, 5, 2),
+  (6, 6, 6, 6, 6, 6, 1, 6, 1),
+  (7, 7, 7, 7, 7, 7, 1, 7, 1),
+  (8, 8, 8, 8, 8, 8, 1, 8, 2),
+  (9, 9, 9, 9, 9, 9, 1, 9, 1),
+  (10, 10, 10, 10, 10, 10, 1, 10, 2),
+  (16, 10, 10, 3, 3, 6, 1, 3, 2),
+  (17, 1, 7, 7, 1, 1, 1, 10, 1),
+  (18, 3, 5, 7, 3, 15, 1, 5, 1),
+  (19, 2, 2, 6, 4, 2, 1, 7, 1),
+  (20, 4, 4, 3, 2, 16, 1, 2, 1),
+  (21, 5, 8, 5, 1, 3, 1, 5, 2),
+  (22, 6, 6, 7, 7, 18, 1, 3, 1),
+  (23, 7, 7, 2, 2, 14, 1, 6, 1),
+  (24, 8, 9, 7, 3, 15, 1, 9, 2),
+  (25, 9, 10, 1, 8, 16, 1, 5, 1),
+  (26, 10, 1, 3, 4, 17, 1, 2, 2),
+  (27, 1, 8, 1, 11, 1, 1, 4, 1),
+  (28, 2, 5, 4, 7, 5, 1, 11, 1),
+  (29, 3, 7, 12, 5, 12, 1, 12, 1),
+  (30, 4, 3, 2, 9, 14, 1, 1, 1),
+  (31, 5, 5, 3, 5, 4, 1, 5, 2),
+  (32, 6, 9, 1, 10, 18, 1, 4, 1),
+  (33, 1, 6, 2, 7, 15, 1, 7, 1),
+  (34, 2, 7, 2, 2, 1, 1, 6, 1),
+  (35, 3, 8, 11, 1, 16, 1, 2, 1),
+  (36, 4, 9, 7, 3, 17, 1, 3, 1),
+  (37, 5, 4, 2, 4, 5, 1, 1, 2),
+  (38, 8, 3, 6, 5, 15, 1, 7, 2),
+  (39, 3, 9, 1, 3, 16, 1, 9, 1),
+  (40, 9, 6, 2, 1, 14, 1, 5, 1),
+  (41, 7, 2, 7, 7, 17, 1, 10, 1);
 
 -- --------------------------------------------------------
 --
@@ -4118,6 +4120,28 @@ VALUES
 
 -- --------------------------------------------------------
 --
+-- Estructura de tabla para la tabla `unidad_medida`
+--
+CREATE TABLE
+  `unidad_medida` (
+    `idUnidadMedida` int (11) NOT NULL,
+    `nombreUnidad` varchar(50) NOT NULL,
+    `abreviatura` varchar(10) DEFAULT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `unidad_medida`
+--
+INSERT INTO
+  `unidad_medida` (`idUnidadMedida`, `nombreUnidad`, `abreviatura`)
+VALUES
+  (1, 'Unidad', 'un.'),
+  (2, 'Par', 'par'),
+  (3, 'Set', 'set'),
+  (4, 'Pack', 'pack');
+
+-- --------------------------------------------------------
+--
 -- Estructura de tabla para la tabla `usuario`
 --
 CREATE TABLE
@@ -4243,7 +4267,8 @@ ADD KEY `idColor` (`idColor`),
 ADD KEY `idTalle` (`idTalle`),
 ADD KEY `idEstado` (`idEstado`),
 ADD KEY `idTela` (`idTela`),
-ADD KEY `fk_detalle_nombre` (`idNombre`);
+ADD KEY `fk_detalle_nombre` (`idNombre`),
+ADD KEY `fk_detalle_unidad_medida` (`idUnidadMedida`);
 
 --
 -- Indices de la tabla `detallepedido`
@@ -4379,6 +4404,11 @@ ALTER TABLE `tela` ADD PRIMARY KEY (`idTela`);
 ALTER TABLE `tiporol` ADD PRIMARY KEY (`idTipoRol`);
 
 --
+-- Indices de la tabla `unidad_medida`
+--
+ALTER TABLE `unidad_medida` ADD PRIMARY KEY (`idUnidadMedida`);
+
+--
 -- Indices de la tabla `usuario`
 --
 ALTER TABLE `usuario` ADD PRIMARY KEY (`idUsuario`),
@@ -4503,6 +4533,12 @@ ALTER TABLE `tela` MODIFY `idTela` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 13;
 
 --
+-- AUTO_INCREMENT de la tabla `unidad_medida`
+--
+ALTER TABLE `unidad_medida` MODIFY `idUnidadMedida` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 5;
+
+--
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario` MODIFY `idUsuario` int (11) NOT NULL AUTO_INCREMENT,
@@ -4549,7 +4585,8 @@ ADD CONSTRAINT `detalleindumentaria_ibfk_3` FOREIGN KEY (`idColor`) REFERENCES `
 ADD CONSTRAINT `detalleindumentaria_ibfk_4` FOREIGN KEY (`idTalle`) REFERENCES `talle` (`idTalle`),
 ADD CONSTRAINT `detalleindumentaria_ibfk_5` FOREIGN KEY (`idEstado`) REFERENCES `estadoindumentaria` (`idEstado`),
 ADD CONSTRAINT `detalleindumentaria_ibfk_6` FOREIGN KEY (`idTela`) REFERENCES `tela` (`idTela`),
-ADD CONSTRAINT `fk_detalle_nombre` FOREIGN KEY (`idNombre`) REFERENCES `nombreindumentaria` (`idNombre`);
+ADD CONSTRAINT `fk_detalle_nombre` FOREIGN KEY (`idNombre`) REFERENCES `nombreindumentaria` (`idNombre`),
+ADD CONSTRAINT `fk_detalle_unidad_medida` FOREIGN KEY (`idUnidadMedida`) REFERENCES `unidad_medida` (`idUnidadMedida`);
 
 --
 -- Filtros para la tabla `detallepedido`

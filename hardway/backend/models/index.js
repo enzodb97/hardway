@@ -10,6 +10,7 @@ const EstadoPedido = require('./EstadoPedido');
 const Indumentaria = require('./Indumentaria');
 const DetalleIndumentaria = require('./DetalleIndumentaria');
 const PedidoIndumentaria = require('./PedidoIndumentaria');
+const UnidadMedida = require('./UnidadMedida'); // Nuevo modelo
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
 const {
   Color,
@@ -134,6 +135,12 @@ const setupAssociations = () => {
     foreignKey: "idEstado",
     as: "EstadoIndumentarium" 
   });
+  
+  // Relación con UnidadMedida
+  DetalleIndumentaria.belongsTo(UnidadMedida, { 
+    foreignKey: "idUnidadMedida",
+    as: "UnidadMedidum" 
+  });
 
   // Relaciones de ubicación
   Persona.belongsTo(Domicilio, { foreignKey: "idDomicilio" });
@@ -181,6 +188,7 @@ module.exports = {
   EstadoIndumentaria,
   PrecioIndumentaria,
   NombreIndumentaria,
+  UnidadMedida, // Nuevo modelo exportado
   
   // Modelos adicionales
   Stock,

@@ -8,6 +8,8 @@ const {
   EstadoIndumentaria,
   PrecioIndumentaria,
   NombreIndumentaria,
+  DetalleIndumentaria, // Agregamos este modelo
+  UnidadMedida, // Nuevo modelo
   TipoRol,
   MotivoCancelacion,
   sequelize 
@@ -299,6 +301,146 @@ router.post("/barrios/find-or-create", async (req, res) => {
   } catch (error) {
     console.error("Error al crear/encontrar barrio:", error);
     res.status(500).json({ error: "Error al crear/encontrar barrio" });
+  }
+});
+
+// Rutas para Unidades de Medida
+router.get("/unidades-medida", async (req, res) => {
+  try {
+    const unidades = await UnidadMedida.findAll({
+      order: [['nombreUnidad', 'ASC']]
+    });
+    res.json(unidades);
+  } catch (error) {
+    console.error("Error al obtener unidades de medida:", error);
+    res.status(500).json({ error: "Error al obtener unidades de medida" });
+  }
+});
+
+router.post("/unidades-medida", async (req, res) => {
+  try {
+    const { nombreUnidad, abreviatura } = req.body;
+    const nuevaUnidad = await UnidadMedida.create({ 
+      nombreUnidad, 
+      abreviatura 
+    });
+    res.status(201).json(nuevaUnidad);
+  } catch (error) {
+    console.error("Error al crear unidad de medida:", error);
+    res.status(500).json({ error: "Error al crear unidad de medida" });
+  }
+});
+
+router.put("/unidades-medida/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombreUnidad, abreviatura } = req.body;
+    
+    const unidad = await UnidadMedida.findByPk(id);
+    if (!unidad) {
+      return res.status(404).json({ error: "Unidad de medida no encontrada" });
+    }
+    
+    await unidad.update({ nombreUnidad, abreviatura });
+    res.json(unidad);
+  } catch (error) {
+    console.error("Error al actualizar unidad de medida:", error);
+    res.status(500).json({ error: "Error al actualizar unidad de medida" });
+  }
+});
+
+router.delete("/unidades-medida/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const unidad = await UnidadMedida.findByPk(id);
+    
+    if (!unidad) {
+      return res.status(404).json({ error: "Unidad de medida no encontrada" });
+    }
+    
+    await unidad.destroy();
+    res.json({ message: "Unidad de medida eliminada correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar unidad de medida:", error);
+    res.status(500).json({ error: "Error al eliminar unidad de medida" });
+  }
+});
+
+// Endpoint para buscar o crear detalle de indumentaria
+router.post("/detalle-indumentaria/find-or-create", async (req, res) => {
+  try {
+    const { 
+      idNombre, 
+      idPrecio, 
+      idCategoria, 
+      idColor, 
+      idTalle, 
+      idEstado, 
+      idTela,
+      idUnidadMedida 
+    } = req.body;
+
+    // Buscar si ya existe un detalle con estas características
+    let detalle = await DetalleIndumentaria.findOne({
+      where: {
+        idNombre,
+        idPrecio,
+        idCategoria,
+        idColor,
+        idTalle,
+        idEstado,
+        idTela,
+        idUnidadMedida
+      }
+    });
+
+    // Si no existe, crear uno nuevo
+    if (!detalle) {
+      detalle = await DetalleIndumentaria.create({
+        idNombre,
+        idPrecio,
+        idCategoria,
+        idColor,
+        idTalle,
+        idEstado,
+        idTela,
+        idUnidadMedida,
+        cantidadIndumentaria: 0 // Inicializar en 0
+      });
+    }
+
+    res.json(detalle);
+  } catch (error) {
+    console.error("Error al buscar o crear detalle de indumentaria:", error);
+    res.status(500).json({ error: "Error al procesar detalle de indumentaria" });
+  }
+});
+
+// Endpoint para actualizar precio de un detalle de indumentaria
+router.put("/detalle-indumentaria/:id/precio", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { precio } = req.body;
+
+    const detalle = await DetalleIndumentaria.findByPk(id);
+    
+    if (!detalle) {
+      return res.status(404).json({ error: "Detalle de indumentaria no encontrado" });
+    }
+
+    // Buscar o crear el precio
+    const [precioObj] = await PrecioIndumentaria.findOrCreate({
+      where: { precio },
+      defaults: { precio }
+    });
+
+    // Actualizar el detalle con el nuevo precio
+    await detalle.update({ idPrecio: precioObj.idPrecio });
+    
+    res.json({ message: "Precio actualizado correctamente", detalle });
+  } catch (error) {
+    console.error("Error al actualizar precio del detalle:", error);
+    res.status(500).json({ error: "Error al actualizar precio del detalle" });
   }
 });
 

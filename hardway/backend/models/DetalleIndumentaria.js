@@ -16,6 +16,7 @@ const DetalleIndumentaria = sequelize.define(
     idEstado: DataTypes.INTEGER,
     idTela: DataTypes.INTEGER,
     idNombre: DataTypes.INTEGER,
+    idUnidadMedida: DataTypes.INTEGER, // Nueva columna
   },
   { tableName: "detalleindumentaria", timestamps: false }
 );

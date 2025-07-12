@@ -11,6 +11,7 @@ export interface IndumentariaItem {
   precio: number;
   estado: string;
   cantidadIndumentaria: number;
+  unidad: string; // Nueva propiedad para la unidad de medida
   idIndumentaria?: number;
   rack?: string;
 }
@@ -38,6 +39,7 @@ export async function obtenerIndumentariaPaginada(
     precio: parseFloat(item.DetalleIndumentarium?.PrecioIndumentarium?.precio || "0"),
     estado: item.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "Sin estado",
     cantidadIndumentaria: item.DetalleIndumentarium?.cantidadIndumentaria || 0,
+    unidad: item.DetalleIndumentarium?.UnidadMedidum?.nombreUnidad || "Unidad", // Nueva propiedad
     idIndumentaria: item.idDetalle,
     rack: item.rack || "Sin asignar"
   }));

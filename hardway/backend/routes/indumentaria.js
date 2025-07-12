@@ -10,6 +10,7 @@ const {
   CategoriaIndumentaria,
   EstadoIndumentaria,
   PrecioIndumentaria,
+  UnidadMedida, // Nuevo modelo
   Stock,
   MovimientoStock,
   sequelize 
@@ -31,6 +32,7 @@ router.get("/", async (req, res) => {
             { model: CategoriaIndumentaria, as: "CategoriaIndumentarium" },
             { model: EstadoIndumentaria, as: "EstadoIndumentarium" },
             { model: PrecioIndumentaria, as: "PrecioIndumentarium" },
+            { model: UnidadMedida, as: "UnidadMedidum" }, // Nuevo JOIN
           ],
         },
         {
@@ -116,6 +118,7 @@ router.get("/:id", async (req, res) => {
             { model: CategoriaIndumentaria, as: "CategoriaIndumentarium" },
             { model: EstadoIndumentaria, as: "EstadoIndumentarium" },
             { model: PrecioIndumentaria, as: "PrecioIndumentarium" },
+            { model: UnidadMedida, as: "UnidadMedidum" }, // Nuevo JOIN
           ],
         },
         {

@@ -1,15 +1,594 @@
+/* ========================================
+   INDUMENTARIA - ESTILOS PROFESIONALES
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Aplicar fuente Inter a todos los elementos */
 .indumentaria-page,
-.ion-page.indumentaria-page,
-.ion-content.indumentaria-page,
-.ion-content {
-  background-color: #feaf00 !important;
-  --background: #feaf00 !important;
+.indumentaria-page * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Página principal */
+.indumentaria-page {
+  --ion-background-color: #f8fafc;
+  min-height: 100vh;
+  position: relative;
+}
+
+.indumentaria-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(253, 180, 11, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  z-index: -1;
+}
+
+/* Header personalizado */
+.indumentaria-page ion-header {
+  position: relative;
+  z-index: 10;
+}
+
+.indumentaria-page ion-header ion-toolbar {
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --color: white;
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.indumentaria-page ion-header ion-toolbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+  pointer-events: none;
+}
+
+.indumentaria-page ion-title {
+  font-weight: 700;
+  font-size: 1.3em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Contenido principal */
+.indumentaria-page ion-content {
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  background: transparent;
+}
+
+/* Buscador y botón nueva prenda */
+.search-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(230, 235, 245, 0.8);
+  margin-bottom: 24px;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.search-container ion-item {
+  --background: transparent;
+  --border-color: transparent;
+  --padding-start: 0;
+  --padding-end: 0;
+  --min-height: 48px;
+}
+
+.search-container ion-input {
+  --placeholder-color: #64748b;
+  --color: #1e293b;
+  font-size: 15px;
+  font-weight: 400;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.search-container ion-input:hover {
+  border-color: #fdb40b;
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.1);
+}
+
+.search-container ion-button {
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --color: white;
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 48px;
+  margin-left: 12px;
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
+  transition: all 0.3s ease;
+}
+
+.search-container ion-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(253, 180, 11, 0.4);
+}
+
+/* Contador de total */
+.total-counter {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.total-counter ion-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.total-counter b {
+  color: #fdb40b;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* Tabla de indumentaria */
+.tabla-indumentaria {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(230, 235, 245, 0.8);
+  margin-bottom: 24px;
+}
+
+/* Header de la tabla */
+.tabla-header {
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  color: white;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  border-radius: 5px;
+}
+
+.tabla-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="header-pattern" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23header-pattern)"/></svg>');
+  pointer-events: none;
+}
+
+.tabla-header ion-col {
+  padding: 20px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tabla-header ion-col:last-child {
+  border-right: none;
+}
+
+/* Filas de datos */
+.tabla-indumentaria ion-row:not(.tabla-header) {
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.tabla-indumentaria ion-row:not(.tabla-header):hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.tabla-indumentaria ion-row:not(.tabla-header):last-child {
+  border-bottom: none;
+}
+
+.tabla-indumentaria ion-col:not(.tabla-header ion-col) {
+  padding: 16px;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  vertical-align: middle;
+  border-right: 1px solid #f1f5f9;
+}
+
+.tabla-indumentaria ion-col:last-child {
+  border-right: none;
+}
+
+/* Códigos y datos especiales */
+.codigo-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Monaco', 'Menlo', monospace;
+  display: inline-block;
+}
+
+.precio-badge {
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-block;
+}
+
+.stock-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  min-width: 50px;
+  display: inline-block;
+}
+
+.stock-badge.alto {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.stock-badge.medio {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.stock-badge.bajo {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.estado-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.estado-badge.activo {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.estado-badge.inactivo {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.estado-badge.apta {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.estado-badge.no-apta {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.unidad-badge {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+}
+
+/* Botones de acción */
+.actions-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions-container ion-button {
+  --border-radius: 8px;
+  font-weight: 500;
+  height: 36px;
+  min-width: 36px;
+  transition: all 0.3s ease;
+}
+
+.actions-container ion-button[color="primary"] {
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --color: white;
+  box-shadow: 0 2px 8px rgba(253, 180, 11, 0.2);
+}
+
+.actions-container ion-button[color="primary"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.3);
+}
+
+.actions-container ion-button[color="danger"] {
+  --background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.actions-container ion-button[color="danger"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Paginación */
+.pagination-footer {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid #e2e8f0;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pagination-controls ion-button {
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --color: white;
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 44px;
+  min-width: 100px;
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
+  transition: all 0.3s ease;
+}
+
+.pagination-controls ion-button:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(253, 180, 11, 0.4);
+}
+
+.pagination-controls ion-button[disabled] {
+  --background: #e2e8f0;
+  --color: #94a3b8;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.pagination-info {
+  background: #f8fafc;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  border: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+/* Estados vacíos */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 16px;
+  margin: 20px 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 4em;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.empty-title {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.empty-description {
+  color: #94a3b8;
+  font-size: 1em;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .indumentaria-page ion-content {
+    --padding-start: 16px;
+    --padding-end: 16px;
+  }
+  
+  .search-container {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .indumentaria-page ion-content {
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+  
+  .search-container {
+    padding: 16px 12px;
+  }
+  
+  .search-container ion-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .search-container ion-button {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+  
+  .tabla-header ion-col,
+  .tabla-indumentaria ion-col {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  
+  .pagination-controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .pagination-info {
+    order: -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .indumentaria-page ion-content {
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+  
+  .tabla-header ion-col,
+  .tabla-indumentaria ion-col {
+    padding: 8px 4px;
+    font-size: 11px;
+  }
+  
+  .actions-container {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .actions-container ion-button {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* Animaciones */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .tabla-indumentaria {
-  background-color: #f2eae1;
+  animation: slideInUp 0.5s ease-out;
 }
 
-.ion-padding {
-  background-color: #f2eae1;
+.search-container {
+  animation: slideInUp 0.3s ease-out;
+}
+
+/* Loading states */
+.loading-row {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .indumentaria-page::before {
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(253, 180, 11, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.15) 0%, transparent 50%),
+      linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  }
+  
+  .search-container,
+  .tabla-indumentaria,
+  .pagination-footer {
+    background: #334155;
+    border-color: #475569;
+  }
+  
+  .total-counter {
+    background: #334155;
+    border-color: #475569;
+  }
+  
+  .total-counter ion-text {
+    color: #e2e8f0;
+  }
+  
+  .tabla-indumentaria ion-col:not(.tabla-header ion-col) {
+    color: #e2e8f0;
+    border-color: #475569;
+  }
+  
+  .pagination-info {
+    background: #475569;
+    border-color: #64748b;
+    color: #e2e8f0;
+  }
 }

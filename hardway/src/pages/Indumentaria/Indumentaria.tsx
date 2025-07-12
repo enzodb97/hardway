@@ -15,9 +15,10 @@ import {
   IonIcon,
   IonFooter,
   IonText,
+  IonSpinner,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { pencil, trash } from "ionicons/icons";
+import { pencil, trash, add, search, shirt } from "ionicons/icons";
 import {
   obtenerIndumentariaPaginada,
   IndumentariaItem,
@@ -63,6 +64,8 @@ const Indumentaria: React.FC = () => {
       try {
         await fetch(`/api/indumentaria/${id}`, { method: "DELETE" });
         cargarIndumentaria();
+        setAlertMsg("Prenda eliminada exitosamente.");
+        setShowAlert(true);
       } catch (error) {
         setAlertMsg("Error al eliminar prenda.");
         setShowAlert(true);
@@ -72,129 +75,209 @@ const Indumentaria: React.FC = () => {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  // Función para obtener clase de stock según cantidad
+  const getStockClass = (cantidad: number) => {
+    if (cantidad >= 20) return "alto";
+    if (cantidad >= 5) return "medio";
+    return "bajo";
+  };
+
+  // Función para obtener clase de estado
+  const getEstadoClass = (estado: string) => {
+    const estadoLower = estado.toLowerCase();
+    if (estadoLower === "apta") return "apta";
+    if (estadoLower === "no apta") return "no-apta";
+    // Fallback para estados activo/inactivo por compatibilidad
+    return estadoLower === "activo" ? "activo" : "inactivo";
+  };
+
   return (
     <IonPage className="indumentaria-page">
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Indumentaria</IonTitle>
+          <IonTitle>
+            <IonIcon icon={shirt} style={{ marginRight: '8px' }} />
+            Gestión de Indumentaria
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="indumentaria-page">
-        <IonItem>
-          <IonInput
-            placeholder="Buscar por descripción, código, color o talle"
-            value={busqueda}
-            onIonChange={(e) => {
-              setPage(1);
-              setBusqueda(e.detail.value!);
-            }}
-            clearInput
-          />
-          <IonButton
-            slot="end"
-            onClick={() => history.push("/alta-indumentaria")}
-          >
-            Nueva Prenda
-          </IonButton>
-        </IonItem>
+      
+      <IonContent>
+        {/* Buscador y botón nueva prenda */}
+        <div className="search-container">
+          <IonItem lines="none">
+            <IonIcon icon={search} slot="start" style={{ color: '#64748b' }} />
+            <IonInput
+              placeholder="Buscar por descripción, código, color o talle..."
+              value={busqueda}
+              onIonChange={(e) => {
+                setPage(1);
+                setBusqueda(e.detail.value!);
+              }}
+              clearInput
+            />
+            <IonButton
+              slot="end"
+              onClick={() => history.push("/alta-indumentaria")}
+            >
+              <IonIcon icon={add} slot="start" />
+              Nueva Prenda
+            </IonButton>
+          </IonItem>
+        </div>
 
-        <IonGrid className="tabla-indumentaria">
-          <br />
-          <IonText className="ion-padding">
-            Total de prendas: <b>{total}</b>
+        {/* Contador de total */}
+        <div className="total-counter">
+          <IonIcon icon={shirt} style={{ color: '#fdb40b', fontSize: '1.2em' }} />
+          <IonText>
+            Total de prendas registradas: <b>{total}</b>
+            {busqueda && (
+              <span style={{ color: '#64748b', marginLeft: '8px' }}>
+                (filtradas por: "{busqueda}")
+              </span>
+            )}
           </IonText>
-          <br />
-          <br />
-          <IonRow>
-            <IonCol>
-              <strong>Código</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Nombre</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Color</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Tela</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Talle</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Categoría</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Precio</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Estado</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Stock</strong>
-            </IonCol>
-            <IonCol>
-              <strong>Acciones</strong>
-            </IonCol>
+        </div>
+
+        {/* Tabla de indumentaria */}
+        <IonGrid className="tabla-indumentaria">
+          <IonRow className="tabla-header">
+            <IonCol size="1.2">Código</IonCol>
+            <IonCol size="1.8">Nombre</IonCol>
+            <IonCol size="1">Color</IonCol>
+            <IonCol size="1.2">Tela</IonCol>
+            <IonCol size="0.8">Talle</IonCol>
+            <IonCol size="1.2">Categoría</IonCol>
+            <IonCol size="1">Precio</IonCol>
+            <IonCol size="0.8">Estado</IonCol>
+            <IonCol size="0.8">Stock</IonCol>
+            <IonCol size="0.8">Unidad</IonCol>
+            <IonCol size="1.4">Acciones</IonCol>
           </IonRow>
-          {(prendas || []).map((item) => (
-            <IonRow key={item.codigoIndumentaria}>
-              <IonCol>{item.codigoIndumentaria}</IonCol>
-              <IonCol>{item.nombre}</IonCol>
-              <IonCol>{item.color}</IonCol>
-              <IonCol>{item.nombreTela}</IonCol>
-              <IonCol>{item.talle}</IonCol>
-              <IonCol>{item.categoria}</IonCol>
-              <IonCol>{item.precio}</IonCol>
-              <IonCol>{item.estado}</IonCol>
-              <IonCol>{item.cantidadIndumentaria}</IonCol>
-              <IonCol>
-                <IonButton
-                  fill="clear"
-                  onClick={() =>
-                    history.push(
-                      `/alta-indumentaria/${item.codigoIndumentaria}`
-                    )
-                  }
-                >
-                  <IonIcon icon={pencil} color="primary" />
-                </IonButton>
-                <IonButton
-                  fill="clear"
-                  color="danger"
-                  onClick={() => handleEliminar(item.codigoIndumentaria)}
-                >
-                  <IonIcon icon={trash} />
-                </IonButton>
+          
+          {loading ? (
+            <IonRow>
+              <IonCol size="12" className="ion-text-center ion-padding">
+                <IonSpinner name="crescent" color="primary" />
+                <p style={{ marginTop: '16px', color: '#64748b' }}>
+                  Cargando prendas...
+                </p>
               </IonCol>
             </IonRow>
-          ))}
+          ) : prendas.length === 0 ? (
+            <IonRow>
+              <IonCol size="12">
+                <div className="empty-state">
+                  <IonIcon icon={shirt} className="empty-icon" />
+                  <h3 className="empty-title">
+                    {busqueda ? 'No se encontraron prendas' : 'No hay prendas registradas'}
+                  </h3>
+                  <p className="empty-description">
+                    {busqueda 
+                      ? `No hay prendas que coincidan con "${busqueda}". Intenta con otros términos de búsqueda.`
+                      : 'Comienza agregando tu primera prenda al inventario.'
+                    }
+                  </p>
+                  {!busqueda && (
+                    <IonButton 
+                      style={{ marginTop: '20px' }}
+                      onClick={() => history.push("/alta-indumentaria")}
+                    >
+                      <IonIcon icon={add} slot="start" />
+                      Agregar Primera Prenda
+                    </IonButton>
+                  )}
+                </div>
+              </IonCol>
+            </IonRow>
+          ) : (
+            (prendas || []).map((item) => (
+              <IonRow key={item.codigoIndumentaria}>
+                <IonCol size="1.2">
+                  <span className="codigo-badge">{item.codigoIndumentaria}</span>
+                </IonCol>
+                <IonCol size="1.8">{item.nombre}</IonCol>
+                <IonCol size="1">{item.color}</IonCol>
+                <IonCol size="1.2">{item.nombreTela}</IonCol>
+                <IonCol size="0.8">{item.talle}</IonCol>
+                <IonCol size="1.2">{item.categoria}</IonCol>
+                <IonCol size="1">
+                  <span className="precio-badge">${item.precio}</span>
+                </IonCol>
+                <IonCol size="0.8">
+                  <span className={`estado-badge ${getEstadoClass(item.estado)}`}>
+                    {item.estado}
+                  </span>
+                </IonCol>
+                <IonCol size="0.8">
+                  <span className={`stock-badge ${getStockClass(item.cantidadIndumentaria)}`}>
+                    {item.cantidadIndumentaria}
+                  </span>
+                </IonCol>
+                <IonCol size="0.8">
+                  <span className="unidad-badge">{item.unidad}</span>
+                </IonCol>
+                <IonCol size="1.4">
+                  <div className="actions-container">
+                    <IonButton
+                      fill="solid"
+                      color="primary"
+                      size="small"
+                      onClick={() =>
+                        history.push(
+                          `/alta-indumentaria/${item.codigoIndumentaria}`
+                        )
+                      }
+                    >
+                      <IonIcon icon={pencil} />
+                    </IonButton>
+                    <IonButton
+                      fill="solid"
+                      color="danger"
+                      size="small"
+                      onClick={() => handleEliminar(item.codigoIndumentaria)}
+                    >
+                      <IonIcon icon={trash} />
+                    </IonButton>
+                  </div>
+                </IonCol>
+              </IonRow>
+            ))
+          )}
         </IonGrid>
-        {/* Paginación */}
-        <IonFooter className="ion-padding ion-text-center">
-          <IonButton
-            disabled={page === 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            Anterior
-          </IonButton>
-          <IonText className="ion-padding-horizontal">
-            Página {page} de {totalPages}
-          </IonText>
-          <IonButton
-            disabled={page === totalPages || totalPages === 0}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
-            Siguiente
-          </IonButton>
-        </IonFooter>
-        <IonAlert
-          isOpen={showAlert}
-          message={alertMsg}
-          buttons={["Aceptar"]}
-          onDidDismiss={() => setShowAlert(false)}
-        />
       </IonContent>
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <IonFooter className="pagination-footer">
+          <div className="pagination-controls">
+            <IonButton
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </IonButton>
+            
+            <div className="pagination-info">
+              Página {page} de {totalPages}
+            </div>
+            
+            <IonButton
+              disabled={page === totalPages || totalPages === 0}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Siguiente
+            </IonButton>
+          </div>
+        </IonFooter>
+      )}
+
+      <IonAlert
+        isOpen={showAlert}
+        message={alertMsg}
+        buttons={["Aceptar"]}
+        onDidDismiss={() => setShowAlert(false)}
+      />
     </IonPage>
   );
 };

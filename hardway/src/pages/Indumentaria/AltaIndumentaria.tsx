@@ -30,7 +30,8 @@ const camposIniciales = {
   precio: "",
   cantidad: "",
   idDetalle: "",
-  cantidadAnterior: "", // <--- AGREGA ESTO
+  cantidadAnterior: "",
+  idUnidadMedida: "", // Nueva propiedad para la unidad de medida
 };
 
 const AltaIndumentaria: React.FC = () => {
@@ -48,6 +49,7 @@ const AltaIndumentaria: React.FC = () => {
   const [estados, setEstados] = useState<any[]>([]);
   const [precios, setPrecios] = useState<any[]>([]);
   const [nombresIndumentaria, setNombresIndumentaria] = useState<any[]>([]);
+  const [unidadesMedida, setUnidadesMedida] = useState<any[]>([]);
 
   useEffect(() => {
     const cargarAuxiliares = async () => {
@@ -60,6 +62,7 @@ const AltaIndumentaria: React.FC = () => {
           estadosRes,
           preciosRes,
           nombresRes,
+          unidadesRes,
         ] = await Promise.all([
           axiosInstance.get("/api/colores"),
           axiosInstance.get("/api/talles"),
@@ -68,6 +71,7 @@ const AltaIndumentaria: React.FC = () => {
           axiosInstance.get("/api/estados-indumentaria"),
           axiosInstance.get("/api/precios"),
           axiosInstance.get("/api/nombres-indumentaria"),
+          axiosInstance.get("/api/unidades-medida"),
         ]);
         setColores(coloresRes.data);
         setTalles(tallesRes.data);
@@ -76,6 +80,7 @@ const AltaIndumentaria: React.FC = () => {
         setEstados(estadosRes.data);
         setPrecios(preciosRes.data);
         setNombresIndumentaria(nombresRes.data);
+        setUnidadesMedida(unidadesRes.data);
       } catch {
         setAlertMsg("Error al cargar datos auxiliares.");
         setShowAlert(true);
@@ -103,6 +108,7 @@ const AltaIndumentaria: React.FC = () => {
             cantidad: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
             idDetalle: data.idDetalle?.toString() || "",
             cantidadAnterior: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
+            idUnidadMedida: data.DetalleIndumentarium?.idUnidadMedida?.toString() || "",
           });
         } catch (error) {
           setAlertMsg("Error al cargar la prenda.");
@@ -152,6 +158,7 @@ const AltaIndumentaria: React.FC = () => {
           idTalle: form.idTalle,
           idEstado: form.idEstado,
           idTela: form.idTela,
+          idUnidadMedida: form.idUnidadMedida,
         }
       );
       const idDetalle = detalleRes.data.idDetalle;
@@ -391,6 +398,20 @@ const AltaIndumentaria: React.FC = () => {
               <IonSelectOption value="nuevo">
                 + Agregar nuevo estado
               </IonSelectOption>
+            </IonSelect>
+          </IonItem>
+          <IonItem>
+            <IonLabel position="floating">Unidad de Medida</IonLabel>
+            <IonSelect
+              value={form.idUnidadMedida}
+              onIonChange={(e) => handleChange("idUnidadMedida", e.detail.value)}
+              required
+            >
+              {unidadesMedida.map((u) => (
+                <IonSelectOption key={u.idUnidadMedida} value={u.idUnidadMedida}>
+                  {u.nombreUnidad} ({u.abreviatura})
+                </IonSelectOption>
+              ))}
             </IonSelect>
           </IonItem>
           <IonItem>
