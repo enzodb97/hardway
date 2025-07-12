@@ -50,6 +50,71 @@ const DetallePedido: React.FC = () => {
     });
   };
 
+  // Configuración de estados y progreso
+  const estadosPedido = [
+    { id: 1, nombre: "En Curso", icono: "📋", descripcion: "Pedido creado", key: "creado" },
+    { id: 2, nombre: "Pendiente de Pago", icono: "💳", descripcion: "Esperando pago", key: "pago" },
+    { id: 3, nombre: "Abonado", icono: "✅", descripcion: "Pago confirmado", key: "abonado" },
+    { id: 4, nombre: "Despachado", icono: "🚚", descripcion: "En camino", key: "enviado" },
+    { id: 5, nombre: "Finalizado", icono: "🏠", descripcion: "Entregado", key: "entregado" },
+  ];
+
+  const obtenerProgresoActual = () => {
+    if (!pedido) return 0;
+    
+    // Si está cancelado, retornar estado especial
+    if (pedido.idEstado === 6) return -1;
+    
+    const estadoActual = estadosPedido.findIndex(estado => estado.id === pedido.idEstado);
+    return estadoActual >= 0 ? estadoActual : 0;
+  };
+
+  const BarraProgreso = () => {
+    const progresoActual = obtenerProgresoActual();
+    
+    // Si está cancelado, mostrar barra especial
+    if (progresoActual === -1) {
+      return (
+        <div className="barra-progreso-container">
+          <div className="progreso-cancelado">
+            <div className="estado-cancelado">
+              <div className="circulo-cancelado">
+                <span className="icono-cancelado">❌</span>
+              </div>
+              <div className="info-estado-cancelado">
+                <span className="nombre-estado-cancelado">Pedido Cancelado</span>
+                <span className="descripcion-estado-cancelado">El pedido ha sido cancelado</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="barra-progreso-container">
+        <div className="barra-progreso">
+          {estadosPedido.map((estado, index) => (
+            <div key={estado.id} className="paso-progreso">
+              <div className={`paso-contenido ${index <= progresoActual ? 'completado' : 'pendiente'}`}>
+                <div className={`circulo-estado ${index <= progresoActual ? 'activo' : ''} ${index === progresoActual ? 'actual' : ''}`}>
+                  <span className="icono-estado">{estado.icono}</span>
+                </div>
+                <div className="info-estado">
+                  <span className="nombre-estado">{estado.nombre}</span>
+                  <span className="descripcion-estado">{estado.descripcion}</span>
+                </div>
+              </div>
+              {index < estadosPedido.length - 1 && (
+                <div className={`linea-conexion ${index < progresoActual ? 'completada' : 'pendiente'}`}></div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <IonPage className="detalle-pedido-page">
       <IonHeader>
@@ -63,6 +128,9 @@ const DetallePedido: React.FC = () => {
           <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />{" "}
           Detalle de Pedido #{pedido?.numeroPedido || id}
         </h2>
+        
+        {/* Barra de progreso del pedido */}
+        {pedido && <BarraProgreso />}
         
         {/* Información del estado del pedido */}
         {pedido && (
