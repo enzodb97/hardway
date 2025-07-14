@@ -48,6 +48,7 @@ interface ClienteReporte {
   apellido: string;
   email: string;
   total_pedidos: number;
+  total_valor: number; // Nuevo campo para el valor total de los pedidos
 }
 
 const PAGE_SIZE = 5;
@@ -84,9 +85,13 @@ const ClientesMasPedidos: React.FC = () => {
       });
   }, []);
 
+  // Ordenar por valor total de pedidos descendente
+  const clientesOrdenados = [...clientes].sort(
+    (a, b) => b.total_valor - a.total_valor
+  );
   const clientesAMostrar = mostrarTodos
-    ? clientes
-    : clientes.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE);
+    ? clientesOrdenados
+    : clientesOrdenados.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE);
 
   const totalPaginas = mostrarTodos
     ? 1
@@ -98,7 +103,7 @@ const ClientesMasPedidos: React.FC = () => {
   const exportarPDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const title = "Clientes con más pedidos";
+    const title = "Clientes de Alto Valor";
     const textWidth = doc.getTextWidth(title);
     const x = (pageWidth - textWidth) / 2;
 
@@ -140,20 +145,20 @@ const ClientesMasPedidos: React.FC = () => {
     doc.save("Clientes_mas_pedidos.pdf");
   };
 
-  // Prepara los datos para el gráfico
+  // Prepara los datos para el gráfico (por valor total)
   const data = {
-    labels: clientes.map((c) => `${c.nombre} ${c.apellido}`),
+    labels: clientesOrdenados.map((c) => `${c.nombre} ${c.apellido}`),
     datasets: [
       {
-        label: "Total de Pedidos",
-        data: clientes.map((c) => c.total_pedidos),
-        backgroundColor: colores.slice(0, clientes.length), // Un color por barra
+        label: "Valor Total de Pedidos ($)",
+        data: clientesOrdenados.map((c) => c.total_valor),
+        backgroundColor: colores.slice(0, clientesOrdenados.length),
         borderRadius: 8,
         maxBarThickness: 32,
       },
     ],
   };
-  const maxPedidos = Math.max(...clientes.map((c) => c.total_pedidos), 0);
+  const maxValor = Math.max(...clientesOrdenados.map((c) => c.total_valor), 0);
 
   const options = {
     indexAxis: "y" as const, // Barras horizontales
@@ -162,17 +167,17 @@ const ClientesMasPedidos: React.FC = () => {
       legend: { display: false },
       title: {
         display: true,
-        text: "Top 10 Clientes por Cantidad de Pedidos",
+        text: "Top 10 Clientes por Valor Total de Pedidos",
         font: { size: 18 },
         padding: { top: 10, bottom: 20 },
       },
       datalabels: {
-        anchor: "end",
-        align: "end",
+        anchor: "end" as const,
+        align: "end" as const,
         color: "#333",
-        font: { weight: "bold" },
+        font: { weight: "bold" as const },
         offset: 16,
-        formatter: (value: number) => value,
+        formatter: (value: number) => `$${value.toLocaleString()}`,
         clamp: true,
         display: true,
       },
@@ -180,8 +185,9 @@ const ClientesMasPedidos: React.FC = () => {
         callbacks: {
           label: function (context: any) {
             const idx = context.dataIndex;
-            const c = clientes[idx];
+            const c = clientesOrdenados[idx];
             return [
+              `Valor total: $${c.total_valor.toLocaleString()}`,
               `Total pedidos: ${c.total_pedidos}`,
               `Email: ${c.email || "-"}`,
             ];
@@ -193,12 +199,11 @@ const ClientesMasPedidos: React.FC = () => {
       x: {
         title: {
           display: true,
-          text: "Total de Pedidos",
+          text: "Valor Total de Pedidos ($)",
           font: { size: 14 },
         },
         beginAtZero: true,
         ticks: { precision: 0 },
-        max: maxPedidos + 1, // <-- Esto agrega una "columna" más de espacio
       },
       y: {
         title: {
@@ -214,7 +219,7 @@ const ClientesMasPedidos: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar color="warning">
-          <IonTitle>Clientes con más pedidos</IonTitle>
+          <IonTitle>Clientes de Alto Valor</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
@@ -222,7 +227,7 @@ const ClientesMasPedidos: React.FC = () => {
           <IonRow>
             <IonCol size="12" className="ion-text-center">
               <h2 style={{ margin: "16px 0 8px 0" }}>
-                Top 10 Clientes con más pedidos
+                Top 10 Clientes de Alto Valor
               </h2>
               <div style={{ fontSize: 14, color: "#888" }}>
                 Fecha de emisión: {fechaEmision}
@@ -245,14 +250,17 @@ const ClientesMasPedidos: React.FC = () => {
                       <IonCol size="2" className="celda-centrada">
                         N° Cliente
                       </IonCol>
-                      <IonCol size="4" className="celda-centrada">
+                      <IonCol size="3" className="celda-centrada">
                         Nombre y Apellido
                       </IonCol>
-                      <IonCol size="4" className="celda-centrada">
+                      <IonCol size="3" className="celda-centrada">
                         Email
                       </IonCol>
                       <IonCol size="2" className="celda-centrada">
                         Total Pedidos
+                      </IonCol>
+                      <IonCol size="2" className="celda-centrada">
+                        Valor Total ($)
                       </IonCol>
                     </IonRow>
                     {clientesAMostrar.map((c) => (
@@ -260,14 +268,17 @@ const ClientesMasPedidos: React.FC = () => {
                         <IonCol size="2" className="celda-centrada">
                           {c.idCliente}
                         </IonCol>
-                        <IonCol size="4" className="celda-centrada">
+                        <IonCol size="3" className="celda-centrada">
                           {`${c.nombre} ${c.apellido}`}
                         </IonCol>
-                        <IonCol size="4" className="celda-centrada">
+                        <IonCol size="3" className="celda-centrada">
                           {c.email || ""}
                         </IonCol>
                         <IonCol size="2" className="celda-centrada">
                           {c.total_pedidos}
+                        </IonCol>
+                        <IonCol size="2" className="celda-centrada">
+                          ${c.total_valor.toLocaleString()}
                         </IonCol>
                       </IonRow>
                     ))}
