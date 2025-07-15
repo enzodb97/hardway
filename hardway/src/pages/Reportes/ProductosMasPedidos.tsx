@@ -14,6 +14,7 @@ import {
   IonCard,
   IonCardContent,
   IonIcon,
+  IonToast,
 } from "@ionic/react";
 import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
@@ -31,6 +32,8 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./Reportes.css";
+import "./ProductosMasPedidos.table.css";
+import { checkmarkCircle } from "ionicons/icons";
 
 // Registrar componentes y plugins
 Chart.register(
@@ -43,20 +46,28 @@ Chart.register(
   ChartDataLabels
 );
 
-interface ProductoMasPedido {
-  nombre_indumentaria: string;
+interface ProductoMasPedidoPorTemporada {
+  temporada: string;
+  ranking: number;
+  nombre_producto: string;
   codigoIndumentaria: string;
-  cantidad_total_vendida: number;
+  total_vendido: number;
   talle: string;
   tela: string;
   color: string;
 }
 
 const ProductosMasPedidos: React.FC = () => {
-  const [productos, setProductos] = useState<ProductoMasPedido[]>([]);
+  const [productos, setProductos] = useState<ProductoMasPedidoPorTemporada[]>(
+    []
+  );
   const [incluirGrafico, setIncluirGrafico] = useState(false);
-  const chartRef = useRef<any>(null);
+  const [temporadaSeleccionada, setTemporadaSeleccionada] =
+    useState<string>("");
+  const chartRefs = useRef<{ [temporada: string]: any }>({});
+  const [graficoListo, setGraficoListo] = useState(false);
   const fechaEmision = new Date().toLocaleString("es-AR");
+  const [showToast, setShowToast] = useState({ open: false, message: "" });
 
   useEffect(() => {
     axiosInstance
@@ -68,51 +79,110 @@ const ProductosMasPedidos: React.FC = () => {
       });
   }, []);
 
-  // Etiqueta combinada para cada producto
-  const etiquetas = productos.map(
-    (p) => `${p.nombre_indumentaria}, Talle ${p.talle}, ${p.tela}, ${p.color}`
-  );
+  // Agrupar productos por temporada
+  const productosPorTemporada: {
+    [temporada: string]: ProductoMasPedidoPorTemporada[];
+  } = {};
+  productos.forEach((p) => {
+    if (!productosPorTemporada[p.temporada])
+      productosPorTemporada[p.temporada] = [];
+    productosPorTemporada[p.temporada].push(p);
+  });
 
-  // Genera un array de colores distintos (puedes personalizarlos)
+  const temporadas = Object.keys(productosPorTemporada);
+  React.useEffect(() => {
+    if (!temporadaSeleccionada && temporadas.length > 0) {
+      setTemporadaSeleccionada(temporadas[0]);
+    }
+  }, [temporadas, temporadaSeleccionada]);
+
+  // Marcar el gráfico como listo cuando el ref cambia y es válido
+  useEffect(() => {
+    setGraficoListo(false);
+    const timeout = setTimeout(() => {
+      const ref = chartRefs.current[temporadaSeleccionada];
+      let chartInstance = null;
+      if (ref) {
+        if (ref.chartInstance) chartInstance = ref.chartInstance;
+        else if (ref.chart) chartInstance = ref.chart;
+        else chartInstance = ref;
+      }
+      if (chartInstance && typeof chartInstance.toBase64Image === "function") {
+        setGraficoListo(true);
+      }
+    }, 200); // pequeño retardo para asegurar render
+    return () => clearTimeout(timeout);
+  }, [
+    temporadaSeleccionada,
+    productosPorTemporada[temporadaSeleccionada]?.length,
+  ]);
+
+  // Colores para las barras
+  // Paleta corporativa: azul, amarillo, gris, naranja, violeta, verde, etc.
   const colores = [
-    "#FF6384", // rojo
-    "#36A2EB", // azul
-    "#FFCE56", // amarillo
-    "#4BC0C0", // verde agua
-    "#9966FF", // violeta
+    "#0057ff", // azul corporativo
+    "#fdb40b", // amarillo corporativo
+    "#755bd4ff", // violeta
+    "#ff9f40", // naranja
+    "#b284be", // lila
+    "#00c49a", // verde
+    "#ff6384", // rojo
+    "#36a2eb", // azul claro
+    "#ffce56", // amarillo claro
+    "#4bc0c0", // verde agua
   ];
 
-  // Datos para el gráfico
-  const data = {
-    labels: etiquetas,
-    datasets: [
-      {
-        label: "Cantidad Vendida",
-        data: productos.map((p) => p.cantidad_total_vendida),
-        backgroundColor: colores.slice(0, productos.length), // Un color por barra
-        borderRadius: 8,
-        maxBarThickness: 32,
-      },
-    ],
+  // Generar datos de gráfico por temporada
+
+  const getChartData = (productos: ProductoMasPedidoPorTemporada[]) => {
+    return {
+      labels: productos.map(
+        (p) =>
+          `${p.nombre_producto} (${p.codigoIndumentaria})\nTalle: ${p.talle} | Tela: ${p.tela} | Color: ${p.color}`
+      ),
+      datasets: [
+        {
+          label: "Cantidad Vendida",
+          data: productos.map((p) => p.total_vendido),
+          backgroundColor: colores.slice(0, productos.length),
+          borderRadius: 8,
+          maxBarThickness: 32,
+        },
+      ],
+    };
   };
 
-  const options = {
+  // Mejorar opciones del gráfico para responsive
+  const getChartOptions = (
+    temporada: string,
+    productos: ProductoMasPedidoPorTemporada[]
+  ) => ({
     indexAxis: "y" as const,
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: {
+        display: false,
+      },
       title: {
         display: true,
-        text: "Top 10 Productos Más Pedidos",
-        font: { size: 18 },
-        padding: { top: 10, bottom: 20 },
+        text: [
+          `Top Productos Más Pedidos`,
+          `Temporada seleccionada: ${temporada}`,
+        ],
+        font: { size: 20, family: "Montserrat, Arial, sans-serif" },
+        color: "#0057ff",
+        padding: { top: 10, bottom: 8 },
+        align: "center" as const,
       },
       datalabels: {
         anchor: "end" as const,
         align: "end" as const,
-        color: "#333",
-        font: { weight: "bold" as const },
+        color: "#0057ff",
+        font: { weight: "bold" as const, size: 14 },
         formatter: (value: number) => value,
+        clamp: true,
+        display: true,
       },
       tooltip: {
         callbacks: {
@@ -120,14 +190,23 @@ const ProductosMasPedidos: React.FC = () => {
             const idx = context.dataIndex;
             const p = productos[idx];
             return [
-              `Cantidad: ${p.cantidad_total_vendida}`,
+              `Cantidad: ${p.total_vendido}`,
               `Código: ${p.codigoIndumentaria}`,
               `Talle: ${p.talle}`,
               `Tela: ${p.tela}`,
               `Color: ${p.color}`,
+              `Ranking: ${p.ranking}`,
             ];
           },
         },
+      },
+    },
+    layout: {
+      padding: {
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16,
       },
     },
     scales: {
@@ -135,25 +214,32 @@ const ProductosMasPedidos: React.FC = () => {
         title: {
           display: true,
           text: "Cantidad Total",
-          font: { size: 14 },
+          font: { size: 15, family: "Poppins, Arial, sans-serif" },
+          color: "#333",
         },
         beginAtZero: true,
-        // Ajuste para que el eje X muestre siempre 1 más que el máximo
-        max: Math.max(...productos.map((p) => p.cantidad_total_vendida), 0) + 1,
-        ticks: { precision: 0 },
+        max: Math.max(...productos.map((p) => p.total_vendido), 0) + 1,
+        ticks: { precision: 0, font: { size: 13 } },
+        grid: { color: "#e0e0e0" },
       },
       y: {
         title: {
           display: true,
           text: "Producto",
-          font: { size: 14 },
+          font: { size: 15, family: "Poppins, Arial, sans-serif" },
+          color: "#333",
         },
+        ticks: { font: { size: 13 } },
+        grid: { color: "#e0e0e0" },
       },
     },
-  };
+  });
 
   // Exportar a Excel con gráfico de barras de productos más pedidos
   const exportarExcel = async () => {
+    if (!graficoListo) {
+      return;
+    }
     const workbook = new ExcelJS.Workbook();
     workbook.creator = "Pegasus System";
     workbook.created = new Date();
@@ -178,14 +264,14 @@ const ProductosMasPedidos: React.FC = () => {
     // --- FIN LOGO ---
 
     // Fila de título grande y centrado
-    wsProductos.mergeCells("A1:F1");
-    wsProductos.getCell("A1").value = "Top 10 Productos Más Pedidos";
-    wsProductos.getCell("A1").font = {
+    wsProductos.mergeCells("B1:H1");
+    wsProductos.getCell("B1").value = "Top 10 Productos Más Pedidos";
+    wsProductos.getCell("B1").font = {
       bold: true,
       size: 18,
       color: { argb: "FF333333" },
     };
-    wsProductos.getCell("A1").alignment = {
+    wsProductos.getCell("B1").alignment = {
       vertical: "middle",
       horizontal: "center",
     };
@@ -207,17 +293,23 @@ const ProductosMasPedidos: React.FC = () => {
 
     // Definir columnas con ancho, encabezado y tipo
     wsProductos.columns = [
-      { header: "Nombre", key: "nombre", width: 25 },
-      { header: "Código", key: "codigo", width: 15 },
+      { header: "", key: "nombre", width: 25 },
+      { header: "", key: "codigo", width: 15 },
       {
-        header: "Cantidad",
+        header: "",
         key: "cantidad",
         width: 12,
         style: { numFmt: "#,##0" },
       },
-      { header: "Talle", key: "talle", width: 10, style: { numFmt: "0" } },
-      { header: "Tela", key: "tela", width: 15 },
-      { header: "Top 10 Productos Más Pedidos", key: "color", width: 15 },
+      { header: "", key: "talle", width: 10 },
+      { header: "", key: "tela", width: 15 },
+      {
+        header:
+          "Top 10 Productos mas pedido de la Temporada" +
+          (temporadaSeleccionada ? ` (${temporadaSeleccionada})` : ""),
+        key: "color",
+        width: 15,
+      },
     ];
     // Forzar la fila de encabezado manualmente para evitar errores de visualización
     wsProductos.getRow(3).values = [
@@ -229,17 +321,19 @@ const ProductosMasPedidos: React.FC = () => {
       "Color",
     ];
 
-    // Agregar filas de datos, forzando cantidad y talle como números
-    (productos || []).forEach((p: ProductoMasPedido) => {
-      wsProductos.addRow({
-        nombre: p.nombre_indumentaria,
-        codigo: p.codigoIndumentaria,
-        cantidad: Number(p.cantidad_total_vendida),
-        talle: Number(p.talle),
-        tela: p.tela,
-        color: p.color,
+    // Exportar solo la temporada seleccionada
+    if (temporadaSeleccionada && productosPorTemporada[temporadaSeleccionada]) {
+      productosPorTemporada[temporadaSeleccionada].forEach((p) => {
+        wsProductos.addRow({
+          nombre: p.nombre_producto,
+          codigo: p.codigoIndumentaria,
+          cantidad: Number(p.total_vendido),
+          talle: p.talle,
+          tela: p.tela,
+          color: p.color,
+        });
       });
-    });
+    }
 
     // Estilos para el encabezado (ahora fila 3)
     wsProductos.getRow(3).eachCell((cell) => {
@@ -281,47 +375,41 @@ const ProductosMasPedidos: React.FC = () => {
       });
     });
 
-    // Pie de página profesional
-    /*const lastRow = wsProductos.lastRow?.number || productos.length + 3;
-    const pieRowNum = lastRow + 2;
-    wsProductos.mergeCells(`A${pieRowNum}:F${pieRowNum}`);
-    wsProductos.getCell(`A${pieRowNum}`).value =
-      "Reporte generado por Pegasus System | www.pegasus.com.ar";
-    wsProductos.getCell(`A${pieRowNum}`).font = {
-      italic: true,
-      size: 10,
-      color: { argb: "FF888888" },
-    };
-    wsProductos.getCell(`A${pieRowNum}`).alignment = {
-      vertical: "middle",
-      horizontal: "right",
-    };*/
-
-    // Exportar gráfico como imagen (si existe)
-    if (chartRef.current) {
-      let chartInstance = chartRef.current.chartInstance || chartRef.current;
-      if (chartInstance && chartInstance.toBase64Image) {
-        const imgBase64 = chartInstance.toBase64Image();
-        // Convertir base64 a ArrayBuffer
-        const base64Data = imgBase64.replace(/^data:image\/png;base64,/, "");
-        const binaryString = atob(base64Data);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const arrayBuffer = bytes.buffer;
-        // Agregar imagen a ExcelJS
-        const imageId = workbook.addImage({
-          buffer: arrayBuffer,
-          extension: "png",
-        });
-        // Insertar imagen debajo de la tabla (A productos.length+3 para dejar espacio)
-        wsProductos.addImage(imageId, {
-          tl: { col: 0, row: productos.length + 3 },
-          ext: { width: 1000, height: 600 },
-        });
+    // Exportar solo el gráfico de la temporada seleccionada (robusto)
+    let currentRow = wsProductos.lastRow ? wsProductos.lastRow.number + 2 : 5;
+    let chartRef = chartRefs.current[temporadaSeleccionada];
+    let chartInstance = null;
+    if (chartRef) {
+      if (chartRef.chartInstance)
+        chartInstance = chartRef.chartInstance; // Chart.js 2.x
+      else if (chartRef.chart) chartInstance = chartRef.chart; // Chart.js 3.x
+      else chartInstance = chartRef;
+    }
+    let imgBase64 = null;
+    if (chartInstance && typeof chartInstance.toBase64Image === "function") {
+      try {
+        imgBase64 = chartInstance.toBase64Image();
+      } catch (e) {
+        imgBase64 = null;
       }
+    }
+    if (imgBase64 && imgBase64.startsWith("data:image/png;base64,")) {
+      const base64Data = imgBase64.replace(/^data:image\/png;base64,/, "");
+      const binaryString = atob(base64Data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const arrayBuffer = bytes.buffer;
+      const imageId = workbook.addImage({
+        buffer: arrayBuffer,
+        extension: "png",
+      });
+      wsProductos.addImage(imageId, {
+        tl: { col: 0, row: currentRow },
+        ext: { width: 1000, height: 600 },
+      });
     }
 
     // Descargar archivo
@@ -339,18 +427,23 @@ const ProductosMasPedidos: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+    setShowToast({ open: true, message: "¡Excel exportado exitosamente!" });
   };
 
   const exportarPDF = async () => {
+    if (incluirGrafico && !graficoListo) {
+      return;
+    }
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const title = "Top 10 Productos Más Pedidos";
+    const title =
+      "Top 10 Productos Más Pedidos Temporada " + temporadaSeleccionada;
     const textWidth = doc.getTextWidth(title);
     const x = (pageWidth - textWidth) / 2;
 
     // Logo en base64 (puedes usar tu propio logo)
     const logoBase64 =
-      "data:image/png;base64,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";
+      "data:image/png;base64,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";
 
     doc.addImage(logoBase64, "PNG", 10, 8, 15, 15);
     doc.text(title, x, 18);
@@ -358,162 +451,322 @@ const ProductosMasPedidos: React.FC = () => {
     doc.text(`Fecha de emisión: ${fechaEmision}`, x, 25);
 
     // Tabla primero
-    autoTable(doc, {
-      head: [["Nombre", "Código", "Cantidad", "Talle", "Tela", "Color"]],
-      body: productos.map((p) => [
-        p.nombre_indumentaria,
-        p.codigoIndumentaria,
-        p.cantidad_total_vendida,
-        p.talle,
-        p.tela,
-        p.color,
-      ]),
-      startY: 32,
-      styles: { fontSize: 10, halign: "center" },
-      headStyles: { fillColor: [254, 175, 0], halign: "center" },
-    });
+    // Exportar solo la tabla de la temporada seleccionada
+    let startY = 32;
+    if (temporadaSeleccionada && productosPorTemporada[temporadaSeleccionada]) {
+      doc.setFontSize(13);
+      autoTable(doc, {
+        head: [
+          ["Ranking", "Nombre", "Código", "Cantidad", "Talle", "Tela", "Color"],
+        ],
+        body: productosPorTemporada[temporadaSeleccionada].map((p) => [
+          p.ranking,
+          p.nombre_producto,
+          p.codigoIndumentaria,
+          p.total_vendido,
+          p.talle,
+          p.tela,
+          p.color,
+        ]),
+        startY: startY + 12,
+        styles: { fontSize: 10, halign: "center" },
+        headStyles: { fillColor: [254, 175, 0], halign: "center" },
+      });
+      startY = (doc as any).lastAutoTable.finalY || startY + 40;
+    }
 
-    // Gráfico debajo de la tabla
-    if (incluirGrafico && chartRef.current) {
-      const chart = chartRef.current;
-      const chartInstance = chart.chartInstance || chart;
-      const imgData = chartInstance.toBase64Image();
-      const finalY = (doc as any).lastAutoTable.finalY || 32;
-      doc.addImage(imgData, "PNG", 15, finalY + 10, 180, 50);
+    // Gráfico debajo de la tabla solo de la temporada seleccionada (robusto)
+    if (
+      incluirGrafico &&
+      temporadaSeleccionada &&
+      chartRefs.current[temporadaSeleccionada]
+    ) {
+      let y = startY + 10;
+      let chartRefPDF = chartRefs.current[temporadaSeleccionada];
+      let chartInstancePDF = null;
+      if (chartRefPDF) {
+        if (chartRefPDF.chartInstance)
+          chartInstancePDF = chartRefPDF.chartInstance;
+        else if (chartRefPDF.chart) chartInstancePDF = chartRefPDF.chart;
+        else chartInstancePDF = chartRefPDF;
+      }
+      let imgData = null;
+      if (
+        chartInstancePDF &&
+        typeof chartInstancePDF.toBase64Image === "function"
+      ) {
+        try {
+          imgData = chartInstancePDF.toBase64Image();
+        } catch (e) {
+          imgData = null;
+        }
+      }
+      if (imgData && imgData.startsWith("data:image/png;base64,")) {
+        doc.setFontSize(12);
+        doc.text(`Gráfico - ${temporadaSeleccionada}`, 15, y);
+        doc.addImage(imgData, "PNG", 15, y + 2, 180, 50);
+      }
     }
 
     doc.save("Productos_mas_pedidos.pdf");
+    setShowToast({ open: true, message: "¡PDF exportado exitosamente!" });
   };
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar color="warning">
-          <IonTitle>Productos más pedidos</IonTitle>
+          <IonTitle>Productos más pedidos por Temporada</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
         <IonGrid>
           <IonRow>
             <IonCol size="12" className="ion-text-center">
-              <h2 className="reporte-titulo">Top 10 Productos Más Pedidos</h2>
+              <h2 className="reporte-titulo">
+                Top 10 Productos Más Pedidos por Temporada
+              </h2>
               <div className="reporte-fecha">
                 Fecha de emisión: {fechaEmision}
               </div>
             </IonCol>
           </IonRow>
-          <IonRow>
-            <IonCol size="12">
-              <IonCard>
-                <IonCardContent>
-                  <IonGrid>
-                    <IonRow className="table-header">
-                      <IonCol size="2" className="celda-centrada">
-                        Nombre
-                      </IonCol>
-                      <IonCol size="2" className="celda-centrada">
-                        Código
-                      </IonCol>
-                      <IonCol size="2" className="celda-centrada">
-                        Cantidad
-                      </IonCol>
-                      <IonCol size="2" className="celda-centrada">
-                        Talle
-                      </IonCol>
-                      <IonCol size="2" className="celda-centrada">
-                        Tela
-                      </IonCol>
-                      <IonCol size="2" className="celda-centrada">
-                        Color
-                      </IonCol>
-                    </IonRow>
-                    {productos.map((p, idx) => (
+          <IonRow style={{ marginBottom: 16, alignItems: "center" }}>
+            <IonCol
+              size="12"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <label htmlFor="temporada-select" style={{ fontWeight: 500 }}>
+                  Temporada:
+                </label>
+                <select
+                  id="temporada-select"
+                  value={temporadaSeleccionada}
+                  onChange={(e) => setTemporadaSeleccionada(e.target.value)}
+                  style={{
+                    padding: 6,
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    minWidth: 120,
+                  }}
+                >
+                  {temporadas.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </IonCol>
+          </IonRow>
+          {temporadaSeleccionada && (
+            <IonRow style={{ marginBottom: 32 }}>
+              <IonCol size="12">
+                <IonCard>
+                  <IonCardContent>
+                    <h3 style={{ textAlign: "center", marginBottom: 16 }}>
+                      Temporada Seleccionada: {temporadaSeleccionada}
+                    </h3>
+                    <IonGrid>
                       <IonRow
-                        key={
-                          p.codigoIndumentaria +
-                          "-" +
-                          p.talle +
-                          "-" +
-                          p.tela +
-                          "-" +
-                          p.color
-                        }
+                        className="table-header"
+                        style={{
+                          fontWeight: "bold",
+                          background: "#0057ff",
+                          color: "white",
+                        }}
                       >
-                        <IonCol size="2" className="celda-centrada">
-                          {p.nombre_indumentaria}
+                        <IonCol
+                          size="1"
+                          className="celda-centrada"
+                          title="Ranking según cantidad vendida"
+                        >
+                          Ranking
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
-                          {p.codigoIndumentaria}
+                        <IonCol
+                          size="3"
+                          className="celda-centrada"
+                          title="Nombre del producto"
+                        >
+                          Producto
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
-                          {p.cantidad_total_vendida}
+                        <IonCol
+                          size="2"
+                          className="celda-centrada"
+                          title="Código interno de indumentaria"
+                        >
+                          Código
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
-                          {p.talle}
+                        <IonCol
+                          size="2"
+                          className="celda-centrada"
+                          title="Cantidad total vendida"
+                        >
+                          Cantidad
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
-                          {p.tela}
+                        <IonCol
+                          size="1"
+                          className="celda-centrada"
+                          title="Talle del producto"
+                        >
+                          Talle
                         </IonCol>
-                        <IonCol size="2" className="celda-centrada">
-                          {p.color}
+                        <IonCol
+                          size="1"
+                          className="celda-centrada"
+                          title="Tipo de tela"
+                        >
+                          Tela
+                        </IonCol>
+                        <IonCol
+                          size="2"
+                          className="celda-centrada"
+                          title="Color principal"
+                        >
+                          Color
                         </IonCol>
                       </IonRow>
-                    ))}
-                    <hr />
-                    <IonButton
-                      color="primary"
-                      size="small"
-                      style={{ marginBottom: 8, marginRight: 8 }}
-                      onClick={exportarExcel}
+                      {(productosPorTemporada[temporadaSeleccionada] || []).map(
+                        (p, idx) => (
+                          <IonRow
+                            className="reporte-tabla-fila"
+                            key={
+                              p.codigoIndumentaria +
+                              "-" +
+                              p.ranking +
+                              "-" +
+                              p.talle +
+                              "-" +
+                              p.tela +
+                              "-" +
+                              p.color
+                            }
+                          >
+                            <IonCol size="1" className="celda-centrada">
+                              {p.ranking}
+                            </IonCol>
+                            <IonCol size="3" className="celda-centrada">
+                              {p.nombre_producto}
+                            </IonCol>
+                            <IonCol size="2" className="celda-centrada">
+                              {p.codigoIndumentaria}
+                            </IonCol>
+                            <IonCol size="2" className="celda-centrada">
+                              {p.total_vendido}
+                            </IonCol>
+                            <IonCol size="1" className="celda-centrada">
+                              {p.talle}
+                            </IonCol>
+                            <IonCol size="1" className="celda-centrada">
+                              {p.tela}
+                            </IonCol>
+                            <IonCol size="2" className="celda-centrada">
+                              {p.color}
+                            </IonCol>
+                          </IonRow>
+                        )
+                      )}
+                    </IonGrid>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                      }}
                     >
-                      <IonIcon icon={downloadOutline} slot="start" />
-                      Exportar a Excel
-                    </IonButton>
-                    <IonButton
-                      size="small"
-                      fill={incluirGrafico ? "solid" : "outline"}
-                      color={incluirGrafico ? "primary" : "medium"}
-                      onClick={() => setIncluirGrafico((prev) => !prev)}
-                      style={{ marginLeft: 0, marginBottom: 8 }}
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={exportarExcel}
+                        style={{ minWidth: 120 }}
+                      >
+                        <IonIcon icon={downloadOutline} slot="start" />
+                        Exportar a Excel
+                      </IonButton>
+                      <IonButton
+                        size="small"
+                        fill={incluirGrafico ? "solid" : "outline"}
+                        color={incluirGrafico ? "primary" : "medium"}
+                        onClick={() => setIncluirGrafico((prev) => !prev)}
+                        style={{ minWidth: 120 }}
+                      >
+                        {incluirGrafico
+                          ? "Quitar gráfico del PDF"
+                          : "Incluir gráfico en PDF"}
+                      </IonButton>
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={exportarPDF}
+                        style={{ minWidth: 80 }}
+                      >
+                        <IonIcon icon={documentText} slot="start" />
+                        PDF
+                      </IonButton>
+                    </div>
+                    <div
+                      style={{
+                        width: "100%",
+                        minHeight: 420,
+                        maxWidth: 1200,
+                        margin: "0 auto",
+                        background: "#fff",
+                        borderRadius: 12,
+                        boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
+                        padding: 24,
+                      }}
                     >
-                      {incluirGrafico
-                        ? "Quitar gráfico del PDF"
-                        : "Incluir gráfico en PDF"}
-                    </IonButton>
-                    <IonButton
-                      color="primary"
-                      size="small"
-                      className="reporte-btn-pdf"
-                      onClick={exportarPDF}
-                      style={{ marginTop: 8, marginBottom: 16 }}
-                    >
-                      <IonIcon icon={documentText} slot="start" />
-                      PDF
-                    </IonButton>
-                  </IonGrid>
-                  {/* Gráfico de barras horizontales */}
-                  <div
-                    style={{
-                      background: "white",
-                      borderRadius: 12,
-                      padding: 40,
-                      marginTop: 24,
-                    }}
-                  >
-                    <Bar
-                      ref={chartRef}
-                      data={data}
-                      options={options}
-                      plugins={[ChartDataLabels]}
-                      width={1200}
-                      height={600}
-                    />
-                  </div>
-                </IonCardContent>
-              </IonCard>
+                      <Bar
+                        key={temporadaSeleccionada}
+                        ref={(el) => {
+                          chartRefs.current[temporadaSeleccionada] = el;
+                        }}
+                        data={getChartData(
+                          productosPorTemporada[temporadaSeleccionada] || []
+                        )}
+                        options={getChartOptions(
+                          temporadaSeleccionada,
+                          productosPorTemporada[temporadaSeleccionada] || []
+                        )}
+                        plugins={[ChartDataLabels] as any}
+                        width={1200}
+                        height={420}
+                      />
+                    </div>
+                  </IonCardContent>
+                </IonCard>
+              </IonCol>
+            </IonRow>
+          )}
+          <IonRow>
+            <IonCol size="12">
+              <IonButton
+                color="medium"
+                size="small"
+                routerLink="/reportes"
+                style={{ minWidth: 80 }}
+              >
+                Volver
+              </IonButton>
             </IonCol>
           </IonRow>
         </IonGrid>
+        <IonToast
+          isOpen={showToast.open}
+          onDidDismiss={() => setShowToast({ open: false, message: "" })}
+          message={showToast.message}
+          duration={1800}
+          color="success"
+          icon={checkmarkCircle}
+          position="bottom"
+        />
       </IonContent>
     </IonPage>
   );

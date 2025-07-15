@@ -99,40 +99,62 @@ router.get("/stock-actual", async (req, res) => {
 router.get("/productos-mas-pedidos", async (req, res) => {
   try {
     const [result] = await sequelize.query(`
+      WITH VentasConTemporada AS (
+        SELECT
+          CASE
+            WHEN MONTH(p.fechaPedido) IN (12, 1, 2) THEN 'Verano'
+            WHEN MONTH(p.fechaPedido) IN (3, 4, 5) THEN 'Otoño'
+            WHEN MONTH(p.fechaPedido) IN (6, 7, 8) THEN 'Invierno'
+            ELSE 'Primavera'
+          END AS temporada,
+          ni.nombre AS nombre_producto,
+          i.codigoIndumentaria,
+          ta.talle,
+          te.tipoTela AS tela,
+          co.color,
+          SUM(dp.cantidad) AS total_vendido
+        FROM
+          pedido p
+        JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
+        JOIN indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
+        JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+        JOIN nombreindumentaria ni ON di.idNombre = ni.idNombre
+        JOIN talle ta ON di.idTalle = ta.idTalle
+        JOIN tela te ON di.idTela = te.idTela
+        JOIN color co ON di.idColor = co.idColor
+        WHERE
+          p.estaActivo = 1 AND p.idEstado != 6
+        GROUP BY
+          temporada, ni.nombre, i.codigoIndumentaria, ta.talle, te.tipoTela, co.color
+      ),
+      VentasRankeadas AS (
+        SELECT
+          temporada,
+          nombre_producto,
+          codigoIndumentaria,
+          talle,
+          tela,
+          color,
+          total_vendido,
+          ROW_NUMBER() OVER(PARTITION BY temporada ORDER BY total_vendido DESC) AS ranking
+        FROM
+          VentasConTemporada
+      )
       SELECT
-        ni.nombre AS nombre_indumentaria,
-        dp.codigoIndumentaria,
-        SUM(dp.cantidad) AS cantidad_total_vendida,
-        ta.talle,
-        te.tipoTela AS tela,
-        co.color
+        temporada,
+        ranking,
+        nombre_producto,
+        codigoIndumentaria,
+        talle,
+        tela,
+        color,
+        total_vendido
       FROM
-        detallepedido dp
-      JOIN
-        pedido p ON dp.numeroPedido = p.numeroPedido
-      JOIN
-        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
-      JOIN
-        detalleindumentaria di ON i.idDetalle = di.idDetalle
-      JOIN
-        nombreindumentaria ni ON di.idNombre = ni.idNombre
-      JOIN
-        talle ta ON di.idTalle = ta.idTalle
-      JOIN
-        tela te ON di.idTela = te.idTela
-      JOIN
-        color co ON di.idColor = co.idColor
+        VentasRankeadas
       WHERE
-        p.idEstado != 6
-      GROUP BY
-        dp.codigoIndumentaria,
-        ni.nombre,
-        ta.talle,
-        te.tipoTela,
-        co.color
+        ranking <= 10
       ORDER BY
-        cantidad_total_vendida DESC
-      LIMIT 10
+        temporada, ranking;
     `);
     res.json(result);
   } catch (error) {
