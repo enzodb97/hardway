@@ -163,45 +163,32 @@ router.get("/productos-mas-pedidos", async (req, res) => {
   }
 });
 
-// Obtener ventas de los últimos 7 días
-router.get("/ventas-ultimos-7-dias", async (req, res) => {
+// Reporte: Porcentaje de cancelaciones por motivo
+router.get("/cancelaciones-motivo", async (req, res) => {
   try {
     const [result] = await sequelize.query(`
+      WITH TotalCancelados AS (
+        SELECT COUNT(*) AS total_general
+        FROM pedido
+        WHERE idMotivoCancelacion IS NOT NULL AND estaActivo = 0
+      )
       SELECT
-        DATE(p.fechaPedido) AS dia,
-        SUM(pr.precio * dp.cantidad) AS total_ventas_del_dia
-      FROM
-        pedido p
-      JOIN
-        detallepedido dp ON p.numeroPedido = dp.numeroPedido
-      JOIN
-        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
-      JOIN
-        detalleindumentaria di ON i.idDetalle = di.idDetalle
-      JOIN
-        precioindumentaria pr ON di.idPrecio = pr.idPrecio
-      WHERE
-        p.fechaPedido >= CURDATE() - INTERVAL 7 DAY
-        AND p.idEstado != 6
-      GROUP BY
-        dia
-      ORDER BY
-        dia ASC
+        mc.descripcion AS motivo,
+        COUNT(p.numeroPedido) AS cantidad_de_pedidos,
+        ROUND((COUNT(p.numeroPedido) * 100.0 / (SELECT total_general FROM TotalCancelados)), 2) AS porcentaje
+      FROM pedido p
+      JOIN motivo_cancelacion mc ON p.idMotivoCancelacion = mc.idMotivo
+      WHERE p.idMotivoCancelacion IS NOT NULL AND p.estaActivo = 0
+      GROUP BY mc.descripcion
+      ORDER BY porcentaje DESC;
     `);
     res.json(result);
   } catch (error) {
-    console.error("Error en ventas-ultimos-7-dias:", error);
+    console.error("Error en cancelaciones-motivo:", error);
     res
       .status(500)
-      .json({ error: "Error al obtener ventas de la última semana" });
+      .json({ error: "Error al obtener reporte de cancelaciones por motivo" });
   }
-});
-
-// Alias para compatibilidad con el frontend
-router.get("/ultima-semana-venta", async (req, res) => {
-  // Redirigir a ventas-ultimos-7-dias
-  req.url = "/ventas-ultimos-7-dias";
-  router.handle(req, res);
 });
 
 module.exports = router;

@@ -143,6 +143,36 @@ const Reportes: React.FC = () => {
                           verticalAlign: "middle",
                         }}
                       />
+                      Análisis de Cancelaciones
+                    </IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <div>
+                      Consulta el porcentaje de cancelaciones por motivo.
+                    </div>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      onClick={() =>
+                        history.push("/reportes/analisis-cancelaciones")
+                      }
+                    >
+                      Ver reporte completo...
+                    </IonButton>
+                  </IonCardContent>
+                </IonCard>
+              </IonCol>
+              <IonCol size="6">
+                <IonCard className="reporte-tarjeta">
+                  <IonCardHeader>
+                    <IonCardTitle>
+                      <IonIcon
+                        icon={trendingUp}
+                        style={{
+                          marginRight: 8,
+                          verticalAlign: "middle",
+                        }}
+                      />
                       Productos mas pedidos
                     </IonCardTitle>
                   </IonCardHeader>
@@ -170,25 +200,6 @@ const Reportes: React.FC = () => {
                 </IonCard>
               </IonCol>
             </IonRow>
-            {/*<IonCol size="6">
-              <IonCard className="reporte-tarjeta">
-                <IonCardHeader>
-                  <IonCardTitle>Ventas (últimos 7 días)</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <pre className="reporte-ascii-grafico">/\ / \ /----\ / \</pre>
-                  <IonButton
-                    fill="clear"
-                    size="small"
-                    onClick={() =>
-                      history.push("/reportes/ultima-semana-venta")
-                    }
-                  >
-                    Ver reporte de ventas...
-                  </IonButton>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>*/}
           </IonGrid>
         )}
       </IonContent>

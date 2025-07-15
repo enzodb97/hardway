@@ -24,7 +24,7 @@ import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
 import Reportes from "./pages/Reportes/Reportes";
 import ClientesMasPedidos from "./pages/Reportes/ClientesMasPedidos";
-import UltimaSemanaVenta from "./pages/Reportes/UltimaSemanaVenta";
+import AnalisisCancelaciones from "./pages/Reportes/AnalisisCancelaciones";
 import StockActual from "./pages/Reportes/StockActual";
 import ProductosMasPedidos from "./pages/Reportes/ProductosMasPedidos";
 import Picking from "./pages/Picking/Picking";
@@ -125,9 +125,12 @@ const AppRouter = () => {
             <Route exact path="/">
               <Redirect to="/dashboard" />
             </Route>
-            <RoleRoute path="/reportes" component={Reportes} 
-            requiredRoles={["Administrador"]}
-            exact />
+            <RoleRoute
+              path="/reportes"
+              component={Reportes}
+              requiredRoles={["Administrador"]}
+              exact
+            />
             <Route
               path="/reportes/clientes-mas-pedidos"
               component={ClientesMasPedidos}
@@ -144,8 +147,8 @@ const AppRouter = () => {
               exact
             />
             <Route
-              path="/reportes/ultima-semana-venta"
-              component={UltimaSemanaVenta}
+              path="/reportes/analisis-cancelaciones"
+              component={AnalisisCancelaciones}
               exact
             />
             <Route exact path="/debug-auth" component={DebugAuth} />
