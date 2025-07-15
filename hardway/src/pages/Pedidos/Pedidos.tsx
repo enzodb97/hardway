@@ -35,6 +35,13 @@ import {
   handleConfirmFinalizar,
   obtenerPickerAsignado,
   exportarPDF,
+  handleCancelarPedido,
+  iniciarFlujoPago,
+  confirmarAbono,
+  limpiarEstadoAbono,
+  toggleEstadoFiltro,
+  limpiarFiltrosEstado,
+  obtenerNombreEstado,
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
@@ -154,73 +161,10 @@ const Pedidos: React.FC = () => {
     ? pedidosFiltrados.slice(0, 5)
     : pedidosFiltrados;
 
-  // --- FUNCIONES UTILITARIAS ---
-  // Todas las funciones de negocio se delegan a pedidosUtils.ts
-  const handleCancelarPedido = async (numeroPedido: string) => {
-    setPedidoParaCancelar(numeroPedido);
-    try {
-      const response = await axiosInstance.get("/api/motivos-cancelacion");
-      const motivos = response.data;
-      setMotivosCancelacion(motivos);
-      setMotivoSeleccionado(null);
-      setShowMotivoModal(true);
-    } catch {
-      setAlertMsg("No se pudieron cargar los motivos de cancelación.");
-      setShowAlert(true);
-    }
-  };
-
-  // Función para iniciar el flujo de abono
-  const iniciarFlujoPago = (numeroPedido: string) => {
-    setPedidoParaAbonar(numeroPedido);
-    setShowConfirmAbono(true);
-  };
-
-  // Función para confirmar el abono
-  const confirmarAbono = async () => {
-    if (!pedidoParaAbonar) return;
-
-    try {
-      await marcarPedidoComoAbonado(pedidoParaAbonar);
-      setShowConfirmAbono(false);
-      setShowAbonoExitoso(true);
-      cargarPedidos().then(setPedidos);
-    } catch (err) {
-      setShowConfirmAbono(false);
-      setAlertMsg("Error al marcar el pedido como abonado.");
-      setShowAlert(true);
-    }
-  };
-
-  // Función para limpiar el estado después del éxito
-  const limpiarEstadoAbono = () => {
-    setShowAbonoExitoso(false);
-    setPedidoParaAbonar(null);
-  };
-
-  // Función para manejar el filtro por estados
-  const toggleEstadoFiltro = (estadoId: string) => {
-    setEstadosFiltrados((prev) => {
-      if (prev.includes(estadoId)) {
-        // Si ya está incluido, lo removemos
-        return prev.filter((id) => id !== estadoId);
-      } else {
-        // Si no está incluido, lo agregamos
-        return [...prev, estadoId];
-      }
-    });
-  };
-
-  // Función para limpiar todos los filtros de estado
-  const limpiarFiltrosEstado = () => {
-    setEstadosFiltrados([]);
-  };
-
-  // Función para obtener el nombre del estado por ID
-  const obtenerNombreEstado = (idEstado: string) => {
-    const estado = todosLosEstados.find((e) => e.id.toString() === idEstado);
-    return estado ? estado.nombre : "Desconocido";
-  };
+  // --- FUNCIONES UTILITARIAS Y DE NEGOCIO ---
+  // Ahora delegadas a pedidosUtils.ts
+  // handleCancelarPedido, iniciarFlujoPago, confirmarAbono, limpiarEstadoAbono,
+  // toggleEstadoFiltro, limpiarFiltrosEstado, obtenerNombreEstado
 
   // Título dinámico SOLO para el PDF exportado
   const tituloPDF = (() => {
@@ -395,7 +339,15 @@ const Pedidos: React.FC = () => {
                                   <IonButton
                                     fill="clear"
                                     onClick={() =>
-                                      handleCancelarPedido(pedido.numeroPedido)
+                                      handleCancelarPedido(
+                                        pedido.numeroPedido,
+                                        setPedidoParaCancelar,
+                                        setMotivosCancelacion,
+                                        setMotivoSeleccionado,
+                                        setShowMotivoModal,
+                                        setAlertMsg,
+                                        setShowAlert
+                                      )
                                     }
                                     className="cancel-btn"
                                   >
@@ -477,7 +429,11 @@ const Pedidos: React.FC = () => {
                                   fill="outline"
                                   color="warning"
                                   onClick={() =>
-                                    iniciarFlujoPago(pedido.numeroPedido)
+                                    iniciarFlujoPago(
+                                      pedido.numeroPedido,
+                                      setPedidoParaAbonar,
+                                      setShowConfirmAbono
+                                    )
                                   }
                                   className="abonar-btn"
                                 >
@@ -934,7 +890,14 @@ const Pedidos: React.FC = () => {
             {
               text: "Aceptar",
               handler: () => {
-                confirmarAbono();
+                confirmarAbono(
+                  pedidoParaAbonar,
+                  setShowConfirmAbono,
+                  setShowAbonoExitoso,
+                  setPedidos,
+                  setAlertMsg,
+                  setShowAlert
+                );
               },
             },
           ]}
@@ -942,14 +905,16 @@ const Pedidos: React.FC = () => {
         {/* Alerta de Éxito al Abonar */}
         <IonAlert
           isOpen={showAbonoExitoso}
-          onDidDismiss={limpiarEstadoAbono}
+          onDidDismiss={() =>
+            limpiarEstadoAbono(setShowAbonoExitoso, setPedidoParaAbonar)
+          }
           header="Éxito"
           message="El pedido fue abonado correctamente."
           buttons={[
             {
               text: "Aceptar",
               handler: () => {
-                limpiarEstadoAbono();
+                limpiarEstadoAbono(setShowAbonoExitoso, setPedidoParaAbonar);
               },
             },
           ]}
@@ -970,7 +935,7 @@ const Pedidos: React.FC = () => {
                 <IonButton
                   fill="clear"
                   size="small"
-                  onClick={limpiarFiltrosEstado}
+                  onClick={() => limpiarFiltrosEstado(setEstadosFiltrados)}
                   className="clear-filter-btn"
                 >
                   Limpiar
@@ -982,7 +947,12 @@ const Pedidos: React.FC = () => {
                 <IonItem
                   key={estado.id}
                   button
-                  onClick={() => toggleEstadoFiltro(estado.id.toString())}
+                  onClick={() =>
+                    toggleEstadoFiltro(
+                      estado.id.toString(),
+                      setEstadosFiltrados
+                    )
+                  }
                 >
                   <IonLabel>
                     <div className="estado-filter-item">
@@ -992,7 +962,10 @@ const Pedidos: React.FC = () => {
                           : ""}
                       </span>
                       <span className={`status-badge status--${estado.clase}`}>
-                        {estado.nombre}
+                        {obtenerNombreEstado(
+                          estado.id.toString(),
+                          todosLosEstados
+                        )}
                       </span>
                     </div>
                   </IonLabel>

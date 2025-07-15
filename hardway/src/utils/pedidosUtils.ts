@@ -1,3 +1,96 @@
+// Migradas desde Pedidos.tsx
+
+// Manejar cancelación de pedido (abre modal y carga motivos)
+export const handleCancelarPedido = async (
+  numeroPedido: string,
+  setPedidoParaCancelar: any,
+  setMotivosCancelacion: any,
+  setMotivoSeleccionado: any,
+  setShowMotivoModal: any,
+  setAlertMsg: any,
+  setShowAlert: any
+) => {
+  setPedidoParaCancelar(numeroPedido);
+  try {
+    const response = await axiosInstance.get("/api/motivos-cancelacion");
+    const motivos = response.data;
+    setMotivosCancelacion(motivos);
+    setMotivoSeleccionado(null);
+    setShowMotivoModal(true);
+  } catch {
+    setAlertMsg("No se pudieron cargar los motivos de cancelación.");
+    setShowAlert(true);
+  }
+};
+
+// Iniciar flujo de abono
+export const iniciarFlujoPago = (
+  numeroPedido: string,
+  setPedidoParaAbonar: any,
+  setShowConfirmAbono: any
+) => {
+  setPedidoParaAbonar(numeroPedido);
+  setShowConfirmAbono(true);
+};
+
+// Confirmar abono
+export const confirmarAbono = async (
+  pedidoParaAbonar: string | null,
+  setShowConfirmAbono: any,
+  setShowAbonoExitoso: any,
+  setPedidos: any,
+  setAlertMsg: any,
+  setShowAlert: any
+) => {
+  if (!pedidoParaAbonar) return;
+  try {
+    await marcarPedidoComoAbonado(pedidoParaAbonar);
+    setShowConfirmAbono(false);
+    setShowAbonoExitoso(true);
+    cargarPedidos().then(setPedidos);
+  } catch (err) {
+    setShowConfirmAbono(false);
+    setAlertMsg("Error al marcar el pedido como abonado.");
+    setShowAlert(true);
+  }
+};
+
+// Limpiar estado de abono
+export const limpiarEstadoAbono = (
+  setShowAbonoExitoso: any,
+  setPedidoParaAbonar: any
+) => {
+  setShowAbonoExitoso(false);
+  setPedidoParaAbonar(null);
+};
+
+// Manejar filtro de estados
+export const toggleEstadoFiltro = (
+  estadoId: string,
+  setEstadosFiltrados: any
+) => {
+  setEstadosFiltrados((prev: string[]) => {
+    if (prev.includes(estadoId)) {
+      return prev.filter((id) => id !== estadoId);
+    } else {
+      return [...prev, estadoId];
+    }
+  });
+};
+
+// Limpiar filtros de estado
+export const limpiarFiltrosEstado = (setEstadosFiltrados: any) => {
+  setEstadosFiltrados([]);
+};
+
+// Obtener nombre de estado por ID
+export const obtenerNombreEstado = (
+  idEstado: string,
+  todosLosEstados: any[]
+) => {
+  const estado = todosLosEstados.find((e) => e.id.toString() === idEstado);
+  return estado ? estado.nombre : "Desconocido";
+};
 // src/utils/pedidosUtils.ts
 import axiosInstance from "../config/axios";
 import {
