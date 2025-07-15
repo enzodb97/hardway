@@ -29,19 +29,12 @@ import {
   filtrarPedidos,
   filtrarPedidosPorFecha,
   Pedido,
-  eliminarPedido,
   marcarPedidoComoAbonado,
-  handleEliminarPedido,
   fetchPickers,
   asignarPicker,
-  handleConfirmAbonar,
   handleConfirmFinalizar,
   obtenerPickerAsignado,
   exportarPDF,
-  marcarPedidoComoFinalizado,
-  obtenerMotivosCancelacion,
-  cancelarPedidoConMotivo,
-  MotivoCancelacion,
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
@@ -77,7 +70,8 @@ const Pedidos: React.FC = () => {
   const [motivoSeleccionado, setMotivoSeleccionado] = useState<number | null>(
     null
   );
-  const [observacionPersonalizada, setObservacionPersonalizada] = useState<string>("");
+  const [observacionPersonalizada, setObservacionPersonalizada] =
+    useState<string>("");
   const [showMotivoModal, setShowMotivoModal] = useState(false);
 
   // Estados para manejar errores de autorización
@@ -228,12 +222,24 @@ const Pedidos: React.FC = () => {
     return estado ? estado.nombre : "Desconocido";
   };
 
+  // Título dinámico SOLO para el PDF exportado
+  const tituloPDF = (() => {
+    if (estadosFiltrados.length === 0) return "Todos los pedidos";
+    if (estadosFiltrados.length === 1) {
+      const estado = todosLosEstados.find(
+        (e) => e.id.toString() === estadosFiltrados[0]
+      );
+      return estado ? `Pedidos: ${estado.nombre}` : "Pedidos filtrados";
+    }
+    return "Pedidos: Varios estados";
+  })();
+
   return (
     <IonPage className="pedidos-page">
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
-          <IonTitle>Pedidos</IonTitle>
+          <IonTitle>PEDIDOS</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="pedidos-content">
@@ -252,8 +258,7 @@ const Pedidos: React.FC = () => {
             </IonCol>
             <IonCol size="2" className="ion-text-right pedidos-total-col">
               <span className="pedidos-total-badge">
-                {/*Total: {pedidosFiltrados.length}*/}
-                Total: {pedidos.length}
+                Total: {pedidosFiltrados.length}
               </span>
             </IonCol>
           </IonRow>
@@ -604,7 +609,26 @@ const Pedidos: React.FC = () => {
             <IonCol size="12">
               <IonButton
                 expand="block"
-                onClick={() => exportarPDF(pedidosFiltrados)}
+                onClick={() => {
+                  // Obtener nombres de los estados seleccionados
+                  let estadosSeleccionados: string[] = [];
+                  if (estadosFiltrados.length > 0) {
+                    estadosSeleccionados = estadosFiltrados
+                      .map((id) => {
+                        const estado = todosLosEstados.find(
+                          (e) => e.id.toString() === id
+                        );
+                        return estado ? estado.nombre : id;
+                      })
+                      .filter(Boolean);
+                  }
+                  exportarPDF(
+                    pedidosFiltrados,
+                    tituloPDF,
+                    estadosSeleccionados
+                  );
+                }}
+                disabled={pedidosFiltrados.length === 0}
               >
                 Exportar lista de pedidos a PDF
               </IonButton>
@@ -733,15 +757,19 @@ const Pedidos: React.FC = () => {
                 </div>
               ))}
             </div>
-            
+
             {/* Campo de observación personalizada - solo visible cuando el motivo es "Otro" (id 6) */}
             {motivoSeleccionado === 6 && (
               <div className="observacion-personalizada">
                 <IonItem className="observacion-input-item">
-                  <IonLabel position="stacked">Observación personalizada *</IonLabel>
+                  <IonLabel position="stacked">
+                    Observación personalizada *
+                  </IonLabel>
                   <IonTextarea
                     value={observacionPersonalizada}
-                    onIonInput={(e: any) => setObservacionPersonalizada(e.detail.value!)}
+                    onIonInput={(e: any) =>
+                      setObservacionPersonalizada(e.detail.value!)
+                    }
                     placeholder="Ingrese el motivo de cancelación..."
                     rows={3}
                     maxlength={500}
@@ -764,15 +792,24 @@ const Pedidos: React.FC = () => {
                 Cancelar
               </IonButton>
               <IonButton
-                disabled={!motivoSeleccionado || !pedidoParaCancelar || (motivoSeleccionado === 6 && !observacionPersonalizada.trim())}
+                disabled={
+                  !motivoSeleccionado ||
+                  !pedidoParaCancelar ||
+                  (motivoSeleccionado === 6 && !observacionPersonalizada.trim())
+                }
                 className="motivo-cancelacion-btn-confirmar"
                 onClick={async () => {
                   if (!motivoSeleccionado || !pedidoParaCancelar || !username)
                     return;
 
                   // Validar observación si el motivo es "Otro" (id 6)
-                  if (motivoSeleccionado === 6 && !observacionPersonalizada.trim()) {
-                    setAlertMsg("La observación es requerida cuando el motivo es 'Otro'");
+                  if (
+                    motivoSeleccionado === 6 &&
+                    !observacionPersonalizada.trim()
+                  ) {
+                    setAlertMsg(
+                      "La observación es requerida cuando el motivo es 'Otro'"
+                    );
                     setShowAlert(true);
                     return;
                   }
@@ -809,8 +846,12 @@ const Pedidos: React.FC = () => {
                     };
 
                     // Solo incluir observación si el motivo es "Otro" y hay texto
-                    if (motivoSeleccionado === 6 && observacionPersonalizada.trim()) {
-                      requestBody.observacionCancelacion = observacionPersonalizada.trim();
+                    if (
+                      motivoSeleccionado === 6 &&
+                      observacionPersonalizada.trim()
+                    ) {
+                      requestBody.observacionCancelacion =
+                        observacionPersonalizada.trim();
                     }
 
                     // Proceder con la cancelación
