@@ -29,7 +29,7 @@ const DetallePedido: React.FC = () => {
         setPrendas(res.data.items || []);
         setPedido(res.data.pedido);
       } catch (error) {
-        console.error('Error al cargar pedido:', error);
+        console.error("Error al cargar pedido:", error);
       }
     };
     cargarPedido();
@@ -52,26 +52,58 @@ const DetallePedido: React.FC = () => {
 
   // Configuración de estados y progreso
   const estadosPedido = [
-    { id: 1, nombre: "En Curso", icono: "📋", descripcion: "Pedido creado", key: "creado" },
-    { id: 2, nombre: "Pendiente de Pago", icono: "💳", descripcion: "Esperando pago", key: "pago" },
-    { id: 3, nombre: "Abonado", icono: "✅", descripcion: "Pago confirmado", key: "abonado" },
-    { id: 4, nombre: "Despachado", icono: "🚚", descripcion: "En camino", key: "enviado" },
-    { id: 5, nombre: "Finalizado", icono: "🏠", descripcion: "Entregado", key: "entregado" },
+    {
+      id: 1,
+      nombre: "En Curso",
+      icono: "📋",
+      descripcion: "Pedido creado",
+      key: "creado",
+    },
+    {
+      id: 2,
+      nombre: "Pendiente de Pago",
+      icono: "💳",
+      descripcion: "Esperando pago",
+      key: "pago",
+    },
+    {
+      id: 3,
+      nombre: "Abonado",
+      icono: "✅",
+      descripcion: "Pago confirmado",
+      key: "abonado",
+    },
+    {
+      id: 4,
+      nombre: "Despachado",
+      icono: "🚚",
+      descripcion: "En camino",
+      key: "enviado",
+    },
+    {
+      id: 5,
+      nombre: "Finalizado",
+      icono: "🏠",
+      descripcion: "Entregado",
+      key: "entregado",
+    },
   ];
 
   const obtenerProgresoActual = () => {
     if (!pedido) return 0;
-    
+
     // Si está cancelado, retornar estado especial
     if (pedido.idEstado === 6) return -1;
-    
-    const estadoActual = estadosPedido.findIndex(estado => estado.id === pedido.idEstado);
+
+    const estadoActual = estadosPedido.findIndex(
+      (estado) => estado.id === pedido.idEstado
+    );
     return estadoActual >= 0 ? estadoActual : 0;
   };
 
   const BarraProgreso = () => {
     const progresoActual = obtenerProgresoActual();
-    
+
     // Si está cancelado, mostrar barra especial
     if (progresoActual === -1) {
       return (
@@ -82,8 +114,12 @@ const DetallePedido: React.FC = () => {
                 <span className="icono-cancelado">❌</span>
               </div>
               <div className="info-estado-cancelado">
-                <span className="nombre-estado-cancelado">Pedido Cancelado</span>
-                <span className="descripcion-estado-cancelado">El pedido ha sido cancelado</span>
+                <span className="nombre-estado-cancelado">
+                  Pedido Cancelado
+                </span>
+                <span className="descripcion-estado-cancelado">
+                  El pedido ha sido cancelado
+                </span>
               </div>
             </div>
           </div>
@@ -96,17 +132,31 @@ const DetallePedido: React.FC = () => {
         <div className="barra-progreso">
           {estadosPedido.map((estado, index) => (
             <div key={estado.id} className="paso-progreso">
-              <div className={`paso-contenido ${index <= progresoActual ? 'completado' : 'pendiente'}`}>
-                <div className={`circulo-estado ${index <= progresoActual ? 'activo' : ''} ${index === progresoActual ? 'actual' : ''}`}>
+              <div
+                className={`paso-contenido ${
+                  index <= progresoActual ? "completado" : "pendiente"
+                }`}
+              >
+                <div
+                  className={`circulo-estado ${
+                    index <= progresoActual ? "activo" : ""
+                  } ${index === progresoActual ? "actual" : ""}`}
+                >
                   <span className="icono-estado">{estado.icono}</span>
                 </div>
                 <div className="info-estado">
                   <span className="nombre-estado">{estado.nombre}</span>
-                  <span className="descripcion-estado">{estado.descripcion}</span>
+                  <span className="descripcion-estado">
+                    {estado.descripcion}
+                  </span>
                 </div>
               </div>
               {index < estadosPedido.length - 1 && (
-                <div className={`linea-conexion ${index < progresoActual ? 'completada' : 'pendiente'}`}></div>
+                <div
+                  className={`linea-conexion ${
+                    index < progresoActual ? "completada" : "pendiente"
+                  }`}
+                ></div>
               )}
             </div>
           ))}
@@ -128,15 +178,16 @@ const DetallePedido: React.FC = () => {
           <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />{" "}
           Detalle de Pedido #{pedido?.numeroPedido || id}
         </h2>
-        
+
         {/* Barra de progreso del pedido */}
         {pedido && <BarraProgreso />}
-        
+
         {/* Información del estado del pedido */}
         {pedido && (
           <div className="pedido-info-card">
-            <p><strong>Estado:</strong> {pedido.tipoEstado}</p>
-
+            <p>
+              <strong>Estado:</strong> {pedido.tipoEstado}
+            </p>
           </div>
         )}
 
@@ -147,49 +198,63 @@ const DetallePedido: React.FC = () => {
             <p className="usuario-creacion">
               <strong>Creado por:</strong> {pedido.usuarioCreo}
             </p>
-             <p className="usuario-creacion"><strong>Fecha del pedido:</strong> {pedido.fechaPedido ? new Date(pedido.fechaPedido).toLocaleString("es-AR") : "-"}</p>
+            <p className="usuario-creacion">
+              <strong>Fecha del pedido:</strong>{" "}
+              {pedido.fechaPedido
+                ? new Date(pedido.fechaPedido).toLocaleString("es-AR")
+                : "-"}
+            </p>
           </div>
         )}
 
         {/* Mostrar información de modificación si existe y es diferente a la fecha de creación */}
-        {pedido && pedido.fechaModificacion && pedido.fechaPedido && 
-         new Date(pedido.fechaModificacion).getTime() !== new Date(pedido.fechaPedido).getTime() && (
-          <div className="modificacion-pedido-card">
-            <h3>Historial de Modificaciones</h3>
-            <p className="fecha-modificacion">
-              <strong>Última modificación:</strong> {new Date(pedido.fechaModificacion).toLocaleString("es-AR")}
-            </p>
-            {pedido.usuarioModifico && (
+        {pedido &&
+          pedido.fechaModificacion &&
+          pedido.fechaPedido &&
+          new Date(pedido.fechaModificacion).getTime() !==
+            new Date(pedido.fechaPedido).getTime() && (
+            <div className="modificacion-pedido-card">
+              <h3>Historial de Modificaciones</h3>
               <p className="fecha-modificacion">
-                <strong>Modificado por:</strong> {pedido.usuarioModifico}
+                <strong>Última modificación:</strong>{" "}
+                {new Date(pedido.fechaModificacion).toLocaleString("es-AR")}
               </p>
-            )}
-          </div>
-        )}
+              {pedido.usuarioModifico && (
+                <p className="fecha-modificacion">
+                  <strong>Modificado por:</strong> {pedido.usuarioModifico}
+                </p>
+              )}
+            </div>
+          )}
 
         {/* Mostrar motivo de cancelación solo si el pedido está cancelado */}
         {pedido && pedido.idEstado === 6 && pedido.motivoCancelacion && (
           <div className="motivo-cancelacion-card">
             <h3>Motivo de Cancelación</h3>
-            <p><strong>Motivo:</strong> {pedido.motivoCancelacion}</p>
-            
+            <p>
+              <strong>Motivo:</strong> {pedido.motivoCancelacion}
+            </p>
+
             {/* Mostrar fecha de cancelación */}
             {pedido.fechaCancelacion && (
               <p className="fecha-cancelacion">
-                <strong>Fecha de cancelación:</strong> {new Date(pedido.fechaCancelacion).toLocaleString("es-AR")}
+                <strong>Fecha de cancelación:</strong>{" "}
+                {new Date(pedido.fechaCancelacion).toLocaleString("es-AR")}
               </p>
             )}
-            
+
             {/* Mostrar observación personalizada si existe */}
             {pedido.observacionCancelacion && (
               <div className="observacion-cancelacion">
-                <p><strong>Observación:</strong></p>
+                <p>
+                  <strong>Observación:</strong>
+                </p>
                 <div className="observacion-texto">
                   {pedido.observacionCancelacion}
                 </div>
               </div>
             )}
-            
+
             {pedido.usuarioCancelo && (
               <p className="motivo-cancelacion">
                 <strong>Cancelado por:</strong> {pedido.usuarioCancelo}
@@ -238,20 +303,61 @@ const DetallePedido: React.FC = () => {
               </IonCol>
               <IonCol class="col" size="2">
                 {mostrarPrecio(prenda.subtotal)}
+                {prenda.descuento_por_item &&
+                  Number(prenda.descuento_por_item) > 0 && (
+                    <div style={{ color: "teal", fontSize: 12 }}>
+                      -{mostrarPrecio(prenda.descuento_por_item)} desc.
+                    </div>
+                  )}
               </IonCol>
             </IonRow>
           ))}
-          {/* Fila de total */}
+          {/* Fila de subtotal */}
           <IonRow className="table-total-row">
             <IonCol size="9" style={{ textAlign: "right", fontWeight: "bold" }}>
-              Total del pedido:
+              Subtotal:
             </IonCol>
             <IonCol size="2" style={{ fontWeight: "bold" }}>
-              {mostrarPrecio(
-                prendas.reduce((acc, p) => acc + (Number(p.subtotal) || 0), 0)
-              )}
+              {mostrarPrecio(pedido?.subtotal)}
             </IonCol>
           </IonRow>
+          {/* Mostrar descuento global si corresponde */}
+          {pedido &&
+            pedido.descuentoOrden &&
+            Number(pedido.descuentoOrden) > 0 && (
+              <IonRow className="table-descuento-row">
+                <IonCol
+                  size="9"
+                  style={{
+                    textAlign: "right",
+                    fontWeight: "bold",
+                    color: "goldenrod",
+                  }}
+                >
+                  👑 Cliente VIP 10% de descuento aplicado:
+                </IonCol>
+                <IonCol
+                  size="2"
+                  style={{ fontWeight: "bold", color: "goldenrod" }}
+                >
+                  -{mostrarPrecio(pedido.descuentoOrden)}
+                </IonCol>
+              </IonRow>
+            )}
+          {/* Mostrar total final */}
+          {pedido && (
+            <IonRow className="table-total-final-row">
+              <IonCol
+                size="9"
+                style={{ textAlign: "right", fontWeight: "bold" }}
+              >
+                Total a pagar:
+              </IonCol>
+              <IonCol size="2" style={{ fontWeight: "bold" }}>
+                {mostrarPrecio(Number(pedido.total))}
+              </IonCol>
+            </IonRow>
+          )}
         </IonGrid>
         <hr />
         <IonButton

@@ -8,6 +8,7 @@ const DetallePedido = sequelize.define(
     numeroPedido: DataTypes.STRING,
     codigoIndumentaria: DataTypes.STRING,
     cantidad: DataTypes.INTEGER,
+    descuentoItem: DataTypes.DECIMAL(10, 2), // Descuento por ítem
   },
   { tableName: "detallepedido", timestamps: false }
 );

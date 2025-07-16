@@ -17,6 +17,7 @@ const Pedido = sequelize.define(
     observacionCancelacion: DataTypes.TEXT, // Para observaciones personalizadas de cancelación
     fechaCancelacion: DataTypes.DATE, // Para la fecha y hora exactas de cancelación
     estaActivo: DataTypes.TINYINT, // Para borrado lógico
+    descuentoOrden: DataTypes.DECIMAL(10, 2), // Descuento global sobre el pedido
   },
   { tableName: "pedido", timestamps: false }
 );

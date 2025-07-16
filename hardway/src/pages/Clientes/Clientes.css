@@ -1,3 +1,78 @@
+/* Botón y texto EDITAR en azul */
+.edit-action {
+  --color: #1976d2;
+}
+.edit-label {
+  color: #1976d2;
+  font-weight: 600;
+}
+/* Botón y texto DAR DE BAJA en rojo */
+.baja-action {
+  --color: #e53935;
+}
+.baja-label {
+  color: #e53935;
+  font-weight: 600;
+}
+.vip-crown-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  background: #000000;
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+.vip-crown-icon {
+  width: 22px;
+  height: 22px;
+  margin-left: 0;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(253, 180, 11, 0.3));
+  display: block;
+}
+.vip-star-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 3px;
+  background: #111;
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+.vip-star-icon {
+  width: 18px;
+  height: 18px;
+  margin-left: 0;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(253, 180, 11, 0.3));
+  display: block;
+}
+/* Mejoras visuales para coronas y estrellas VIP */
+.vip-crown-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+}
+.vip-crown-icon {
+  width: 22px;
+  height: 22px;
+  margin-left: 2px;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(253, 180, 11, 0.3));
+}
+.vip-star-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 3px;
+}
+.vip-star-icon {
+  width: 18px;
+  height: 18px;
+  margin-left: 1px;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(253, 180, 11, 0.3));
+}
 /* Estructura principal */
 .clientes-page {
   --ion-background-color: #f8f9fa;
@@ -35,7 +110,8 @@
   align-items: center;
 }
 
-.total-badge, .filtered-badge {
+.total-badge,
+.filtered-badge {
   --padding-start: 12px;
   --padding-end: 12px;
   --padding-top: 8px;
@@ -249,7 +325,8 @@ ion-chip[color="danger"] {
   margin-top: 16px;
 }
 
-.edit-action, .delete-action {
+.edit-action,
+.delete-action {
   --border-radius: 8px;
   --padding-start: 16px;
   --padding-end: 16px;
@@ -311,7 +388,8 @@ ion-chip[color="danger"] {
   gap: 4px;
 }
 
-.phone-info, .location-info {
+.phone-info,
+.location-info {
   font-size: 0.9em;
   color: #636e72;
 }
@@ -386,57 +464,57 @@ ion-chip[color="danger"] {
   .clientes-container {
     gap: 12px;
   }
-  
+
   .clients-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .header-section {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
-  
+
   .stats-section {
     justify-content: center;
   }
-  
+
   .view-controls {
     justify-content: center;
   }
-  
+
   .filters-section {
     flex-direction: column;
   }
-  
+
   .filter-item {
     min-width: unset;
   }
-  
+
   .client-card {
     margin: 0 4px;
   }
-  
+
   .card-header-content {
     gap: 12px;
   }
-  
+
   .client-avatar {
     width: 50px;
     height: 50px;
     font-size: 20px;
   }
-  
+
   .client-name {
     font-size: 1.1em;
   }
-  
+
   .list-item-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .client-contact-info {
     align-items: flex-start;
     align-self: stretch;
@@ -448,11 +526,11 @@ ion-chip[color="danger"] {
     --padding-start: 8px;
     --padding-end: 8px;
   }
-  
+
   .card-actions {
     flex-direction: column;
   }
-  
+
   .client-list-item {
     padding: 12px;
   }

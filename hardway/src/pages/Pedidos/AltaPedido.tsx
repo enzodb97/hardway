@@ -16,18 +16,19 @@ import {
   IonList,
   IonIcon,
 } from "@ionic/react";
-import { 
-  person, 
-  shirt, 
-  list, 
-  shirtOutline, 
-  add, 
-  arrowBack, 
-  checkmark, 
-  save 
+import {
+  person,
+  shirt,
+  list,
+  shirtOutline,
+  add,
+  arrowBack,
+  checkmark,
+  save,
 } from "ionicons/icons";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
+import { useClientesVip } from "../../utils/useClientesVip";
 import axiosInstance from "../../config/axios";
 import "./AltaPedido.css";
 import zepelin from "../../assets/images/zepelin.png";
@@ -52,7 +53,11 @@ const AltaPedido: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const history = useHistory();
   const location = useLocation();
+
   const { clientes } = useClientes();
+  const { vipIds } = useClientesVip();
+
+  // ...estados...
 
   const [form, setForm] = useState(estadoInicial);
   const [prendasSeleccionadas, setPrendasSeleccionadas] = useState<
@@ -76,6 +81,19 @@ const AltaPedido: React.FC = () => {
   const [indumentaria, setIndumentaria] = useState<any[]>([]);
   const [showIndumentariaModal, setShowIndumentariaModal] = useState(false);
   const [filtroIndumentaria, setFiltroIndumentaria] = useState("");
+
+  // Calcular total y descuento si corresponde (después de los estados)
+  const esVip = form.idCliente && vipIds.has(Number(form.idCliente));
+  const totalPedido = prendasSeleccionadas.reduce((acc, prenda) => {
+    // Buscar precio de la prenda en el catálogo
+    const prendaCat = indumentaria.find(
+      (i) => i.codigoIndumentaria === prenda.codigoIndumentaria
+    );
+    const precio = prendaCat ? prendaCat.precio : 0;
+    return acc + precio * prenda.cantidad;
+  }, 0);
+  const descuento = esVip ? totalPedido * 0.1 : 0;
+  const totalConDescuento = totalPedido - descuento;
 
   // Limpiar formulario y prendas SIEMPRE al entrar a la página de alta
   useEffect(() => {
@@ -278,6 +296,9 @@ const AltaPedido: React.FC = () => {
             cantidad,
           })
         ),
+        total: totalConDescuento,
+        descuento: descuento,
+        esVip: esVip,
       };
 
       if (esEdicion && id) {
@@ -350,14 +371,10 @@ const AltaPedido: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
-          <IonTitle>
-            {esEdicion
-              ? `Editar Pedido`
-              : "Nuevo Pedido"}
-          </IonTitle>
+          <IonTitle>{esEdicion ? `Editar Pedido` : "Nuevo Pedido"}</IonTitle>
         </IonToolbar>
       </IonHeader>
-      
+
       <IonContent className="alta-pedido-content">
         <div className="form-container">
           {/* Hero Section */}
@@ -365,15 +382,12 @@ const AltaPedido: React.FC = () => {
             <div className="hero-content">
               <img src={zepelin} alt="Hardway Logo" className="brand-logo" />
               <h1 className="hero-title">
-                            {esEdicion
-              ? `Editar Pedido #${id}`
-              : " Crear Nuevo Pedido"}
+                {esEdicion ? `Editar Pedido #${id}` : " Crear Nuevo Pedido"}
               </h1>
               <p className="hero-subtitle">
-                {esEdicion 
+                {esEdicion
                   ? "Modifica los detalles del pedido existente"
-                  : "Registra un nuevo pedido para tu cliente"
-                }
+                  : "Registra un nuevo pedido para tu cliente"}
               </p>
             </div>
           </div>
@@ -387,18 +401,26 @@ const AltaPedido: React.FC = () => {
                     <IonIcon icon={person} />
                     Información del Cliente
                   </h3>
-                  <p className="card-subtitle">Selecciona el cliente para este pedido</p>
+                  <p className="card-subtitle">
+                    Selecciona el cliente para este pedido
+                  </p>
                 </div>
                 <div className="card-content">
-                  <IonItem 
-                    className={`form-item ${esEdicion ? 'disabled' : ''}`} 
+                  <IonItem
+                    className={`form-item ${esEdicion ? "disabled" : ""}`}
                     button={!esEdicion}
-                    onClick={esEdicion ? undefined : () => setShowClienteModal(true)}
+                    onClick={
+                      esEdicion ? undefined : () => setShowClienteModal(true)
+                    }
                   >
                     <IonLabel position="floating">Cliente</IonLabel>
                     <IonInput
                       value={form.clienteNombre}
-                      placeholder={esEdicion ? "Cliente del pedido" : "Toca para seleccionar un cliente"}
+                      placeholder={
+                        esEdicion
+                          ? "Cliente del pedido"
+                          : "Toca para seleccionar un cliente"
+                      }
                       readonly
                       required
                     />
@@ -419,7 +441,9 @@ const AltaPedido: React.FC = () => {
                     <IonIcon icon={shirt} />
                     Indumentaria del Pedido
                   </h3>
-                  <p className="card-subtitle">Agrega las Indumentaira que incluirá este pedido</p>
+                  <p className="card-subtitle">
+                    Agrega las Indumentaira que incluirá este pedido
+                  </p>
                 </div>
                 <div className="card-content">
                   <div className="prendas-header">
@@ -428,7 +452,8 @@ const AltaPedido: React.FC = () => {
                       Indumentarias Seleccionadas
                     </div>
                     <div className="prendas-counter">
-                      {prendasSeleccionadas.length} {prendasSeleccionadas.length === 1 ? 'prenda' : 'prendas'}
+                      {prendasSeleccionadas.length}{" "}
+                      {prendasSeleccionadas.length === 1 ? "prenda" : "prendas"}
                     </div>
                   </div>
 
@@ -437,28 +462,36 @@ const AltaPedido: React.FC = () => {
                       <IonIcon icon={shirtOutline} className="empty-icon" />
                       <h4 className="empty-title">No hay prendas agregadas</h4>
                       <p className="empty-description">
-                        Haz clic en "Agregar Indumentria" para comenzar a construir tu pedido
+                        Haz clic en "Agregar Indumentria" para comenzar a
+                        construir tu pedido
                       </p>
                     </div>
                   ) : (
                     <div className="prendas-list">
                       {prendasSeleccionadas.map((prenda) => (
-                        <div key={prenda.codigoIndumentaria} className="prenda-card">
+                        <div
+                          key={prenda.codigoIndumentaria}
+                          className="prenda-card"
+                        >
                           <button
                             className="remove-button"
-                            onClick={() => eliminarPrenda(prenda.codigoIndumentaria)}
+                            onClick={() =>
+                              eliminarPrenda(prenda.codigoIndumentaria)
+                            }
                             title="Quitar prenda"
                           >
                             ×
                           </button>
-                          
+
                           <div className="prenda-header">
                             <div className="prenda-title-section">
                               <h4 className="prenda-name">{prenda.nombre}</h4>
-                              <div className="prenda-code">{prenda.codigoIndumentaria}</div>
+                              <div className="prenda-code">
+                                {prenda.codigoIndumentaria}
+                              </div>
                             </div>
                           </div>
-                          
+
                           <div className="prenda-details">
                             <div className="prenda-detail">
                               <strong>Color:</strong> {prenda.color}
@@ -470,10 +503,12 @@ const AltaPedido: React.FC = () => {
                               <strong>Tela:</strong> {prenda.nombreTela}
                             </div>
                           </div>
-                          
+
                           <div className="prenda-quantity">
                             <span className="quantity-label">Cantidad:</span>
-                            <div className="quantity-value">{prenda.cantidad}</div>
+                            <div className="quantity-value">
+                              {prenda.cantidad}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -492,6 +527,35 @@ const AltaPedido: React.FC = () => {
               </div>
             </div>
 
+            {/* Mostrar resumen de total y descuento si hay prendas */}
+            {prendasSeleccionadas.length > 0 && (
+              <div
+                className="pedido-resumen-total"
+                style={{ marginBottom: 16, marginTop: 8 }}
+              >
+                <div>
+                  <strong>Total sin descuento:</strong> $
+                  {totalPedido.toFixed(2)}
+                </div>
+                {esVip && (
+                  <div style={{ color: "goldenrod", fontWeight: 600 }}>
+                    <span role="img" aria-label="vip">
+                      👑
+                    </span>{" "}
+                    Cliente VIP: 10% de descuento aplicado
+                  </div>
+                )}
+                {descuento > 0 && (
+                  <div>
+                    <strong>Descuento:</strong> -${descuento.toFixed(2)}
+                  </div>
+                )}
+                <div>
+                  <strong>Total a pagar:</strong> $
+                  {totalConDescuento.toFixed(2)}
+                </div>
+              </div>
+            )}
             <div className="form-actions">
               <IonButton
                 className="button-danger"
@@ -502,7 +566,7 @@ const AltaPedido: React.FC = () => {
                 <IonIcon icon={arrowBack} slot="start" />
                 Cancelar
               </IonButton>
-              
+
               <IonButton
                 className="button-success"
                 type="submit"

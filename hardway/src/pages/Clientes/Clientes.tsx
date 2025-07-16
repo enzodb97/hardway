@@ -10,8 +10,6 @@ import {
   IonButton,
   IonIcon,
   IonBadge,
-  IonFab,
-  IonFabButton,
   IonAlert,
   IonCard,
   IonCardHeader,
@@ -26,37 +24,48 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSkeletonText,
+  IonToggle,
 } from "@ionic/react";
-import { 
-  add, 
-  pencil, 
-  trash, 
-  print, 
-  person, 
-  call, 
-  mail, 
-  location, 
+import {
+  add,
+  pencil,
+  print,
+  person,
+  call,
+  mail,
+  location,
   document,
   funnel,
   grid,
   list,
   checkmarkCircle,
   closeCircle,
-  time
+  time,
 } from "ionicons/icons";
 import { useState } from "react";
+import { useClientesVip } from "../../utils/useClientesVip";
+import crownIcon from "../../assets/icons/vip-crown.svg";
+import starIcon from "../../assets/icons/vip-star.svg";
 import { useClientes } from "../../context/ClientesContext";
 import HistorialCliente from "./HistorialCliente";
 import "./Clientes.css";
 import { exportarClientesPDF } from "../../utils/clientesUtils";
 
 const Clientes: React.FC = () => {
-  const { clientes, eliminarCliente, darDeBajaCliente, darDeAltaCliente, recargarClientes } = useClientes();
+  const {
+    clientes,
+    eliminarCliente,
+    darDeBajaCliente,
+    darDeAltaCliente,
+    recargarClientes,
+  } = useClientes();
+  const { vipIds } = useClientesVip();
   const [busqueda, setBusqueda] = useState("");
   const [vistaGrid, setVistaGrid] = useState(true);
   const [filtroLocalidad, setFiltroLocalidad] = useState("");
   const [filtroDocumento, setFiltroDocumento] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [soloVip, setSoloVip] = useState(false);
 
   // Estados para alertas
   const [showAlert, setShowAlert] = useState(false);
@@ -70,23 +79,33 @@ const Clientes: React.FC = () => {
 
   // Estados para historial
   const [showHistorial, setShowHistorial] = useState(false);
-  const [clienteHistorial, setClienteHistorial] = useState<{id: number, nombre: string} | null>(null);
+  const [clienteHistorial, setClienteHistorial] = useState<{
+    id: number;
+    nombre: string;
+  } | null>(null);
 
   // Obtener localidades únicas para el filtro
-  const localidadesUnicas = [...new Set(clientes.map(c => c.localidad).filter(Boolean))];
+  const localidadesUnicas = [
+    ...new Set(clientes.map((c) => c.localidad).filter(Boolean)),
+  ];
 
   const clientesFiltrados = clientes.filter((cliente) => {
-    const cumpleBusqueda = 
+    const cumpleBusqueda =
       (cliente.nombre?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
-      (cliente.apellido?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
+      (cliente.apellido?.toLowerCase() || "").includes(
+        busqueda.toLowerCase()
+      ) ||
       (cliente.email?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
       (cliente.numeroDocumento || "").includes(busqueda) ||
       (cliente.telefono || "").includes(busqueda);
-    
-    const cumpleLocalidad = !filtroLocalidad || cliente.localidad === filtroLocalidad;
-    const cumpleDocumento = !filtroDocumento || cliente.tipoDocumento === filtroDocumento;
-    
-    return cumpleBusqueda && cumpleLocalidad && cumpleDocumento;
+
+    const cumpleLocalidad =
+      !filtroLocalidad || cliente.localidad === filtroLocalidad;
+    const cumpleDocumento =
+      !filtroDocumento || cliente.tipoDocumento === filtroDocumento;
+    const cumpleVip = !soloVip || vipIds.has(cliente.id);
+
+    return cumpleBusqueda && cumpleLocalidad && cumpleDocumento && cumpleVip;
   });
 
   const totalClientes = clientes.length;
@@ -97,7 +116,7 @@ const Clientes: React.FC = () => {
     try {
       await recargarClientes();
     } catch (error) {
-      console.error('Error al recargar clientes:', error);
+      console.error("Error al recargar clientes:", error);
     } finally {
       setCargando(false);
       event.detail.complete();
@@ -126,7 +145,9 @@ const Clientes: React.FC = () => {
         error.response.status === 400 &&
         backendMsg.includes("No se puede eliminar el cliente")
       ) {
-        setAlertMsg("No se puede dar de baja el cliente, tiene pedidos asociados.");
+        setAlertMsg(
+          "No se puede dar de baja el cliente, tiene pedidos asociados."
+        );
         setShowAlert(true);
       } else {
         setAlertMsg("Error al dar de baja el cliente.");
@@ -191,7 +212,7 @@ const Clientes: React.FC = () => {
   const mostrarHistorial = (cliente: any) => {
     setClienteHistorial({
       id: cliente.id,
-      nombre: `${cliente.nombre} ${cliente.apellido}`
+      nombre: `${cliente.nombre} ${cliente.apellido}`,
     });
     setShowHistorial(true);
   };
@@ -200,9 +221,6 @@ const Clientes: React.FC = () => {
     setShowHistorial(false);
     setClienteHistorial(null);
   };
-
-
-
 
   // Render de vista en tarjetas
   const renderVistaCards = () => (
@@ -215,14 +233,28 @@ const Clientes: React.FC = () => {
                 <IonIcon icon={person} />
               </div>
               <div className="client-main-info">
-                <IonCardTitle className="client-name">{`${cliente.nombre} ${cliente.apellido}`}</IonCardTitle>
+                <IonCardTitle className="client-name">
+                  {`${cliente.nombre} ${cliente.apellido}`}
+                  {vipIds.has(cliente.id) && (
+                    <span className="vip-crown-wrapper">
+                      <img
+                        src={crownIcon}
+                        alt="VIP"
+                        title="Cliente VIP"
+                        className="vip-crown-icon"
+                      />
+                    </span>
+                  )}
+                </IonCardTitle>
                 <IonChip color="primary" className="doc-chip">
                   <IonIcon icon={document} />
-                  <IonLabel>{cliente.tipoDocumento}: {cliente.numeroDocumento}</IonLabel>
+                  <IonLabel>
+                    {cliente.tipoDocumento}: {cliente.numeroDocumento}
+                  </IonLabel>
                 </IonChip>
                 {/* Chip de estado del cliente */}
-                <IonChip 
-                  color={cliente.estaActivo === 0 ? "danger" : "success"} 
+                <IonChip
+                  color={cliente.estaActivo === 0 ? "danger" : "success"}
                   style={{ fontSize: "0.8rem" }}
                 >
                   {cliente.estaActivo === 0 ? "Inactivo" : "Activo"}
@@ -230,7 +262,7 @@ const Clientes: React.FC = () => {
               </div>
             </div>
           </IonCardHeader>
-          
+
           <IonCardContent>
             <div className="client-details">
               {cliente.telefono && (
@@ -239,14 +271,14 @@ const Clientes: React.FC = () => {
                   <span>{cliente.telefono}</span>
                 </div>
               )}
-              
+
               {cliente.email && (
                 <div className="detail-item">
                   <IonIcon icon={mail} color="primary" />
                   <span>{cliente.email}</span>
                 </div>
               )}
-              
+
               {(cliente.localidad || cliente.barrio) && (
                 <div className="detail-item">
                   <IonIcon icon={location} color="primary" />
@@ -258,16 +290,17 @@ const Clientes: React.FC = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="card-actions">
               <IonButton
                 fill="clear"
                 size="small"
+                color="primary"
                 routerLink={`/alta-cliente/${cliente.id}`}
                 className="edit-action"
               >
-                <IonIcon icon={pencil} slot="start" />
-                Editar
+                <IonIcon icon={pencil} slot="start" color="primary" />
+                <span className="edit-label">Editar</span>
               </IonButton>
               <IonButton
                 fill="clear"
@@ -295,12 +328,12 @@ const Clientes: React.FC = () => {
                 <IonButton
                   fill="clear"
                   size="small"
-                  color="warning"
+                  color="danger"
                   onClick={() => pedirConfirmacionBaja(cliente.id)}
                   className="baja-action"
                 >
-                  <IonIcon icon={closeCircle} slot="start" />
-                  Dar de Baja
+                  <IonIcon icon={closeCircle} slot="start" color="danger" />
+                  <span className="baja-label">Dar de Baja</span>
                 </IonButton>
               )}
             </div>
@@ -317,11 +350,25 @@ const Clientes: React.FC = () => {
         <div key={cliente.id} className="client-list-item">
           <div className="list-item-content">
             <div className="client-basic-info">
-              <h3 className="client-name-list">{`${cliente.nombre} ${cliente.apellido}`}</h3>
+              <h3 className="client-name-list">
+                {`${cliente.nombre} ${cliente.apellido}`}
+                {vipIds.has(cliente.id) && (
+                  <span className="vip-star-wrapper">
+                    <img
+                      src={starIcon}
+                      alt="VIP"
+                      title="Cliente VIP"
+                      className="vip-star-icon"
+                    />
+                  </span>
+                )}
+              </h3>
               <div className="client-info-row">
-                <p className="client-doc-list">{cliente.tipoDocumento}: {cliente.numeroDocumento}</p>
-                <IonChip 
-                  color={cliente.estaActivo === 0 ? "danger" : "success"} 
+                <p className="client-doc-list">
+                  {cliente.tipoDocumento}: {cliente.numeroDocumento}
+                </p>
+                <IonChip
+                  color={cliente.estaActivo === 0 ? "danger" : "success"}
                   style={{ fontSize: "0.7rem", marginLeft: "8px" }}
                 >
                   {cliente.estaActivo === 0 ? "Inactivo" : "Activo"}
@@ -340,9 +387,12 @@ const Clientes: React.FC = () => {
             <IonButton
               fill="clear"
               size="small"
+              color="primary"
               routerLink={`/alta-cliente/${cliente.id}`}
+              className="edit-action"
             >
-              <IonIcon icon={pencil} />
+              <IonIcon icon={pencil} color="primary" />
+              <span className="edit-label">Editar</span>
             </IonButton>
             <IonButton
               fill="clear"
@@ -366,10 +416,12 @@ const Clientes: React.FC = () => {
               <IonButton
                 fill="clear"
                 size="small"
-                color="warning"
+                color="danger"
                 onClick={() => pedirConfirmacionBaja(cliente.id)}
+                className="baja-action"
               >
-                <IonIcon icon={closeCircle} />
+                <IonIcon icon={closeCircle} color="danger" />
+                <span className="baja-label">Dar de Baja</span>
               </IonButton>
             )}
           </div>
@@ -410,7 +462,7 @@ const Clientes: React.FC = () => {
                 Mostrando: {clientesFiltrados.length}
               </IonBadge>
             </div>
-            
+
             <div className="view-controls">
               <IonButton
                 fill={vistaGrid ? "solid" : "outline"}
@@ -450,7 +502,9 @@ const Clientes: React.FC = () => {
                 onIonChange={(e) => setFiltroLocalidad(e.detail.value)}
                 interface="popover"
               >
-                <IonSelectOption value="">Todas las localidades</IonSelectOption>
+                <IonSelectOption value="">
+                  Todas las localidades
+                </IonSelectOption>
                 {localidadesUnicas.map((localidad) => (
                   <IonSelectOption key={localidad} value={localidad}>
                     {localidad}
@@ -473,8 +527,17 @@ const Clientes: React.FC = () => {
               </IonSelect>
             </IonItem>
 
+            <IonItem className="filter-item">
+              <IonLabel>Solo VIP</IonLabel>
+              <IonToggle
+                checked={soloVip}
+                onIonChange={(e) => setSoloVip(e.detail.checked)}
+                color="warning"
+              />
+            </IonItem>
+
             <div className="filter-actions">
-              {(busqueda || filtroLocalidad || filtroDocumento) && (
+              {(busqueda || filtroLocalidad || filtroDocumento || soloVip) && (
                 <IonButton
                   fill="clear"
                   size="small"
@@ -484,7 +547,7 @@ const Clientes: React.FC = () => {
                   Limpiar filtros
                 </IonButton>
               )}
-              
+
               {clientesFiltrados.length > 0 && (
                 <IonButton
                   fill="solid"
@@ -506,11 +569,11 @@ const Clientes: React.FC = () => {
                 {Array.from({ length: 6 }).map((_, index) => (
                   <IonCard key={index}>
                     <IonCardHeader>
-                      <IonSkeletonText animated style={{ width: '60%' }} />
+                      <IonSkeletonText animated style={{ width: "60%" }} />
                     </IonCardHeader>
                     <IonCardContent>
-                      <IonSkeletonText animated style={{ width: '80%' }} />
-                      <IonSkeletonText animated style={{ width: '40%' }} />
+                      <IonSkeletonText animated style={{ width: "80%" }} />
+                      <IonSkeletonText animated style={{ width: "40%" }} />
                     </IonCardContent>
                   </IonCard>
                 ))}
@@ -529,8 +592,10 @@ const Clientes: React.FC = () => {
                   Agregar primer cliente
                 </IonButton>
               </div>
+            ) : vistaGrid ? (
+              renderVistaCards()
             ) : (
-              vistaGrid ? renderVistaCards() : renderVistaLista()
+              renderVistaLista()
             )}
           </div>
 
@@ -565,7 +630,7 @@ const Clientes: React.FC = () => {
               },
             ]}
           />
-          
+
           {/* Confirmación de dar de baja */}
           <IonAlert
             isOpen={showConfirmBaja}
@@ -605,7 +670,7 @@ const Clientes: React.FC = () => {
               },
             ]}
           />
-          
+
           <IonAlert
             isOpen={showAlert}
             onDidDismiss={() => setShowAlert(false)}

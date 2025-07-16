@@ -1,12 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { verificarAccesoPedidos } = require('../middleware/auth');
-const { 
-  Pedido, 
-  Cliente, 
-  Persona, 
-  EstadoPedido, 
-  DetallePedido, 
+const { verificarAccesoPedidos } = require("../middleware/auth");
+const {
+  Pedido,
+  Cliente,
+  Persona,
+  EstadoPedido,
+  DetallePedido,
   Indumentaria,
   DetalleIndumentaria,
   NombreIndumentaria,
@@ -16,9 +16,9 @@ const {
   Color,
   Talle,
   PrecioIndumentaria,
-  sequelize 
-} = require('../models');
-const { Sequelize } = require('sequelize');
+  sequelize,
+} = require("../models");
+const { Sequelize } = require("sequelize");
 
 // Aplicar middleware a todas las rutas de pedidos
 router.use(verificarAccesoPedidos);
@@ -40,17 +40,21 @@ router.get("/", async (req, res) => {
         { model: EstadoPedido },
         {
           model: DetallePedido,
-          include: [{ 
-            model: Indumentaria,
-            as: "Indumentarium"
-          }],
+          include: [
+            {
+              model: Indumentaria,
+              as: "Indumentarium",
+            },
+          ],
         },
       ],
     });
     res.json(pedidos);
   } catch (error) {
     console.error("Error al obtener pedidos:", error);
-    res.status(500).json({ error: "Error al obtener pedidos", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al obtener pedidos", detalle: error.message });
   }
 });
 
@@ -59,14 +63,61 @@ router.post("/", async (req, res) => {
   const { idCliente, idEstado, prendas } = req.body;
   const t = await sequelize.transaction();
   try {
-    // Genera un número de pedido único
-    const numeroPedido =
-      "PED-" +
-      new Date().getFullYear() +
-      "-" +
-      Math.floor(Math.random() * 1000)
-        .toString()
-        .padStart(3, "0");
+    // Generar número de pedido: PED-YYYYMMDD-XXX (XXX = correlativo del día)
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const fechaStr = `${yyyy}${mm}${dd}`;
+
+    // Buscar el último número correlativo del día
+    const [result] = await sequelize.query(
+      `SELECT numeroPedido FROM pedido WHERE numeroPedido LIKE :prefijo ORDER BY numeroPedido DESC LIMIT 1`,
+      { replacements: { prefijo: `PED-${fechaStr}-%` } }
+    );
+    let correlativo = 1;
+    if (result.length > 0) {
+      // Extraer el número correlativo del último pedido del día
+      const ultimo = result[0].numeroPedido;
+      const partes = ultimo.split("-");
+      correlativo = parseInt(partes[2], 10) + 1;
+    }
+    const numeroPedido = `PED-${fechaStr}-${String(correlativo).padStart(
+      3,
+      "0"
+    )}`;
+
+    // Calcular el total del pedido (precio * cantidad de cada prenda)
+    let totalPedido = 0;
+    if (prendas && Array.isArray(prendas)) {
+      for (const prenda of prendas) {
+        // Obtener precio de la prenda
+        const [precioRow] = await sequelize.query(
+          `SELECT pr.precio FROM indumentaria i
+            JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+            JOIN precioindumentaria pr ON di.idPrecio = pr.idPrecio
+            WHERE i.codigoIndumentaria = ? LIMIT 1`,
+          { replacements: [prenda.codigoIndumentaria] }
+        );
+        const precio = precioRow[0]?.precio || 0;
+        totalPedido += precio * prenda.cantidad;
+      }
+    }
+
+    // Verificar si el cliente es VIP
+    let esVip = false;
+    try {
+      const [vipRows] = await sequelize.query(
+        "SELECT idCliente FROM vista_clientes_vip WHERE idCliente = ?",
+        { replacements: [idCliente] }
+      );
+      esVip = vipRows.length > 0;
+    } catch (e) {
+      esVip = false;
+    }
+
+    // Calcular descuento global si es VIP
+    const descuentoOrden = esVip ? totalPedido * 0.1 : 0;
 
     // Crea el pedido (fechaPedido se asigna automáticamente por la BD)
     const pedido = await Pedido.create(
@@ -75,6 +126,7 @@ router.post("/", async (req, res) => {
         idCliente,
         idEstado,
         idUsuarioCreo: req.usuarioAutenticado.idUsuario, // Registrar quien creó el pedido
+        descuentoOrden,
       },
       { transaction: t }
     );
@@ -88,6 +140,7 @@ router.post("/", async (req, res) => {
             numeroPedido,
             codigoIndumentaria: prenda.codigoIndumentaria,
             cantidad: prenda.cantidad,
+            descuentoItem: 0, // Por ahora, sin descuento por ítem
           },
           { transaction: t }
         );
@@ -117,7 +170,9 @@ router.post("/", async (req, res) => {
   } catch (error) {
     await t.rollback();
     console.error("Error al crear pedido:", error);
-    res.status(500).json({ error: "Error al crear pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al crear pedido", detalle: error.message });
   }
 });
 
@@ -140,22 +195,24 @@ router.get("/:numeroPedido", async (req, res) => {
         { model: EstadoPedido },
         {
           model: DetallePedido,
-          include: [{ 
-            model: Indumentaria,
-            as: "Indumentarium",
-            include: [
-              {
-                model: DetalleIndumentaria,
-                as: "DetalleIndumentarium",
-                include: [
-                  { model: NombreIndumentaria, as: "NombreIndumentarium" },
-                  { model: Color, as: "Color" },
-                  { model: Talle, as: "Talle" },
-                  { model: PrecioIndumentaria, as: "PrecioIndumentarium" },
-                ],
-              },
-            ],
-          }],
+          include: [
+            {
+              model: Indumentaria,
+              as: "Indumentarium",
+              include: [
+                {
+                  model: DetalleIndumentaria,
+                  as: "DetalleIndumentarium",
+                  include: [
+                    { model: NombreIndumentaria, as: "NombreIndumentarium" },
+                    { model: Color, as: "Color" },
+                    { model: Talle, as: "Talle" },
+                    { model: PrecioIndumentaria, as: "PrecioIndumentarium" },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     });
@@ -167,7 +224,9 @@ router.get("/:numeroPedido", async (req, res) => {
     res.json(pedido);
   } catch (error) {
     console.error("Error al obtener pedido:", error);
-    res.status(500).json({ error: "Error al obtener pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al obtener pedido", detalle: error.message });
   }
 });
 
@@ -189,7 +248,9 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
         p.fechaCancelacion,
         uc.nombreUsuario AS usuarioCancelo,
         ucr.nombreUsuario AS usuarioCreo,
-        um.nombreUsuario AS usuarioModifico
+        um.nombreUsuario AS usuarioModifico,
+        p.idCliente,
+        p.descuentoOrden
       FROM pedido p
       JOIN estadopedido ep ON p.idEstado = ep.idEstado
       LEFT JOIN motivo_cancelacion mc ON p.idMotivoCancelacion = mc.idMotivo
@@ -209,7 +270,8 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
         co.color,
         pr.precio AS precio_unitario,
         dp.cantidad,
-        (pr.precio * dp.cantidad) AS subtotal
+        dp.descuentoItem AS descuento_por_item,
+        (pr.precio * dp.cantidad - IFNULL(dp.descuentoItem,0)) AS subtotal
       FROM
         detallepedido dp
       JOIN
@@ -230,15 +292,39 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
       { replacements: [numeroPedido] }
     );
 
+    // Calcular subtotal general
+    let subtotalGeneral = 0;
+    for (const item of detalleItems) {
+      subtotalGeneral +=
+        Number(item.precio_unitario) * Number(item.cantidad) -
+        (Number(item.descuento_por_item) || 0);
+    }
+
+    // Descuento global del pedido
+    const descuentoOrden = pedidoInfo[0]?.descuentoOrden || 0;
+    const granTotal = subtotalGeneral - descuentoOrden;
+
+    // Devolver los campos calculados
+    const pedidoExtendido = pedidoInfo[0]
+      ? {
+          ...pedidoInfo[0],
+          subtotal: subtotalGeneral,
+          descuentoOrden,
+          total: granTotal,
+        }
+      : null;
+
     const response = {
-      pedido: pedidoInfo[0] || null,
+      pedido: pedidoExtendido,
       items: detalleItems,
     };
 
     res.json(response);
   } catch (error) {
     console.error("Error al obtener detalle plano del pedido:", error);
-    res.status(500).json({ error: "Error al obtener detalle plano del pedido" });
+    res
+      .status(500)
+      .json({ error: "Error al obtener detalle plano del pedido" });
   }
 });
 
@@ -271,7 +357,8 @@ router.put("/:numeroPedido", async (req, res) => {
       if (stock) {
         await MovimientoStock.create(
           {
-            idMovimientoStock: "MOV-DEV-" + Math.random().toString().slice(2, 8),
+            idMovimientoStock:
+              "MOV-DEV-" + Math.random().toString().slice(2, 8),
             idStock: stock.idStock,
             fechaMovimiento: new Date(),
             cantidad: detalle.cantidad,
@@ -308,7 +395,8 @@ router.put("/:numeroPedido", async (req, res) => {
         if (stock) {
           await MovimientoStock.create(
             {
-              idMovimientoStock: "MOV-PED-" + Math.random().toString().slice(2, 8),
+              idMovimientoStock:
+                "MOV-PED-" + Math.random().toString().slice(2, 8),
               idStock: stock.idStock,
               fechaMovimiento: new Date(),
               cantidad: -Math.abs(prenda.cantidad),
@@ -329,7 +417,12 @@ router.put("/:numeroPedido", async (req, res) => {
          fechaModificacion = NOW() 
        WHERE numeroPedido = ?`,
       {
-        replacements: [idCliente, idEstado, req.usuarioAutenticado.idUsuario, numeroPedido],
+        replacements: [
+          idCliente,
+          idEstado,
+          req.usuarioAutenticado.idUsuario,
+          numeroPedido,
+        ],
         transaction: t,
       }
     );
@@ -339,7 +432,9 @@ router.put("/:numeroPedido", async (req, res) => {
   } catch (error) {
     await t.rollback();
     console.error("Error al editar pedido:", error);
-    res.status(500).json({ error: "Error al editar pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al editar pedido", detalle: error.message });
   }
 });
 
@@ -363,7 +458,8 @@ router.delete("/:numeroPedido", async (req, res) => {
       if (stock) {
         await MovimientoStock.create(
           {
-            idMovimientoStock: "MOV-DEL-" + Math.random().toString().slice(2, 8),
+            idMovimientoStock:
+              "MOV-DEL-" + Math.random().toString().slice(2, 8),
             idStock: stock.idStock,
             fechaMovimiento: new Date(),
             cantidad: detalle.cantidad,
@@ -396,7 +492,9 @@ router.delete("/:numeroPedido", async (req, res) => {
   } catch (error) {
     await t.rollback();
     console.error("Error al eliminar pedido:", error);
-    res.status(500).json({ error: "Error al eliminar pedido", detalle: error.message });
+    res
+      .status(500)
+      .json({ error: "Error al eliminar pedido", detalle: error.message });
   }
 });
 
@@ -413,7 +511,10 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
   }
 
   // Validar observación si el motivo es "Otro" (asumiendo que id 6 es "Otro")
-  if (idMotivo === 6 && (!observacionCancelacion || observacionCancelacion.trim() === '')) {
+  if (
+    idMotivo === 6 &&
+    (!observacionCancelacion || observacionCancelacion.trim() === "")
+  ) {
     return res.status(400).json({
       error: "Se requiere observación cuando el motivo es 'Otro'",
     });
@@ -437,7 +538,8 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
     if (!pedido) {
       await t.rollback();
       return res.status(404).json({
-        error: "Pedido no encontrado o no se puede cancelar (ya finalizado o cancelado)",
+        error:
+          "Pedido no encontrado o no se puede cancelar (ya finalizado o cancelado)",
       });
     }
 
@@ -455,7 +557,9 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
       });
 
       if (stock) {
-        const idMovimiento = `MOV-CANC-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+        const idMovimiento = `MOV-CANC-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 5)}`;
 
         await MovimientoStock.create(
           {
@@ -480,17 +584,14 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
     };
 
     // Solo agregar observación si se proporcionó
-    if (observacionCancelacion && observacionCancelacion.trim() !== '') {
+    if (observacionCancelacion && observacionCancelacion.trim() !== "") {
       updateData.observacionCancelacion = observacionCancelacion.trim();
     }
 
-    await Pedido.update(
-      updateData,
-      {
-        where: { numeroPedido },
-        transaction: t,
-      }
-    );
+    await Pedido.update(updateData, {
+      where: { numeroPedido },
+      transaction: t,
+    });
 
     await t.commit();
 
