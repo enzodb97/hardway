@@ -938,7 +938,12 @@ const Pedidos: React.FC = () => {
                   onClick={() => limpiarFiltrosEstado(setEstadosFiltrados)}
                   className="clear-filter-btn"
                 >
-                  Limpiar
+                  <IonIcon
+                    icon="close-circle"
+                    color="danger"
+                    style={{ fontSize: 22, marginRight: 4 }}
+                  />
+                  <span className="clear-filter-label">Limpiar</span>
                 </IonButton>
               )}
             </div>

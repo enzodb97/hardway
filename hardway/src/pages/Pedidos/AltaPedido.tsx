@@ -702,20 +702,26 @@ const AltaPedido: React.FC = () => {
                     <IonInput
                       class="cantidad-input"
                       type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       placeholder="Cantidad"
                       min={1}
                       value={prenda._cantidadTemp || ""}
-                      onIonChange={(e) => {
-                        const cantidad = Number(e.detail.value);
+                      onIonInput={(e: any) => {
+                        // Solo permitir números, sin +, -, e, .
+                        let valor = e.target.value.replace(/[^0-9]/g, "");
+                        if (valor === "") valor = "1";
+                        let cantidad = Number(valor);
                         if (cantidad > prenda.cantidadIndumentaria) {
                           setAlertMsg(
                             `Stock del producto insuficiente, el stock actual es: ${prenda.cantidadIndumentaria}`
                           );
                           setShowAlert(true);
-                          prenda._cantidadTemp = prenda.cantidadIndumentaria;
-                          return;
+                          cantidad = prenda.cantidadIndumentaria;
                         }
                         prenda._cantidadTemp = cantidad;
+                        // Forzar el valor limpio en el input
+                        e.target.value = cantidad;
                       }}
                     />
                     <IonButton

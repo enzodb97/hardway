@@ -37,9 +37,11 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 ### 1. 📂 `/config`
 
 **¿Qué contiene?**
+
 - `database.js`: Configuración de conexión a la base de datos MySQL
 
 **¿Qué hace?**
+
 - Establece la conexión con la base de datos usando Sequelize
 - Define parámetros como host, usuario, contraseña (desde variables de entorno)
 - Proporciona la función `connectDB()` para verificar la conexión
@@ -47,10 +49,12 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 ### 2. 📂 `/models`
 
 **¿Qué contiene?**
+
 - `index.js`: Configura y exporta todos los modelos
 - Archivos individuales por cada modelo (Usuario.js, Cliente.js, etc.)
 
 **¿Qué hace?**
+
 - Define la estructura de las tablas usando Sequelize
 - Establece relaciones entre tablas (uno a muchos, muchos a muchos)
 - Configura validaciones de datos
@@ -58,9 +62,11 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 ### 3. 📂 `/routes`
 
 **¿Qué contiene?**
+
 - Archivos separados por funcionalidad (usuarios.js, pedidos.js, picking.js)
 
 **¿Qué hace?**
+
 - Define los endpoints de la API (URLs)
 - Especifica qué métodos HTTP acepta cada ruta (GET, POST, PUT, DELETE)
 - Controla la lógica de negocio para cada operación
@@ -69,11 +75,13 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 ### 4. 📂 `/middleware`
 
 **¿Qué contiene?**
+
 - `auth.js`: Funciones de autenticación y autorización
 - `errorHandler.js`: Manejador de errores
 - `validators.js`: Validación de datos
 
 **¿Qué hace?**
+
 - Verifica tokens de autenticación
 - Valida permisos según roles de usuario
 - Verifica y sanitiza datos de entrada
@@ -82,9 +90,11 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 ### 5. 📂 `/services`
 
 **¿Qué contiene?**
+
 - Archivos con lógica de negocio compleja (pedidoService.js, stockService.js)
 
 **¿Qué hace?**
+
 - Implementa lógica de negocio separada de las rutas
 - Coordina operaciones entre múltiples modelos
 - Gestiona transacciones de base de datos
@@ -93,9 +103,11 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 ### 6. 📂 `/utils`
 
 **¿Qué contiene?**
+
 - Funciones auxiliares (dateUtils.js, formatters.js)
 
 **¿Qué hace?**
+
 - Proporciona funciones auxiliares reutilizables
 - Formatea datos para respuestas de API
 - Valida formatos (email, teléfono, etc.)
@@ -103,6 +115,7 @@ Para nuevos usuarios que necesitan entender cómo está estructurado el sistema:
 ### 7. 📄 `index.js` (archivo principal)
 
 **¿Qué hace?**
+
 - Inicializa el servidor Express
 - Conecta con la base de datos
 - Configura middleware global (CORS, body-parser)
@@ -173,23 +186,25 @@ El frontend estará disponible en `http://localhost:3000`
 
 ### Lista completa de usuarios
 
-| ID | Usuario   | Contraseña | Rol               | Descripción                    |
-|----|-----------|------------|-------------------|--------------------------------|
-| 1  | admin     | admin123   | Administrador     | Acceso completo al sistema     |
-| 2  | mariag    | 1234       | Vendedor          | Puede realizar ventas          |
-| 5  | anamtz    | 123        | Picker            | Encargado de picking           |
-| 6  | luisrd    | 123        | Picker            | Encargado de picking           |
-| 7  | sofiag    | 123        | Encargado de Stock| Gestiona stock                 |
-| 15 | envios    | 123        | Envíos            | Encargado de Envíos            |
+| ID  | Usuario | Contraseña | Rol                | Descripción                |
+| --- | ------- | ---------- | ------------------ | -------------------------- |
+| 1   | admin   | admin123   | Administrador      | Acceso completo al sistema |
+| 2   | mariag  | 1234       | Vendedor           | Puede realizar ventas      |
+| 5   | anamtz  | 123        | Picker             | Encargado de picking       |
+| 6   | luisrd  | 123        | Picker             | Encargado de picking       |
+| 7   | sofiag  | 123        | Encargado de Stock | Gestiona stock             |
+| 15  | envios  | 123        | Envíos             | Encargado de Envíos        |
 
 ### Detalles por rol
 
 #### Administrador
+
 - **Usuario:** admin
 - **Contraseña:** admin123
 - **Permisos:** Acceso completo al sistema
 
 #### Pickers
+
 - **Usuario:** anamtz
 - **Contraseña:** 123
 - **Legajo:** LP005
@@ -199,6 +214,7 @@ El frontend estará disponible en `http://localhost:3000`
 - **Legajo:** LP006
 
 #### Vendedores
+
 - **Usuario:** mariag
 - **Contraseña:** 1234
 
@@ -206,41 +222,49 @@ El frontend estará disponible en `http://localhost:3000`
 - **Contraseña:** 12345
 
 #### Encargado de Stock
+
 - **Usuario:** sofiag
 - **Contraseña:** 123
 
 #### Encargado de Envíos
+
 - **Usuario:** envios
 - **Contraseña:** 123
 
 ## 📱 Módulos Principales
 
 ### Gestión de Clientes
+
 - Agregar, editar y eliminar clientes
 - Consultar historial de pedidos por cliente
 
 ### Gestión de Pedidos
+
 - Crear nuevos pedidos
 - Seguimiento de estados (Pendiente, Pagado, Finalizado, etc.)
 - Cancelación de pedidos
 
 ### Gestión de Stock
+
 - Control de inventario
 - Movimientos de entrada/salida
 - Visualización por racks
 
 ### Sistema de Picking
+
 - Asignación de tareas a pickers
 - Visualización de tareas pendientes
 - Interfaz optimizada para pickers
 - Completar tareas
 
 ### Gestión de Envíos
+
 - Seguimiento de pedidos listos para despacho
 - Asignación de códigos de seguimiento
 - Marcado como despachado
 
 ### Reportes
+
 - Clientes con más pedidos
 - Productos más vendidos
 - Stock actual
@@ -249,11 +273,13 @@ El frontend estará disponible en `http://localhost:3000`
 ## 🔄 Flujo de Trabajo Típico
 
 1. **Cliente realiza pedido**
+
    - Se registra el cliente (si es nuevo)
    - Se crea el pedido con estado "Pendiente"
    - Se descuenta stock de los productos
 
 2. **Picking**
+
    - Administrador asigna tarea a un picker
    - Picker ve tarea en su panel
    - Picker prepara productos según ubicación (rack)
@@ -261,10 +287,12 @@ El frontend estará disponible en `http://localhost:3000`
    - Pedido cambia a "Pendiente de Pago"
 
 3. **Pago**
+
    - Administrador registra pago
    - Pedido cambia a "Abonado"
 
 4. **Envío**
+
    - Se registra código de seguimiento
    - Se despacha pedido
    - Pedido cambia a "Despachado"
@@ -276,14 +304,17 @@ El frontend estará disponible en `http://localhost:3000`
 ## 🐛 Solución de Problemas Comunes
 
 ### El sistema no se conecta a la base de datos
+
 - Verificar que MySQL esté corriendo
 - Revisar credenciales en `backend/config/database.js`
 
 ### Error al cargar tareas de picking
+
 - Verificar que el usuario tenga el legajo de picker asignado correctamente
 - Confirmar que existan asignaciones para ese picker
 
 ### No se muestran los racks en el picking
+
 - Asegurarse que los productos tengan asignado un rack en la tabla `stock`
 - Verificar la relación entre stock e indumentaria
 
@@ -300,7 +331,7 @@ El archivo `.env` (no incluido en el repositorio por seguridad) contiene variabl
 ```
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=hardway_db
+DB_NAME=hardway1_db
 DB_USER=root
 DB_PASSWORD=tu_contraseña
 PORT=3001

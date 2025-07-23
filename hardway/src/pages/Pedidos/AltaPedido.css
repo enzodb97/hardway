@@ -10,15 +10,22 @@
 }
 
 .alta-pedido-page::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(253, 180, 11, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.08) 0%, transparent 50%),
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(253, 180, 11, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 200, 87, 0.08) 0%,
+      transparent 50%
+    ),
     linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   z-index: -1;
 }
@@ -38,7 +45,7 @@
 }
 
 .alta-pedido-page ion-header ion-toolbar::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -91,7 +98,7 @@
 }
 
 .hero-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -124,8 +131,13 @@
 }
 
 @keyframes logoFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .hero-title {
@@ -157,7 +169,7 @@
   .form-grid {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .form-grid .full-width {
     grid-column: 1 / -1;
   }
@@ -194,9 +206,7 @@
 .form-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(230, 235, 245, 0.8);
   overflow: hidden;
   transition: all 0.3s ease;
@@ -205,9 +215,7 @@
 
 .form-card:hover {
   transform: translateY(-4px);
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
@@ -219,7 +227,7 @@
 }
 
 .card-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -271,7 +279,6 @@
 
 .form-item:hover,
 .form-item.item-has-focus {
-  
   --border-color: #fdb40b;
   box-shadow: 0 4px 12px rgba(253, 180, 11, 0.1);
   transform: translateY(-1px);
@@ -380,7 +387,7 @@
   gap: 8px;
   font-size: 1.3em;
   font-weight: 700;
-  color: #334155;
+  color: #ffffff;
 }
 
 .prendas-title ion-icon {
@@ -458,7 +465,7 @@
   border-radius: 6px;
   font-size: 0.8em;
   font-weight: 600;
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: "Monaco", "Menlo", monospace;
 }
 
 .prenda-details {
@@ -593,7 +600,7 @@
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .form-actions ion-button {
     height: 48px !important;
     --height: 48px;
@@ -605,17 +612,17 @@
   .form-container {
     padding: 16px;
   }
-  
+
   .hero-section {
     padding: 30px 16px;
     margin: -16px -16px 24px -16px;
   }
-  
+
   .brand-logo {
     width: 75px;
     height: 75px;
   }
-  
+
   .hero-title {
     font-size: 1.8em;
   }
@@ -625,29 +632,29 @@
   .form-container {
     padding: 12px;
   }
-  
+
   .hero-section {
     padding: 24px 12px;
     margin: -12px -12px 20px -12px;
   }
-  
+
   .brand-logo {
     width: 65px;
     height: 65px;
   }
-  
+
   .hero-title {
     font-size: 1.6em;
   }
-  
+
   .hero-subtitle {
     font-size: 1em;
   }
-  
+
   .card-content {
     padding: 24px 20px 20px 20px;
   }
-  
+
   .card-header {
     padding: 16px 20px 14px 20px;
   }
@@ -661,25 +668,25 @@
   .form-container {
     padding: 8px;
   }
-  
+
   .hero-section {
     padding: 20px 8px;
     margin: -8px -8px 16px -8px;
   }
-  
+
   .brand-logo {
     width: 55px;
     height: 55px;
   }
-  
+
   .hero-title {
     font-size: 1.4em;
   }
-  
+
   .card-content {
     padding: 20px 16px 16px 16px;
   }
-  
+
   .card-header {
     padding: 12px 16px 10px 16px;
   }
@@ -687,15 +694,15 @@
   .cliente-card .card-content {
     padding: 24px 16px 20px 16px;
   }
-  
+
   .card-title {
     font-size: 1.1em;
   }
-  
+
   .prendas-list {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     gap: 12px;
     margin-top: 24px;
@@ -728,9 +735,15 @@
   animation: slideInUp 0.5s ease-out;
 }
 
-.form-card:nth-child(1) { animation-delay: 0.1s; }
-.form-card:nth-child(2) { animation-delay: 0.2s; }
-.form-card:nth-child(3) { animation-delay: 0.3s; }
+.form-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.form-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.form-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
 
 .prenda-card {
   animation: slideInUp 0.3s ease-out;
@@ -765,7 +778,7 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   .brand-logo {
     animation: none;
   }
@@ -774,54 +787,61 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .alta-pedido-page::before {
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+    background: radial-gradient(
+        circle at 20% 80%,
+        rgba(102, 126, 234, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(118, 75, 162, 0.15) 0%,
+        transparent 50%
+      ),
       linear-gradient(135deg, #1e293b 0%, #334155 100%);
   }
-  
+
   .form-card {
     background: #334155;
     border-color: #475569;
   }
-  
+
   .card-header {
     background: linear-gradient(135deg, #475569 0%, #64748b 100%);
     border-color: #64748b;
   }
-  
+
   .card-title {
     color: #f1f5f9;
   }
-  
+
   .card-subtitle {
     color: #cbd5e1;
   }
-  
+
   .form-item {
     --background: #475569;
     --border-color: #64748b;
     --color: #f1f5f9;
   }
-  
+
   .prenda-card {
     background: #475569;
     border-color: #64748b;
   }
-  
+
   .prenda-name {
     color: #f1f5f9;
   }
-  
+
   .empty-state {
     background: #475569;
     border-color: #64748b;
   }
-  
+
   .empty-title {
     color: #e2e8f0;
   }
-  
+
   .empty-description {
     color: #cbd5e1;
   }
@@ -1169,31 +1189,31 @@ ion-modal ion-item ion-input[placeholder] {
     padding: 24px;
     margin: 0 10px;
   }
-  
+
   .brand-logo {
     width: 60px;
     height: 60px;
   }
-  
+
   .titulo ion-title {
     font-size: 1.5em;
   }
-  
+
   .prenda-details {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .prenda-actions {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .indumentaria-modal {
     --width: 95vw;
     --height: 90vh;
   }
-  
+
   .indumentaria-label {
     width: 100% !important;
     font-size: 0.9em !important;
@@ -1204,18 +1224,18 @@ ion-modal ion-item ion-input[placeholder] {
   .alta-pedido-content {
     padding: 16px;
   }
-  
+
   .alta-pedido-form {
     padding: 20px;
   }
-  
+
   .prenda-item {
     --padding-start: 12px;
     --padding-end: 12px;
     --padding-top: 12px;
     --padding-bottom: 12px;
   }
-  
+
   .prenda-title {
     font-size: 1em;
     flex-direction: column;
@@ -1244,11 +1264,21 @@ ion-modal ion-item ion-input[placeholder] {
   animation: slideInUp 0.4s ease-out;
 }
 
-.prenda-item:nth-child(1) { animation-delay: 0.1s; }
-.prenda-item:nth-child(2) { animation-delay: 0.2s; }
-.prenda-item:nth-child(3) { animation-delay: 0.3s; }
-.prenda-item:nth-child(4) { animation-delay: 0.4s; }
-.prenda-item:nth-child(5) { animation-delay: 0.5s; }
+.prenda-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.prenda-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.prenda-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.prenda-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.prenda-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
 
 /* Scroll personalizado */
 .alta-pedido-content::-webkit-scrollbar,
@@ -1272,7 +1302,6 @@ ion-modal ion-content::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
 
-
-.native-input.sc-ion-input-md{
+.native-input.sc-ion-input-md {
   padding-top: 15px !important;
 }

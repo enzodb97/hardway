@@ -1,9 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+/* Mejorar visualización de la X para limpiar filtro de estados */
+.clear-filter-btn {
+  --color: #e53935;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.clear-filter-label {
+  color: #e53935;
+  font-weight: 600;
+  font-size: 1em;
+}
 
 /* Aplicar fuente Inter a todos los elementos */
 .pedidos-page,
 .pedidos-page * {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
 }
 
 .pedidos-page {
@@ -152,7 +166,6 @@
 
 /* Botón detalle */
 .action-buttons .detail-btn {
-  
   --background-hover: #475569;
   --color: white;
 }
@@ -360,13 +373,13 @@ ion-popover ion-item:hover {
 /* Estilos para el modal de motivo de cancelación */
 .motivo-cancelacion-modal {
   --backdrop-opacity: 0.6;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .motivo-cancelacion-modal *,
 .motivo-cancelacion-modal ion-modal,
 .motivo-cancelacion-modal ion-button {
-  font-family: 'Roboto', sans-serif !important;
+  font-family: "Roboto", sans-serif !important;
 }
 
 .motivo-cancelacion-modal ion-modal {
@@ -488,7 +501,7 @@ ion-popover ion-item:hover {
 }
 
 .motivo-option.selected .motivo-option-radio::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -569,7 +582,8 @@ ion-popover ion-item:hover {
   border: none !important;
 }
 
-.motivo-cancelacion-modal .motivo-cancelacion-btn-confirmar:hover:not(:disabled) {
+.motivo-cancelacion-modal
+  .motivo-cancelacion-btn-confirmar:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(153, 27, 27, 0.3) !important;
 }
@@ -693,12 +707,6 @@ ion-popover ion-item:hover {
 
 /* Filtro de fechas eliminado */
 
-
-
-
-
-
-
 /* Animaciones y transiciones suaves */
 @keyframes fadeIn {
   from {
@@ -711,10 +719,6 @@ ion-popover ion-item:hover {
   }
 }
 
-
-
-
-
 /* Calendario y datetime eliminados */
 
 @media (max-width: 768px) {
@@ -723,27 +727,27 @@ ion-popover ion-item:hover {
     --padding-end: 16px;
     --padding-top: 16px;
   }
-  
+
   .pedidos-buscador {
     margin-bottom: 16px;
   }
-  
+
   .table-header ion-col,
   .table-row ion-col {
     padding: 12px 8px;
     font-size: 12px;
   }
-  
+
   .status-badge {
     min-width: 90px;
     padding: 6px 12px;
     font-size: 10px;
   }
-  
+
   .action-buttons {
     gap: 4px;
   }
-  
+
   .action-buttons ion-button {
     --padding-start: 8px;
     --padding-end: 8px;
@@ -751,18 +755,18 @@ ion-popover ion-item:hover {
     --padding-bottom: 6px;
     font-size: 11px;
   }
-  
+
   .pedidos-total-badge {
     padding: 8px 16px;
     font-size: 12px;
   }
-  
+
   .pedidos-paginacion-col {
     flex-direction: column;
     gap: 12px;
     padding: 12px;
   }
-  
+
   .pedidos-paginacion-text {
     font-size: 12px;
     text-align: center;
@@ -774,7 +778,7 @@ ion-popover ion-item:hover {
   .table-row:hover .status-badge {
     transform: scale(1.05);
   }
-  
+
   .table-row:hover .action-buttons ion-button {
     transform: scale(1.05);
   }
@@ -996,7 +1000,8 @@ ion-popover.estado-filter-popover::part(content) {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -1070,7 +1075,7 @@ ion-popover.estado-filter-popover::part(content) {
 .fecha-datetime-calendar .datetime-calendar {
   background: white;
   border-radius: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .fecha-datetime-calendar .calendar-month-year {
@@ -1174,7 +1179,7 @@ ion-popover.estado-filter-popover::part(content) {
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 2px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .fecha-datetime-calendar .calendar-day:hover {
@@ -1215,11 +1220,11 @@ ion-popover.estado-filter-popover::part(content) {
 .fecha-datetime-calendar ion-datetime {
   --background: white;
   --color: #1e293b;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .fecha-datetime-calendar ion-datetime button {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .fecha-datetime-calendar ion-datetime .datetime-calendar-header {
@@ -1267,7 +1272,7 @@ ion-popover.estado-filter-popover::part(content) {
   width: 36px;
   height: 36px;
   margin: 2px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .fecha-datetime-calendar ion-datetime .datetime-calendar-day:hover {
@@ -1276,7 +1281,9 @@ ion-popover.estado-filter-popover::part(content) {
   transform: scale(1.05);
 }
 
-.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-active {
+.fecha-datetime-calendar
+  ion-datetime
+  .datetime-calendar-day.calendar-day-active {
   background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   color: white;
   border-color: #fdb40b;
@@ -1285,21 +1292,27 @@ ion-popover.estado-filter-popover::part(content) {
   box-shadow: 0 4px 12px rgba(253, 180, 11, 0.3);
 }
 
-.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-today {
+.fecha-datetime-calendar
+  ion-datetime
+  .datetime-calendar-day.calendar-day-today {
   background: #fef3c7;
   color: #d97706;
   border-color: #f59e0b;
   font-weight: 600;
 }
 
-.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-disabled {
+.fecha-datetime-calendar
+  ion-datetime
+  .datetime-calendar-day.calendar-day-disabled {
   background: #f9fafb;
   color: #d1d5db;
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.fecha-datetime-calendar ion-datetime .datetime-calendar-day.calendar-day-disabled:hover {
+.fecha-datetime-calendar
+  ion-datetime
+  .datetime-calendar-day.calendar-day-disabled:hover {
   background: #f9fafb;
   transform: none;
 }
@@ -1312,13 +1325,13 @@ ion-popover.estado-filter-popover::part(content) {
     height: 32px;
     font-size: 13px;
   }
-  
+
   .fecha-datetime-calendar .calendar-month-year,
   .fecha-datetime-calendar ion-datetime .datetime-calendar-month-year {
     font-size: 16px;
     padding: 12px 16px;
   }
-  
+
   .fecha-datetime-calendar .calendar-header button,
   .fecha-datetime-calendar ion-datetime .datetime-calendar-prev,
   .fecha-datetime-calendar ion-datetime .datetime-calendar-next {
@@ -1346,7 +1359,7 @@ ion-popover.estado-filter-popover::part(content) {
 }
 
 .fecha-filtro-label {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: #374151;
@@ -1361,7 +1374,7 @@ ion-popover.estado-filter-popover::part(content) {
   padding: 12px 16px;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 400;
   color: #1e293b;
@@ -1382,7 +1395,7 @@ ion-popover.estado-filter-popover::part(content) {
 
 /* Estilos para el calendario popup */
 .react-datepicker {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   border: none;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
@@ -1558,39 +1571,39 @@ ion-popover.estado-filter-popover::part(content) {
     margin: 12px 0 20px 0;
     padding: 16px;
   }
-  
+
   .fecha-picker-input {
     padding: 10px 14px;
     font-size: 16px; /* Evita zoom en iOS */
   }
-  
+
   .react-datepicker {
     border-radius: 12px;
   }
-  
+
   .react-datepicker__header {
     padding: 16px 12px 12px 12px;
   }
-  
+
   .react-datepicker__current-month {
     font-size: 15px;
     margin-bottom: 10px;
   }
-  
+
   .react-datepicker__navigation {
     top: 18px;
     width: 28px;
     height: 28px;
   }
-  
+
   .react-datepicker__navigation--previous {
     left: 12px;
   }
-  
+
   .react-datepicker__navigation--next {
     right: 12px;
   }
-  
+
   .react-datepicker__day-name,
   .react-datepicker__day {
     width: 2rem;
@@ -1599,34 +1612,46 @@ ion-popover.estado-filter-popover::part(content) {
     font-size: 13px;
     margin: 1px;
   }
-  
+
   .react-datepicker__day-name {
     font-size: 11px;
   }
 }
 
 /* Estilos para el botón de limpiar */
+/* Mejorar visualización del botón de limpiar (X) en el filtro de fechas */
 .react-datepicker__close-icon {
   background-color: #ef4444;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-}
-
-.react-datepicker__close-icon::after {
-  background-color: white;
-  font-size: 12px;
-  color: white;
-  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.react-datepicker__close-icon::after {
+  content: "✕";
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
 }
 
 /* Animaciones */

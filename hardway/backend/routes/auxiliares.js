@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { 
+const {
   Color,
   Talle,
   Tela,
@@ -12,9 +12,9 @@ const {
   UnidadMedida, // Nuevo modelo
   TipoRol,
   MotivoCancelacion,
-  sequelize 
-} = require('../models');
-const { Ciudad, Barrio } = require('../models/Ubicacion');
+  sequelize,
+} = require("../models");
+const { Ciudad, Barrio } = require("../models/Ubicacion");
 
 // Rutas para Colores
 router.get("/colores", async (req, res) => {
@@ -162,14 +162,18 @@ router.get("/nombres-indumentaria", async (req, res) => {
 router.post("/nombres-indumentaria/find-or-create", async (req, res) => {
   try {
     const { nombre } = req.body;
-    const [nombreIndumentaria, created] = await NombreIndumentaria.findOrCreate({
-      where: { nombre },
-      defaults: { nombre }
-    });
+    const [nombreIndumentaria, created] = await NombreIndumentaria.findOrCreate(
+      {
+        where: { nombre },
+        defaults: { nombre },
+      }
+    );
     res.json(nombreIndumentaria);
   } catch (error) {
     console.error("Error al crear/encontrar nombre de indumentaria:", error);
-    res.status(500).json({ error: "Error al crear/encontrar nombre de indumentaria" });
+    res
+      .status(500)
+      .json({ error: "Error al crear/encontrar nombre de indumentaria" });
   }
 });
 
@@ -188,15 +192,15 @@ router.get("/tiporoles", async (req, res) => {
 router.get("/motivos-cancelacion", async (req, res) => {
   try {
     const motivos = await MotivoCancelacion.findAll({
-      attributes: ['idMotivo', 'descripcion'],
-      order: [['descripcion', 'ASC']]
+      attributes: ["idMotivo", "descripcion"],
+      order: [["descripcion", "ASC"]],
     });
     res.json(motivos);
   } catch (error) {
     console.error("Error al obtener motivos de cancelación:", error);
-    res.status(500).json({ 
-      error: "Error al obtener motivos de cancelación", 
-      detalle: error.message 
+    res.status(500).json({
+      error: "Error al obtener motivos de cancelación",
+      detalle: error.message,
     });
   }
 });
@@ -205,7 +209,7 @@ router.get("/motivos-cancelacion", async (req, res) => {
 router.get("/ciudades", async (req, res) => {
   try {
     const ciudades = await Ciudad.findAll({
-      order: [['nombreCiudad', 'ASC']]
+      order: [["nombreCiudad", "ASC"]],
     });
     res.json(ciudades);
   } catch (error) {
@@ -218,32 +222,36 @@ router.post("/ciudades/find-or-create", async (req, res) => {
   try {
     const { nombreCiudad, codigoPostal } = req.body;
     if (!nombreCiudad) {
-      return res.status(400).json({ error: "Nombre de ciudad requerido" });
+      return res.status(400).json({ error: "Nombre de Localidad requerido" });
     }
-    
+
     // Primero busca una ciudad con el mismo nombre y código postal
     let ciudad = await Ciudad.findOne({
       where: {
         nombreCiudad,
-        codigoPostal: codigoPostal || ""
-      }
+        codigoPostal: codigoPostal || "",
+      },
     });
-    
+
     // Si no existe, créala
     if (!ciudad) {
       ciudad = await Ciudad.create({
         nombreCiudad,
-        codigoPostal: codigoPostal || ""
+        codigoPostal: codigoPostal || "",
       });
-      console.log(`Ciudad creada: ${nombreCiudad} (CP: ${codigoPostal || "N/A"})`);
+      console.log(
+        `Ciudad creada: ${nombreCiudad} (CP: ${codigoPostal || "N/A"})`
+      );
     } else {
-      console.log(`Ciudad encontrada: ${nombreCiudad} (ID: ${ciudad.idCiudad})`);
+      console.log(
+        `Ciudad encontrada: ${nombreCiudad} (ID: ${ciudad.idCiudad})`
+      );
     }
-    
+
     res.json({
       idCiudad: ciudad.idCiudad,
       nombreCiudad: ciudad.nombreCiudad,
-      codigoPostal: ciudad.codigoPostal
+      codigoPostal: ciudad.codigoPostal,
     });
   } catch (error) {
     console.error("Error al crear/encontrar ciudad:", error);
@@ -255,8 +263,8 @@ router.post("/ciudades/find-or-create", async (req, res) => {
 router.get("/barrios", async (req, res) => {
   try {
     const barrios = await Barrio.findAll({
-      include: [{ model: Ciudad, as: 'Ciudad' }],
-      order: [['nombreBarrio', 'ASC']]
+      include: [{ model: Ciudad, as: "Ciudad" }],
+      order: [["nombreBarrio", "ASC"]],
     });
     res.json(barrios);
   } catch (error) {
@@ -269,34 +277,36 @@ router.post("/barrios/find-or-create", async (req, res) => {
   try {
     const { nombreBarrio, idCiudad } = req.body;
     if (!nombreBarrio || !idCiudad) {
-      return res.status(400).json({ 
-        error: "Nombre de barrio y ID de ciudad son requeridos" 
+      return res.status(400).json({
+        error: "Nombre de barrio y ID de ciudad son requeridos",
       });
     }
-    
+
     // Primero busca un barrio con el mismo nombre y ciudad
     let barrio = await Barrio.findOne({
       where: {
         nombreBarrio,
-        idCiudad
-      }
+        idCiudad,
+      },
     });
-    
+
     // Si no existe, créalo
     if (!barrio) {
       barrio = await Barrio.create({
         nombreBarrio,
-        idCiudad
+        idCiudad,
       });
       console.log(`Barrio creado: ${nombreBarrio} (Ciudad ID: ${idCiudad})`);
     } else {
-      console.log(`Barrio encontrado: ${nombreBarrio} (ID: ${barrio.idBarrio})`);
+      console.log(
+        `Barrio encontrado: ${nombreBarrio} (ID: ${barrio.idBarrio})`
+      );
     }
-    
+
     res.json({
       idBarrio: barrio.idBarrio,
       nombreBarrio: barrio.nombreBarrio,
-      idCiudad: barrio.idCiudad
+      idCiudad: barrio.idCiudad,
     });
   } catch (error) {
     console.error("Error al crear/encontrar barrio:", error);
@@ -308,7 +318,7 @@ router.post("/barrios/find-or-create", async (req, res) => {
 router.get("/unidades-medida", async (req, res) => {
   try {
     const unidades = await UnidadMedida.findAll({
-      order: [['nombreUnidad', 'ASC']]
+      order: [["nombreUnidad", "ASC"]],
     });
     res.json(unidades);
   } catch (error) {
@@ -320,9 +330,9 @@ router.get("/unidades-medida", async (req, res) => {
 router.post("/unidades-medida", async (req, res) => {
   try {
     const { nombreUnidad, abreviatura } = req.body;
-    const nuevaUnidad = await UnidadMedida.create({ 
-      nombreUnidad, 
-      abreviatura 
+    const nuevaUnidad = await UnidadMedida.create({
+      nombreUnidad,
+      abreviatura,
     });
     res.status(201).json(nuevaUnidad);
   } catch (error) {
@@ -335,12 +345,12 @@ router.put("/unidades-medida/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { nombreUnidad, abreviatura } = req.body;
-    
+
     const unidad = await UnidadMedida.findByPk(id);
     if (!unidad) {
       return res.status(404).json({ error: "Unidad de medida no encontrada" });
     }
-    
+
     await unidad.update({ nombreUnidad, abreviatura });
     res.json(unidad);
   } catch (error) {
@@ -353,11 +363,11 @@ router.delete("/unidades-medida/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const unidad = await UnidadMedida.findByPk(id);
-    
+
     if (!unidad) {
       return res.status(404).json({ error: "Unidad de medida no encontrada" });
     }
-    
+
     await unidad.destroy();
     res.json({ message: "Unidad de medida eliminada correctamente" });
   } catch (error) {
@@ -369,15 +379,15 @@ router.delete("/unidades-medida/:id", async (req, res) => {
 // Endpoint para buscar o crear detalle de indumentaria
 router.post("/detalle-indumentaria/find-or-create", async (req, res) => {
   try {
-    const { 
-      idNombre, 
-      idPrecio, 
-      idCategoria, 
-      idColor, 
-      idTalle, 
-      idEstado, 
+    const {
+      idNombre,
+      idPrecio,
+      idCategoria,
+      idColor,
+      idTalle,
+      idEstado,
       idTela,
-      idUnidadMedida 
+      idUnidadMedida,
     } = req.body;
 
     // Buscar si ya existe un detalle con estas características
@@ -390,8 +400,8 @@ router.post("/detalle-indumentaria/find-or-create", async (req, res) => {
         idTalle,
         idEstado,
         idTela,
-        idUnidadMedida
-      }
+        idUnidadMedida,
+      },
     });
 
     // Si no existe, crear uno nuevo
@@ -405,14 +415,16 @@ router.post("/detalle-indumentaria/find-or-create", async (req, res) => {
         idEstado,
         idTela,
         idUnidadMedida,
-        cantidadIndumentaria: 0 // Inicializar en 0
+        cantidadIndumentaria: 0, // Inicializar en 0
       });
     }
 
     res.json(detalle);
   } catch (error) {
     console.error("Error al buscar o crear detalle de indumentaria:", error);
-    res.status(500).json({ error: "Error al procesar detalle de indumentaria" });
+    res
+      .status(500)
+      .json({ error: "Error al procesar detalle de indumentaria" });
   }
 });
 
@@ -423,20 +435,22 @@ router.put("/detalle-indumentaria/:id/precio", async (req, res) => {
     const { precio } = req.body;
 
     const detalle = await DetalleIndumentaria.findByPk(id);
-    
+
     if (!detalle) {
-      return res.status(404).json({ error: "Detalle de indumentaria no encontrado" });
+      return res
+        .status(404)
+        .json({ error: "Detalle de indumentaria no encontrado" });
     }
 
     // Buscar o crear el precio
     const [precioObj] = await PrecioIndumentaria.findOrCreate({
       where: { precio },
-      defaults: { precio }
+      defaults: { precio },
     });
 
     // Actualizar el detalle con el nuevo precio
     await detalle.update({ idPrecio: precioObj.idPrecio });
-    
+
     res.json({ message: "Precio actualizado correctamente", detalle });
   } catch (error) {
     console.error("Error al actualizar precio del detalle:", error);
