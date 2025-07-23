@@ -87,19 +87,19 @@ const AppRouter = () => {
               exact
               path="/indumentaria"
               component={Indumentaria}
-              requiredRoles={["Administrador"]}
+              requiredRoles={["Administrador", "Encargado de Stock"]}
             />
             <RoleRoute
               exact
               path="/alta-indumentaria"
               component={AltaIndumentaria}
-              requiredRoles={["Administrador"]}
+              requiredRoles={["Administrador", "Encargado de Stock"]}
             />
             <RoleRoute
               exact
               path="/alta-indumentaria/:id"
               component={AltaIndumentaria}
-              requiredRoles={["Administrador"]}
+              requiredRoles={["Administrador", "Encargado de Stock"]}
             />
             <RoleRoute
               exact
@@ -111,11 +111,7 @@ const AppRouter = () => {
               exact
               path="/envios"
               component={Envios}
-              requiredRoles={[
-                "Encargado de Logística",
-                "Administrador",
-                "Envios",
-              ]}
+              requiredRoles={["Administrador", "Envios"]}
             />
             <Route exact path="/detalle-pedido/:id">
               <DetallePedido />
@@ -129,27 +125,31 @@ const AppRouter = () => {
             <RoleRoute
               path="/reportes"
               component={Reportes}
-              requiredRoles={["Administrador"]}
+              requiredRoles={["Administrador", "Gerente"]}
               exact
             />
-            <Route
+            <RoleRoute
               path="/reportes/clientes-mas-pedidos"
               component={ClientesMasPedidos}
+              requiredRoles={["Administrador", "Gerente"]}
               exact
             />
-            <Route
+            <RoleRoute
               path="/reportes/stock-actual"
               component={StockActual}
+              requiredRoles={["Administrador", "Gerente"]}
               exact
             />
-            <Route
+            <RoleRoute
               path="/reportes/productos-mas-pedidos"
               component={ProductosMasPedidos}
+              requiredRoles={["Administrador", "Gerente"]}
               exact
             />
-            <Route
+            <RoleRoute
               path="/reportes/analisis-cancelaciones"
               component={AnalisisCancelaciones}
+              requiredRoles={["Administrador", "Gerente"]}
               exact
             />
             <Route exact path="/debug-auth" component={DebugAuth} />
