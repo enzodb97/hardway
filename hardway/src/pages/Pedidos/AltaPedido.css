@@ -1,3 +1,27 @@
+/* Botones de cantidad en prenda-card */
+.prenda-card .quantity-btn {
+  background: #2d3748; /* mismo color que el contenedor .prenda-card */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0 2px;
+  transition: background 0.2s;
+  min-width: 15px;
+  min-height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.prenda-card .quantity-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.prenda-card .quantity-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 /* ========================================
    ALTA DE PEDIDOS - ESTILOS PROFESIONALES
    ======================================== */
@@ -18,7 +42,7 @@
   bottom: 0;
   background: radial-gradient(
       circle at 20% 80%,
-      rgba(253, 180, 11, 0.08) 0%,
+      rgba(253, 11, 11, 0.08) 0%,
       transparent 50%
     ),
     radial-gradient(

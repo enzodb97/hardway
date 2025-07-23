@@ -158,7 +158,11 @@ const AppRouter = () => {
               path="/acceso-restringido"
               render={(props) => {
                 const { location } = props;
-                const { rol, requiredRoles } = location.state || {};
+                const { rol, requiredRoles } =
+                  (location.state as {
+                    rol?: string;
+                    requiredRoles?: string[];
+                  }) || {};
                 return (
                   <AccesoRestringido rol={rol} requiredRoles={requiredRoles} />
                 );

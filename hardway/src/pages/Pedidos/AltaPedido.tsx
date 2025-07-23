@@ -507,7 +507,74 @@ const AltaPedido: React.FC = () => {
                           <div className="prenda-quantity">
                             <span className="quantity-label">Cantidad:</span>
                             <div className="quantity-value">
-                              {prenda.cantidad}
+                              <button
+                                type="button"
+                                className="quantity-btn"
+                                onClick={() => {
+                                  setPrendasSeleccionadas((prev) =>
+                                    prev.map((p) =>
+                                      p.codigoIndumentaria ===
+                                      prenda.codigoIndumentaria
+                                        ? {
+                                            ...p,
+                                            cantidad:
+                                              p.cantidad > 1
+                                                ? p.cantidad - 1
+                                                : 1,
+                                          }
+                                        : p
+                                    )
+                                  );
+                                }}
+                                disabled={prenda.cantidad <= 1}
+                              >
+                                −
+                              </button>
+                              <span style={{ margin: "0 8px" }}>
+                                {prenda.cantidad}
+                              </span>
+                              <button
+                                type="button"
+                                className="quantity-btn"
+                                onClick={() => {
+                                  // Buscar el stock máximo
+                                  const prendaCat = indumentaria.find(
+                                    (i) =>
+                                      i.codigoIndumentaria ===
+                                      prenda.codigoIndumentaria
+                                  );
+                                  const maxStock = prendaCat
+                                    ? prendaCat.cantidadIndumentaria
+                                    : 1;
+                                  setPrendasSeleccionadas((prev) =>
+                                    prev.map((p) =>
+                                      p.codigoIndumentaria ===
+                                      prenda.codigoIndumentaria
+                                        ? {
+                                            ...p,
+                                            cantidad:
+                                              p.cantidad < maxStock
+                                                ? p.cantidad + 1
+                                                : maxStock,
+                                          }
+                                        : p
+                                    )
+                                  );
+                                }}
+                                disabled={(() => {
+                                  const prendaCat = indumentaria.find(
+                                    (i) =>
+                                      i.codigoIndumentaria ===
+                                      prenda.codigoIndumentaria
+                                  );
+                                  const maxStock = prendaCat
+                                    ? prendaCat.cantidadIndumentaria
+                                    : 1;
+                                  return prenda.cantidad >= maxStock;
+                                })()}
+                              >
+                                +
+                              </button>
                             </div>
                           </div>
                         </div>
