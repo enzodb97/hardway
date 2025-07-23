@@ -1,11 +1,6 @@
 import { Route, Redirect } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { 
-  IonCard, 
-  IonCardContent, 
-  IonIcon, 
-  IonText 
-} from "@ionic/react";
+import { IonCard, IonCardContent, IonIcon, IonText } from "@ionic/react";
 import { lockClosed, warning } from "ionicons/icons";
 import "./RoleRoute.css";
 
@@ -30,38 +25,12 @@ const RoleRoute: React.FC<RoleRouteProps> = ({
           return <Component {...props} />;
         } else if (isAuthenticated) {
           return (
-            <div className="access-denied-container">
-              <IonCard className="access-denied-card">
-                <IonCardContent>
-                  <div className="access-denied-icon-container">
-                    <IonIcon 
-                      icon={lockClosed} 
-                      className="access-denied-lock-icon"
-                    />
-                  </div>
-                  <IonText>
-                    <h2 className="access-denied-title">
-                      Acceso Restringido
-                    </h2>
-                  </IonText>
-                  <IonText>
-                    <p className="access-denied-message">
-                      <IonIcon 
-                        icon={warning} 
-                        className="access-denied-warning-icon"
-                      />
-                      No tienes los permisos necesarios para acceder a esta sección.
-                      <br />
-                      Tu rol: {rol || "No definido"}
-                      <br />
-                      Roles requeridos: {requiredRoles.join(", ")}
-                      <br />
-                      Contacta a tu administrador si necesitas acceso.
-                    </p>
-                  </IonText>
-                </IonCardContent>
-              </IonCard>
-            </div>
+            <Redirect
+              to={{
+                pathname: "/acceso-restringido",
+                state: { rol, requiredRoles },
+              }}
+            />
           );
         } else {
           return <Redirect to="/login" />;

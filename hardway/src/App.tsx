@@ -31,6 +31,7 @@ import Picking from "./pages/Picking/Picking";
 import Envios from "./pages/Envios/Envios";
 import DebugAuth from "./pages/DebugAuth";
 import UsuariosSimple from "./pages/UsuariosSimple";
+import AccesoRestringido from "./pages/AccesoRestringido";
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -152,6 +153,17 @@ const AppRouter = () => {
               exact
             />
             <Route exact path="/debug-auth" component={DebugAuth} />
+            <Route
+              exact
+              path="/acceso-restringido"
+              render={(props) => {
+                const { location } = props;
+                const { rol, requiredRoles } = location.state || {};
+                return (
+                  <AccesoRestringido rol={rol} requiredRoles={requiredRoles} />
+                );
+              }}
+            />
           </IonRouterOutlet>
         </IonSplitPane>
       ) : (
