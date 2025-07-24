@@ -59,7 +59,6 @@ const AltaCliente: React.FC = () => {
     if (id) {
       const clienteExistente = clientes.find((c) => c.id === Number(id));
       if (clienteExistente) {
-
         setFormData(clienteExistente);
         setEsEdicion(true);
         setPreviousNumeroDocumento(clienteExistente.numeroDocumento || "");
@@ -104,18 +103,24 @@ const AltaCliente: React.FC = () => {
 
     try {
       // 1. Obtener o crear ciudad
-      const ciudadRes = await axiosInstance.post("/api/ciudades/find-or-create", {
-        nombreCiudad: formData.localidad,
-        codigoPostal: formData.cp,
-      });
+      const ciudadRes = await axiosInstance.post(
+        "/api/ciudades/find-or-create",
+        {
+          nombreCiudad: formData.localidad,
+          codigoPostal: formData.cp,
+        }
+      );
       console.log("Respuesta ciudad:", ciudadRes.data); // <-- Agrega esto
       const idCiudad = ciudadRes.data.idCiudad;
 
       // 2. Obtener o crear barrio
-      const barrioRes = await axiosInstance.post("/api/barrios/find-or-create", {
-        nombreBarrio: formData.barrio,
-        idCiudad,
-      });
+      const barrioRes = await axiosInstance.post(
+        "/api/barrios/find-or-create",
+        {
+          nombreBarrio: formData.barrio,
+          idCiudad,
+        }
+      );
       console.log("Respuesta barrio:", barrioRes.data); // <-- Agrega esto
       const idBarrio = barrioRes.data.idBarrio;
 
@@ -293,7 +298,10 @@ const AltaCliente: React.FC = () => {
             <div className="two-column-grid">
               <div className="form-column">
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Localidad</IonLabel>
+                  <IonLabel position="floating">
+                    Localidad
+                    <span className="required">*</span>
+                  </IonLabel>
                   <IonInput
                     value={formData.localidad}
                     onIonChange={(e) =>
@@ -326,7 +334,9 @@ const AltaCliente: React.FC = () => {
                 </IonItem>
 
                 <IonItem className="form-item">
-                  <IonLabel position="floating">Domicilio (Alternativo)</IonLabel>
+                  <IonLabel position="floating">
+                    Domicilio (Alternativo)
+                  </IonLabel>
                   <IonInput
                     value={formData.domicilio}
                     onIonChange={(e) =>

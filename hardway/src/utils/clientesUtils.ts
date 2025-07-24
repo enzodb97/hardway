@@ -35,15 +35,22 @@ export function validarCamposCliente(
   if (formData.numeroDocumento && formData.numeroDocumento.trim().length < 3) {
     return "El N° de Documento debe tener al menos 3 caracteres.";
   }
-  if (!formData.nombre || formData.nombre.trim().length < 2) {
-    return "El nombre es obligatorio y debe tener al menos 2 caracteres.";
+  if (!formData.nombre || formData.nombre.trim().length < 3) {
+    return "El nombre es obligatorio y debe tener al menos 3 caracteres.";
   }
-  if (!formData.apellido || formData.apellido.trim().length < 2) {
-    return "El apellido es obligatorio y debe tener al menos 2 caracteres.";
+  if (!formData.apellido || formData.apellido.trim().length < 3) {
+    return "El apellido es obligatorio y debe tener al menos 3 caracteres.";
   }
-  if (!formData.barrio || formData.barrio.trim().length < 2) {
+  if (!formData.localidad || formData.localidad.trim().length < 5) {
+    return "El campo Localidad es obligatorio y debe tener al menos 5 caracteres.";
+  }
+  if (!formData.barrio || formData.barrio.trim().length < 3) {
     return "El campo Barrio es obligatorio.";
   }
+  if (!formData.telefono || formData.telefono.trim().length < 7) {
+    return "El campo Teléfono es obligatorio y debe tener al menos 7 caracteres.";
+  }
+
   return null;
 }
 
@@ -65,20 +72,22 @@ export const exportarClientesPDF = (clientes: Cliente[]) => {
   doc.text(title, x, 18);
   // Ordenar clientes por nombre
   const clientesOrdenados = [...clientes].sort((a, b) => {
-    const nombreA = a.nombre?.toLowerCase() || '';
-    const nombreB = b.nombre?.toLowerCase() || '';
+    const nombreA = a.nombre?.toLowerCase() || "";
+    const nombreB = b.nombre?.toLowerCase() || "";
     return nombreA.localeCompare(nombreB);
   });
 
   autoTable(doc, {
-    head: [["ID", "CUIT/DNI", "Nombre y Apellido", "Localidad", "Teléfono", "Email"]],
+    head: [
+      ["ID", "CUIT/DNI", "Nombre y Apellido", "Localidad", "Teléfono", "Email"],
+    ],
     body: clientesOrdenados.map((cliente) => [
-      cliente.id || '',
-      `${cliente.tipoDocumento || 'DNI'}: ${cliente.numeroDocumento || ''}`,
-      `${cliente.nombre || ''} ${cliente.apellido || ''}`.trim(),
-      cliente.localidad || '',
-      cliente.telefono || '',
-      cliente.email || '',
+      cliente.id || "",
+      `${cliente.tipoDocumento || "DNI"}: ${cliente.numeroDocumento || ""}`,
+      `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim(),
+      cliente.localidad || "",
+      cliente.telefono || "",
+      cliente.email || "",
     ]),
     startY: 28,
     styles: { fontSize: 10 },

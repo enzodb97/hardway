@@ -1,3 +1,9 @@
+@media (prefers-color-scheme: dark) {
+  .form-item:hover {
+    --color: #0c1014 !important;
+    box-shadow: none !important;
+  }
+}
 /* Estilos Generales */
 .alta-cliente-page {
   --ion-background-color: #fdb40b;
@@ -185,22 +191,22 @@
     padding: 20px;
     margin: 10px auto;
   }
-  
+
   .form-section {
     padding: 15px;
     margin-bottom: 20px;
   }
-  
+
   .section-title {
     font-size: 1.1em;
     margin-bottom: 15px;
   }
-  
+
   .two-column-grid {
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  
+
   .alta-cliente-form ion-item {
     margin-bottom: 10px;
     --min-height: 50px;
@@ -212,21 +218,21 @@
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .form-title {
     font-size: 1.3em;
     text-align: center;
   }
-  
+
   .brand-logo {
     width: 60px;
     height: 60px;
   }
-  
+
   .alta-cliente-form {
     padding: 15px;
   }
-  
+
   .form-section {
     padding: 12px;
   }

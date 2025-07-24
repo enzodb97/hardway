@@ -674,7 +674,7 @@ const Clientes: React.FC = () => {
                 </p>
                 <IonButton routerLink="/alta-cliente" className="add-first-btn">
                   <IonIcon icon={add} slot="start" />
-                  Agregar primer cliente
+                  Agregar Nuevo Cliente
                 </IonButton>
               </div>
             ) : vistaGrid ? (
