@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-07-2025 a las 21:34:53
+-- Tiempo de generación: 24-07-2025 a las 23:47:33
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -221,26 +221,26 @@ INSERT INTO `cliente` (`idCliente`, `email`, `telefono`, `estaActivo`, `idPerson
 (8, 'diego@mail.com', '666777888', 1, 8),
 (9, 'lucia@mail.com', '999000111', 1, 9),
 (10, 'pedro@mail.com', '222333444', 1, 10),
-(28, 'martin.gomez1@test.com', '555-1101', 1, 34),
-(29, 'sofia.rodriguez1@test.com', '555-1102', 1, 35),
-(30, 'diego.fernandez1@test.com', '555-1103', 1, 36),
-(31, 'lucia.diaz1@test.com', '555-1104', 1, 37),
-(32, 'carlos.lopez1@test.com', '555-1105', 1, 38),
-(33, 'martin.gomez2@test.com', '555-1106', 1, 39),
-(34, 'sofia.rodriguez2@test.com', '555-1107', 1, 40),
-(35, 'valeria.paz1@test.com', '555-1108', 1, 41),
-(36, 'javier.sosa1@test.com', '555-1109', 1, 42),
-(37, 'carolina.vega1@test.com', '555-1110', 1, 43),
-(38, 'diego.fernandez2@test.com', '555-1111', 1, 44),
-(39, 'lucia.diaz2@test.com', '555-1112', 1, 45),
-(40, 'carlos.lopez2@test.com', '555-1113', 1, 46),
-(41, 'andrea.moreno1@test.com', '555-1114', 1, 47),
-(42, 'hernan.alonso1@test.com', '555-1115', 1, 48),
-(43, 'martin.gomez3@test.com', '555-1116', 1, 49),
-(44, 'gabriela.torres1@test.com', '555-1117', 1, 50),
-(45, 'matias.romero1@test.com', '555-1118', 1, 51),
-(46, 'paula.suarez1@test.com', '555-1119', 1, 52),
-(47, 'martin.gomez4@test.com', '555-1120', 1, 53);
+(28, 'martin.gomez1@test.com', '5551101', 1, 34),
+(29, 'sofia.rodriguez1@test.com', '5551102', 1, 35),
+(30, 'diego.fernandez1@test.com', '5551103', 1, 36),
+(31, 'lucia.diaz1@test.com', '5551104', 1, 37),
+(32, 'carlos.lopez1@test.com', '5551105', 1, 38),
+(33, 'martin.gomez2@test.com', '5551106', 1, 39),
+(34, 'sofia.rodriguez2@test.com', '5551107', 1, 40),
+(35, 'valeria.paz1@test.com', '5551108', 1, 41),
+(36, 'javier.sosa1@test.com', '5551109', 1, 42),
+(37, 'carolina.vega1@test.com', '5551110', 1, 43),
+(38, 'diego.fernandez2@test.com', '5551111', 1, 44),
+(39, 'lucia.diaz2@test.com', '5551112', 1, 45),
+(40, 'carlos.lopez2@test.com', '5551113', 1, 46),
+(41, 'andrea.moreno1@test.com', '5551114', 1, 47),
+(42, 'hernan.alonso1@test.com', '5551115', 1, 48),
+(43, 'martin.gomez3@test.com', '5551116', 1, 49),
+(44, 'gabriela.torres1@test.com', '5551117', 1, 50),
+(45, 'matias.romero1@test.com', '5551118', 1, 51),
+(46, 'paula.suarez1@test.com', '5551119', 1, 52),
+(47, 'martin.gomez4@test.com', '5551120', 1, 53);
 
 -- --------------------------------------------------------
 
