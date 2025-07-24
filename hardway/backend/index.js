@@ -38,7 +38,9 @@ const clientesVipRoutes = require("./routes/clientesVip");
 
 // Usar rutas
 
-app.use("/api", authRoutes);
+// Las rutas VIP deben ser públicas y estar antes que cualquier autenticación
+app.use("/api/clientes/vip", clientesVipRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/pedidos", pedidosRoutes);
@@ -48,7 +50,6 @@ app.use("/api", ubicacionRoutes);
 app.use("/api/reportes", reportesRoutes);
 app.use("/api/picking", pickingRoutes);
 app.use("/api/envios", enviosRoutes);
-app.use("/api/clientes/vip", clientesVipRoutes);
 
 // Endpoint de prueba
 app.get("/api/health", (req, res) => {

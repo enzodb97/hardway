@@ -459,6 +459,110 @@ ion-chip[color="danger"] {
   opacity: 0.6;
 }
 
+/* Modal VIP personalizado */
+.vip-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vip-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  max-width: 350px;
+  width: 100%;
+  padding: 32px 24px 24px 24px;
+  position: relative;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: modalFadeIn 0.2s;
+}
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.vip-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.vip-modal-star {
+  width: 32px;
+  height: 32px;
+  color: #fdb40b;
+  filter: drop-shadow(0 1px 2px rgba(253, 180, 11, 0.3));
+}
+.vip-modal-header h2 {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #2d3436;
+  margin: 0;
+}
+.vip-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.vip-modal-actual {
+  font-size: 1em;
+  color: #636e72;
+  margin-bottom: 4px;
+}
+.vip-modal-actual span {
+  font-weight: 700;
+  color: #fdb40b;
+}
+.vip-modal-input {
+  border-radius: 8px;
+  border: 1px solid #eee;
+  padding: 10px 12px;
+  font-size: 1.1em;
+  background: #f8f9fa;
+  color: #2d3436;
+  margin-top: 2px;
+}
+.vip-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+.vip-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.18);
+  z-index: 1000;
+}
+.vip-monto-btn {
+  --background: #fffbe6;
+  --color: #fdb40b;
+  --border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(253, 180, 11, 0.12);
+  border: none;
+}
+.vip-monto-btn:hover {
+  --background: #fff3c1;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .clientes-container {

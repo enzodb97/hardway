@@ -26,12 +26,10 @@ router.get("/top", async (req, res) => {
     );
     res.json(result);
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        error: "Error al obtener el top de clientes VIP",
-        details: err.message,
-      });
+    res.status(500).json({
+      error: "Error al obtener el top de clientes VIP",
+      details: err.message,
+    });
   }
 });
 
@@ -64,6 +62,42 @@ router.get("/count", async (req, res) => {
     res
       .status(500)
       .json({ error: "Error al contar clientes VIP", details: err.message });
+  }
+});
+
+// 6. Obtener el monto mínimo actual para ser VIP
+router.get("/vip-threshold", async (req, res) => {
+  try {
+    const [result] = await sequelize.query(
+      "SELECT valor FROM configuracionvip WHERE clave = 'monto_vip'"
+    );
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Configuración no encontrada" });
+    }
+    res.json({ monto: result[0].valor });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Error al obtener monto VIP", details: err.message });
+  }
+});
+
+// 5. Actualizar el monto mínimo para ser VIP
+router.put("/vip-threshold", async (req, res) => {
+  const { monto } = req.body;
+  if (typeof monto !== "number" || monto <= 0) {
+    return res.status(400).json({ error: "Monto inválido" });
+  }
+  try {
+    await sequelize.query(
+      "UPDATE configuracionvip SET valor = :monto WHERE clave = 'monto_vip'",
+      { replacements: { monto } }
+    );
+    res.json({ success: true, message: "Monto VIP actualizado" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Error al actualizar monto VIP", details: err.message });
   }
 });
 

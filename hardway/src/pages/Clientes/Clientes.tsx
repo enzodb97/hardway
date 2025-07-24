@@ -25,6 +25,7 @@ import {
   IonRefresherContent,
   IonSkeletonText,
   IonToggle,
+  IonInput,
 } from "@ionic/react";
 import {
   add,
@@ -42,7 +43,7 @@ import {
   closeCircle,
   time,
 } from "ionicons/icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useClientesVip } from "../../utils/useClientesVip";
 import crownIcon from "../../assets/icons/vip-crown.svg";
 import starIcon from "../../assets/icons/vip-star.svg";
@@ -50,6 +51,7 @@ import { useClientes } from "../../context/ClientesContext";
 import HistorialCliente from "./HistorialCliente";
 import "./Clientes.css";
 import { exportarClientesPDF } from "../../utils/clientesUtils";
+import axios from "axios";
 
 const Clientes: React.FC = () => {
   const {
@@ -83,6 +85,14 @@ const Clientes: React.FC = () => {
     id: number;
     nombre: string;
   } | null>(null);
+
+  // Estado para el monto VIP
+  const [montoVip, setMontoVip] = useState<number | null>(null);
+  const [nuevoMontoVip, setNuevoMontoVip] = useState<string>("");
+  const [cargandoMontoVip, setCargandoMontoVip] = useState(false);
+
+  // Estado para el modal del monto VIP
+  const [showModalMontoVip, setShowModalMontoVip] = useState(false);
 
   // Obtener localidades únicas para el filtro
   const localidadesUnicas = [
@@ -220,6 +230,68 @@ const Clientes: React.FC = () => {
   const cerrarHistorial = () => {
     setShowHistorial(false);
     setClienteHistorial(null);
+  };
+
+  // Obtener el monto VIP actual al montar
+  useEffect(() => {
+    const fetchMontoVip = async () => {
+      setCargandoMontoVip(true);
+      try {
+        const res = await axios.get("/api/clientes/vip/vip-threshold");
+        setMontoVip(res.data.monto);
+        setNuevoMontoVip(res.data.monto.toString());
+      } catch (err) {
+        setMontoVip(null);
+      } finally {
+        setCargandoMontoVip(false);
+      }
+    };
+    fetchMontoVip();
+  }, []);
+
+  // Actualizar el monto VIP
+  const actualizarMontoVip = async () => {
+    const monto = Number(nuevoMontoVip);
+    if (isNaN(monto) || monto <= 0) {
+      setAlertMsg("Ingrese un monto válido mayor a 0");
+      setShowAlert(true);
+      return;
+    }
+    setCargandoMontoVip(true);
+    try {
+      await axios.put("/api/clientes/vip/vip-threshold", { monto });
+      setMontoVip(monto);
+      setAlertMsg("Monto VIP actualizado correctamente");
+      setShowAlert(true);
+    } catch (err) {
+      setAlertMsg("Error al actualizar el monto VIP");
+      setShowAlert(true);
+    } finally {
+      setCargandoMontoVip(false);
+    }
+  };
+
+  // Nueva función para actualizar desde el modal
+  const actualizarMontoVipModal = async (valor: string) => {
+    const monto = Number(valor);
+    if (isNaN(monto) || monto <= 0) {
+      setAlertMsg("Ingrese un monto válido mayor a 0");
+      setShowAlert(true);
+      return;
+    }
+    setCargandoMontoVip(true);
+    try {
+      await axios.put("/api/clientes/vip/vip-threshold", { monto });
+      setMontoVip(monto);
+      setAlertMsg("Monto VIP actualizado correctamente");
+      setShowAlert(true);
+      setShowModalMontoVip(false);
+    } catch (err) {
+      setAlertMsg("Error al actualizar el monto VIP");
+      setShowAlert(true);
+    } finally {
+      setCargandoMontoVip(false);
+    }
   };
 
   // Render de vista en tarjetas
@@ -548,17 +620,30 @@ const Clientes: React.FC = () => {
                 </IonButton>
               )}
 
-              {clientesFiltrados.length > 0 && (
+              {/* Botones de exportar y editar VIP juntos */}
+              <div className="export-vip-btns">
+                {clientesFiltrados.length > 0 && (
+                  <IonButton
+                    fill="solid"
+                    size="small"
+                    onClick={() => exportarClientesPDF(clientesFiltrados)}
+                    className="export-pdf-btn"
+                  >
+                    <IonIcon icon={print} slot="start" />
+                    Exportar a PDF
+                  </IonButton>
+                )}
                 <IonButton
-                  fill="solid"
+                  fill="outline"
                   size="small"
-                  onClick={() => exportarClientesPDF(clientesFiltrados)}
-                  className="export-pdf-btn"
+                  color="warning"
+                  className="vip-monto-btn"
+                  onClick={() => setShowModalMontoVip(true)}
                 >
-                  <IonIcon icon={print} slot="start" />
-                  Exportar a PDF
+                  <IonIcon icon={starIcon} slot="start" color="warning" />
+                  Editar Monto VIP
                 </IonButton>
-              )}
+              </div>
             </div>
           </div>
 
@@ -599,17 +684,68 @@ const Clientes: React.FC = () => {
             )}
           </div>
 
-          {/* FAB para exportar a PDF */}
-          {/*<IonFab vertical="bottom" horizontal="end" slot="fixed">
-            <IonFabButton 
-              className="print-btn" 
-              onClick={() => clientesFiltrados.length > 0 && exportarClientesPDF(clientesFiltrados)}
-              disabled={clientesFiltrados.length === 0}
-              title="Exportar listado de clientes a PDF"
-            >
-              <IonIcon icon={print} />
-            </IonFabButton>
-          </IonFab>*/}
+          {/* Botón para editar monto VIP
+          <IonButton
+            fill="outline"
+            size="small"
+            color="warning"
+            className="vip-monto-btn"
+            onClick={() => setShowModalMontoVip(true)}
+          >
+            <IonIcon icon={starIcon} slot="start" color="warning" />
+            Monto VIP
+          </IonButton>*/}
+
+          {/* Modal para editar monto VIP */}
+          {showModalMontoVip && (
+            <div className="vip-modal-overlay">
+              <div className="vip-modal">
+                <div className="vip-modal-header">
+                  <IonIcon
+                    icon={starIcon}
+                    color="warning"
+                    className="vip-modal-star"
+                  />
+                  <h2>Editar monto mínimo VIP</h2>
+                </div>
+                <div className="vip-modal-body">
+                  <p className="vip-modal-actual">
+                    Monto actual: <span>${montoVip ?? "-"}</span>
+                  </p>
+                  <IonInput
+                    type="number"
+                    min={1}
+                    value={nuevoMontoVip}
+                    onIonChange={(e) => setNuevoMontoVip(e.detail.value!)}
+                    className="vip-modal-input"
+                    placeholder="Nuevo monto mínimo"
+                  />
+                </div>
+                <div className="vip-modal-actions">
+                  <IonButton
+                    fill="clear"
+                    size="small"
+                    color="medium"
+                    onClick={() => setShowModalMontoVip(false)}
+                  >
+                    Cancelar
+                  </IonButton>
+                  <IonButton
+                    fill="solid"
+                    size="small"
+                    color="warning"
+                    onClick={() => actualizarMontoVipModal(nuevoMontoVip)}
+                  >
+                    Guardar
+                  </IonButton>
+                </div>
+              </div>
+              <div
+                className="vip-modal-backdrop"
+                onClick={() => setShowModalMontoVip(false)}
+              ></div>
+            </div>
+          )}
 
           {/* Alertas */}
           <IonAlert

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-07-2025 a las 18:46:12
+-- Tiempo de generación: 24-07-2025 a las 21:34:53
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -302,6 +302,24 @@ INSERT INTO `color` (`idColor`, `color`) VALUES
 (9, 'Naranja'),
 (10, 'Violeta'),
 (11, 'Morado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `configuracionvip`
+--
+
+CREATE TABLE `configuracionvip` (
+  `clave` varchar(50) NOT NULL,
+  `valor` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+
+--
+-- Volcado de datos para la tabla `configuracionvip`
+--
+
+INSERT INTO `configuracionvip` (`clave`, `valor`) VALUES
+('monto_vip', '15000');
 
 -- --------------------------------------------------------
 
@@ -1585,7 +1603,7 @@ CREATE TABLE `vista_clientes_vip` (
 --
 DROP TABLE IF EXISTS `vista_clientes_vip`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_clientes_vip`  AS SELECT `c`.`idCliente` AS `idCliente`, `pe`.`nombre` AS `nombre`, `pe`.`apellido` AS `apellido`, `c`.`email` AS `email`, sum(`pr`.`precio` * `dp`.`cantidad`) AS `monto_total_gastado` FROM ((((((`pedido` `p` join `cliente` `c` on(`p`.`idCliente` = `c`.`idCliente`)) join `persona` `pe` on(`c`.`idPersona` = `pe`.`idPersona`)) join `detallepedido` `dp` on(`p`.`numeroPedido` = `dp`.`numeroPedido`)) join `indumentaria` `i` on(`dp`.`codigoIndumentaria` = `i`.`codigoIndumentaria`)) join `detalleindumentaria` `di` on(`i`.`idDetalle` = `di`.`idDetalle`)) join `precioindumentaria` `pr` on(`di`.`idPrecio` = `pr`.`idPrecio`)) WHERE `p`.`estaActivo` = 1 AND `p`.`idEstado` <> 6 GROUP BY `c`.`idCliente`, `pe`.`nombre`, `pe`.`apellido`, `c`.`email` HAVING `monto_total_gastado` > 25000 ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_clientes_vip`  AS SELECT `c`.`idCliente` AS `idCliente`, `pe`.`nombre` AS `nombre`, `pe`.`apellido` AS `apellido`, `c`.`email` AS `email`, sum(`pr`.`precio` * `dp`.`cantidad`) AS `monto_total_gastado` FROM ((((((`pedido` `p` join `cliente` `c` on(`p`.`idCliente` = `c`.`idCliente`)) join `persona` `pe` on(`c`.`idPersona` = `pe`.`idPersona`)) join `detallepedido` `dp` on(`p`.`numeroPedido` = `dp`.`numeroPedido`)) join `indumentaria` `i` on(`dp`.`codigoIndumentaria` = `i`.`codigoIndumentaria`)) join `detalleindumentaria` `di` on(`i`.`idDetalle` = `di`.`idDetalle`)) join `precioindumentaria` `pr` on(`di`.`idPrecio` = `pr`.`idPrecio`)) WHERE `p`.`estaActivo` = 1 AND `p`.`idEstado` <> 6 GROUP BY `c`.`idCliente`, `pe`.`nombre`, `pe`.`apellido`, `c`.`email` HAVING `monto_total_gastado` > (select cast(`configuracionvip`.`valor` as decimal(10,2)) from `configuracionvip` where `configuracionvip`.`clave` = 'monto_vip') ;
 
 --
 -- Índices para tablas volcadas
@@ -1653,6 +1671,12 @@ ALTER TABLE `cliente_historial_estado`
 --
 ALTER TABLE `color`
   ADD PRIMARY KEY (`idColor`);
+
+--
+-- Indices de la tabla `configuracionvip`
+--
+ALTER TABLE `configuracionvip`
+  ADD PRIMARY KEY (`clave`);
 
 --
 -- Indices de la tabla `detalleindumentaria`
