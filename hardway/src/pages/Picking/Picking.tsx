@@ -24,6 +24,7 @@ import {
   cargarTareasPicking,
   verPickingList,
   completarTareaPicking,
+  exportarPedidoPDF,
 } from "../../utils/pickingUtils";
 import "./Picking.css";
 
@@ -60,50 +61,67 @@ const Picking: React.FC = () => {
   const handleVerPickingList = async (numeroPedido: string) => {
     try {
       const response = await verPickingList(numeroPedido);
-      
+
       // Log para diagnóstico de la estructura de datos
-      console.log('Respuesta del endpoint picking list:', response);
+      console.log("Respuesta del endpoint picking list:", response);
       if (response?.pedido?.DetallePedidos?.length > 0) {
-        console.log('Primer item detalle:', response.pedido.DetallePedidos[0]);
-        console.log('Indumentarium del primer item:', response.pedido.DetallePedidos[0].Indumentarium);
-        console.log('DetalleIndumentarium:', response.pedido.DetallePedidos[0].Indumentarium?.DetalleIndumentarium);
-        console.log('Stock del primer item:', response.pedido.DetallePedidos[0].Indumentarium?.Stock);
-        console.log('Rack del primer item:', response.pedido.DetallePedidos[0].Indumentarium?.Stock?.Rack);
+        console.log("Primer item detalle:", response.pedido.DetallePedidos[0]);
+        console.log(
+          "Indumentarium del primer item:",
+          response.pedido.DetallePedidos[0].Indumentarium
+        );
+        console.log(
+          "DetalleIndumentarium:",
+          response.pedido.DetallePedidos[0].Indumentarium?.DetalleIndumentarium
+        );
+        console.log(
+          "Stock del primer item:",
+          response.pedido.DetallePedidos[0].Indumentarium?.Stock
+        );
+        console.log(
+          "Rack del primer item:",
+          response.pedido.DetallePedidos[0].Indumentarium?.Stock?.Rack
+        );
       }
-      
+
       // Transformamos los datos para tener un formato compatible con el componente
       if (response && response.pedido && response.pedido.DetallePedidos) {
         // Convertir los detalles del pedido al formato esperado por el componente
-        const itemsFormateados = response.pedido.DetallePedidos.map((detalle: any) => {
-          // Extraemos los datos anidados
-          const indumentaria = detalle.Indumentarium || {};
-          const detalleInd = indumentaria.DetalleIndumentarium || {};
-          const nombreInd = detalleInd.NombreIndumentarium || {};
-          const color = detalleInd.Color || {};
-          const talle = detalleInd.Talle || {};
-          const categoria = detalleInd.CategoriaIndumentarium || {};
-          
-          return {
-            nombre_producto: nombreInd.nombre || 'Sin nombre',
-            codigoIndumentaria: detalle.codigoIndumentaria,
-            referencia: indumentaria.codigoIndumentaria,
-            cantidad: detalle.cantidad,
-            rack: indumentaria.Stock?.Rack?.numeroRack || indumentaria.Stock?.idRack?.toString() || 'Sin asignar',
-            categoria: categoria.categoria || 'Sin categoría',
-            color: color.color || 'N/A',
-            talle: talle.talle || 'N/A'
-          };
-        });
-        
+        const itemsFormateados = response.pedido.DetallePedidos.map(
+          (detalle: any) => {
+            // Extraemos los datos anidados
+            const indumentaria = detalle.Indumentarium || {};
+            const detalleInd = indumentaria.DetalleIndumentarium || {};
+            const nombreInd = detalleInd.NombreIndumentarium || {};
+            const color = detalleInd.Color || {};
+            const talle = detalleInd.Talle || {};
+            const categoria = detalleInd.CategoriaIndumentarium || {};
+
+            return {
+              nombre_producto: nombreInd.nombre || "Sin nombre",
+              codigoIndumentaria: detalle.codigoIndumentaria,
+              referencia: indumentaria.codigoIndumentaria,
+              cantidad: detalle.cantidad,
+              rack:
+                indumentaria.Stock?.Rack?.numeroRack ||
+                indumentaria.Stock?.idRack?.toString() ||
+                "Sin asignar",
+              categoria: categoria.categoria || "Sin categoría",
+              color: color.color || "N/A",
+              talle: talle.talle || "N/A",
+            };
+          }
+        );
+
         setPickingList(itemsFormateados);
       } else {
         // Si no hay datos o el formato es inesperado, inicializamos como array vacío
         setPickingList([]);
       }
-      
+
       setShowPickingList(true);
     } catch (err) {
-      console.error('Error detallado:', err);
+      console.error("Error detallado:", err);
       setAlertMsg("Error al obtener picking list");
       setShowAlert(true);
     }
@@ -114,22 +132,37 @@ const Picking: React.FC = () => {
     numeroPedido: string
   ) => {
     try {
-      console.log('Enviando completar tarea con idAsignacion:', idAsignacion, 'tipo:', typeof idAsignacion);
+      console.log(
+        "Enviando completar tarea con idAsignacion:",
+        idAsignacion,
+        "tipo:",
+        typeof idAsignacion
+      );
       if (!idAsignacion && rol === "Administrador") {
-        console.error('Error: Se requiere idAsignacion para completar tarea como admin');
-        setAlertMsg("Error: Se requiere ID de asignación para completar tarea como administrador");
+        console.error(
+          "Error: Se requiere idAsignacion para completar tarea como admin"
+        );
+        setAlertMsg(
+          "Error: Se requiere ID de asignación para completar tarea como administrador"
+        );
         setShowAlert(true);
         return;
       }
-      
+
       const resultado = await completarTareaPicking(idAsignacion, numeroPedido);
-      setAlertMsg(`Tarea completada. El pedido ahora está en estado "${resultado.estado || 'Pendiente de Pago'}"`);
+      setAlertMsg(
+        `Tarea completada. El pedido ahora está en estado "${
+          resultado.estado || "Pendiente de Pago"
+        }"`
+      );
       setShowAlert(true);
       cargarTareas();
       setShowPickingList(false);
     } catch (err) {
-      console.error('Error en handleCompletarTarea:', err);
-      setAlertMsg("Error al completar tarea. Verifica la consola para más detalles.");
+      console.error("Error en handleCompletarTarea:", err);
+      setAlertMsg(
+        "Error al completar tarea. Verifica la consola para más detalles."
+      );
       setShowAlert(true);
     }
   };
@@ -173,6 +206,59 @@ const Picking: React.FC = () => {
                       </IonLabel>
                       <IonButton
                         slot="end"
+                        color="warning"
+                        className="picking-action-btn"
+                        onClick={async () => {
+                          // Obtener productos del pedido para exportar
+                          try {
+                            const response = await verPickingList(
+                              tarea.numeroPedido
+                            );
+                            // Mapear productos para el PDF
+                            const productos = (
+                              response?.pedido?.DetallePedidos || []
+                            ).map((detalle: any) => {
+                              const indumentaria = detalle.Indumentarium || {};
+                              const detalleInd =
+                                indumentaria.DetalleIndumentarium || {};
+                              const nombreInd =
+                                detalleInd.NombreIndumentarium || {};
+                              const color = detalleInd.Color || {};
+                              const talle = detalleInd.Talle || {};
+                              const categoria =
+                                detalleInd.CategoriaIndumentarium || {};
+                              return {
+                                id:
+                                  indumentaria.idIndumentaria ||
+                                  detalle.codigoIndumentaria ||
+                                  "-",
+                                nombre: nombreInd.nombre || "Sin nombre",
+                                cantidad: detalle.cantidad || 0,
+                                rack:
+                                  indumentaria.Stock?.Rack?.numeroRack ||
+                                  indumentaria.Stock?.idRack?.toString() ||
+                                  "Sin asignar",
+                                categoria:
+                                  categoria.categoria || "Sin categoría",
+                                color: color.color || "N/A",
+                                talle: talle.talle || "N/A",
+                              };
+                            });
+                            exportarPedidoPDF({
+                              id: tarea.numeroPedido,
+                              productos,
+                            });
+                          } catch (err) {
+                            setAlertMsg("Error al exportar el pedido a PDF");
+                            setShowAlert(true);
+                          }
+                        }}
+                        style={{ marginRight: 8 }}
+                      >
+                        Exportar PDF
+                      </IonButton>
+                      <IonButton
+                        slot="end"
                         color="primary"
                         className="picking-action-btn"
                         onClick={() => handleVerPickingList(tarea.numeroPedido)}
@@ -184,8 +270,13 @@ const Picking: React.FC = () => {
                         color="success"
                         className="picking-action-btn"
                         onClick={() => {
-                          console.log('Seleccionando tarea:', tarea);
-                          console.log('ID Asignación:', tarea.idAsignacion, 'tipo:', typeof tarea.idAsignacion);
+                          console.log("Seleccionando tarea:", tarea);
+                          console.log(
+                            "ID Asignación:",
+                            tarea.idAsignacion,
+                            "tipo:",
+                            typeof tarea.idAsignacion
+                          );
                           setTareaSeleccionada(tarea);
                           setShowConfirm(true);
                         }}
@@ -199,7 +290,7 @@ const Picking: React.FC = () => {
             </IonRow>
           </IonGrid>
         )}
-        
+
         {/* Modal para ver picking list */}
         {/* Modal Picking List con Ionic/React */}
         <IonModal
@@ -277,10 +368,17 @@ const Picking: React.FC = () => {
             {
               text: "Completar",
               handler: () => {
-                console.log('Tarea seleccionada al completar:', tareaSeleccionada);
+                console.log(
+                  "Tarea seleccionada al completar:",
+                  tareaSeleccionada
+                );
                 if (!tareaSeleccionada || !tareaSeleccionada.idAsignacion) {
-                  console.error('Error: No hay idAsignacion en la tarea seleccionada');
-                  setAlertMsg("Error: No se encontró ID de asignación para esta tarea");
+                  console.error(
+                    "Error: No hay idAsignacion en la tarea seleccionada"
+                  );
+                  setAlertMsg(
+                    "Error: No se encontró ID de asignación para esta tarea"
+                  );
                   setShowAlert(true);
                   return false;
                 }
