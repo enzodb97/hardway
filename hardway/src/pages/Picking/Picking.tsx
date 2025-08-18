@@ -18,7 +18,11 @@ import {
   IonModal,
   IonInput,
 } from "@ionic/react";
-import { checkmarkCircleOutline, closeOutline } from "ionicons/icons";
+import {
+  checkmarkCircleOutline,
+  closeOutline,
+  printOutline,
+} from "ionicons/icons";
 import { useAuth } from "../../context/AuthContext";
 import {
   cargarTareasPicking,
@@ -255,7 +259,8 @@ const Picking: React.FC = () => {
                         }}
                         style={{ marginRight: 8 }}
                       >
-                        Exportar PDF
+                        <IonIcon icon={printOutline} slot="start" />
+                        Exportar A PDF
                       </IonButton>
                       <IonButton
                         slot="end"
