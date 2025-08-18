@@ -17,6 +17,7 @@ const EncargadoPicker = sequelize.define(
 
 // Endpoint de login
 router.post("/login", async (req, res) => {
+  console.log('🔗 URL recibida:', req.originalUrl);
   const { nombreUsuario, password, contrasena } = req.body;
   // Acepta tanto 'password' como 'contrasena' para compatibilidad
   const passwordToCheck = password || contrasena;

@@ -40,7 +40,7 @@ const clientesVipRoutes = require("./routes/clientesVip");
 
 // Las rutas VIP deben ser públicas y estar antes que cualquier autenticación
 app.use("/api/clientes/vip", clientesVipRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/api", authRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/pedidos", pedidosRoutes);
