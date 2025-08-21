@@ -190,6 +190,8 @@
 }
 
 .tabla-header ion-col {
+  display: flex;
+  justify-content: center;
   padding: 20px 16px;
   font-weight: 600;
   font-size: 14px;
@@ -208,6 +210,11 @@
 .tabla-indumentaria ion-row:not(.tabla-header) {
   border-bottom: 1px solid #f1f5f9;
   transition: all 0.3s ease;
+}
+.tabla-indumentaria ion-col:not(.tabla-header) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .tabla-indumentaria ion-row:not(.tabla-header):hover {

@@ -1,0 +1,291 @@
+/* ========================================
+	 ALTA INDUMENTARIA - ESTILOS PROFESIONALES
+	 ======================================== */
+
+.indumentaria-page ion-content{
+    /*--background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);*/
+    --background:
+            linear-gradient(135deg, #fffbe6 0%, #e2e4e6 100%) padding-box,
+            url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="%23fdb40b" opacity="0.13"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>') center/cover repeat;
+       
+}
+ion-card-header {
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.3s ease;
+        background:
+            linear-gradient(135deg, #fffbe6 0%, #e2e4e6 100%) padding-box,
+            url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="%23fdb40b" opacity="0.13"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>') center/cover repeat;
+        border-radius: 18px 18px 0 0;
+        padding-top: 24px;
+        padding-bottom: 18px;
+}
+.empty-icon {
+    width: 60px;
+    height: 60px;
+    align-items: center;
+    justify-content: center;
+    color:  #fdb40b;
+    background: none;
+    margin-bottom: 20px;
+}
+.icon-inner{
+    animation: logoFloat 3s ease-in-out infinite;
+}
+.sc-ion-alert-md-h {
+    --background: #f8fafc;
+    --color: #1e293b;
+    --placeholder-color: #64748b;
+}
+.alert-button-group.sc-ion-alert-md{
+    justify-content: center;
+}
+.alta-indumentaria-card {
+    background: #fffffffa !important;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(230, 235, 245, 0.8);
+    padding: 32px 24px 24px 24px;
+    margin-top: 32px;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.alta-indumentaria-card,
+.alta-indumentaria-card * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.alta-indumentaria-form-grid {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 80vh;
+    width: 100%;
+}
+
+.alta-indumentaria-card ion-item {
+    --background: transparent;
+    --border-color: transparent;
+    --min-height: 100px;
+    border-radius: 14px;
+    margin-bottom: 22px;
+}
+
+.alta-indumentaria-card ion-select {
+    --background: #f8fafc;
+    --color: #1e293b;
+    --placeholder-color: #64748b;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    height: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.alta-indumentaria-card ion-input {
+    --background: #f8fafc;
+    --color: #1e293b;
+    --placeholder-color: #64748b;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    min-height: 60px;
+    height: 80px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
+.alta-indumentaria-card ion-input:focus,
+.alta-indumentaria-card ion-select:focus {
+    border-color: #fdb40b;
+    box-shadow: 0 4px 12px rgba(253, 180, 11, 0.1);
+}
+
+/* Asegura que los labels flotantes sean visibles y no queden detrás de los inputs/selects */
+.alta-indumentaria-card ion-label {
+    color: #fdb40b !important;
+    font-weight: 600;
+    font-size: 1em;
+    z-index: 2;
+    background: transparent;
+    pointer-events: auto;
+    transition: color 0.2s;
+}
+
+/* Mejora la visibilidad cuando el label está flotando */
+.alta-indumentaria-card ion-item .label-floating.sc-ion-label-md-h {
+     color: #1e293b !important;
+    font-weight: 700;
+    background: white;
+    padding: 0 4px;
+    z-index: 3;
+}
+
+.alta-indumentaria-card ion-button[type="submit"] {
+    --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+    --color: white;
+    --border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-top: 16px;
+    box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
+    transition: all 0.3s;
+}
+
+.alta-indumentaria-card ion-button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(253, 180, 11, 0.4);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .alta-indumentaria-card {
+        padding: 20px 8px 16px 8px;
+        margin-top: 16px;
+    }
+
+    .alta-indumentaria-form-grid {
+        min-height: 60vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .alta-indumentaria-card {
+        padding: 10px 2px 8px 2px;
+        margin-top: 8px;
+    }
+
+    .alta-indumentaria-form-grid {
+        min-height: 40vh;
+    }
+}
+
+.alta-indumentaria-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 6px 32px rgba(253, 180, 11, 0.10), 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #fdb40b22;
+    padding: 32px 28px 24px 28px;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    animation: fadeInUp 0.5s cubic-bezier(.4, 1.4, .6, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;;
+    justify-content: center;
+}
+
+.alta-indumentaria-card ion-card-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #ff9500;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+}
+
+.alta-indumentaria-form-grid {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alta-indumentaria-card form ion-item {
+    --background: transparent;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(253, 180, 11, 0.04);
+    transition: box-shadow 0.2s;
+}
+
+.alta-indumentaria-card form ion-item:focus-within {
+    box-shadow: 0 4px 16px rgba(253, 180, 11, 0.10);
+    border-color: #fdb40b;
+}
+
+.alta-indumentaria-card form ion-label {
+    font-weight: 600;
+    color: #fdb40b !important;
+    letter-spacing: 0.2px;
+}
+
+.alta-indumentaria-card form ion-input,
+.alta-indumentaria-card form ion-select {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    font-size: 1em;
+    font-weight: 500;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-top: 2px;
+}
+
+.alta-indumentaria-card form ion-input:focus,
+.alta-indumentaria-card form ion-select:focus {
+    border-color: #fdb40b;
+    box-shadow: 0 2px 8px rgba(253, 180, 11, 0.10);
+}
+
+.alta-indumentaria-card form ion-select {
+    --background: #f8fafc;
+    --placeholder-color: #64748b;
+    min-height: 44px;
+    box-shadow: none;
+}
+
+.alta-indumentaria-card form ion-select .select-text {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.alta-indumentaria-card form ion-select .select-placeholder {
+    color: #64748b;
+    opacity: 1;
+}
+
+.alta-indumentaria-card form ion-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.alta-indumentaria-card form ion-button[type="submit"] {
+    --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+    --color: white;
+    --border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.1em;
+    margin-top: 10px;
+    box-shadow: 0 4px 16px rgba(253, 180, 11, 0.18);
+    letter-spacing: 0.5px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.alta-indumentaria-card form ion-button[type="submit"]:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(253, 180, 11, 0.22);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
