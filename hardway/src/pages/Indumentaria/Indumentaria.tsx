@@ -19,6 +19,7 @@ import {
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import { pencil, trash, add, search, shirt } from "ionicons/icons";
+import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
   IndumentariaItem,
@@ -62,7 +63,7 @@ const Indumentaria: React.FC = () => {
   const handleEliminar = async (id: string) => {
     if (window.confirm("¿Seguro que desea eliminar esta prenda?")) {
       try {
-        await fetch(`/api/indumentaria/${id}`, { method: "DELETE" });
+        await axiosInstance.delete(`/api/indumentaria/${id}`);
         cargarIndumentaria();
         setAlertMsg("Prenda eliminada exitosamente.");
         setShowAlert(true);
@@ -142,17 +143,18 @@ const Indumentaria: React.FC = () => {
         {/* Tabla de indumentaria */}
         <IonGrid className="tabla-indumentaria">
           <IonRow className="tabla-header">
-            <IonCol size="1.2">Código</IonCol>
-            <IonCol size="1.8">Nombre</IonCol>
+            <IonCol size="1">Código</IonCol>
+            <IonCol size="1">Nombre</IonCol>
             <IonCol size="1">Color</IonCol>
-            <IonCol size="1.2">Tela</IonCol>
-            <IonCol size="0.8">Talle</IonCol>
-            <IonCol size="1.2">Categoría</IonCol>
+            <IonCol size="1">Tela</IonCol>
+            <IonCol size="1">Talle</IonCol>
+            <IonCol size="1">Categoría</IonCol>
             <IonCol size="1">Precio</IonCol>
-            <IonCol size="0.8">Estado</IonCol>
-            <IonCol size="0.8">Stock</IonCol>
-            <IonCol size="0.8">Unidad</IonCol>
-            <IonCol size="1.4">Acciones</IonCol>
+            <IonCol size="1">Estado</IonCol>
+            <IonCol size="1">Stock</IonCol>
+            <IonCol size="1">Unidad</IonCol>
+            <IonCol size="1">Rack</IonCol>
+            <IonCol size="1">Acciones</IonCol>
           </IonRow>
           
           {loading ? (
@@ -193,31 +195,34 @@ const Indumentaria: React.FC = () => {
           ) : (
             (prendas || []).map((item) => (
               <IonRow key={item.codigoIndumentaria}>
-                <IonCol size="1.2">
+                <IonCol size="1">
                   <span className="codigo-badge">{item.codigoIndumentaria}</span>
                 </IonCol>
-                <IonCol size="1.8">{item.nombre}</IonCol>
+                <IonCol size="1">{item.nombre}</IonCol>
                 <IonCol size="1">{item.color}</IonCol>
-                <IonCol size="1.2">{item.nombreTela}</IonCol>
-                <IonCol size="0.8">{item.talle}</IonCol>
-                <IonCol size="1.2">{item.categoria}</IonCol>
+                <IonCol size="1">{item.nombreTela}</IonCol>
+                <IonCol size="1">{item.talle}</IonCol>
+                <IonCol size="1">{item.categoria}</IonCol>
                 <IonCol size="1">
                   <span className="precio-badge">${item.precio}</span>
                 </IonCol>
-                <IonCol size="0.8">
+                <IonCol size="1">
                   <span className={`estado-badge ${getEstadoClass(item.estado)}`}>
                     {item.estado}
                   </span>
                 </IonCol>
-                <IonCol size="0.8">
+                <IonCol size="1">
                   <span className={`stock-badge ${getStockClass(item.cantidadIndumentaria)}`}>
                     {item.cantidadIndumentaria}
                   </span>
                 </IonCol>
-                <IonCol size="0.8">
+                <IonCol size="1">
                   <span className="unidad-badge">{item.unidad}</span>
                 </IonCol>
-                <IonCol size="1.4">
+                <IonCol size="1">
+                  <span className="rack-badge">#{item.Stock?.numeroRack || 'N/A'}</span>
+                </IonCol>
+                <IonCol size="1">
                   <div className="actions-container">
                     <IonButton
                       fill="solid"

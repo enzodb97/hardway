@@ -71,6 +71,7 @@ const Rack = sequelize.define(
   {
     idRack: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     numeroRack: DataTypes.STRING,
+    descripcion: DataTypes.STRING
   },
   { tableName: "rack", timestamps: false }
 );

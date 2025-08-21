@@ -73,8 +73,8 @@ router.get("/telas", async (req, res) => {
 
 router.post("/telas", async (req, res) => {
   try {
-    const { tela } = req.body;
-    const nuevaTela = await Tela.create({ tela });
+    const { tipoTela } = req.body;
+    const nuevaTela = await Tela.create({ tipoTela });
     res.status(201).json(nuevaTela);
   } catch (error) {
     console.error("Error al crear tela:", error);

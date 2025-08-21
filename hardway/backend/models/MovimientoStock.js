@@ -7,6 +7,7 @@ const MovimientoStock = sequelize.define(
     idMovimientoStock: {
       type: DataTypes.STRING(50),
       primaryKey: true,
+      defaultValue: () => `MOV${Date.now()}`,
     },
     idStock: DataTypes.STRING(50),
     fechaMovimiento: DataTypes.DATE,

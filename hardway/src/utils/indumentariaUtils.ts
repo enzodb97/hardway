@@ -11,9 +11,12 @@ export interface IndumentariaItem {
   precio: number;
   estado: string;
   cantidadIndumentaria: number;
-  unidad: string; // Nueva propiedad para la unidad de medida
+  unidad: string;
   idIndumentaria?: number;
-  rack?: string;
+  Stock?: {
+    numeroRack: string;
+    idRack: number;
+  };
 }
 
 export interface IndumentariaPage {
@@ -39,9 +42,12 @@ export async function obtenerIndumentariaPaginada(
     precio: parseFloat(item.DetalleIndumentarium?.PrecioIndumentarium?.precio || "0"),
     estado: item.DetalleIndumentarium?.EstadoIndumentarium?.estadoIndumentaria || "Sin estado",
     cantidadIndumentaria: item.DetalleIndumentarium?.cantidadIndumentaria || 0,
-    unidad: item.DetalleIndumentarium?.UnidadMedidum?.nombreUnidad || "Unidad", // Nueva propiedad
+    unidad: item.DetalleIndumentarium?.UnidadMedidum?.nombreUnidad || "Unidad",
     idIndumentaria: item.idDetalle,
-    rack: item.rack || "Sin asignar"
+    Stock: item.Stock ? {
+      numeroRack: item.Stock.Rack?.numeroRack,
+      idRack: item.Stock.Rack?.idRack
+    } : undefined
   }));
   
   // Filtro en frontend

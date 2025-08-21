@@ -7,6 +7,7 @@ const Stock = sequelize.define(
     idStock: {
       type: DataTypes.STRING(50),
       primaryKey: true,
+      defaultValue: () => `STK-${Date.now()}`,
     },
     codigoIndumentaria: DataTypes.STRING(50),
     idRack: DataTypes.INTEGER,

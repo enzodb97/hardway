@@ -44,7 +44,8 @@ const camposIniciales = {
   cantidad: "",
   idDetalle: "",
   cantidadAnterior: "",
-  idUnidadMedida: "", // Nueva propiedad para la unidad de medida
+  idUnidadMedida: "", // Propiedad para la unidad de medida
+  idRack: "",        // Propiedad para el rack
 };
 
 const AltaIndumentaria: React.FC = () => {
@@ -65,6 +66,7 @@ const AltaIndumentaria: React.FC = () => {
   const [precios, setPrecios] = useState<any[]>([]);
   const [nombresIndumentaria, setNombresIndumentaria] = useState<any[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<any[]>([]);
+  const [racks, setRacks] = useState<any[]>([]);
 
   useEffect(() => {
     const cargarAuxiliares = async () => {
@@ -78,6 +80,7 @@ const AltaIndumentaria: React.FC = () => {
           preciosRes,
           nombresRes,
           unidadesRes,
+          racksRes,
         ] = await Promise.all([
           axiosInstance.get("/api/colores"),
           axiosInstance.get("/api/talles"),
@@ -87,6 +90,7 @@ const AltaIndumentaria: React.FC = () => {
           axiosInstance.get("/api/precios"),
           axiosInstance.get("/api/nombres-indumentaria"),
           axiosInstance.get("/api/unidades-medida"),
+          axiosInstance.get("/api/indumentaria/racks"),
         ]);
         setColores(coloresRes.data);
         setTalles(tallesRes.data);
@@ -96,6 +100,7 @@ const AltaIndumentaria: React.FC = () => {
         setPrecios(preciosRes.data);
         setNombresIndumentaria(nombresRes.data);
         setUnidadesMedida(unidadesRes.data);
+        setRacks(racksRes.data);
       } catch {
         setAlertMsg("Error al cargar datos auxiliares.");
         setShowAlert(true);
@@ -124,6 +129,7 @@ const AltaIndumentaria: React.FC = () => {
             idDetalle: data.idDetalle?.toString() || "",
             cantidadAnterior: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
             idUnidadMedida: data.DetalleIndumentarium?.idUnidadMedida?.toString() || "",
+            idRack: data.Stock?.idRack?.toString() || "",
           });
         } catch (error) {
           setAlertMsg("Error al cargar la Indumentaria.");
@@ -187,18 +193,28 @@ const AltaIndumentaria: React.FC = () => {
         const cantidadActual = Number(form.cantidad);
         const cantidadAnterior = Number(form.cantidadAnterior);
         const diferencia = cantidadActual - cantidadAnterior;
-        if (diferencia !== 0) {
-          await axiosInstance.post("/api/stock/movimiento", {
-            codigoIndumentaria: form.codigoIndumentaria,
-            cantidad: diferencia,
-            observaciones: "Ajuste manual desde edición",
-          });
+        if (diferencia !== 0 || form.idRack) {
+          // Si hay cambio en el stock
+          if (diferencia !== 0) {
+            await axiosInstance.post("/api/indumentaria/stock/movimiento", {
+              codigoIndumentaria: form.codigoIndumentaria,
+              cantidad: diferencia,
+              observaciones: "Ajuste manual desde edición",
+            });
+          }
+          // Si hay cambio en el rack
+          if (form.idRack) {
+            await axiosInstance.put(`/api/indumentaria/stock/${form.codigoIndumentaria}`, {
+              idRack: parseInt(form.idRack)
+            });
+          }
         }
       } else {
         await axiosInstance.post("/api/indumentaria", {
           codigoIndumentaria: form.codigoIndumentaria,
           idDetalle,
-          cantidad: form.cantidad,
+          cantidadInicial: parseInt(form.cantidad) || 0,
+          idRack: parseInt(form.idRack) || null,
         });
         await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
           precio: form.precio,
@@ -448,6 +464,22 @@ const AltaIndumentaria: React.FC = () => {
                         </IonCol>
                       </IonRow>
                       <IonRow>
+                        <IonCol size="12" sizeMd="6">
+                          <IonItem>
+                            <IonLabel position="floating" class="titulo">Rack</IonLabel>
+                            <IonSelect
+                              value={form.idRack}
+                              onIonChange={(e) => handleChange("idRack", e.detail.value)}
+                              required
+                            >
+                              {racks.map((r) => (
+                                <IonSelectOption key={r.idRack} value={String(r.idRack)}>
+                                  {r.numeroRack} - {r.descripcion || 'Sin descripción'}
+                                </IonSelectOption>
+                              ))}
+                            </IonSelect>
+                          </IonItem>
+                        </IonCol>
                         <IonCol size="12" sizeMd="6">
                           <IonItem>
                             <IonLabel position="floating" class="titulo">Precio</IonLabel>

@@ -26,7 +26,6 @@ setupAssociations();
 const authRoutes = require("./routes/auth");
 const usuariosRoutes = require("./routes/usuarios");
 const clientesRoutes = require("./routes/clientes");
-
 const pedidosRoutes = require("./routes/pedidos");
 const indumentariaRoutes = require("./routes/indumentaria");
 const auxiliaresRoutes = require("./routes/auxiliares");
