@@ -19,7 +19,9 @@ const { Ciudad, Barrio } = require("../models/Ubicacion");
 // Rutas para Colores
 router.get("/colores", async (req, res) => {
   try {
-    const colores = await Color.findAll();
+    const colores = await Color.findAll({
+      order: [['color', 'ASC']]
+    });
     res.json(colores);
   } catch (error) {
     console.error("Error al obtener colores:", error);
@@ -41,7 +43,9 @@ router.post("/colores", async (req, res) => {
 // Rutas para Talles
 router.get("/talles", async (req, res) => {
   try {
-    const talles = await Talle.findAll();
+    const talles = await Talle.findAll({
+      order: [['talle', 'ASC']]
+    });
     res.json(talles);
   } catch (error) {
     console.error("Error al obtener talles:", error);
@@ -63,7 +67,9 @@ router.post("/talles", async (req, res) => {
 // Rutas para Telas
 router.get("/telas", async (req, res) => {
   try {
-    const telas = await Tela.findAll();
+    const telas = await Tela.findAll({
+      order: [['tipoTela', 'ASC']]
+    });
     res.json(telas);
   } catch (error) {
     console.error("Error al obtener telas:", error);
@@ -85,7 +91,9 @@ router.post("/telas", async (req, res) => {
 // Rutas para Categorías
 router.get("/categorias", async (req, res) => {
   try {
-    const categorias = await CategoriaIndumentaria.findAll();
+    const categorias = await CategoriaIndumentaria.findAll({
+      order: [['categoria', 'ASC']]
+    });
     res.json(categorias);
   } catch (error) {
     console.error("Error al obtener categorías:", error);

@@ -56,6 +56,13 @@ const AltaIndumentaria: React.FC = () => {
   const [alertMsg, setAlertMsg] = useState("");
   const [showLoading, setShowLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  
+  // Estados para los alerts de nuevos items
+  const [showNewColorAlert, setShowNewColorAlert] = useState(false);
+  const [showNewTalleAlert, setShowNewTalleAlert] = useState(false);
+  const [showNewTelaAlert, setShowNewTelaAlert] = useState(false);
+  const [showNewCategoriaAlert, setShowNewCategoriaAlert] = useState(false);
+  const [newItemValue, setNewItemValue] = useState("");
   const esEdicion = Boolean(id);
 
   const [colores, setColores] = useState<any[]>([]);
@@ -144,6 +151,63 @@ const AltaIndumentaria: React.FC = () => {
 
   const handleChange = (campo: string, valor: string) => {
     setForm({ ...form, [campo]: valor });
+  };
+
+  // Manejadores para nuevos items
+  const handleNewColor = async (value: string) => {
+    if (!value) return;
+    try {
+      const res = await axiosInstance.post("/api/colores", { color: value });
+      setColores([...colores, res.data]);
+      handleChange("idColor", String(res.data.idColor));
+      setShowToast(true);
+      setShowNewColorAlert(false);
+    } catch (error) {
+      setAlertMsg("Error al crear el nuevo color");
+      setShowAlert(true);
+    }
+  };
+
+  const handleNewTalle = async (value: string) => {
+    if (!value) return;
+    try {
+      const res = await axiosInstance.post("/api/talles", { talle: value });
+      setTalles([...talles, res.data]);
+      handleChange("idTalle", String(res.data.idTalle));
+      setShowToast(true);
+      setShowNewTalleAlert(false);
+    } catch (error) {
+      setAlertMsg("Error al crear el nuevo talle");
+      setShowAlert(true);
+    }
+  };
+
+  const handleNewTela = async (value: string) => {
+    if (!value) return;
+    try {
+      const res = await axiosInstance.post("/api/telas", { tipoTela: value });
+      setTelas([...telas, res.data]);
+      handleChange("idTela", String(res.data.idTela));
+      setShowToast(true);
+      setShowNewTelaAlert(false);
+    } catch (error) {
+      setAlertMsg("Error al crear la nueva tela");
+      setShowAlert(true);
+    }
+  };
+
+  const handleNewCategoria = async (value: string) => {
+    if (!value) return;
+    try {
+      const res = await axiosInstance.post("/api/categorias", { categoria: value });
+      setCategorias([...categorias, res.data]);
+      handleChange("idCategoria", String(res.data.idCategoria));
+      setShowToast(true);
+      setShowNewCategoriaAlert(false);
+    } catch (error) {
+      setAlertMsg("Error al crear la nueva categoría");
+      setShowAlert(true);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -285,15 +349,7 @@ const AltaIndumentaria: React.FC = () => {
                               value={form.idColor}
                               onIonChange={(e) => {
                                 if (e.detail.value === "nuevo") {
-                                  const nuevoColor = prompt("Ingrese el nuevo color:");
-                                  if (nuevoColor) {
-                                    axiosInstance
-                                      .post("/api/colores", { color: nuevoColor })
-                                      .then((res) => {
-                                        setColores([...colores, res.data]);
-                                        handleChange("idColor", res.data.idColor);
-                                      });
-                                  }
+                                  setShowNewColorAlert(true);
                                 } else {
                                   handleChange("idColor", e.detail.value);
                                 }
@@ -318,15 +374,7 @@ const AltaIndumentaria: React.FC = () => {
                               value={form.idTalle}
                               onIonChange={(e) => {
                                 if (e.detail.value === "nuevo") {
-                                  const nuevoTalle = prompt("Ingrese el nuevo talle:");
-                                  if (nuevoTalle) {
-                                    axiosInstance
-                                      .post("/api/talles", { talle: nuevoTalle })
-                                      .then((res) => {
-                                        setTalles([...talles, res.data]);
-                                        handleChange("idTalle", res.data.idTalle);
-                                      });
-                                  }
+                                  setShowNewTalleAlert(true);
                                 } else {
                                   handleChange("idTalle", e.detail.value);
                                 }
@@ -353,15 +401,7 @@ const AltaIndumentaria: React.FC = () => {
                               value={form.idTela}
                               onIonChange={(e) => {
                                 if (e.detail.value === "nuevo") {
-                                  const nuevaTela = prompt("Ingrese el nuevo tipo de tela:");
-                                  if (nuevaTela) {
-                                    axiosInstance
-                                      .post("/api/telas", { tipoTela: nuevaTela })
-                                      .then((res) => {
-                                        setTelas([...telas, res.data]);
-                                        handleChange("idTela", res.data.idTela);
-                                      });
-                                  }
+                                  setShowNewTelaAlert(true);
                                 } else {
                                   handleChange("idTela", e.detail.value);
                                 }
@@ -386,15 +426,7 @@ const AltaIndumentaria: React.FC = () => {
                               value={form.idCategoria}
                               onIonChange={(e) => {
                                 if (e.detail.value === "nuevo") {
-                                  const nuevaCategoria = prompt("Ingrese la nueva categoría:");
-                                  if (nuevaCategoria) {
-                                    axiosInstance
-                                      .post("/api/categorias", { categoria: nuevaCategoria })
-                                      .then((res) => {
-                                        setCategorias([...categorias, res.data]);
-                                        handleChange("idCategoria", res.data.idCategoria);
-                                      });
-                                  }
+                                  setShowNewCategoriaAlert(true);
                                 } else {
                                   handleChange("idCategoria", e.detail.value);
                                 }
@@ -533,6 +565,107 @@ const AltaIndumentaria: React.FC = () => {
           message={alertMsg}
           buttons={["Aceptar"]}
           onDidDismiss={() => setShowAlert(false)}
+        />
+
+        {/* Alertas para nuevos items */}
+        <IonAlert
+          isOpen={showNewColorAlert}
+          onDidDismiss={() => setShowNewColorAlert(false)}
+          header="Nuevo Color"
+          inputs={[
+            {
+              name: 'color',
+              type: 'text',
+              placeholder: 'Ingrese el nuevo color'
+            }
+          ]}
+          buttons={[
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Agregar',
+              handler: (data) => {
+                handleNewColor(data.color);
+              }
+            }
+          ]}
+        />
+
+        <IonAlert
+          isOpen={showNewTalleAlert}
+          onDidDismiss={() => setShowNewTalleAlert(false)}
+          header="Nuevo Talle"
+          inputs={[
+            {
+              name: 'talle',
+              type: 'text',
+              placeholder: 'Ingrese el nuevo talle'
+            }
+          ]}
+          buttons={[
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Agregar',
+              handler: (data) => {
+                handleNewTalle(data.talle);
+              }
+            }
+          ]}
+        />
+
+        <IonAlert
+          isOpen={showNewTelaAlert}
+          onDidDismiss={() => setShowNewTelaAlert(false)}
+          header="Nueva Tela"
+          inputs={[
+            {
+              name: 'tela',
+              type: 'text',
+              placeholder: 'Ingrese el nuevo tipo de tela'
+            }
+          ]}
+          buttons={[
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Agregar',
+              handler: (data) => {
+                handleNewTela(data.tela);
+              }
+            }
+          ]}
+        />
+
+        <IonAlert
+          isOpen={showNewCategoriaAlert}
+          onDidDismiss={() => setShowNewCategoriaAlert(false)}
+          header="Nueva Categoría"
+          inputs={[
+            {
+              name: 'categoria',
+              type: 'text',
+              placeholder: 'Ingrese la nueva categoría'
+            }
+          ]}
+          buttons={[
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Agregar',
+              handler: (data) => {
+                handleNewCategoria(data.categoria);
+              }
+            }
+          ]}
         />
       </IonContent>
     </IonPage>
