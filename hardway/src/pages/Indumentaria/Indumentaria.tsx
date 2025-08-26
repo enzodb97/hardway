@@ -59,18 +59,51 @@ const Indumentaria: React.FC = () => {
     // eslint-disable-next-line
   }, [page, busqueda]);
 
-  // Eliminar prenda
-  const handleEliminar = async (id: string) => {
-    if (window.confirm("¿Seguro que desea eliminar esta prenda?")) {
-      try {
-        await axiosInstance.delete(`/api/indumentaria/${id}`);
-        cargarIndumentaria();
-        setAlertMsg("Prenda eliminada exitosamente.");
-        setShowAlert(true);
-      } catch (error) {
-        setAlertMsg("Error al eliminar prenda.");
-        setShowAlert(true);
-      }
+    const [showNoAptaAlert, setShowNoAptaAlert] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [cantidadNoApta, setCantidadNoApta] = useState<number>(0);
+  const [motivoNoApta, setMotivoNoApta] = useState<string>("");
+
+  // Manejar cambio a No Apta
+  const handleNoApta = async (id: string) => {
+    console.log('Iniciando proceso de No Apta para:', id);
+    const prenda = prendas.find(p => p.codigoIndumentaria === id);
+    if (!prenda) return;
+    
+    if (prenda.cantidadIndumentaria <= 0) {
+      setAlertMsg("No hay stock disponible para mover a No Apto");
+      setShowAlert(true);
+      return;
+    }
+    
+    setSelectedItem(id);
+    setShowNoAptaAlert(true);
+    
+    // Actualizar el mensaje del alert para mostrar el stock disponible
+    setAlertMsg(`Hay ${prenda.cantidadIndumentaria} unidades disponibles en stock.\nIngrese la cantidad que desea marcar como No Apta:`);
+  };
+
+  // Confirmar cambio a No Apta
+  const confirmarNoApta = async () => {
+    if (!selectedItem || cantidadNoApta <= 0) return;
+
+    try {
+      await axiosInstance.post(`/api/indumentaria/${selectedItem}/no-apta`, {
+        cantidad: cantidadNoApta,
+        motivo: motivoNoApta
+      });
+      
+      cargarIndumentaria();
+      setAlertMsg("Stock movido a No Apto correctamente.");
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg(error.response?.data?.error || "Error al mover stock a No Apto.");
+      setShowAlert(true);
+    } finally {
+      setShowNoAptaAlert(false);
+      setSelectedItem(null);
+      setCantidadNoApta(0);
+      setMotivoNoApta("");
     }
   };
 
@@ -238,9 +271,9 @@ const Indumentaria: React.FC = () => {
                     </IonButton>
                     <IonButton
                       fill="solid"
-                      color="danger"
+                      color="warning"
                       size="small"
-                      onClick={() => handleEliminar(item.codigoIndumentaria)}
+                      onClick={() => handleNoApta(item.codigoIndumentaria)}
                     >
                       <IonIcon icon={trash} />
                     </IonButton>
@@ -282,6 +315,93 @@ const Indumentaria: React.FC = () => {
         message={alertMsg}
         buttons={["Aceptar"]}
         onDidDismiss={() => setShowAlert(false)}
+      />
+
+      {/* Alert para mover a No Apta */}
+      <IonAlert
+        isOpen={showNoAptaAlert}
+        header="Mover a No Apta"
+        subHeader={selectedItem ? `Indumentaria: ${selectedItem}` : ''}
+        message={alertMsg}
+        inputs={[
+          {
+            name: 'cantidad',
+            type: 'number',
+            placeholder: 'Cantidad',
+            min: 1,
+            max: selectedItem ? prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria : undefined
+          },
+          {
+            name: 'motivo',
+            type: 'text',
+            placeholder: 'Motivo (opcional)'
+          }
+        ]}
+        buttons={[
+          {
+            text: 'Cancelar',
+            role: 'cancel',
+            handler: () => {
+              setShowNoAptaAlert(false);
+              setSelectedItem(null);
+            }
+          },
+          {
+            text: 'Confirmar',
+            handler: async (data) => {
+              if (!selectedItem || !data.cantidad) {
+                setAlertMsg("Por favor ingrese una cantidad");
+                setShowAlert(true);
+                return false;
+              }
+              
+              const prenda = prendas.find(p => p.codigoIndumentaria === selectedItem);
+              if (!prenda) return false;
+              
+              const cantidad = Number(data.cantidad);
+              if (cantidad <= 0) {
+                setAlertMsg("La cantidad debe ser mayor a 0");
+                setShowAlert(true);
+                return false;
+              }
+              
+              if (cantidad > prenda.cantidadIndumentaria) {
+                setAlertMsg(`No hay suficiente stock disponible. Máximo disponible: ${prenda.cantidadIndumentaria}`);
+                setShowAlert(true);
+                return false;
+              }
+              
+              try {
+                console.log('Enviando datos:', {
+                  cantidad: cantidad,
+                  motivo: data.motivo || ''
+                });
+                
+                const response = await axiosInstance.post(`/api/indumentaria/${selectedItem}/no-apta`, {
+                  cantidad: cantidad,
+                  motivo: data.motivo || ''
+                });
+                
+                console.log('Respuesta:', response.data);
+                
+                cargarIndumentaria();
+                setAlertMsg("Stock movido a No Apto correctamente.");
+                setShowAlert(true);
+                setShowNoAptaAlert(false);
+                setSelectedItem(null);
+              } catch (error: any) {
+                console.error('Error detallado:', {
+                  mensaje: error.message,
+                  respuesta: error.response?.data,
+                  status: error.response?.status
+                });
+                setAlertMsg(error.response?.data?.error || "Error al mover stock a No Apto.");
+                setShowAlert(true);
+                return false;
+              }
+            }
+          }
+        ]}
       />
     </IonPage>
   );

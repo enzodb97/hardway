@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-07-2025 a las 23:47:33
+-- Tiempo de generación: 27-08-2025 a las 00:36:08
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -761,6 +761,8 @@ CREATE TABLE `movimientostock` (
 --
 
 INSERT INTO `movimientostock` (`idMovimientoStock`, `idStock`, `fechaMovimiento`, `cantidad`, `observaciones`) VALUES
+('MOV-1756247729019-1', 'STK001', '2025-08-26', -2, 'Movimiento a No Apto: prueba'),
+('MOV-1756247729020-2', 'STK-NA-1756247729017', '2025-08-26', 2, 'Ingreso desde stock vendible: prueba'),
 ('MOV-20240110-001', 'STK007', '2024-01-10', -3, 'Venta Pedido PED-20240110-001'),
 ('MOV-20240115-001', 'STK004', '2024-01-15', -5, 'Venta Pedido PED-20240115-001'),
 ('MOV-20240125-001', 'STK001', '2024-01-25', -2, 'Venta Pedido PED-20240125-001'),
@@ -1341,7 +1343,8 @@ INSERT INTO `rack` (`idRack`, `numeroRack`, `descripcion`) VALUES
 (7, 7, 'Rack 7'),
 (8, 8, 'Rack 8'),
 (9, 9, 'Rack 9'),
-(10, 10, 'Rack 10');
+(10, 10, 'Rack 10'),
+(99, 0, 'Depósito de Indumentaria No Apta / Merma');
 
 -- --------------------------------------------------------
 
@@ -1383,6 +1386,7 @@ CREATE TABLE `stock` (
 --
 
 INSERT INTO `stock` (`idStock`, `codigoIndumentaria`, `idRack`) VALUES
+('STK-NA-1756247729017', 'IND001', 99),
 ('STK001', 'IND001', 1),
 ('STK002', 'IND002', 2),
 ('STK003', 'IND003', 3),
@@ -1966,7 +1970,7 @@ ALTER TABLE `precioindumentaria`
 -- AUTO_INCREMENT de la tabla `rack`
 --
 ALTER TABLE `rack`
-  MODIFY `idRack` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `idRack` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 
 --
 -- AUTO_INCREMENT de la tabla `talle`

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { Sequelize, Op } = require('sequelize');
 const { 
   Indumentaria,
   DetalleIndumentaria,
@@ -14,7 +15,7 @@ const {
   Stock,
   MovimientoStock,
   Rack,
-  sequelize 
+  sequelize
 } = require('../models');
 
 // Rutas de Racks
@@ -95,17 +96,22 @@ router.get("/", async (req, res) => {
 
     // Calcular stock actual para cada indumentaria
     const indumentariaConStock = indumentaria.map(item => {
-      let stockActual = 0;
+      const itemJson = item.toJSON();
+      
+      // Calcular stock disponible (excluyendo el rack No Apto)
+      let stockDisponible = 0;
       if (item.Stock && item.Stock.MovimientoStocks) {
-        stockActual = item.Stock.MovimientoStocks.reduce((total, movimiento) => {
-          return total + (movimiento.cantidad || 0);
-        }, 0);
+        // Solo contar stock de racks que no sean el No Apto (99)
+        if (item.Stock.idRack !== 99) {
+          stockDisponible = item.Stock.MovimientoStocks.reduce((total, movimiento) => {
+            return total + (movimiento.cantidad || 0);
+          }, 0);
+        }
       }
 
       // Agregar el stock calculado al DetalleIndumentarium
-      const itemJson = item.toJSON();
       if (itemJson.DetalleIndumentarium) {
-        itemJson.DetalleIndumentarium.cantidadIndumentaria = stockActual;
+        itemJson.DetalleIndumentarium.cantidadIndumentaria = stockDisponible;
       }
 
       return itemJson;
@@ -268,33 +274,133 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Eliminar indumentaria (soft delete)
-router.delete("/:id", async (req, res) => {
+// Mover indumentaria a No Apta
+router.post("/:id/no-apta", async (req, res) => {
   const { id } = req.params;
+  const { cantidad, motivo } = req.body;
+
+  console.log('Recibiendo solicitud para marcar como no apta:', {
+    id,
+    cantidad,
+    motivo
+  });
+
+  // Validar datos de entrada
+  if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
+    return res.status(400).json({ 
+      error: "La cantidad debe ser un número mayor a 0",
+      detalles: { cantidad, tipo: typeof cantidad }
+    });
+  }
 
   const t = await sequelize.transaction();
   try {
-    const indumentaria = await Indumentaria.findOne({
-      where: { codigoIndumentaria: id },
-      transaction: t,
+    // 1. Obtener el stock actual y todos sus movimientos
+    // 1. Obtener el stock actual y todos sus movimientos
+    const stockActual = await Stock.findOne({
+      where: { 
+        codigoIndumentaria: id,
+        idRack: { [Op.ne]: 99 } // Excluir el rack de No Aptos
+      },
+      include: [{ 
+        model: MovimientoStock,
+        attributes: ['cantidad', 'fechaMovimiento', 'observaciones']
+      }],
+      transaction: t
     });
 
-    if (!indumentaria) {
+    if (!stockActual) {
+      console.log('Stock no encontrado para:', id);
       await t.rollback();
-      return res.status(404).json({ error: "Indumentaria no encontrada" });
+      return res.status(404).json({ error: "Stock no encontrado" });
     }
 
-    await indumentaria.update(
-      { estaActivo: 0 },
-      { transaction: t }
-    );
+    console.log('Stock encontrado:', {
+      idStock: stockActual.idStock,
+      movimientos: stockActual.MovimientoStocks.map(m => ({
+        cantidad: m.cantidad,
+        fecha: m.fechaMovimiento,
+        obs: m.observaciones
+      }))
+    });
+
+    // Calcular stock disponible sumando todos los movimientos
+    const stockDisponible = stockActual.MovimientoStocks.reduce((total, mov) => {
+      return total + (Number(mov.cantidad) || 0)
+    }, 0);
+    
+    console.log('Stock disponible calculado:', {
+      stockDisponible,
+      movimientos: stockActual.MovimientoStocks.map(m => ({
+        cantidad: m.cantidad,
+        fecha: m.fechaMovimiento
+      }))
+    });
+    
+    if (stockDisponible < cantidad) {
+      console.log('Error: Stock insuficiente', { stockDisponible, cantidadSolicitada: cantidad });
+      await t.rollback();
+      return res.status(400).json({ 
+        error: "No hay suficiente stock disponible",
+        detalles: { 
+          stockDisponible, 
+          cantidadSolicitada: cantidad,
+          codigoIndumentaria: id
+        }
+      });
+    }
+    
+    console.log('Stock disponible calculado:', stockDisponible);
+    
+    if (stockDisponible < cantidad) {
+      await t.rollback();
+      return res.status(400).json({ error: "No hay suficiente stock disponible" });
+    }
+
+    // 2. Crear nuevo registro de stock para No Apto si no existe
+    let stockNoApto = await Stock.findOne({
+      where: { 
+        codigoIndumentaria: id,
+        idRack: 99 // Rack No Apto
+      },
+      transaction: t
+    });
+
+    if (!stockNoApto) {
+      stockNoApto = await Stock.create({
+        idStock: `STK-NA-${Date.now()}`,
+        codigoIndumentaria: id,
+        idRack: 99 // Rack No Apto
+      }, { transaction: t });
+    }
+
+    // 3. Registrar movimientos
+    const fecha = new Date();
+    
+    // Movimiento de salida del stock original
+    await MovimientoStock.create({
+      idMovimientoStock: `MOV-${Date.now()}-1`,
+      idStock: stockActual.idStock,
+      fechaMovimiento: fecha,
+      cantidad: -cantidad,
+      observaciones: `Movimiento a No Apto: ${motivo || 'Sin especificar'}`
+    }, { transaction: t });
+
+    // Movimiento de entrada al stock no apto
+    await MovimientoStock.create({
+      idMovimientoStock: `MOV-${Date.now()}-2`,
+      idStock: stockNoApto.idStock,
+      fechaMovimiento: fecha,
+      cantidad: cantidad,
+      observaciones: `Ingreso desde stock vendible: ${motivo || 'Sin especificar'}`
+    }, { transaction: t });
 
     await t.commit();
-    res.json({ message: "Indumentaria eliminada correctamente" });
+    res.json({ message: "Stock movido a No Apto correctamente" });
   } catch (error) {
     await t.rollback();
-    console.error("Error al eliminar indumentaria:", error);
-    res.status(500).json({ error: "Error al eliminar indumentaria", detalle: error.message });
+    console.error("Error al mover stock a No Apto:", error);
+    res.status(500).json({ error: "Error al mover stock a No Apto", detalle: error.message });
   }
 });
 
