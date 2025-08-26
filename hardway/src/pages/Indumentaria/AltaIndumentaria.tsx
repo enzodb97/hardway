@@ -30,23 +30,26 @@ import {
 import { useHistory, useParams } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import "./AltaIndumentaria.css";
+import { 
+  cargarAuxiliares, 
+  cargarIndumentaria, 
+  crearNuevoColor, 
+  crearNuevoTalle, 
+  crearNuevaTela, 
+  crearNuevaCategoria,
+  guardarIndumentaria,
+  camposIniciales,
+  IndumentariaFormData,
+  Color,
+  Talle,
+  Tela,
+  Categoria,
+  Estado,
+  UnidadMedida,
+  Rack
+} from "../../utils/indumentariaUtils";
 
-const camposIniciales = {
-  codigoIndumentaria: "",
-  nombre: "",
-  idColor: "",
-  idTalle: "",
-  idTela: "",
-  idCategoria: "",
-  idEstado: "",
-  idPrecio: "",
-  precio: "",
-  cantidad: "",
-  idDetalle: "",
-  cantidadAnterior: "",
-  idUnidadMedida: "", // Propiedad para la unidad de medida
-  idRack: "",        // Propiedad para el rack
-};
+
 
 const AltaIndumentaria: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -65,85 +68,57 @@ const AltaIndumentaria: React.FC = () => {
   const [newItemValue, setNewItemValue] = useState("");
   const esEdicion = Boolean(id);
 
-  const [colores, setColores] = useState<any[]>([]);
-  const [talles, setTalles] = useState<any[]>([]);
-  const [telas, setTelas] = useState<any[]>([]);
-  const [categorias, setCategorias] = useState<any[]>([]);
-  const [estados, setEstados] = useState<any[]>([]);
+  const [colores, setColores] = useState<Color[]>([]);
+  const [talles, setTalles] = useState<Talle[]>([]);
+  const [telas, setTelas] = useState<Tela[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [estados, setEstados] = useState<Estado[]>([]);
   const [precios, setPrecios] = useState<any[]>([]);
   const [nombresIndumentaria, setNombresIndumentaria] = useState<any[]>([]);
-  const [unidadesMedida, setUnidadesMedida] = useState<any[]>([]);
-  const [racks, setRacks] = useState<any[]>([]);
+  const [unidadesMedida, setUnidadesMedida] = useState<UnidadMedida[]>([]);
+  const [racks, setRacks] = useState<Rack[]>([]);
 
   useEffect(() => {
-    const cargarAuxiliares = async () => {
+    const inicializarDatos = async () => {
       try {
-        const [
-          coloresRes,
-          tallesRes,
-          telasRes,
-          categoriasRes,
-          estadosRes,
-          preciosRes,
-          nombresRes,
-          unidadesRes,
-          racksRes,
-        ] = await Promise.all([
-          axiosInstance.get("/api/colores"),
-          axiosInstance.get("/api/talles"),
-          axiosInstance.get("/api/telas"),
-          axiosInstance.get("/api/categorias"),
-          axiosInstance.get("/api/estados-indumentaria"),
-          axiosInstance.get("/api/precios"),
-          axiosInstance.get("/api/nombres-indumentaria"),
-          axiosInstance.get("/api/unidades-medida"),
-          axiosInstance.get("/api/indumentaria/racks"),
-        ]);
-        setColores(coloresRes.data);
-        setTalles(tallesRes.data);
-        setTelas(telasRes.data);
-        setCategorias(categoriasRes.data);
-        setEstados(estadosRes.data);
-        setPrecios(preciosRes.data);
-        setNombresIndumentaria(nombresRes.data);
-        setUnidadesMedida(unidadesRes.data);
-        setRacks(racksRes.data);
-      } catch {
-        setAlertMsg("Error al cargar datos auxiliares.");
+        const datos = await cargarAuxiliares();
+        setColores(datos.colores);
+        setTalles(datos.talles);
+        setTelas(datos.telas);
+        setCategorias(datos.categorias);
+        setEstados(datos.estados);
+        setPrecios(datos.precios);
+        setNombresIndumentaria(datos.nombresIndumentaria);
+        setUnidadesMedida(datos.unidadesMedida);
+        setRacks(datos.racks);
+      } catch (error) {
+        if (error instanceof Error) {
+          setAlertMsg(error.message);
+        } else {
+          setAlertMsg("Error al cargar datos auxiliares.");
+        }
         setShowAlert(true);
       }
     };
-    cargarAuxiliares();
+    inicializarDatos();
   }, []);
 
   useEffect(() => {
     if (esEdicion && id) {
-      const cargarPrenda = async () => {
+      const cargarPrendaExistente = async () => {
         try {
-          const res = await axiosInstance.get(`/api/indumentaria/${id}`);
-          const data = res.data;
-          setForm({
-            codigoIndumentaria: data.codigoIndumentaria || "",
-            nombre: data.DetalleIndumentarium?.NombreIndumentarium?.nombre || "",
-            idColor: data.DetalleIndumentarium?.idColor?.toString() || "",
-            idTalle: data.DetalleIndumentarium?.idTalle?.toString() || "",
-            idTela: data.DetalleIndumentarium?.idTela?.toString() || "",
-            idCategoria: data.DetalleIndumentarium?.idCategoria?.toString() || "",
-            idEstado: data.DetalleIndumentarium?.idEstado?.toString() || "",
-            idPrecio: data.DetalleIndumentarium?.idPrecio?.toString() || "",
-            precio: data.DetalleIndumentarium?.PrecioIndumentarium?.precio || "",
-            cantidad: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
-            idDetalle: data.idDetalle?.toString() || "",
-            cantidadAnterior: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
-            idUnidadMedida: data.DetalleIndumentarium?.idUnidadMedida?.toString() || "",
-            idRack: data.Stock?.idRack?.toString() || "",
-          });
+          const datos = await cargarIndumentaria(id);
+          setForm(datos);
         } catch (error) {
-          setAlertMsg("Error al cargar la Indumentaria.");
+          if (error instanceof Error) {
+            setAlertMsg(error.message);
+          } else {
+            setAlertMsg("Error al cargar la Indumentaria.");
+          }
           setShowAlert(true);
         }
       };
-      cargarPrenda();
+      cargarPrendaExistente();
     } else {
       setForm(camposIniciales);
     }
@@ -157,9 +132,9 @@ const AltaIndumentaria: React.FC = () => {
   const handleNewColor = async (value: string) => {
     if (!value) return;
     try {
-      const res = await axiosInstance.post("/api/colores", { color: value });
-      setColores([...colores, res.data]);
-      handleChange("idColor", String(res.data.idColor));
+      const nuevoColor = await crearNuevoColor(value);
+      setColores([...colores, nuevoColor]);
+      handleChange("idColor", String(nuevoColor.idColor));
       setShowToast(true);
       setShowNewColorAlert(false);
     } catch (error) {
@@ -171,9 +146,9 @@ const AltaIndumentaria: React.FC = () => {
   const handleNewTalle = async (value: string) => {
     if (!value) return;
     try {
-      const res = await axiosInstance.post("/api/talles", { talle: value });
-      setTalles([...talles, res.data]);
-      handleChange("idTalle", String(res.data.idTalle));
+      const nuevoTalle = await crearNuevoTalle(value);
+      setTalles([...talles, nuevoTalle]);
+      handleChange("idTalle", String(nuevoTalle.idTalle));
       setShowToast(true);
       setShowNewTalleAlert(false);
     } catch (error) {
@@ -185,9 +160,9 @@ const AltaIndumentaria: React.FC = () => {
   const handleNewTela = async (value: string) => {
     if (!value) return;
     try {
-      const res = await axiosInstance.post("/api/telas", { tipoTela: value });
-      setTelas([...telas, res.data]);
-      handleChange("idTela", String(res.data.idTela));
+      const nuevaTela = await crearNuevaTela(value);
+      setTelas([...telas, nuevaTela]);
+      handleChange("idTela", String(nuevaTela.idTela));
       setShowToast(true);
       setShowNewTelaAlert(false);
     } catch (error) {
@@ -199,9 +174,9 @@ const AltaIndumentaria: React.FC = () => {
   const handleNewCategoria = async (value: string) => {
     if (!value) return;
     try {
-      const res = await axiosInstance.post("/api/categorias", { categoria: value });
-      setCategorias([...categorias, res.data]);
-      handleChange("idCategoria", String(res.data.idCategoria));
+      const nuevaCategoria = await crearNuevaCategoria(value);
+      setCategorias([...categorias, nuevaCategoria]);
+      handleChange("idCategoria", String(nuevaCategoria.idCategoria));
       setShowToast(true);
       setShowNewCategoriaAlert(false);
     } catch (error) {
@@ -214,76 +189,7 @@ const AltaIndumentaria: React.FC = () => {
     e.preventDefault();
     setShowLoading(true);
     try {
-      let idPrecio = form.idPrecio;
-      if (form.precio && !form.idPrecio) {
-        const precioRes = await axiosInstance.post("/api/precios", {
-          precio: form.precio,
-        });
-        idPrecio = precioRes.data.idPrecio;
-      }
-      const nombreRes = await axiosInstance.post(
-        "/api/nombres-indumentaria/find-or-create",
-        { nombre: form.nombre }
-      );
-      const idNombre = nombreRes.data.idNombre;
-      const detalleRes = await axiosInstance.post(
-        "/api/detalle-indumentaria/find-or-create",
-        {
-          idNombre,
-          idPrecio,
-          idCategoria: form.idCategoria,
-          idColor: form.idColor,
-          idTalle: form.idTalle,
-          idEstado: form.idEstado,
-          idTela: form.idTela,
-          idUnidadMedida: form.idUnidadMedida,
-        }
-      );
-      const idDetalle = detalleRes.data.idDetalle;
-      if (esEdicion && id) {
-        if (idDetalle === form.idDetalle) {
-          await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
-            precio: form.precio,
-          });
-        } else {
-          await axiosInstance.put(`/api/indumentaria/${id}`, {
-            codigoIndumentaria: form.codigoIndumentaria,
-            idDetalle,
-          });
-          await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
-            precio: form.precio,
-          });
-        }
-        const cantidadActual = Number(form.cantidad);
-        const cantidadAnterior = Number(form.cantidadAnterior);
-        const diferencia = cantidadActual - cantidadAnterior;
-        if (diferencia !== 0 || form.idRack) {
-          // Si hay cambio en el stock
-          if (diferencia !== 0) {
-            await axiosInstance.post("/api/indumentaria/stock/movimiento", {
-              codigoIndumentaria: form.codigoIndumentaria,
-              cantidad: diferencia,
-              observaciones: "Ajuste manual desde edición",
-            });
-          }
-          // Si hay cambio en el rack
-          if (form.idRack) {
-            await axiosInstance.put(`/api/indumentaria/stock/${form.codigoIndumentaria}`, {
-              idRack: parseInt(form.idRack)
-            });
-          }
-        }
-      } else {
-        await axiosInstance.post("/api/indumentaria", {
-          codigoIndumentaria: form.codigoIndumentaria,
-          idDetalle,
-          cantidadInicial: parseInt(form.cantidad) || 0,
-          idRack: parseInt(form.idRack) || null,
-        });
-        await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
-          precio: form.precio,
-        });
-      }
+      await guardarIndumentaria({ form, esEdicion, id });
       setShowToast(true);
       setTimeout(() => history.push("/indumentaria"), 1200);
     } catch (error) {

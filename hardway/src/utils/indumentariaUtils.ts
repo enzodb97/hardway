@@ -24,6 +24,247 @@ export interface IndumentariaPage {
   total: number;
 }
 
+export interface IndumentariaFormData {
+  codigoIndumentaria: string;
+  nombre: string;
+  idColor: string;
+  idTalle: string;
+  idTela: string;
+  idCategoria: string;
+  idEstado: string;
+  idPrecio: string;
+  precio: string;
+  cantidad: string;
+  idDetalle: string;
+  cantidadAnterior: string;
+  idUnidadMedida: string;
+  idRack: string;
+}
+
+export const camposIniciales: IndumentariaFormData = {
+  codigoIndumentaria: "",
+  nombre: "",
+  idColor: "",
+  idTalle: "",
+  idTela: "",
+  idCategoria: "",
+  idEstado: "",
+  idPrecio: "",
+  precio: "",
+  cantidad: "",
+  idDetalle: "",
+  cantidadAnterior: "",
+  idUnidadMedida: "",
+  idRack: "",
+};
+
+// Interfaces para los auxiliares
+export interface Color {
+  idColor: number;
+  color: string;
+}
+
+export interface Talle {
+  idTalle: number;
+  talle: string;
+}
+
+export interface Tela {
+  idTela: number;
+  tipoTela: string;
+}
+
+export interface Categoria {
+  idCategoria: number;
+  categoria: string;
+}
+
+export interface Estado {
+  idEstado: number;
+  estadoIndumentaria: string;
+}
+
+export interface UnidadMedida {
+  idUnidadMedida: number;
+  nombreUnidad: string;
+  abreviatura: string;
+}
+
+export interface Rack {
+  idRack: number;
+  numeroRack: string;
+  descripcion?: string;
+}
+
+// Funciones para manejar auxiliares
+export const cargarAuxiliares = async () => {
+  try {
+    const [
+      coloresRes,
+      tallesRes,
+      telasRes,
+      categoriasRes,
+      estadosRes,
+      preciosRes,
+      nombresRes,
+      unidadesRes,
+      racksRes,
+    ] = await Promise.all([
+      axiosInstance.get("/api/colores"),
+      axiosInstance.get("/api/talles"),
+      axiosInstance.get("/api/telas"),
+      axiosInstance.get("/api/categorias"),
+      axiosInstance.get("/api/estados-indumentaria"),
+      axiosInstance.get("/api/precios"),
+      axiosInstance.get("/api/nombres-indumentaria"),
+      axiosInstance.get("/api/unidades-medida"),
+      axiosInstance.get("/api/indumentaria/racks"),
+    ]);
+
+    return {
+      colores: coloresRes.data,
+      talles: tallesRes.data,
+      telas: telasRes.data,
+      categorias: categoriasRes.data,
+      estados: estadosRes.data,
+      precios: preciosRes.data,
+      nombresIndumentaria: nombresRes.data,
+      unidadesMedida: unidadesRes.data,
+      racks: racksRes.data,
+    };
+  } catch (error) {
+    throw new Error("Error al cargar datos auxiliares");
+  }
+};
+
+export const crearNuevoColor = async (color: string) => {
+  const res = await axiosInstance.post("/api/colores", { color });
+  return res.data;
+};
+
+export const crearNuevoTalle = async (talle: string) => {
+  const res = await axiosInstance.post("/api/talles", { talle });
+  return res.data;
+};
+
+export const crearNuevaTela = async (tipoTela: string) => {
+  const res = await axiosInstance.post("/api/telas", { tipoTela });
+  return res.data;
+};
+
+export const crearNuevaCategoria = async (categoria: string) => {
+  const res = await axiosInstance.post("/api/categorias", { categoria });
+  return res.data;
+};
+
+export interface GuardarIndumentariaParams {
+  form: IndumentariaFormData;
+  esEdicion: boolean;
+  id?: string;
+}
+
+export const guardarIndumentaria = async ({ form, esEdicion, id }: GuardarIndumentariaParams) => {
+  let idPrecio = form.idPrecio;
+  if (form.precio && !form.idPrecio) {
+    const precioRes = await axiosInstance.post("/api/precios", {
+      precio: form.precio,
+    });
+    idPrecio = precioRes.data.idPrecio;
+  }
+
+  const nombreRes = await axiosInstance.post(
+    "/api/nombres-indumentaria/find-or-create",
+    { nombre: form.nombre }
+  );
+  const idNombre = nombreRes.data.idNombre;
+
+  const detalleRes = await axiosInstance.post(
+    "/api/detalle-indumentaria/find-or-create",
+    {
+      idNombre,
+      idPrecio,
+      idCategoria: form.idCategoria,
+      idColor: form.idColor,
+      idTalle: form.idTalle,
+      idEstado: form.idEstado,
+      idTela: form.idTela,
+      idUnidadMedida: form.idUnidadMedida,
+    }
+  );
+  
+  const idDetalle = detalleRes.data.idDetalle;
+
+  if (esEdicion && id) {
+    if (idDetalle === form.idDetalle) {
+      await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+        precio: form.precio,
+      });
+    } else {
+      await axiosInstance.put(`/api/indumentaria/${id}`, {
+        codigoIndumentaria: form.codigoIndumentaria,
+        idDetalle,
+      });
+      await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+        precio: form.precio,
+      });
+    }
+
+    const cantidadActual = Number(form.cantidad);
+    const cantidadAnterior = Number(form.cantidadAnterior);
+    const diferencia = cantidadActual - cantidadAnterior;
+
+    if (diferencia !== 0 || form.idRack) {
+      if (diferencia !== 0) {
+        await axiosInstance.post("/api/indumentaria/stock/movimiento", {
+          codigoIndumentaria: form.codigoIndumentaria,
+          cantidad: diferencia,
+          observaciones: "Ajuste manual desde edición",
+        });
+      }
+      if (form.idRack) {
+        await axiosInstance.put(`/api/indumentaria/stock/${form.codigoIndumentaria}`, {
+          idRack: parseInt(form.idRack)
+        });
+      }
+    }
+  } else {
+    await axiosInstance.post("/api/indumentaria", {
+      codigoIndumentaria: form.codigoIndumentaria,
+      idDetalle,
+      cantidadInicial: parseInt(form.cantidad) || 0,
+      idRack: parseInt(form.idRack) || null,
+    });
+    await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
+      precio: form.precio,
+    });
+  }
+};
+
+export const cargarIndumentaria = async (id: string) => {
+  try {
+    const res = await axiosInstance.get(`/api/indumentaria/${id}`);
+    const data = res.data;
+    return {
+      codigoIndumentaria: data.codigoIndumentaria || "",
+      nombre: data.DetalleIndumentarium?.NombreIndumentarium?.nombre || "",
+      idColor: data.DetalleIndumentarium?.idColor?.toString() || "",
+      idTalle: data.DetalleIndumentarium?.idTalle?.toString() || "",
+      idTela: data.DetalleIndumentarium?.idTela?.toString() || "",
+      idCategoria: data.DetalleIndumentarium?.idCategoria?.toString() || "",
+      idEstado: data.DetalleIndumentarium?.idEstado?.toString() || "",
+      idPrecio: data.DetalleIndumentarium?.idPrecio?.toString() || "",
+      precio: data.DetalleIndumentarium?.PrecioIndumentarium?.precio || "",
+      cantidad: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
+      idDetalle: data.idDetalle?.toString() || "",
+      cantidadAnterior: data.DetalleIndumentarium?.cantidadIndumentaria?.toString() || "",
+      idUnidadMedida: data.DetalleIndumentarium?.idUnidadMedida?.toString() || "",
+      idRack: data.Stock?.idRack?.toString() || "",
+    };
+  } catch (error) {
+    throw new Error("Error al cargar la Indumentaria");
+  }
+};
+
 export async function obtenerIndumentariaPaginada(
   page: number,
   pageSize: number,
