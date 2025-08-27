@@ -7,6 +7,7 @@
   --background: #feaf00 !important;
 }
 
+/* Estilos existentes */
 .picking-admin-picker {
   color: #0054e9;
   font-weight: bold;
@@ -14,24 +15,167 @@
   margin-bottom: 2px;
   display: block;
 }
+
 .picking-pedido-label {
   font-weight: bold;
   color: #222;
 }
+
 .picking-fecha-label {
   color: #444;
   font-size: 0.95rem;
 }
+
 .picking-action-btn {
   margin-left: 8px;
 }
+
+/* Nuevos estilos mejorados */
+.picking-list-modal {
+  --height: 50%;
+  --border-radius: 8px;
+}
+
 .picking-list-modal .ion-text-wrap {
   font-size: 1rem;
 }
+
 .picking-list-modal .ion-label > div {
   margin-bottom: 2px;
 }
 
-.picking-list-modal {
-  --height: 60%;
+.picking-list-item {
+  background: #ffffff;
+  margin: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.picking-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.picking-item-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--ion-color-primary);
+  font-weight: 600;
+}
+
+.picking-ref-badge {
+  background: var(--ion-color-primary);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.picking-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.picking-detail-item ion-icon {
+  font-size: 1.4rem;
+  color: var(--ion-color-medium);
+  min-width: 24px;
+}
+
+.picking-detail-item div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.picking-detail-item .label {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  margin-bottom: 2px;
+}
+
+.picking-detail-item .value {
+  font-size: 1rem;
+  color: var(--ion-color-dark);
+  font-weight: 500;
+}
+
+.picking-detail-item .value.highlight {
+  color: var(--ion-color-primary);
+  font-size: 1.1rem;
+}
+
+.picking-size {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+/* Grid System */
+ion-grid {
+  padding: 0;
+}
+
+ion-row {
+  margin: 0 -4px;
+}
+
+ion-col {
+  padding: 4px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .picking-list-item {
+    margin: 16px;
+    padding: 20px;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .picking-list-item {
+    background: #feaf00;
+    border: 1px solid black;
+  }
+
+  .picking-item-header h2 {
+    color: var(--ion-color-primary-contrast);
+  }
+
+  .picking-detail-item .value {
+    color: black !important;
+  }
+
+  .picking-item-header {
+    border-bottom-color: var(--ion-color-step-150);
+  }
+
+  .picking-size {
+    border-top-color: var(--ion-color-step-150);
+  }
+
+  .picking-detail-item ion-icon {
+    color: var(--ion-color-step-500);
+  }
+
+  .picking-detail-item .label {
+    color: var(--ion-color-step-400);
+  }
+
+  .picking-pedido-label {
+    color: black;
+  }
+
+  .picking-fecha-label {
+    color: var(--ion-color-medium);
+  }
 }

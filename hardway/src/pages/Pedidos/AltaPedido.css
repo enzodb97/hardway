@@ -1074,7 +1074,7 @@ ion-modal ion-content {
   --padding-end: 20px;
   --padding-top: 20px;
   --padding-bottom: 20px;
-  --background: #f8fafc;
+  background: #f8fafc;
 }
 
 /* Items del modal */

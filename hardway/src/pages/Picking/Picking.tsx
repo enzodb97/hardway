@@ -22,6 +22,11 @@ import {
   checkmarkCircleOutline,
   closeOutline,
   printOutline,
+  cubeOutline,
+  locationOutline,
+  pricetagOutline,
+  colorPaletteOutline,
+  resizeOutline
 } from "ionicons/icons";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -321,32 +326,69 @@ const Picking: React.FC = () => {
                 <IonItem>No hay productos para este pedido.</IonItem>
               )}
               {pickingList.map((item: any, idx: number) => (
-                <IonItem key={idx} lines="full">
-                  <IonLabel className="ion-text-wrap">
-                    <div>
-                      <b>Nombre:</b> {item.nombre_producto ?? "-"}
-                    </div>
-                    <div>
-                      <b>Referencia:</b>{" "}
-                      {item.referencia || item.codigoIndumentaria || "-"}
-                    </div>
-                    <div>
-                      <b>Cantidad:</b> {item.cantidad ?? "-"}
-                    </div>
-                    <div>
-                      <b>Rack:</b> {item.rack ?? "Sin asignar"}
-                    </div>
-                    <div>
-                      <b>Categoría:</b> {item.categoria ?? "-"}
-                    </div>
-                    <div>
-                      <b>Color:</b> {item.color ?? "-"}
-                    </div>
-                    <div>
-                      <b>Talle:</b> {item.talle ?? "-"}
-                    </div>
-                  </IonLabel>
-                </IonItem>
+                <div className="picking-list-item" key={idx}>
+                  <IonGrid>
+                    <IonRow>
+                      <IonCol size="12">
+                        <div className="picking-item-header">
+                          <h2>{item.nombre_producto ?? "-"}</h2>
+                          <span className="picking-ref-badge">
+                            {item.referencia || item.codigoIndumentaria || "-"}
+                          </span>
+                        </div>
+                      </IonCol>
+                    </IonRow>
+                    <IonRow>
+                      <IonCol size="6" sizeMd="3">
+                        <div className="picking-detail-item">
+                          <IonIcon icon={cubeOutline} />
+                          <div>
+                            <span className="label">Cantidad</span>
+                            <span className="value">{item.cantidad ?? "-"}</span>
+                          </div>
+                        </div>
+                      </IonCol>
+                      <IonCol size="6" sizeMd="3">
+                        <div className="picking-detail-item">
+                          <IonIcon icon={locationOutline} />
+                          <div>
+                            <span className="label">Rack</span>
+                            <span className="value">{item.rack ?? "Sin asignar"}</span>
+                          </div>
+                        </div>
+                      </IonCol>
+                      <IonCol size="6" sizeMd="3">
+                        <div className="picking-detail-item">
+                          <IonIcon icon={pricetagOutline} />
+                          <div>
+                            <span className="label">Categoría</span>
+                            <span className="value">{item.categoria ?? "-"}</span>
+                          </div>
+                        </div>
+                      </IonCol>
+                      <IonCol size="6" sizeMd="3">
+                        <div className="picking-detail-item">
+                          <IonIcon icon={colorPaletteOutline} />
+                          <div>
+                            <span className="label">Color</span>
+                            <span className="value">{item.color ?? "-"}</span>
+                          </div>
+                        </div>
+                      </IonCol>
+                    </IonRow>
+                    <IonRow>
+                      <IonCol size="12">
+                        <div className="picking-detail-item picking-size">
+                          <IonIcon icon={resizeOutline} />
+                          <div>
+                            <span className="label">Talle</span>
+                            <span className="value highlight">{item.talle ?? "-"}</span>
+                          </div>
+                        </div>
+                      </IonCol>
+                    </IonRow>
+                  </IonGrid>
+                </div>
               ))}
             </IonList>
             <IonButton
