@@ -25,7 +25,26 @@ import {
   IonSelectOption,
   IonButtons,
   IonMenuButton,
+  IonIcon,
+  IonItemDivider,
+  IonText,
+  IonChip,
 } from "@ionic/react";
+import {
+  personAddOutline,
+  peopleOutline,
+  lockClosedOutline,
+  keyOutline,
+  personCircleOutline,
+  ribbonOutline,
+  checkmarkCircle,
+  closeCircleOutline,
+  pencilOutline,
+  trashOutline,
+  searchOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
+} from 'ionicons/icons';
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
 import zepelin from "../../assets/images/zepelin.png";
@@ -42,6 +61,8 @@ const Usuarios: React.FC = () => {
   });
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [editando, setEditando] = useState<Usuario | null>(null);
   const [nuevaPassword, setNuevaPassword] = useState("");
   const [showPasswordAlert, setShowPasswordAlert] = useState(false);
@@ -49,6 +70,44 @@ const Usuarios: React.FC = () => {
     null
   );
   const [rolesDisponibles, setRolesDisponibles] = useState<string[]>([]);
+  const [mostrarListaUsuarios, setMostrarListaUsuarios] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const usersPerPage = 3;
+
+  // Filtrar usuarios por búsqueda
+  const filteredUsers = usuarios.filter(user => 
+    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Calcular páginas totales
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  // Obtener usuarios de la página actual
+  const getCurrentUsers = () => {
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    return filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  };
+
+  // Cambiar de página
+  const handlePageChange = (newPage: number, event?: React.MouseEvent) => {
+    // Prevenir el comportamiento por defecto que causa el scroll
+    event?.preventDefault();
+    
+    // Obtener la referencia del contenedor de la lista
+    const listContainer = document.querySelector('.usuarios-list-container');
+    const currentScroll = listContainer?.getBoundingClientRect().top;
+    
+    setCurrentPage(newPage);
+
+    // Mantener la posición del scroll después de que se actualice el estado
+    if (currentScroll) {
+      setTimeout(() => {
+        listContainer?.scrollIntoView({ behavior: 'auto' });
+      }, 0);
+    }
+  };
 
   // TEMPORALMENTE COMENTAMOS LA VALIDACIÓN DE ROL PARA DEBUGGEAR
   // Solo admin puede ver esta página
@@ -150,10 +209,24 @@ const Usuarios: React.FC = () => {
   };
 
   // Eliminar usuario
-  const handleEliminar = async (id: number) => {
-    if (window.confirm("¿Eliminar este usuario?")) {
-      await eliminarUsuario(id);
-      setUsuarios(usuarios.filter((u) => u.id !== id));
+  const handleEliminar = (id: number) => {
+    setUserToDelete(id);
+    setShowDeleteAlert(true);
+  };
+
+  const confirmDelete = async () => {
+    if (userToDelete) {
+      try {
+        await eliminarUsuario(userToDelete);
+        setUsuarios(usuarios.filter((u) => u.id !== userToDelete));
+        setAlertMsg("Usuario eliminado correctamente");
+        setShowAlert(true);
+      } catch (error) {
+        setAlertMsg("Error al eliminar el usuario");
+        setShowAlert(true);
+      }
+      setShowDeleteAlert(false);
+      setUserToDelete(null);
     }
   };
 
@@ -223,13 +296,23 @@ const Usuarios: React.FC = () => {
         <div className="usuarios-columna">
           {!editando && (
             <div className="usuarios-section usuarios-form-section">
-              {/* Formulario de creación */}
               <div className="encb">
                 <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
-                <h2 className="usuarios-section-title">Crear nuevo usuario</h2>
+                <h2 className="usuarios-section-title">
+                  <IonIcon 
+                    icon={personAddOutline} 
+                    style={{ 
+                      marginRight: '10px',
+                      fontSize: '1.5rem',
+                      verticalAlign: 'middle'
+                    }}
+                  />
+                  Crear nuevo usuario
+                </h2>
               </div>
               <form onSubmit={handleCrear} className="usuarios-form">
                 <IonItem className="usuarios-form-item">
+                  <IonIcon icon={personCircleOutline} slot="start" color="medium" />
                   <IonLabel position="floating">Usuario</IonLabel>
                   <IonInput
                     value={nuevoUsuario.username}
@@ -240,9 +323,11 @@ const Usuarios: React.FC = () => {
                       })
                     }
                     required
+                    clearInput
                   />
                 </IonItem>
                 <IonItem className="usuarios-form-item">
+                  <IonIcon icon={lockClosedOutline} slot="start" color="medium" />
                   <IonLabel position="floating">Contraseña</IonLabel>
                   <IonInput
                     type="password"
@@ -254,9 +339,11 @@ const Usuarios: React.FC = () => {
                       })
                     }
                     required
+                    clearInput
                   />
                 </IonItem>
                 <IonItem className="usuarios-form-item">
+                  <IonIcon icon={ribbonOutline} slot="start" color="medium" />
                   <IonLabel position="floating">Rol</IonLabel>
                   <IonSelect
                     value={nuevoUsuario.rol}
@@ -264,6 +351,14 @@ const Usuarios: React.FC = () => {
                       setNuevoUsuario({ ...nuevoUsuario, rol: e.detail.value! })
                     }
                     required
+                    interface="popover"
+                    interfaceOptions={{
+                      cssClass: 'roles-select-popover',
+                      alignment: 'end',
+                      side: 'end'
+                    }}
+                    style={{ textAlign: 'right', paddingRight: '16px' }}
+                    placeholder="Seleccione un rol"
                   >
                     {rolesDisponibles.map((rol) => (
                       <IonSelectOption key={rol} value={rol}>
@@ -276,20 +371,66 @@ const Usuarios: React.FC = () => {
                   expand="block"
                   type="submit"
                   className="usuarios-btn"
+                  strong={true}
                 >
+                  <IonIcon icon={personAddOutline} slot="start" />
                   Crear Usuario
                 </IonButton>
               </form>
             </div>
           )}
           <div className="usuarios-section usuarios-list-section">
-            {/* Lista de usuarios */}
             <div className="encb">
               <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
-              <h2 className="usuarios-section-title">Lista de usuarios</h2>
+              <h2 className="usuarios-section-title">
+                <IonIcon 
+                  icon={peopleOutline} 
+                  style={{ 
+                    marginRight: '10px',
+                    fontSize: '1.5rem',
+                    verticalAlign: 'middle'
+                  }}
+                />
+                Lista de usuarios
+              </h2>
             </div>
-            <IonList className="usuarios-list">
-              {usuarios.map((usuario) =>
+            
+            <IonButton
+              expand="block"
+              onClick={() => {
+                setMostrarListaUsuarios(!mostrarListaUsuarios);
+                setCurrentPage(1);
+                setSearchTerm("");
+              }}
+              className="ver-usuarios-btn"
+              color={mostrarListaUsuarios ? "medium" : "primary"}
+            >
+              <IonIcon 
+                slot="start" 
+                icon={mostrarListaUsuarios ? closeCircleOutline : peopleOutline} 
+              />
+              {mostrarListaUsuarios ? "Ocultar Usuarios" : "Ver Usuarios"}
+            </IonButton>
+
+            {mostrarListaUsuarios && (
+              <div className="usuarios-list-container">
+                <div className="usuarios-search-container">
+                  <IonItem className="usuarios-search-bar">
+                    <IonIcon slot="start" icon={searchOutline} color="medium" />
+                    <IonInput
+                      placeholder="Buscar usuario..."
+                      value={searchTerm}
+                      onIonChange={e => {
+                        setSearchTerm(e.detail.value || "");
+                        setCurrentPage(1);
+                      }}
+                      clearInput
+                    />
+                  </IonItem>
+                </div>
+
+                <IonList className="usuarios-list usuarios-list-animate">
+              {getCurrentUsers().map((usuario) =>
                 editando && editando.id === usuario.id ? (
                   <form
                     key={usuario.id}
@@ -297,6 +438,7 @@ const Usuarios: React.FC = () => {
                     className="usuarios-edit-form"
                   >
                     <IonItem className="usuarios-form-item">
+                      <IonIcon icon={personCircleOutline} slot="start" color="medium" />
                       <IonLabel position="floating">Usuario</IonLabel>
                       <IonInput
                         value={editando.username}
@@ -307,9 +449,11 @@ const Usuarios: React.FC = () => {
                           })
                         }
                         required
+                        clearInput
                       />
                     </IonItem>
                     <IonItem className="usuarios-form-item">
+                      <IonIcon icon={ribbonOutline} slot="start" color="medium" />
                       <IonLabel position="floating">Rol</IonLabel>
                       <IonSelect
                         value={editando.rol}
@@ -317,6 +461,10 @@ const Usuarios: React.FC = () => {
                           setEditando({ ...editando, rol: e.detail.value! })
                         }
                         required
+                        interface="popover"
+                        interfaceOptions={{
+                          cssClass: 'roles-select-popover'
+                        }}
                       >
                         {rolesDisponibles.map((rol) => (
                           <IonSelectOption key={rol} value={rol}>
@@ -325,56 +473,95 @@ const Usuarios: React.FC = () => {
                         ))}
                       </IonSelect>
                     </IonItem>
-                    <IonButton
-                      type="submit"
-                      color="success"
-                      expand="block"
-                      className="usuarios-btn"
-                    >
-                      Guardar
-                    </IonButton>
-                    <IonButton
-                      color="medium"
-                      expand="block"
-                      className="usuarios-btn"
-                      onClick={() => setEditando(null)}
-                    >
-                      Cancelar
-                    </IonButton>
+                    <div className="usuarios-button-group">
+                      <IonButton
+                        type="submit"
+                        color="success"
+                        expand="block"
+                        className="usuarios-btn"
+                        strong={true}
+                      >
+                        <IonIcon slot="start" icon={checkmarkCircle} />
+                        Guardar
+                      </IonButton>
+                      <IonButton
+                        color="medium"
+                        expand="block"
+                        className="usuarios-btn"
+                        onClick={() => setEditando(null)}
+                        fill="outline"
+                      >
+                        <IonIcon slot="start" icon={closeCircleOutline} />
+                        Cancelar
+                      </IonButton>
+                    </div>
                   </form>
                 ) : (
                   <IonItem key={usuario.id} className="usuarios-list-item">
+                    <IonIcon icon={personCircleOutline} slot="start" color="medium" />
                     <IonLabel>
-                      <strong>{usuario.username}</strong> - {usuario.rol}
+                      <strong>{usuario.username}</strong>
+                      <IonChip color="primary" outline={true}>
+                        <IonIcon icon={ribbonOutline} />
+                        <IonLabel>{usuario.rol}</IonLabel>
+                      </IonChip>
                     </IonLabel>
                     <IonButton
+                      fill="clear"
                       color="warning"
-                      slot="end"
-                      className="usuarios-btn"
                       onClick={() => handleEditar(usuario)}
                     >
-                      Editar
+                      <IonIcon slot="icon-only" icon={pencilOutline} className="boton" />
                     </IonButton>
                     <IonButton
+                      fill="clear"
                       color="tertiary"
-                      slot="end"
-                      className="usuarios-btn"
                       onClick={() => handleCambiarPassword(usuario.id)}
                     >
-                      Cambiar Contraseña
+                      <IonIcon slot="icon-only" icon={keyOutline} className="boton" />
                     </IonButton>
                     <IonButton
+                      fill="clear"
                       color="danger"
-                      slot="end"
-                      className="usuarios-btn"
                       onClick={() => handleEliminar(usuario.id)}
                     >
-                      Eliminar
+                      <IonIcon slot="icon-only" icon={trashOutline} className="boton" />
                     </IonButton>
                   </IonItem>
                 )
               )}
             </IonList>
+
+            {filteredUsers.length > 0 ? (
+              <div className="pagination-controls">
+                <IonButton
+                  fill="clear"
+                  disabled={currentPage === 1}
+                  onClick={(e) => handlePageChange(currentPage - 1, e)}
+                >
+                  <IonIcon slot="icon-only" icon={chevronBackOutline} />
+                </IonButton>
+                
+                <span className="page-info">
+                  Página {currentPage} de {totalPages}
+                </span>
+
+                <IonButton
+                  fill="clear"
+                  disabled={currentPage === totalPages}
+                  onClick={(e) => handlePageChange(currentPage + 1, e)}
+                >
+                  <IonIcon slot="icon-only" icon={chevronForwardOutline} />
+                </IonButton>
+              </div>
+            ) : (
+              <div className="no-results">
+                <IonIcon icon={searchOutline} color="medium" />
+                <p>No se encontraron usuarios</p>
+              </div>
+            )}
+            </div>
+            )}
           </div>
           {/* Alertas */}
           <IonAlert
@@ -382,6 +569,30 @@ const Usuarios: React.FC = () => {
             message={alertMsg}
             buttons={["OK"]}
             onDidDismiss={() => setShowAlert(false)}
+          />
+          
+          {/* Alert de confirmación para eliminar usuario */}
+          <IonAlert
+            isOpen={showDeleteAlert}
+            header="Confirmar eliminación"
+            message="¿Está seguro que desea eliminar este usuario? Esta acción no se puede deshacer."
+            buttons={[
+              {
+                text: 'Cancelar',
+                role: 'cancel',
+                cssClass: 'secondary',
+                handler: () => {
+                  setShowDeleteAlert(false);
+                  setUserToDelete(null);
+                }
+              },
+              {
+                text: 'Eliminar',
+                cssClass: 'danger',
+                handler: () => confirmDelete()
+              }
+            ]}
+            cssClass="delete-alert"
           />
           {/* Modal para cambiar contraseña */}
           <IonAlert

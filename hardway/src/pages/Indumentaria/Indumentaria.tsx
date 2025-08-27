@@ -26,7 +26,7 @@ import {
 } from "../../utils/indumentariaUtils";
 import "./Indumentaria.css";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 const Indumentaria: React.FC = () => {
   const history = useHistory();
