@@ -157,6 +157,55 @@ export const crearNuevaCategoria = async (categoria: string) => {
   return res.data;
 };
 
+export const crearNuevoEstado = async (estadoIndumentaria: string) => {
+  const res = await axiosInstance.post("/api/estados-indumentaria", { estadoIndumentaria });
+  return res.data;
+};
+
+export const validarCamposObligatorios = (form: IndumentariaFormData): string[] => {
+  const camposFaltantes: string[] = [];
+  
+  if (!form.nombre.trim()) {
+    camposFaltantes.push('• Nombre de la indumentaria');
+  }
+  if (!form.idColor) {
+    camposFaltantes.push('• Color');
+  }
+  if (!form.idTalle) {
+    camposFaltantes.push('• Talle');
+  }
+  if (!form.idTela) {
+    camposFaltantes.push('• Tipo de tela');
+  }
+  if (!form.idCategoria) {
+    camposFaltantes.push('• Categoría');
+  }
+  if (!form.idUnidadMedida) {
+    camposFaltantes.push('• Unidad de medida');
+  }
+  if (!form.idRack) {
+    camposFaltantes.push('• Ubicación del rack');
+  }
+  if (!form.precio || parseFloat(form.precio) <= 0) {
+    camposFaltantes.push('• Precio (debe ser mayor a 0)');
+  }
+  if (!form.cantidad || parseInt(form.cantidad) < 0) {
+    camposFaltantes.push('• Cantidad en stock (debe ser 0 o mayor)');
+  }
+  
+  return camposFaltantes;
+};
+
+export const obtenerSiguienteCodigoIndumentaria = async (): Promise<string> => {
+  try {
+    const response = await axiosInstance.get('/api/indumentaria/siguiente-codigo');
+    return response.data.siguienteCodigo;
+  } catch (error) {
+    console.error('Error al obtener siguiente código:', error);
+    throw new Error('Error al obtener el siguiente código de indumentaria');
+  }
+};
+
 export interface GuardarIndumentariaParams {
   form: IndumentariaFormData;
   esEdicion: boolean;

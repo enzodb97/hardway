@@ -65,6 +65,41 @@ router.post("/racks", async (req, res) => {
   }
 });
 
+// Obtener el siguiente código autoincremental
+router.get("/siguiente-codigo", async (req, res) => {
+  try {
+    // Obtener el último código de indumentaria que comience con "IND"
+    const ultimaIndumentaria = await Indumentaria.findOne({
+      where: {
+        codigoIndumentaria: {
+          [Op.like]: 'IND%'
+        }
+      },
+      order: [
+        [Sequelize.literal("CAST(SUBSTRING(codigoIndumentaria, 4) AS UNSIGNED)"), 'DESC']
+      ],
+      limit: 1
+    });
+
+    let siguienteNumero = 1;
+    
+    if (ultimaIndumentaria) {
+      const ultimoCodigo = ultimaIndumentaria.codigoIndumentaria;
+      // Extraer el número después de "IND"
+      const numeroActual = parseInt(ultimoCodigo.substring(3));
+      siguienteNumero = numeroActual + 1;
+    }
+
+    // Formatear con ceros a la izquierda (3 dígitos)
+    const siguienteCodigo = `IND${siguienteNumero.toString().padStart(3, '0')}`;
+    
+    res.json({ siguienteCodigo });
+  } catch (error) {
+    console.error('Error al generar siguiente código:', error);
+    res.status(500).json({ error: 'Error al generar código', detalle: error.message });
+  }
+});
+
 // Obtener toda la indumentaria
 router.get("/", async (req, res) => {
   try {

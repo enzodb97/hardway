@@ -28,7 +28,6 @@ import {
   shirtOutline,
 } from "ionicons/icons";
 import { useHistory, useParams } from "react-router-dom";
-import axiosInstance from "../../config/axios";
 import "./AltaIndumentaria.css";
 import { 
   cargarAuxiliares, 
@@ -39,6 +38,8 @@ import {
   crearNuevaCategoria,
   guardarIndumentaria,
   camposIniciales,
+  obtenerSiguienteCodigoIndumentaria,
+  validarCamposObligatorios,
   IndumentariaFormData,
   Color,
   Talle,
@@ -66,6 +67,13 @@ const AltaIndumentaria: React.FC = () => {
   const [showNewTelaAlert, setShowNewTelaAlert] = useState(false);
   const [showNewCategoriaAlert, setShowNewCategoriaAlert] = useState(false);
   const [newItemValue, setNewItemValue] = useState("");
+  
+  // Estados para confirmaciones y cambios
+  const [showConfirmSave, setShowConfirmSave] = useState(false);
+  const [showUnsavedChanges, setShowUnsavedChanges] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [formOriginal, setFormOriginal] = useState<IndumentariaFormData>(camposIniciales);
+  
   const esEdicion = Boolean(id);
 
   const [colores, setColores] = useState<Color[]>([]);
@@ -91,6 +99,18 @@ const AltaIndumentaria: React.FC = () => {
         setNombresIndumentaria(datos.nombresIndumentaria);
         setUnidadesMedida(datos.unidadesMedida);
         setRacks(datos.racks);
+
+        // Solo generar código automático si no es edición
+        if (!esEdicion) {
+          const siguienteCodigo = await obtenerSiguienteCodigoIndumentaria();
+          // Buscar el estado "Apta" y establecerlo por defecto
+          const estadoApta = datos.estados.find((e: Estado) => e.estadoIndumentaria.toLowerCase() === 'apta');
+          setForm(prev => ({ 
+            ...prev, 
+            codigoIndumentaria: siguienteCodigo,
+            idEstado: estadoApta ? String(estadoApta.idEstado) : ""
+          }));
+        }
       } catch (error) {
         if (error instanceof Error) {
           setAlertMsg(error.message);
@@ -101,7 +121,7 @@ const AltaIndumentaria: React.FC = () => {
       }
     };
     inicializarDatos();
-  }, []);
+  }, [esEdicion]);
 
   useEffect(() => {
     if (esEdicion && id) {
@@ -109,6 +129,8 @@ const AltaIndumentaria: React.FC = () => {
         try {
           const datos = await cargarIndumentaria(id);
           setForm(datos);
+          setFormOriginal(datos); // Guardar copia original para comparar
+          setHasUnsavedChanges(false);
         } catch (error) {
           if (error instanceof Error) {
             setAlertMsg(error.message);
@@ -121,11 +143,20 @@ const AltaIndumentaria: React.FC = () => {
       cargarPrendaExistente();
     } else {
       setForm(camposIniciales);
+      setFormOriginal(camposIniciales);
+      setHasUnsavedChanges(false);
     }
   }, [id, esEdicion]);
 
   const handleChange = (campo: string, valor: string) => {
-    setForm({ ...form, [campo]: valor });
+    const newForm = { ...form, [campo]: valor };
+    setForm(newForm);
+    
+    // Solo verificar cambios en modo edición
+    if (esEdicion) {
+      const hayDiferencias = JSON.stringify(newForm) !== JSON.stringify(formOriginal);
+      setHasUnsavedChanges(hayDiferencias);
+    }
   };
 
   // Manejadores para nuevos items
@@ -187,10 +218,36 @@ const AltaIndumentaria: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar campos obligatorios
+    const camposFaltantes = validarCamposObligatorios(form);
+    if (camposFaltantes.length > 0) {
+      const mensaje = `Por favor, complete los siguientes campos requeridos para continuar:
+
+${camposFaltantes.join('\n')}
+
+Todos los campos marcados son obligatorios para registrar la indumentaria correctamente.`;
+      setAlertMsg(mensaje);
+      setShowAlert(true);
+      return;
+    }
+    
+    // Si es edición, mostrar confirmación
+    if (esEdicion) {
+      setShowConfirmSave(true);
+      return;
+    }
+    
+    // Si es nueva indumentaria, proceder directamente
+    await ejecutarGuardado();
+  };
+
+  const ejecutarGuardado = async () => {
     setShowLoading(true);
     try {
       await guardarIndumentaria({ form, esEdicion, id });
       setShowToast(true);
+      setHasUnsavedChanges(false); // Resetear cambios no guardados
       setTimeout(() => history.push("/indumentaria"), 1200);
     } catch (error) {
       setAlertMsg("Error al guardar la Indumentaria.");
@@ -200,12 +257,28 @@ const AltaIndumentaria: React.FC = () => {
     }
   };
 
+  const handleNavigation = () => {
+    if (esEdicion && hasUnsavedChanges) {
+      setShowUnsavedChanges(true);
+    } else {
+      history.push("/indumentaria");
+    }
+  };
+
   return (
     <IonPage className="indumentaria-page">
       <IonHeader>
         <IonToolbar>
           <IonMenuButton slot="start" />
           <IonTitle>{esEdicion ? "Editar Indumentaria" : "Nueva Indumentaria"}</IonTitle>
+          <IonButton 
+            fill="clear" 
+            slot="end" 
+            onClick={handleNavigation}
+            color="primary"
+          >
+            Volver
+          </IonButton>
         </IonToolbar>
       </IonHeader>
       <IonContent>
@@ -216,6 +289,11 @@ const AltaIndumentaria: React.FC = () => {
                 <IonCardHeader>
                   <IonCardTitle>
                     {esEdicion ? "Editar Indumentaria" : "Registrar Nueva Indumentaria"}
+                    {esEdicion && hasUnsavedChanges && (
+                      <span className="unsaved-changes-indicator">
+                        • Cambios sin guardar
+                      </span>
+                    )}
                   </IonCardTitle>
                   <IonIcon icon={shirtOutline} className="empty-icon icon-inner" />
                 </IonCardHeader>
@@ -229,9 +307,10 @@ const AltaIndumentaria: React.FC = () => {
                             <IonInput
                               value={form.codigoIndumentaria}
                               onIonChange={(e) => handleChange("codigoIndumentaria", e.detail.value!)}
-                              required
-                              readonly={esEdicion}
-                              placeholder="Ej: 1001"
+                              
+                              readonly={true}
+                              placeholder="Generado automáticamente"
+                              className="readonly-input"
                             />
                           </IonItem>
                         </IonCol>
@@ -241,7 +320,7 @@ const AltaIndumentaria: React.FC = () => {
                             <IonInput
                               value={form.nombre}
                               onIonChange={(e) => handleChange("nombre", e.detail.value!)}
-                              required
+                              
                               placeholder="Ej: Camisa Oxford"
                             />
                           </IonItem>
@@ -260,7 +339,7 @@ const AltaIndumentaria: React.FC = () => {
                                   handleChange("idColor", e.detail.value);
                                 }
                               }}
-                              required
+                              
                             >
                               {colores.map((c) => (
                                 <IonSelectOption key={c.idColor} value={String(c.idColor)}>
@@ -285,7 +364,7 @@ const AltaIndumentaria: React.FC = () => {
                                   handleChange("idTalle", e.detail.value);
                                 }
                               }}
-                              required
+                              
                             >
                               {talles.map((t) => (
                                 <IonSelectOption key={t.idTalle} value={String(t.idTalle)}>
@@ -312,7 +391,7 @@ const AltaIndumentaria: React.FC = () => {
                                   handleChange("idTela", e.detail.value);
                                 }
                               }}
-                              required
+                              
                             >
                               {telas.map((t) => (
                                 <IonSelectOption key={t.idTela} value={String(t.idTela)}>
@@ -337,7 +416,7 @@ const AltaIndumentaria: React.FC = () => {
                                   handleChange("idCategoria", e.detail.value);
                                 }
                               }}
-                              required
+                              
                             >
                               {categorias.map((c) => (
                                 <IonSelectOption key={c.idCategoria} value={String(c.idCategoria)}>
@@ -352,45 +431,26 @@ const AltaIndumentaria: React.FC = () => {
                         </IonCol>
                       </IonRow>
                       <IonRow>
-                        <IonCol size="12" sizeMd="6">
-                          <IonItem>
-                            <IonLabel position="floating" class="titulo">Estado</IonLabel>
-                            <IonSelect
-                              value={form.idEstado}
-                              onIonChange={(e) => {
-                                if (e.detail.value === "nuevo") {
-                                  const nuevoEstado = prompt("Ingrese el nuevo estado:");
-                                  if (nuevoEstado) {
-                                    axiosInstance
-                                      .post("/api/estados-indumentaria", {
-                                        estadoIndumentaria: nuevoEstado,
-                                      })
-                                      .then((res) => {
-                                        setEstados([...estados, res.data]);
-                                        handleChange("idEstado", res.data.idEstado);
-                                      });
-                                  }
-                                } else {
-                                  handleChange("idEstado", e.detail.value);
-                                }
-                              }}
-                              required
-                            >
-                              {estados.map((e) => (
-                                <IonSelectOption key={e.idEstado} value={String(e.idEstado)}>
-                                  {e.estadoIndumentaria}
-                                </IonSelectOption>
-                              ))}
-                            </IonSelect>
-                          </IonItem>
-                        </IonCol>
+                        {esEdicion && (
+                          <IonCol size="12" sizeMd="6">
+                            <IonItem>
+                              <IonLabel position="floating" class="titulo">Estado</IonLabel>
+                              <IonInput
+                                value={estados.find(e => String(e.idEstado) === form.idEstado)?.estadoIndumentaria || ''}
+                                readonly={true}
+                                placeholder="Estado actual"
+                                className="readonly-input"
+                              />
+                            </IonItem>
+                          </IonCol>
+                        )}
                         <IonCol size="12" sizeMd="6">
                           <IonItem>
                             <IonLabel position="floating" class="titulo">Unidad de Medida</IonLabel>
                             <IonSelect
                               value={form.idUnidadMedida}
                               onIonChange={(e) => handleChange("idUnidadMedida", e.detail.value)}
-                              required
+                              
                             >
                               {unidadesMedida.map((u) => (
                                 <IonSelectOption key={u.idUnidadMedida} value={String(u.idUnidadMedida)}>
@@ -400,6 +460,17 @@ const AltaIndumentaria: React.FC = () => {
                             </IonSelect>
                           </IonItem>
                         </IonCol>
+                        {!esEdicion && (
+                          <IonCol size="12" sizeMd="6">
+                            <IonItem>
+                              <IonLabel>
+                                <p className="auto-state-indicator">
+                                  ✓ Estado: Se registrará automáticamente como "Apta"
+                                </p>
+                              </IonLabel>
+                            </IonItem>
+                          </IonCol>
+                        )}
                       </IonRow>
                       <IonRow>
                         <IonCol size="12" sizeMd="6">
@@ -408,7 +479,7 @@ const AltaIndumentaria: React.FC = () => {
                             <IonSelect
                               value={form.idRack}
                               onIonChange={(e) => handleChange("idRack", e.detail.value)}
-                              required
+                              
                             >
                               {racks.map((r) => (
                                 <IonSelectOption key={r.idRack} value={String(r.idRack)}>
@@ -425,7 +496,7 @@ const AltaIndumentaria: React.FC = () => {
                               type="number"
                               value={form.precio}
                               onIonChange={(e) => handleChange("precio", e.detail.value!)}
-                              required
+                              
                               placeholder="Ej: 1200"
                             />
                           </IonItem>
@@ -438,16 +509,36 @@ const AltaIndumentaria: React.FC = () => {
                               value={form.cantidad}
                               min={0}
                               onIonChange={(e) => handleChange("cantidad", e.detail.value!)}
-                              required
+                              
                               placeholder="Ej: 10"
                             />
                           </IonItem>
                         </IonCol>
                       </IonRow>
                       <IonRow>
-                        <IonCol size="12">
-                          <IonButton expand="block" type="submit" color="primary" style={{ fontWeight: 600, fontSize: '1.1em', marginTop: 16 }}>
-                            {esEdicion ? "Guardar Cambios" : "Registrar"}
+                        <IonCol size="12" sizeMd="6">
+                          <IonButton 
+                            expand="block" 
+                            fill="outline"
+                            color="danger"
+                            border-radius="8px"
+                            onClick={handleNavigation}
+                            className="cancel-button"
+                          >
+                            Cancelar
+                          </IonButton>
+                        </IonCol>
+                        <IonCol size="12" sizeMd="6">
+                          <IonButton 
+                            expand="block" 
+                            type="submit" 
+                            color={esEdicion && hasUnsavedChanges ? "warning" : "primary"}
+                            className="submit-button"
+                          >
+                            {esEdicion ? 
+                              (hasUnsavedChanges ? "Confirmar Cambios" : "Guardar Cambios") 
+                              : "Registrar"
+                            }
                           </IonButton>
                         </IonCol>
                       </IonRow>
@@ -471,6 +562,7 @@ const AltaIndumentaria: React.FC = () => {
           message={alertMsg}
           buttons={["Aceptar"]}
           onDidDismiss={() => setShowAlert(false)}
+          cssClass="custom-alert"
         />
 
         {/* Alertas para nuevos items */}
@@ -569,6 +661,56 @@ const AltaIndumentaria: React.FC = () => {
               text: 'Agregar',
               handler: (data) => {
                 handleNewCategoria(data.categoria);
+              }
+            }
+          ]}
+        />
+
+        {/* Alert de confirmación para guardar cambios */}
+        <IonAlert
+          isOpen={showConfirmSave}
+          onDidDismiss={() => setShowConfirmSave(false)}
+          header="Confirmar Cambios"
+          message="¿Estás seguro de que deseas guardar los cambios realizados?"
+          buttons={[
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Guardar',
+              handler: () => {
+                ejecutarGuardado();
+                setShowConfirmSave(false);
+              }
+            }
+          ]}
+        />
+
+        {/* Alert para cambios no guardados */}
+        <IonAlert
+          isOpen={showUnsavedChanges}
+          onDidDismiss={() => setShowUnsavedChanges(false)}
+          header="Cambios sin guardar"
+          message="Tienes cambios sin guardar. ¿Quieres guardar los cambios antes de salir?"
+          buttons={[
+            {
+              text: 'Salir sin guardar',
+              role: 'destructive',
+              handler: () => {
+                setHasUnsavedChanges(false);
+                history.push("/indumentaria");
+              }
+            },
+            {
+              text: 'Cancelar',
+              role: 'cancel'
+            },
+            {
+              text: 'Guardar y salir',
+              handler: async () => {
+                await ejecutarGuardado();
+                setShowUnsavedChanges(false);
               }
             }
           ]}

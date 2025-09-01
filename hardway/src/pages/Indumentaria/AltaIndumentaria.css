@@ -2,6 +2,59 @@
 	 ALTA INDUMENTARIA - ESTILOS PROFESIONALES
 	 ======================================== */
 
+/* ========================================
+   ESTILOS PARA ALERTAS PERSONALIZADAS
+   ======================================== */
+.custom-alert .alert-message {
+    white-space: pre-line !important;
+    text-align: left !important;
+    line-height: 1.5 !important;
+}
+
+/* ========================================
+   ESTILOS PARA INDICADORES Y ESTADOS
+   ======================================== */
+.unsaved-changes-indicator {
+    color: #ff6b35;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.readonly-input {
+    color: #666 !important;
+}
+
+.auto-state-indicator {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* ========================================
+   ESTILOS PARA BOTONES
+   ======================================== */
+.action-button {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-top: 16px;
+}
+
+.cancel-button {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-top: 16px;
+}
+
+.submit-button {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-top: 16px;
+    --border-radius: 4px !important;
+}
+
+/* ========================================
+   ESTILOS ORIGINALES
+   ======================================== */
+
 .indumentaria-page ion-content{
     /*--background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);*/
     --background:
