@@ -78,23 +78,14 @@
 
 /* Buscador y botón nueva prenda */
 .search-container {
+  padding: 16px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(230, 235, 245, 0.8);
-  margin-bottom: 24px;
-  overflow: hidden;
-  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .search-container ion-item {
   --background: transparent;
   --border-color: transparent;
-  --padding-start: 0;
-  --padding-end: 0;
-  --min-height: 48px;
 }
 
 .search-container ion-input {
@@ -116,25 +107,22 @@
 }
 
 .search-container ion-button {
-  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
-  --color: white;
-  --border-radius: 12px;
-  font-weight: 600;
-  height: 48px;
-  margin-left: 12px;
-  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
-  transition: all 0.3s ease;
+  margin-left: 8px;
+  --border-radius: 8px;
 }
 
-.search-container ion-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(253, 180, 11, 0.4);
+.search-container ion-button[color="secondary"] {
+  --background: #6c757d;
+  --color: white;
+}
+
+.search-container ion-button[color="secondary"]:hover {
+  --background: #5a6268;
 }
 
 /* Contador de total */
 .total-counter {
   background: white;
-  border-radius: 12px;
   padding: 16px 20px;
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);

@@ -18,11 +18,12 @@ import {
   IonSpinner,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { pencil, trash, add, search, shirt } from "ionicons/icons";
+import { pencil, trash, add, search, shirt, document } from "ionicons/icons";
 import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
   IndumentariaItem,
+  exportarIndumentariaPDF,
 } from "../../utils/indumentariaUtils";
 import "./Indumentaria.css";
 
@@ -107,6 +108,23 @@ const Indumentaria: React.FC = () => {
     }
   };
 
+  // Función para exportar PDF
+  const handleExportarPDF = async () => {
+    try {
+      setLoading(true);
+      // Obtener todas las prendas (sin paginación) para el PDF
+      const todasLasPrendas = await obtenerIndumentariaPaginada(1, 9999, busqueda);
+      await exportarIndumentariaPDF(todasLasPrendas.prendas, busqueda);
+      setAlertMsg("PDF generado exitosamente");
+      setShowAlert(true);
+    } catch (error) {
+      setAlertMsg("Error al generar el PDF");
+      setShowAlert(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   // Función para obtener clase de stock según cantidad
@@ -152,10 +170,20 @@ const Indumentaria: React.FC = () => {
             />
             <IonButton
               slot="end"
+              color="secondary"
+              onClick={handleExportarPDF}
+              disabled={loading || prendas.length === 0}
+              style={{ marginRight: '8px' }}
+            >
+              <IonIcon icon={document} slot="start" />
+              PDF
+            </IonButton>
+            <IonButton
+              slot="end"
               onClick={() => history.push("/alta-indumentaria")}
             >
               <IonIcon icon={add} slot="start" />
-              Nueva Prenda
+              Nueva Indumentaria
             </IonButton>
           </IonItem>
         </div>
@@ -164,7 +192,7 @@ const Indumentaria: React.FC = () => {
         <div className="total-counter">
           <IonIcon icon={shirt} style={{ color: '#fdb40b', fontSize: '1.2em' }} />
           <IonText>
-            Total de prendas registradas: <b>{total}</b>
+            Total de Indumentaria registradas: <b>{total}</b>
             {busqueda && (
               <span style={{ color: '#64748b', marginLeft: '8px' }}>
                 (filtradas por: "{busqueda}")
@@ -195,7 +223,7 @@ const Indumentaria: React.FC = () => {
               <IonCol size="12" className="ion-text-center ion-padding">
                 <IonSpinner name="crescent" color="primary" />
                 <p style={{ marginTop: '16px', color: '#64748b' }}>
-                  Cargando prendas...
+                  Cargando Indumentariass...
                 </p>
               </IonCol>
             </IonRow>
@@ -209,8 +237,8 @@ const Indumentaria: React.FC = () => {
                   </h3>
                   <p className="empty-description">
                     {busqueda 
-                      ? `No hay prendas que coincidan con "${busqueda}". Intenta con otros términos de búsqueda.`
-                      : 'Comienza agregando tu primera prenda al inventario.'
+                      ? `No hay Indumentariass que coincidan con "${busqueda}". Intenta con otros términos de búsqueda.`
+                      : 'Comienza agregando tu primera Indumentaria al inventario.'
                     }
                   </p>
                   {!busqueda && (
@@ -219,7 +247,7 @@ const Indumentaria: React.FC = () => {
                       onClick={() => history.push("/alta-indumentaria")}
                     >
                       <IonIcon icon={add} slot="start" />
-                      Agregar Primera Prenda
+                      Agregar Primera Indumentaria
                     </IonButton>
                   )}
                 </div>
