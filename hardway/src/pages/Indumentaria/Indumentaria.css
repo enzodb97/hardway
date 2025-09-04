@@ -2,12 +2,13 @@
    INDUMENTARIA - ESTILOS PROFESIONALES
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 /* Aplicar fuente Inter a todos los elementos */
 .indumentaria-page,
 .indumentaria-page * {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
 }
 
 /* Página principal */
@@ -18,15 +19,22 @@
 }
 
 .indumentaria-page::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(253, 180, 11, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.08) 0%, transparent 50%),
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(253, 180, 11, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 200, 87, 0.08) 0%,
+      transparent 50%
+    ),
     linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   z-index: -1;
 }
@@ -46,7 +54,7 @@
 }
 
 .indumentaria-page ion-header ion-toolbar::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -80,7 +88,7 @@
 .search-container {
   padding: 16px;
   background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .search-container ion-item {
@@ -109,6 +117,8 @@
 .search-container ion-button {
   margin-left: 8px;
   --border-radius: 8px;
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  height: 35px;
 }
 
 .search-container ion-button[color="secondary"] {
@@ -149,9 +159,7 @@
   background: white;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(230, 235, 245, 0.8);
   margin-bottom: 24px;
 }
@@ -167,7 +175,7 @@
 }
 
 .tabla-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -235,7 +243,7 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: "Monaco", "Menlo", monospace;
   display: inline-block;
 }
 
@@ -361,7 +369,7 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-/* Paginación */
+/* Paginación mejorada */
 .pagination-footer {
   background: white;
   border-radius: 16px 16px 0 0;
@@ -377,23 +385,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .pagination-controls ion-button {
   --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
   --color: white;
-  --border-radius: 12px;
+  --border-radius: 8px;
   font-weight: 600;
-  height: 44px;
-  min-width: 100px;
-  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
+  height: 36px;
+  min-width: 36px;
+  box-shadow: 0 2px 8px rgba(253, 180, 11, 0.3);
   transition: all 0.3s ease;
+}
+
+.pagination-controls ion-button.pagination-first-last {
+  min-width: 44px;
 }
 
 .pagination-controls ion-button:hover:not([disabled]) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(253, 180, 11, 0.4);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.4);
 }
 
 .pagination-controls ion-button[disabled] {
@@ -403,15 +416,73 @@
   opacity: 0.6;
 }
 
+/* Selector de página */
+.page-selector {
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+}
+
+.page-select {
+  width: 80px;
+  height: 44px;
+  text-align: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  --background: #f8fafc;
+  --color: #64748b;
+  --border-radius: 12px;
+  --border-color: #e2e8f0;
+  --border-width: 1px;
+  --border-style: solid;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.page-select .select-label.select-wrapper{
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.page-select:focus,
+.page-select:active,
+.page-select.select-expanded {
+  --background: #f8fafc !important;
+  --color: #64748b !important;
+  outline: none;
+  box-shadow: 0 0 0 2px #fdb40b40;
+}
+
 .pagination-info {
   background: #f8fafc;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 14px;
+  margin: 0 8px;
   padding: 12px 20px;
   border-radius: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  border: 1px solid #e2e8f0;
   white-space: nowrap;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.pagination-summary {
+  text-align: center;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  padding-top: 8px;
+}
+
+.pagination-controls ion-button[disabled] {
+  --background: #e2e8f0;
+  --color: #94a3b8;
+  box-shadow: none;
+  opacity: 0.6;
 }
 
 /* Estados vacíos */
@@ -450,7 +521,7 @@
     --padding-start: 16px;
     --padding-end: 16px;
   }
-  
+
   .search-container {
     padding: 16px;
   }
@@ -461,35 +532,49 @@
     --padding-start: 12px;
     --padding-end: 12px;
   }
-  
+
   .search-container {
     padding: 16px 12px;
   }
-  
+
   .search-container ion-item {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
+
   .search-container ion-button {
     margin-left: 0;
     margin-top: 12px;
   }
-  
+
   .tabla-header ion-col,
   .tabla-indumentaria ion-col {
     padding: 12px 8px;
     font-size: 12px;
   }
-  
+
   .pagination-controls {
-    flex-direction: column;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
   }
-  
+
+  .page-selector {
+    order: -1;
+    width: 100%;
+    padding: 12px 20px;
+  }
+
   .pagination-info {
     order: -1;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .pagination-summary {
+    font-size: 12px;
   }
 }
 
@@ -498,18 +583,18 @@
     --padding-start: 8px;
     --padding-end: 8px;
   }
-  
+
   .tabla-header ion-col,
   .tabla-indumentaria ion-col {
     padding: 8px 4px;
     font-size: 11px;
   }
-  
+
   .actions-container {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .actions-container ion-button {
     width: 100%;
     min-width: auto;
@@ -551,39 +636,210 @@
   }
 }
 
+/* Estilos simplificados para el popover del selector de páginas */
+ion-popover.page-selector-popover {
+  --width: 80px;
+  --min-width: 80px;
+  --max-width: 80px;
+  --background: #f8fafc;
+  --color: #64748b;
+  --offset-x: 30px;
+  --offset-y: -25px;
+}
+
+ion-popover.page-selector-popover .popover-content {
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  transform: translateX(25px) translateY(-30px) !important;
+}
+
+ion-popover.page-selector-popover ion-list {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 80px !important;
+  background: #f8fafc !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Eliminar todos los estilos internos de Ionic y aplicar centrado absoluto */
+ion-popover.page-selector-popover ion-item {
+  --min-height: 40px !important;
+  --padding-start: 0px !important;
+  --padding-end: 0px !important;
+  --inner-padding-start: 0px !important;
+  --inner-padding-end: 0px !important;
+  --background: #f8fafc !important;
+  width: 80px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.1) !important;
+  position: relative !important;
+}
+
+ion-popover.page-selector-popover ion-item:last-child {
+  border-bottom: none !important;
+}
+
+ion-popover.page-selector-popover ion-item:hover {
+  --background: #e2e8f0 !important;
+  cursor: pointer !important;
+}
+
+/* Ocultar completamente todo el contenido de Ionic y superponer nuestro texto */
+ion-popover.page-selector-popover ion-item * {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  z-index: -1 !important;
+}
+
+/* Mostrar solo nuestro número centrado */
+ion-popover.page-selector-popover ion-item::before {
+  content: counter(item-counter) !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  background: transparent !important;
+  z-index: 10 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Configurar contador para cada item */
+ion-popover.page-selector-popover ion-list {
+  counter-reset: item-counter !important;
+}
+
+ion-popover.page-selector-popover ion-item {
+  counter-increment: item-counter !important;
+}
+
+/* Estilos limpiados - solo lo esencial para el popover */
+
+/* Eliminar estilos del action sheet */
+
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .indumentaria-page::before {
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(253, 180, 11, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 200, 87, 0.15) 0%, transparent 50%),
+    background: radial-gradient(
+        circle at 20% 80%,
+        rgba(253, 180, 11, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(255, 200, 87, 0.15) 0%,
+        transparent 50%
+      ),
       linear-gradient(135deg, #1e293b 0%, #334155 100%);
   }
-  
+
   .search-container,
   .tabla-indumentaria,
   .pagination-footer {
     background: #334155;
     border-color: #475569;
   }
-  
+
   .total-counter {
     background: #334155;
     border-color: #475569;
   }
-  
+
   .total-counter ion-text {
     color: #e2e8f0;
   }
-  
+
   .tabla-indumentaria ion-col:not(.tabla-header ion-col) {
     color: #e2e8f0;
     border-color: #475569;
   }
-  
+
   .pagination-info {
     background: #475569;
     border-color: #64748b;
     color: #e2e8f0;
   }
 }
+
+/* Estilos adicionales para garantizar centrado perfecto del action sheet */
+.md ion-action-sheet .action-sheet-button,
+.ios ion-action-sheet .action-sheet-button {
+  text-align: center !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Estilos específicos para Material Design */
+.md ion-action-sheet .action-sheet-button-inner {
+  justify-content: center !important;
+  text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Estilos específicos para iOS */
+.ios ion-action-sheet .action-sheet-button-inner {
+  justify-content: center !important;
+  text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Forzar centrado con selectores muy específicos */
+ion-action-sheet.hydrated .action-sheet-wrapper .action-sheet-container .action-sheet-group .action-sheet-button {
+  text-align: center !important;
+  justify-content: center !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+ion-action-sheet.hydrated .action-sheet-wrapper .action-sheet-container .action-sheet-group .action-sheet-button .action-sheet-button-inner {
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Override global Ionic styles for action sheet text alignment */
+.action-sheet-md .action-sheet-button,
+.action-sheet-ios .action-sheet-button {
+  text-align: center !important;
+  justify-content: center !important;
+}
+
+.action-sheet-md .action-sheet-button-inner,
+.action-sheet-ios .action-sheet-button-inner {
+  justify-content: center !important;
+  text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 auto !important;
+}
+
+/* Centrar texto de manera global en action sheets */
+ion-action-sheet * {
+  text-align: center !important;
+}
+
+/* Definición del selector de páginas ya está arriba */
+
+/* El action sheet mantendrá su posicionamiento por defecto de Ionic */

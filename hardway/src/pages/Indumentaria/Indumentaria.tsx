@@ -16,9 +16,12 @@ import {
   IonFooter,
   IonText,
   IonSpinner,
+  IonSelect,
+  IonSelectOption,
+  IonLabel,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { pencil, trash, add, search, shirt, document } from "ionicons/icons";
+import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward } from "ionicons/icons";
 import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
@@ -313,27 +316,87 @@ const Indumentaria: React.FC = () => {
         </IonGrid>
       </IonContent>
 
-      {/* Paginación */}
+      {/* Paginación mejorada */}
       {totalPages > 1 && (
         <IonFooter className="pagination-footer">
           <div className="pagination-controls">
+            {/* Botón ir al inicio */}
             <IonButton
+              fill="outline"
+              size="small"
+              disabled={page === 1}
+              onClick={() => setPage(1)}
+              className="pagination-first-last"
+            >
+              <IonIcon icon={playBack} />
+            </IonButton>
+            
+            {/* Botón anterior */}
+            <IonButton
+              fill="outline"
+              size="small"
               disabled={page === 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Anterior
+              <IonIcon icon={chevronBack} slot="icon-only" />
             </IonButton>
             
-            <div className="pagination-info">
-              Página {page} de {totalPages}
+            {/* Selector de página */}
+            <div className="page-selector">
+              <IonSelect
+                value={page}
+                onIonChange={(e) => setPage(e.detail.value)}
+                interface="popover"
+                className="page-select"
+                interfaceOptions={{
+                  side: 'top',
+                  displayflex: 'center',
+                  justifyContent: 'center',
+                  alignment: 'center',
+                  size: 'auto',
+                  showBackdrop: true,
+                  translucent: false,
+                  cssClass: 'page-selector-popover'
+                }}
+              >
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <IonSelectOption key={pageNum} value={pageNum}>
+                    {pageNum}
+                  </IonSelectOption>
+                ))}
+              </IonSelect>
             </div>
             
+            {/* Información de páginas */}
+            <div className="pagination-info">
+              de {totalPages}
+            </div>
+            
+            {/* Botón siguiente */}
             <IonButton
+              fill="outline"
+              size="small"
               disabled={page === totalPages || totalPages === 0}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              Siguiente
+              <IonIcon icon={chevronForward} slot="icon-only" />
             </IonButton>
+            
+            {/* Botón ir al final */}
+            <IonButton
+              fill="outline"
+              size="small"
+              disabled={page === totalPages || totalPages === 0}
+              onClick={() => setPage(totalPages)}
+              className="pagination-first-last"
+            >
+              <IonIcon icon={playForward} />
+            </IonButton>
+          </div>
+          
+          {/* Información adicional de registros */}
+          <div className="pagination-summary">
+            Mostrando {((page - 1) * PAGE_SIZE) + 1} - {Math.min(page * PAGE_SIZE, total)} de {total} registros
           </div>
         </IonFooter>
       )}

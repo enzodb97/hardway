@@ -149,6 +149,20 @@ const AltaIndumentaria: React.FC = () => {
   }, [id, esEdicion]);
 
   const handleChange = (campo: string, valor: string) => {
+    // Validación inmediata para cantidad
+    if (campo === "cantidad" && valor && parseInt(valor) === 0) {
+      setAlertMsg("La cantidad debe ser mayor a 0. Por favor, ingresa un valor válido de stock.");
+      setShowAlert(true);
+      return;
+    }
+    
+    // Validación inmediata para precio
+    if (campo === "precio" && valor && parseFloat(valor) === 0) {
+      setAlertMsg("El precio debe ser mayor a 0. Por favor, ingresa un valor válido.");
+      setShowAlert(true);
+      return;
+    }
+    
     const newForm = { ...form, [campo]: valor };
     setForm(newForm);
     
@@ -298,7 +312,7 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                   <IonIcon icon={shirtOutline} className="empty-icon icon-inner" />
                 </IonCardHeader>
                 <IonCardContent>
-                  <form onSubmit={handleSubmit} autoComplete="off">
+                  <form onSubmit={handleSubmit} autoComplete="off" noValidate>
                     <IonGrid>
                       <IonRow>
                         <IonCol size="12" sizeMd="6">
@@ -507,7 +521,6 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                             <IonInput
                               type="number"
                               value={form.cantidad}
-                              min={0}
                               onIonChange={(e) => handleChange("cantidad", e.detail.value!)}
                               
                               placeholder="Ej: 10"

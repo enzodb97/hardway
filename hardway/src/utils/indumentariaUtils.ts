@@ -192,8 +192,8 @@ export const validarCamposObligatorios = (form: IndumentariaFormData): string[] 
   if (!form.precio || parseFloat(form.precio) <= 0) {
     camposFaltantes.push('• Precio (debe ser mayor a 0)');
   }
-  if (!form.cantidad || parseInt(form.cantidad) < 0) {
-    camposFaltantes.push('• Cantidad en stock (debe ser 0 o mayor)');
+  if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+    camposFaltantes.push('• Cantidad en stock (debe ser mayor a 0)');
   }
   
   return camposFaltantes;
@@ -360,6 +360,15 @@ export async function obtenerIndumentariaPaginada(
           item.idIndumentaria.toString().includes(busqueda))
     );
   }
+  
+  // Ordenar por código de indumentaria de forma creciente
+  prendas.sort((a, b) => {
+    // Extraer el número del código (ej: "IND001" -> 1, "IND010" -> 10)
+    const numeroA = parseInt(a.codigoIndumentaria.replace(/\D/g, '')) || 0;
+    const numeroB = parseInt(b.codigoIndumentaria.replace(/\D/g, '')) || 0;
+    return numeroA - numeroB;
+  });
+  
   const total = prendas.length;
   const start = (page - 1) * pageSize;
   const end = start + pageSize;
