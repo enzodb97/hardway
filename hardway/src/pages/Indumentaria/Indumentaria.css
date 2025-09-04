@@ -421,7 +421,17 @@
   margin: 0 8px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
+
+.page-selector ion-select{
+  --padding-start: 20px;
+  --padding-end: 12px;
+  --border-radius: 12px;
+  --border-color: #e2e8f0;
+}
+
+
 
 .page-select {
   width: 80px;
@@ -643,7 +653,7 @@ ion-popover.page-selector-popover {
   --max-width: 80px;
   --background: #f8fafc;
   --color: #64748b;
-  --offset-x: 30px;
+  --offset-x: 14px;
   --offset-y: -25px;
 }
 
