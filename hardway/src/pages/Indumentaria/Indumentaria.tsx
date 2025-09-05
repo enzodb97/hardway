@@ -128,6 +128,8 @@ const Indumentaria: React.FC = () => {
     }
   };
 
+  const [showPageDropdown, setShowPageDropdown] = useState(false);
+
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   // Función para obtener clase de stock según cantidad
@@ -341,30 +343,42 @@ const Indumentaria: React.FC = () => {
               <IonIcon icon={chevronBack} slot="icon-only" />
             </IonButton>
             
-            {/* Selector de página */}
+            {/* Selector de página personalizado */}
             <div className="page-selector">
-              <IonSelect
-                value={page}
-                onIonChange={(e) => setPage(e.detail.value)}
-                interface="popover"
-                className="page-select"
-                interfaceOptions={{
-                  side: 'top',
-                  displayflex: 'center',
-                  justifyContent: 'center',
-                  alignment: 'center',
-                  size: 'auto',
-                  showBackdrop: true,
-                  translucent: false,
-                  cssClass: 'page-selector-popover'
-                }}
-              >
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                  <IonSelectOption key={pageNum} value={pageNum}>
-                    {pageNum}
-                  </IonSelectOption>
-                ))}
-              </IonSelect>
+              <div className="page-select-custom">
+                <button 
+                  className="page-select-button"
+                  onClick={() => setShowPageDropdown(!showPageDropdown)}
+                >
+                  {page}
+                  <span className="dropdown-arrow">▼</span>
+                </button>
+                
+                {showPageDropdown && (
+                  <div className={`page-dropdown ${totalPages > 10 ? 'with-scroll' : ''}`}>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        className={`page-dropdown-item ${pageNum === page ? 'active' : ''}`}
+                        onClick={() => {
+                          setPage(pageNum);
+                          setShowPageDropdown(false);
+                        }}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Overlay para cerrar el dropdown al hacer clic fuera */}
+              {showPageDropdown && (
+                <div 
+                  className="dropdown-overlay"
+                  onClick={() => setShowPageDropdown(false)}
+                />
+              )}
             </div>
             
             {/* Información de páginas */}

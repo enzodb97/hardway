@@ -488,13 +488,6 @@
   padding-top: 8px;
 }
 
-.pagination-controls ion-button[disabled] {
-  --background: #e2e8f0;
-  --color: #94a3b8;
-  box-shadow: none;
-  opacity: 0.6;
-}
-
 /* Estados vacíos */
 .empty-state {
   text-align: center;
@@ -523,6 +516,124 @@
   font-size: 1em;
   margin: 0;
   line-height: 1.5;
+}
+
+/* Selector de página personalizado */
+.page-select-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.page-select-button {
+  width: 80px;
+  height: 44px;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  position: relative;
+}
+
+.page-select-button:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.page-select-button:active {
+  background: #e2e8f0;
+  transform: scale(0.98);
+}
+
+.dropdown-arrow {
+  margin-left: 8px;
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.page-select-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #fdb40b40;
+}
+
+/* Dropdown menu */
+.page-dropdown {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 80px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow: visible; /* Sin scroll por defecto */
+  transform: translateY(-100%);
+}
+
+/* Solo agregar scroll cuando hay más de 10 páginas */
+.page-dropdown.with-scroll {
+  max-height: 400px; /* 10 elementos × 40px = 400px */
+  overflow-y: auto;
+}
+
+.page-dropdown-item {
+  width: 100%;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.1);
+}
+
+.page-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.page-dropdown-item:hover {
+  background: #e2e8f0;
+}
+
+.page-dropdown-item.active {
+  background: #fdb40b;
+  color: white;
+  font-weight: 600;
+}
+
+.page-dropdown-item:first-child {
+  border-radius: 12px 12px 0 0;
+}
+
+.page-dropdown-item:last-child {
+  border-radius: 0 0 12px 12px;
+}
+
+/* Overlay para cerrar dropdown */
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background: transparent;
 }
 
 /* Responsive Design */
@@ -621,14 +732,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.tabla-indumentaria {
-  animation: slideInUp 0.5s ease-out;
-}
-
-.search-container {
-  animation: slideInUp 0.3s ease-out;
 }
 
 /* Loading states */
