@@ -262,6 +262,8 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
       await guardarIndumentaria({ form, esEdicion, id });
       setShowToast(true);
       setHasUnsavedChanges(false); // Resetear cambios no guardados
+      // Marcar que la lista de indumentaria necesita refrescarse
+      localStorage.setItem('indumentaria_needs_refresh', 'true');
       setTimeout(() => history.push("/indumentaria"), 1200);
     } catch (error) {
       setAlertMsg("Error al guardar la Indumentaria.");

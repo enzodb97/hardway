@@ -19,6 +19,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonLabel,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward } from "ionicons/icons";
@@ -62,6 +63,16 @@ const Indumentaria: React.FC = () => {
     cargarIndumentaria();
     // eslint-disable-next-line
   }, [page, busqueda]);
+
+  // Hook para refrescar automáticamente cuando se regresa a la página
+  useIonViewWillEnter(() => {
+    // Verificar si se necesita refrescar basado en un flag en localStorage
+    const needsRefresh = localStorage.getItem('indumentaria_needs_refresh');
+    if (needsRefresh === 'true') {
+      cargarIndumentaria();
+      localStorage.removeItem('indumentaria_needs_refresh');
+    }
+  });
 
     const [showNoAptaAlert, setShowNoAptaAlert] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
