@@ -149,15 +149,15 @@ const AltaIndumentaria: React.FC = () => {
   }, [id, esEdicion]);
 
   const handleChange = (campo: string, valor: string) => {
-    // Validación inmediata para cantidad
-    if (campo === "cantidad" && valor && parseInt(valor) === 0) {
-      setAlertMsg("La cantidad debe ser mayor a 0. Por favor, ingresa un valor válido de stock.");
+    // Validación inmediata para cantidad - solo validar si se intenta establecer 0 manualmente
+    if (campo === "cantidad" && valor && parseInt(valor) < 0) {
+      setAlertMsg("La cantidad no puede ser negativa. Por favor, ingresa un valor válido de stock.");
       setShowAlert(true);
       return;
     }
     
     // Validación inmediata para precio
-    if (campo === "precio" && valor && parseFloat(valor) === 0) {
+    if (campo === "precio" && valor && parseFloat(valor) <= 0) {
       setAlertMsg("El precio debe ser mayor a 0. Por favor, ingresa un valor válido.");
       setShowAlert(true);
       return;
@@ -497,7 +497,9 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                               onIonChange={(e) => handleChange("idRack", e.detail.value)}
                               
                             >
-                              {racks.map((r) => (
+                              {racks
+                                .filter((r) => r.idRack !== 99) // Filtrar el rack de indumentaria no apta
+                                .map((r) => (
                                 <IonSelectOption key={r.idRack} value={String(r.idRack)}>
                                   {r.numeroRack} - {r.descripcion || 'Sin descripción'}
                                 </IonSelectOption>
@@ -524,8 +526,10 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                               type="number"
                               value={form.cantidad}
                               onIonChange={(e) => handleChange("cantidad", e.detail.value!)}
-                              
-                              placeholder="Ej: 10"
+                              disabled={esEdicion}
+                              readonly={esEdicion}
+                              className={esEdicion ? "readonly-input" : ""}
+                              placeholder={esEdicion ? "No modificable" : "Ej: 10"}
                             />
                           </IonItem>
                         </IonCol>

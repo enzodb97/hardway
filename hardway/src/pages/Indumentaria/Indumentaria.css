@@ -335,16 +335,17 @@
 /* Botones de acción */
 .actions-container {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .actions-container ion-button {
   --border-radius: 8px;
   font-weight: 500;
-  height: 36px;
-  min-width: 36px;
+  height: 32px;
+  min-width: 32px;
   transition: all 0.3s ease;
 }
 
@@ -367,6 +368,16 @@
 .actions-container ion-button[color="danger"]:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.actions-container ion-button[color="success"] {
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.actions-container ion-button[color="success"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Paginación mejorada */

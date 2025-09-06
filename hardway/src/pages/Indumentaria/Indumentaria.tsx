@@ -22,7 +22,7 @@ import {
   useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward } from "ionicons/icons";
+import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward, cubeOutline } from "ionicons/icons";
 import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
@@ -78,6 +78,43 @@ const Indumentaria: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [cantidadNoApta, setCantidadNoApta] = useState<number>(0);
   const [motivoNoApta, setMotivoNoApta] = useState<string>("");
+
+  // Estados para agregar stock
+  const [showAgregarStockAlert, setShowAgregarStockAlert] = useState(false);
+  const [cantidadAgregar, setCantidadAgregar] = useState<number>(0);
+  const [motivoStock, setMotivoStock] = useState<string>("");
+
+  // Manejar agregar stock
+  const handleAgregarStock = async (id: string) => {
+    console.log('Iniciando proceso de agregar stock para:', id);
+    setSelectedItem(id);
+    setShowAgregarStockAlert(true);
+  };
+
+  // Confirmar agregar stock
+  const confirmarAgregarStock = async () => {
+    if (!selectedItem || cantidadAgregar <= 0) return;
+
+    try {
+      await axiosInstance.post(`/api/indumentaria/stock/movimiento`, {
+        codigoIndumentaria: selectedItem,
+        cantidad: cantidadAgregar,
+        observaciones: motivoStock || "Incremento manual de stock"
+      });
+      
+      cargarIndumentaria();
+      setAlertMsg(`Stock incrementado correctamente. Se agregaron ${cantidadAgregar} unidades.`);
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg(error.response?.data?.error || "Error al agregar stock.");
+      setShowAlert(true);
+    } finally {
+      setShowAgregarStockAlert(false);
+      setSelectedItem(null);
+      setCantidadAgregar(0);
+      setMotivoStock("");
+    }
+  };
 
   // Manejar cambio a No Apta
   const handleNoApta = async (id: string) => {
@@ -224,14 +261,14 @@ const Indumentaria: React.FC = () => {
             <IonCol size="1">Nombre</IonCol>
             <IonCol size="1">Color</IonCol>
             <IonCol size="1">Tela</IonCol>
-            <IonCol size="1">Talle</IonCol>
+            <IonCol size="0.5">Talle</IonCol>
             <IonCol size="1">Categoría</IonCol>
             <IonCol size="1">Precio</IonCol>
             <IonCol size="1">Estado</IonCol>
             <IonCol size="1">Stock</IonCol>
             <IonCol size="1">Unidad</IonCol>
-            <IonCol size="1">Rack</IonCol>
-            <IonCol size="1">Acciones</IonCol>
+            <IonCol size="0.5">Rack</IonCol>
+            <IonCol size="2">Acciones</IonCol>
           </IonRow>
           
           {loading ? (
@@ -278,7 +315,7 @@ const Indumentaria: React.FC = () => {
                 <IonCol size="1">{item.nombre}</IonCol>
                 <IonCol size="1">{item.color}</IonCol>
                 <IonCol size="1">{item.nombreTela}</IonCol>
-                <IonCol size="1">{item.talle}</IonCol>
+                <IonCol size="0.5">{item.talle}</IonCol>
                 <IonCol size="1">{item.categoria}</IonCol>
                 <IonCol size="1">
                   <span className="precio-badge">${item.precio}</span>
@@ -296,10 +333,10 @@ const Indumentaria: React.FC = () => {
                 <IonCol size="1">
                   <span className="unidad-badge">{item.unidad}</span>
                 </IonCol>
-                <IonCol size="1">
+                <IonCol size="0.5">
                   <span className="rack-badge">#{item.Stock?.numeroRack || 'N/A'}</span>
                 </IonCol>
-                <IonCol size="1">
+                <IonCol size="2">
                   <div className="actions-container">
                     <IonButton
                       fill="solid"
@@ -315,9 +352,19 @@ const Indumentaria: React.FC = () => {
                     </IonButton>
                     <IonButton
                       fill="solid"
+                      color="success"
+                      size="small"
+                      onClick={() => handleAgregarStock(item.codigoIndumentaria)}
+                      title="Agregar Stock"
+                    >
+                      <IonIcon icon={cubeOutline} />
+                    </IonButton>
+                    <IonButton
+                      fill="solid"
                       color="warning"
                       size="small"
                       onClick={() => handleNoApta(item.codigoIndumentaria)}
+                      title="Mover a No Apta"
                     >
                       <IonIcon icon={trash} />
                     </IonButton>
@@ -512,6 +559,88 @@ const Indumentaria: React.FC = () => {
                   status: error.response?.status
                 });
                 setAlertMsg(error.response?.data?.error || "Error al mover stock a No Apto.");
+                setShowAlert(true);
+                return false;
+              }
+            }
+          }
+        ]}
+      />
+
+      {/* Alert para agregar stock */}
+      <IonAlert
+        isOpen={showAgregarStockAlert}
+        header="Agregar Stock"
+        subHeader={selectedItem ? `Indumentaria: ${selectedItem}` : ''}
+        message="Ingrese la cantidad de stock que desea agregar:"
+        inputs={[
+          {
+            name: 'cantidad',
+            type: 'number',
+            placeholder: 'Cantidad a agregar',
+            min: 1
+          },
+          {
+            name: 'motivo',
+            type: 'text',
+            placeholder: 'Motivo/Observación (opcional)',
+            value: 'Incremento manual de stock'
+          }
+        ]}
+        buttons={[
+          {
+            text: 'Cancelar',
+            role: 'cancel',
+            handler: () => {
+              setShowAgregarStockAlert(false);
+              setSelectedItem(null);
+              setCantidadAgregar(0);
+              setMotivoStock("");
+            }
+          },
+          {
+            text: 'Agregar',
+            handler: async (data) => {
+              if (!selectedItem || !data.cantidad) {
+                setAlertMsg("Por favor ingrese una cantidad");
+                setShowAlert(true);
+                return false;
+              }
+              
+              const cantidad = Number(data.cantidad);
+              if (cantidad <= 0) {
+                setAlertMsg("La cantidad debe ser mayor a 0");
+                setShowAlert(true);
+                return false;
+              }
+              
+              try {
+                console.log('Agregando stock:', {
+                  codigoIndumentaria: selectedItem,
+                  cantidad: cantidad,
+                  motivo: data.motivo || 'Incremento manual de stock'
+                });
+                
+                const response = await axiosInstance.post(`/api/indumentaria/stock/movimiento`, {
+                  codigoIndumentaria: selectedItem,
+                  cantidad: cantidad,
+                  observaciones: data.motivo || "Incremento manual de stock"
+                });
+                
+                console.log('Respuesta agregar stock:', response.data);
+                
+                cargarIndumentaria();
+                setAlertMsg(`Stock incrementado correctamente. Se agregaron ${cantidad} unidades.`);
+                setShowAlert(true);
+                setShowAgregarStockAlert(false);
+                setSelectedItem(null);
+              } catch (error: any) {
+                console.error('Error al agregar stock:', {
+                  mensaje: error.message,
+                  respuesta: error.response?.data,
+                  status: error.response?.status
+                });
+                setAlertMsg(error.response?.data?.error || "Error al agregar stock.");
                 setShowAlert(true);
                 return false;
               }

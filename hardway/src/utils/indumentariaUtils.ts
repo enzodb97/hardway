@@ -121,7 +121,7 @@ export const cargarAuxiliares = async () => {
       axiosInstance.get("/api/precios"),
       axiosInstance.get("/api/nombres-indumentaria"),
       axiosInstance.get("/api/unidades-medida"),
-      axiosInstance.get("/api/indumentaria/racks"),
+      axiosInstance.get("/api/indumentaria/racks/disponibles"), // Usar endpoint que excluye rack de No Apta
     ]);
 
     return {

@@ -31,6 +31,22 @@ router.get("/racks", async (req, res) => {
   }
 });
 
+// Obtener racks disponibles para registro/edición (excluye rack de No Apta)
+router.get("/racks/disponibles", async (req, res) => {
+  try {
+    const racks = await Rack.findAll({
+      where: {
+        idRack: { [Op.ne]: 99 } // Excluir el rack de indumentaria no apta
+      },
+      order: [['numeroRack', 'ASC']]
+    });
+    res.json(racks);
+  } catch (error) {
+    console.error('Error al obtener racks disponibles:', error);
+    res.status(500).json({ error: 'Error al obtener racks disponibles', detalle: error.message });
+  }
+});
+
 // Obtener un rack por ID
 router.get("/racks/:id", async (req, res) => {
   try {
@@ -121,6 +137,10 @@ router.get("/", async (req, res) => {
         },
         {
           model: Stock,
+          where: {
+            idRack: { [Op.ne]: 99 } // Excluir el rack de No Aptos
+          },
+          required: false, // LEFT JOIN para permitir indumentaria sin stock
           include: [
             { model: MovimientoStock },
             { model: Rack },
@@ -133,15 +153,12 @@ router.get("/", async (req, res) => {
     const indumentariaConStock = indumentaria.map(item => {
       const itemJson = item.toJSON();
       
-      // Calcular stock disponible (excluyendo el rack No Apto)
+      // Calcular stock disponible (ya filtrado para excluir rack No Apto)
       let stockDisponible = 0;
       if (item.Stock && item.Stock.MovimientoStocks) {
-        // Solo contar stock de racks que no sean el No Apto (99)
-        if (item.Stock.idRack !== 99) {
-          stockDisponible = item.Stock.MovimientoStocks.reduce((total, movimiento) => {
-            return total + (movimiento.cantidad || 0);
-          }, 0);
-        }
+        stockDisponible = item.Stock.MovimientoStocks.reduce((total, movimiento) => {
+          return total + (movimiento.cantidad || 0);
+        }, 0);
       }
 
       // Agregar el stock calculado al DetalleIndumentarium
@@ -168,6 +185,13 @@ router.post("/", async (req, res) => {
     cantidadInicial = 0, // Stock inicial
     idRack // Ubicación del stock
   } = req.body;
+
+  // Validar que no se use el rack de indumentaria no apta (ID 99)
+  if (idRack && parseInt(idRack) === 99) {
+    return res.status(400).json({ 
+      error: "No se puede registrar indumentaria directamente en el rack de 'No Apta'. Este rack está reservado para movimientos de stock no apto." 
+    });
+  }
 
   const t = await sequelize.transaction();
   try {
@@ -244,9 +268,16 @@ router.get("/:id", async (req, res) => {
         },
         {
           model: Stock,
+          where: {
+            idRack: { [Op.ne]: 99 } // Excluir el rack de No Aptos
+          },
+          required: false, // LEFT JOIN para permitir indumentaria sin stock
           include: [
             {
               model: MovimientoStock,
+            },
+            {
+              model: Rack,
             },
           ],
         },
@@ -453,18 +484,22 @@ router.post('/stock/movimiento', async (req, res) => {
 
   const t = await sequelize.transaction();
   try {
-    // Primero buscamos el stock correspondiente
+    // Primero buscamos el stock correspondiente (excluyendo el rack de No Aptos)
     let stock = await Stock.findOne({
-      where: { codigoIndumentaria },
+      where: { 
+        codigoIndumentaria,
+        idRack: { [Op.ne]: 99 } // Excluir el rack de No Aptos
+      },
       transaction: t
     });
 
-    // Si no existe el stock, lo creamos
+    // Si no existe el stock normal, lo creamos (sin rack especificado inicialmente)
     if (!stock) {
       const stockId = `STK-${Date.now()}`;
       stock = await Stock.create({
         idStock: stockId,
-        codigoIndumentaria
+        codigoIndumentaria,
+        idRack: null // Se asignará el rack cuando se especifique
       }, { transaction: t });
     }
 
@@ -490,6 +525,13 @@ router.post('/stock/movimiento', async (req, res) => {
 router.put('/stock/:codigoIndumentaria', async (req, res) => {
   const { codigoIndumentaria } = req.params;
   const { idRack } = req.body;
+
+  // Validar que no se use el rack de indumentaria no apta (ID 99)
+  if (idRack && parseInt(idRack) === 99) {
+    return res.status(400).json({ 
+      error: "No se puede mover indumentaria directamente al rack de 'No Apta'. Use la función específica para marcar como no apta." 
+    });
+  }
 
   const t = await sequelize.transaction();
   try {
