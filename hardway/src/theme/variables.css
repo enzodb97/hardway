@@ -12,8 +12,7 @@ http://ionicframework.com/docs/theming/ */
   color: #000;
 
   /* Set the font family of the entire app */
-  --ion-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Roboto", sans-serif;
+  --ion-font-family: "Roboto", sans-serif;
 }
 
 /* Set text color of the entire app for iOS only */
