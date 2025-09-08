@@ -66,6 +66,17 @@
   transform: translateY(-2px);
 }
 
+.stat-item.active {
+  background: rgba(253, 180, 11, 0.2);
+  border: 2px solid rgba(253, 180, 11, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
+}
+
+.stat-item.active .stat-icon {
+  filter: drop-shadow(0 2px 4px rgba(253, 180, 11, 0.5));
+}
+
 .stat-icon {
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
@@ -233,13 +244,21 @@
   width: 100%;
 }
 
+/* Grid de pedidos */
+.pedidos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
 /* Pedido Cards */
 .pedido-card {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 16px;
-  margin-bottom: 1rem;
+  margin-bottom: 0; /* Removemos el margin-bottom ya que usamos gap en el grid */
   transition: all 0.3s ease;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -652,6 +671,11 @@ ion-modal ion-item {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .pedidos-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
   .pagination-container {
     flex-direction: column;
     text-align: center;
@@ -782,6 +806,45 @@ ion-chip:hover {
   font-size: 0.85rem;
   font-weight: 600;
   font-family: "Roboto", "Helvetica Neue", sans-serif;
+}
+
+/* Active Filter Indicator */
+.active-filter-card {
+  background: rgba(253, 180, 11, 0.15);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(253, 180, 11, 0.5);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.2);
+}
+
+.active-filter-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.filter-icon {
+  color: #fdb40b;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.filter-text {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-grow: 1;
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.clear-filter-btn {
+  --color: #fdb40b;
+  --background-hover: rgba(253, 180, 11, 0.1);
+  margin: 0;
+  height: 32px;
+  width: 32px;
 }
 
 /* Icon spacing for inline elements */

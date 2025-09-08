@@ -44,6 +44,8 @@ import {
   locationOutline,
   calendarOutline,
   layersOutline,
+  filterOutline,
+  closeOutline,
 } from "ionicons/icons";
 import "./Envios.css";
 
@@ -60,6 +62,7 @@ const Envios: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [filtroActivo, setFiltroActivo] = useState<string>('todos');
 
   // Paginación
   const [pagina, setPagina] = useState(1);
@@ -126,6 +129,26 @@ const Envios: React.FC = () => {
 
     setPedidosFiltrados(pedidosFiltrados);
     setPagina(1); // Resetear a la primera página
+  };
+
+  // Función para filtrar por estadísticas
+  const filtrarPorEstadisticas = (tipo: string) => {
+    setFiltroActivo(tipo);
+    setSearchTerm(""); // Limpiar búsqueda
+    
+    switch (tipo) {
+      case 'pendientes':
+        setFiltroEstado('pendientes');
+        break;
+      case 'despachados':
+        setFiltroEstado('despachados');
+        break;
+      case 'total':
+        setFiltroEstado('todos');
+        break;
+      default:
+        setFiltroEstado('todos');
+    }
   };
 
   const handleRefresh = async (event: CustomEvent) => {
@@ -196,7 +219,10 @@ const Envios: React.FC = () => {
             <IonGrid>
               <IonRow>
                 <IonCol size="4" className="stat-col">
-                  <div className="stat-item">
+                  <div 
+                    className={`stat-item ${filtroActivo === 'pendientes' ? 'active' : ''}`}
+                    onClick={() => filtrarPorEstadisticas('pendientes')}
+                  >
                     <IonIcon icon={cubeOutline} className="stat-icon pending" />
                     <div className="stat-number">
                       {pedidos.filter((p) => !p.codigoSeguimiento).length}
@@ -205,7 +231,10 @@ const Envios: React.FC = () => {
                   </div>
                 </IonCol>
                 <IonCol size="4" className="stat-col">
-                  <div className="stat-item">
+                  <div 
+                    className={`stat-item ${filtroActivo === 'despachados' ? 'active' : ''}`}
+                    onClick={() => filtrarPorEstadisticas('despachados')}
+                  >
                     <IonIcon
                       icon={checkmarkCircleOutline}
                       className="stat-icon dispatched"
@@ -217,7 +246,10 @@ const Envios: React.FC = () => {
                   </div>
                 </IonCol>
                 <IonCol size="4" className="stat-col">
-                  <div className="stat-item">
+                  <div 
+                    className={`stat-item ${filtroActivo === 'total' ? 'active' : ''}`}
+                    onClick={() => filtrarPorEstadisticas('total')}
+                  >
                     <IonIcon icon={layersOutline} className="stat-icon total" />
                     <div className="stat-number">{pedidos.length}</div>
                     <div className="stat-label">Total</div>
@@ -292,7 +324,7 @@ const Envios: React.FC = () => {
             </IonCardContent>
           </IonCard>
         ) : (
-          <>
+          <div className="pedidos-grid">
             {pedidosPaginados.map((pedido) => (
               <IonCard key={pedido.numeroPedido} className="pedido-card">
                 <IonCardHeader>
@@ -398,7 +430,7 @@ const Envios: React.FC = () => {
                 </IonCardContent>
               </IonCard>
             ))}
-          </>
+          </div>
         )}
 
         {/* Paginación */}

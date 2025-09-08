@@ -26,7 +26,11 @@ import {
   locationOutline,
   pricetagOutline,
   colorPaletteOutline,
-  resizeOutline
+  resizeOutline,
+  clipboardOutline,
+  refreshOutline,
+  timeOutline,
+  statsChartOutline,
 } from "ionicons/icons";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -40,6 +44,8 @@ import "./Picking.css";
 const Picking: React.FC = () => {
   const { username, rol, legajoPicker } = useAuth();
   const [tareas, setTareas] = useState<any[]>([]);
+  const [tareasFiltradas, setTareasFiltradas] = useState<any[]>([]);
+  const [filtroActivo, setFiltroActivo] = useState<string>('todos');
   const [loading, setLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
@@ -55,6 +61,7 @@ const Picking: React.FC = () => {
       const pickerId = rol === "Picker" ? legajoPicker : username;
       const data = await cargarTareasPicking(rol || "", pickerId || "");
       setTareas(data);
+      setTareasFiltradas(data); // Inicialmente mostrar todas las tareas
     } catch (err) {
       setAlertMsg("Error al cargar tareas");
       setShowAlert(true);
@@ -62,10 +69,38 @@ const Picking: React.FC = () => {
     setLoading(false);
   };
 
+  // Función para filtrar tareas
+  const filtrarTareas = (tipo: string) => {
+    setFiltroActivo(tipo);
+    
+    switch (tipo) {
+      case 'todos':
+        setTareasFiltradas(tareas);
+        break;
+      case 'pendientes':
+        setTareasFiltradas(tareas.filter(tarea => !tarea.completada && !tarea.enProceso));
+        break;
+      case 'enProceso':
+        setTareasFiltradas(tareas.filter(tarea => tarea.enProceso));
+        break;
+      case 'completadas':
+        setTareasFiltradas(tareas.filter(tarea => tarea.completada));
+        break;
+      default:
+        setTareasFiltradas(tareas);
+    }
+  };
+
   useEffect(() => {
     cargarTareas();
     // eslint-disable-next-line
   }, []);
+
+  // Actualizar tareas filtradas cuando cambian las tareas
+  useEffect(() => {
+    filtrarTareas(filtroActivo);
+    // eslint-disable-next-line
+  }, [tareas]);
 
   const handleVerPickingList = async (numeroPedido: string) => {
     try {
@@ -176,256 +211,360 @@ const Picking: React.FC = () => {
     }
   };
 
+  // Calcular estadísticas
+  const stats = {
+    total: tareas.length,
+    pendientes: tareas.filter(tarea => !tarea.completada).length,
+    completadas: tareas.filter(tarea => tarea.completada).length,
+    enProceso: tareas.filter(tarea => tarea.enProceso).length,
+  };
+
   return (
     <IonPage className="picking-page">
       <IonHeader>
-        <IonToolbar>
-          <IonTitle>Mis Tareas de Picking</IonTitle>
+        <IonToolbar className="picking-toolbar">
+          <IonTitle>Gestión de Picking</IonTitle>
+          <IonButton 
+            slot="end" 
+            fill="clear" 
+            onClick={cargarTareas}
+            className="refresh-btn"
+          >
+            <IonIcon icon={refreshOutline} />
+          </IonButton>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="picking-page">
-        {loading ? (
-          <IonSpinner name="crescent" style={{ margin: 32 }} />
-        ) : (
+      
+      <IonContent className="picking-content">
+        {/* Dashboard de Estadísticas */}
+        <div className="stats-dashboard">
           <IonGrid>
             <IonRow>
-              <IonCol size="12">
-                <IonList>
-                  {tareas.length === 0 && (
-                    <IonItem>No tienes tareas pendientes.</IonItem>
-                  )}
-                  {tareas.map((tarea) => (
-                    <IonItem key={tarea.idAsignacion}>
-                      <IonLabel>
-                        {rol === "Administrador" && tarea.pickerAsignado && (
-                          <span className="picking-admin-picker">
-                            Picker asignado: {tarea.pickerAsignado}
-                          </span>
-                        )}
-                        <span className="picking-pedido-label">
-                          Pedido: {tarea.numeroPedido}
-                        </span>
-                        <br />
-                        <span className="picking-fecha-label">
-                          Fecha asignación:{" "}
-                          {new Date(tarea.fechaAsignacion).toLocaleString(
-                            "es-AR"
-                          )}
-                        </span>
-                      </IonLabel>
-                      <IonButton
-                        slot="end"
-                        color="warning"
-                        className="picking-action-btn"
-                        onClick={async () => {
-                          // Obtener productos del pedido para exportar
-                          try {
-                            const response = await verPickingList(
-                              tarea.numeroPedido
-                            );
-                            // Mapear productos para el PDF
-                            const productos = (
-                              response?.pedido?.DetallePedidos || []
-                            ).map((detalle: any) => {
-                              const indumentaria = detalle.Indumentarium || {};
-                              const detalleInd =
-                                indumentaria.DetalleIndumentarium || {};
-                              const nombreInd =
-                                detalleInd.NombreIndumentarium || {};
-                              const color = detalleInd.Color || {};
-                              const talle = detalleInd.Talle || {};
-                              const categoria =
-                                detalleInd.CategoriaIndumentarium || {};
-                              return {
-                                id:
-                                  indumentaria.idIndumentaria ||
-                                  detalle.codigoIndumentaria ||
-                                  "-",
-                                nombre: nombreInd.nombre || "Sin nombre",
-                                cantidad: detalle.cantidad || 0,
-                                rack:
-                                  indumentaria.Stock?.Rack?.numeroRack ||
-                                  indumentaria.Stock?.idRack?.toString() ||
-                                  "Sin asignar",
-                                categoria:
-                                  categoria.categoria || "Sin categoría",
-                                color: color.color || "N/A",
-                                talle: talle.talle || "N/A",
-                              };
-                            });
-                            exportarPedidoPDF({
-                              id: tarea.numeroPedido,
-                              productos,
-                            });
-                          } catch (err) {
-                            setAlertMsg("Error al exportar el pedido a PDF");
-                            setShowAlert(true);
-                          }
-                        }}
-                        style={{ marginRight: 8 }}
-                      >
-                        <IonIcon icon={printOutline} slot="start" />
-                        Exportar A PDF
-                      </IonButton>
-                      <IonButton
-                        slot="end"
-                        color="primary"
-                        className="picking-action-btn"
-                        onClick={() => handleVerPickingList(tarea.numeroPedido)}
-                      >
-                        Ver Picking List
-                      </IonButton>
-                      <IonButton
-                        slot="end"
-                        color="success"
-                        className="picking-action-btn"
-                        onClick={() => {
-                          console.log("Seleccionando tarea:", tarea);
-                          console.log(
-                            "ID Asignación:",
-                            tarea.idAsignacion,
-                            "tipo:",
-                            typeof tarea.idAsignacion
-                          );
-                          setTareaSeleccionada(tarea);
-                          setShowConfirm(true);
-                        }}
-                      >
-                        <IonIcon icon={checkmarkCircleOutline} /> Completar
-                      </IonButton>
-                    </IonItem>
-                  ))}
-                </IonList>
+              <IonCol size="12" sizeMd="3">
+                <div 
+                  className={`stat-card total ${filtroActivo === 'todos' ? 'active' : ''}`}
+                  onClick={() => filtrarTareas('todos')}
+                >
+                  <div className="stat-icon">
+                    <IonIcon icon={clipboardOutline} />
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">{stats.total}</div>
+                    <div className="stat-label">Total Tareas</div>
+                  </div>
+                </div>
+              </IonCol>
+              <IonCol size="12" sizeMd="3">
+                <div 
+                  className={`stat-card pending ${filtroActivo === 'pendientes' ? 'active' : ''}`}
+                  onClick={() => filtrarTareas('pendientes')}
+                >
+                  <div className="stat-icon">
+                    <IonIcon icon={timeOutline} />
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">{stats.pendientes}</div>
+                    <div className="stat-label">Pendientes</div>
+                  </div>
+                </div>
+              </IonCol>
+              <IonCol size="12" sizeMd="3">
+                <div 
+                  className={`stat-card in-progress ${filtroActivo === 'enProceso' ? 'active' : ''}`}
+                  onClick={() => filtrarTareas('enProceso')}
+                >
+                  <div className="stat-icon">
+                    <IonIcon icon={statsChartOutline} />
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">{stats.enProceso}</div>
+                    <div className="stat-label">En Proceso</div>
+                  </div>
+                </div>
+              </IonCol>
+              <IonCol size="12" sizeMd="3">
+                <div 
+                  className={`stat-card completed ${filtroActivo === 'completadas' ? 'active' : ''}`}
+                  onClick={() => filtrarTareas('completadas')}
+                >
+                  <div className="stat-icon">
+                    <IonIcon icon={checkmarkCircleOutline} />
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">{stats.completadas}</div>
+                    <div className="stat-label">Completadas</div>
+                  </div>
+                </div>
               </IonCol>
             </IonRow>
           </IonGrid>
+        </div>
+
+        {/* Contenido Principal */}
+        {loading ? (
+          <div className="loading-container">
+            <IonSpinner name="crescent" className="loading-spinner" />
+            <p className="loading-text">Cargando tareas de picking...</p>
+          </div>
+        ) : (
+          <div className="tasks-container">
+            <IonGrid>
+              <IonRow>
+                <IonCol size="12">
+                  
+                  {tareasFiltradas.length === 0 ? (
+                    <div className="empty-state">
+                      <IonIcon icon={clipboardOutline} className="empty-icon" />
+                      <h2>
+                        {filtroActivo === 'todos' ? 'No hay tareas disponibles' : 
+                         `No hay tareas ${
+                           filtroActivo === 'pendientes' ? 'pendientes' :
+                           filtroActivo === 'enProceso' ? 'en proceso' :
+                           filtroActivo === 'completadas' ? 'completadas' : ''
+                         }`}
+                      </h2>
+                      <p>
+                        {filtroActivo === 'todos' ? 
+                          'No tienes tareas de picking en este momento.' :
+                          `No hay tareas ${
+                            filtroActivo === 'pendientes' ? 'pendientes' :
+                            filtroActivo === 'enProceso' ? 'en proceso' :
+                            filtroActivo === 'completadas' ? 'completadas' : ''
+                          } disponibles.`}
+                      </p>
+                      <IonButton 
+                        color="primary" 
+                        onClick={cargarTareas}
+                        className="refresh-btn"
+                      >
+                        <IonIcon icon={refreshOutline} />
+                        Actualizar
+                      </IonButton>
+                    </div>
+                  ) : (
+                    <div className="tasks-grid">
+                      {tareasFiltradas.map((tarea) => (
+                        <div key={tarea.idAsignacion} className="task-card">
+                          <div className="task-header">
+                            <div className="task-title">
+                              <IonIcon icon={cubeOutline} />
+                              <span>Pedido {tarea.numeroPedido}</span>
+                            </div>
+                            {rol === "Administrador" && tarea.pickerAsignado && (
+                              <div className="picker-badge">
+                                {tarea.pickerAsignado}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="task-info">
+                            <div className="info-item">
+                              <IonIcon icon={timeOutline} />
+                              <span>
+                                {new Date(tarea.fechaAsignacion).toLocaleString("es-AR")}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="task-actions">
+                            <IonButton
+                              size="small"
+                              color="warning"
+                              fill="outline"
+                              onClick={async () => {
+                                try {
+                                  const response = await verPickingList(tarea.numeroPedido);
+                                  const productos = (response?.pedido?.DetallePedidos || []).map((detalle: any) => {
+                                    const indumentaria = detalle.Indumentarium || {};
+                                    const detalleInd = indumentaria.DetalleIndumentarium || {};
+                                    const nombreInd = detalleInd.NombreIndumentarium || {};
+                                    const color = detalleInd.Color || {};
+                                    const talle = detalleInd.Talle || {};
+                                    const categoria = detalleInd.CategoriaIndumentarium || {};
+                                    return {
+                                      id: indumentaria.idIndumentaria || detalle.codigoIndumentaria || "-",
+                                      nombre: nombreInd.nombre || "Sin nombre",
+                                      cantidad: detalle.cantidad || 0,
+                                      rack: indumentaria.Stock?.Rack?.numeroRack || indumentaria.Stock?.idRack?.toString() || "Sin asignar",
+                                      categoria: categoria.categoria || "Sin categoría",
+                                      color: color.color || "N/A",
+                                      talle: talle.talle || "N/A",
+                                    };
+                                  });
+                                  exportarPedidoPDF({
+                                    id: tarea.numeroPedido,
+                                    productos,
+                                  });
+                                } catch (err) {
+                                  setAlertMsg("Error al exportar el pedido a PDF");
+                                  setShowAlert(true);
+                                }
+                              }}
+                            >
+                              <IonIcon icon={printOutline} slot="start" />
+                              PDF
+                            </IonButton>
+                            
+                            <IonButton
+                              size="small"
+                              color="primary"
+                              fill="outline"
+                              onClick={() => handleVerPickingList(tarea.numeroPedido)}
+                            >
+                              <IonIcon icon={locationOutline} slot="start" />
+                              Ver Lista
+                            </IonButton>
+                            
+                            <IonButton
+                              size="small"
+                              color="success"
+                              onClick={() => {
+                                setTareaSeleccionada(tarea);
+                                setShowConfirm(true);
+                              }}
+                            >
+                              <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                              Completar
+                            </IonButton>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </IonCol>
+              </IonRow>
+            </IonGrid>
+          </div>
         )}
 
-        {/* Modal para ver picking list */}
-        {/* Modal Picking List con Ionic/React */}
+        {/* Modal Picking List con diseño profesional */}
         <IonModal
           isOpen={showPickingList}
           onDidDismiss={() => setShowPickingList(false)}
-          className="picking-list-modal"
+          className="picking-modal"
         >
           <IonHeader>
-            <IonToolbar color="primary">
-              <IonTitle>Picking List</IonTitle>
+            <IonToolbar className="picking-modal-toolbar">
+              <IonTitle>Lista de Picking</IonTitle>
               <IonButton
                 slot="end"
                 fill="clear"
                 onClick={() => setShowPickingList(false)}
+                className="modal-close-btn"
               >
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonToolbar>
           </IonHeader>
-          <IonContent>
-            <IonList>
-              {pickingList.length === 0 && (
-                <IonItem>No hay productos para este pedido.</IonItem>
-              )}
-              {pickingList.map((item: any, idx: number) => (
-                <div className="picking-list-item" key={idx}>
-                  <IonGrid>
-                    <IonRow>
-                      <IonCol size="12">
-                        <div className="picking-item-header">
-                          <h2>{item.nombre_producto ?? "-"}</h2>
-                          <span className="picking-ref-badge">
-                            {item.referencia || item.codigoIndumentaria || "-"}
-                          </span>
-                        </div>
-                      </IonCol>
-                    </IonRow>
-                    <IonRow>
-                      <IonCol size="6" sizeMd="3">
-                        <div className="picking-detail-item">
-                          <IonIcon icon={cubeOutline} />
-                          <div>
-                            <span className="label">Cantidad</span>
-                            <span className="value">{item.cantidad ?? "-"}</span>
-                          </div>
-                        </div>
-                      </IonCol>
-                      <IonCol size="6" sizeMd="3">
-                        <div className="picking-detail-item">
-                          <IonIcon icon={locationOutline} />
-                          <div>
-                            <span className="label">Rack</span>
-                            <span className="value">{item.rack ?? "Sin asignar"}</span>
-                          </div>
-                        </div>
-                      </IonCol>
-                      <IonCol size="6" sizeMd="3">
-                        <div className="picking-detail-item">
-                          <IonIcon icon={pricetagOutline} />
-                          <div>
-                            <span className="label">Categoría</span>
-                            <span className="value">{item.categoria ?? "-"}</span>
-                          </div>
-                        </div>
-                      </IonCol>
-                      <IonCol size="6" sizeMd="3">
-                        <div className="picking-detail-item">
-                          <IonIcon icon={colorPaletteOutline} />
-                          <div>
-                            <span className="label">Color</span>
-                            <span className="value">{item.color ?? "-"}</span>
-                          </div>
-                        </div>
-                      </IonCol>
-                    </IonRow>
-                    <IonRow>
-                      <IonCol size="12">
-                        <div className="picking-detail-item picking-size">
-                          <IonIcon icon={resizeOutline} />
-                          <div>
-                            <span className="label">Talle</span>
-                            <span className="value highlight">{item.talle ?? "-"}</span>
-                          </div>
-                        </div>
-                      </IonCol>
-                    </IonRow>
-                  </IonGrid>
+          
+          <IonContent className="picking-modal-content">
+            {pickingList.length === 0 ? (
+              <div className="empty-state">
+                <IonIcon icon={cubeOutline} className="empty-icon" />
+                <h2>Sin productos</h2>
+                <p>No hay productos disponibles para este pedido.</p>
+              </div>
+            ) : (
+              <div className="picking-items-container">
+                <div className="picking-items-header">
+                  <h3>Productos a recoger ({pickingList.length})</h3>
                 </div>
-              ))}
-            </IonList>
-            <IonButton
-              expand="block"
-              color="medium"
-              onClick={() => setShowPickingList(false)}
-              style={{ margin: 16 }}
-            >
-              Cerrar
-            </IonButton>
+                
+                <div className="picking-items-grid">
+                  {pickingList.map((item: any, idx: number) => (
+                    <div className="picking-item-card" key={idx}>
+                      <div className="item-header">
+                        <h4 className="item-name">{item.nombre_producto ?? "-"}</h4>
+                        <span className="item-reference">
+                          {item.referencia || item.codigoIndumentaria || "-"}
+                        </span>
+                      </div>
+                      
+                      <div className="item-details">
+                        <div className="detail-row">
+                          <div className="detail-item">
+                            <IonIcon icon={cubeOutline} />
+                            <div className="detail-content">
+                              <span className="detail-label">Cantidad</span>
+                              <span className="detail-value">{item.cantidad ?? "-"}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="detail-item rack-info">
+                            <IonIcon icon={locationOutline} />
+                            <div className="detail-content">
+                              <span className="detail-label">Rack</span>
+                              <span className="detail-value highlight">{item.rack ?? "Sin asignar"}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="detail-row">
+                          <div className="detail-item">
+                            <IonIcon icon={pricetagOutline} />
+                            <div className="detail-content">
+                              <span className="detail-label">Categoría</span>
+                              <span className="detail-value">{item.categoria ?? "-"}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="detail-item">
+                            <IonIcon icon={colorPaletteOutline} />
+                            <div className="detail-content">
+                              <span className="detail-label">Color</span>
+                              <span className="detail-value">{item.color ?? "-"}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="detail-row">
+                          <div className="detail-item size-info">
+                            <IonIcon icon={resizeOutline} />
+                            <div className="detail-content">
+                              <span className="detail-label">Talle</span>
+                              <span className="detail-value highlight">{item.talle ?? "-"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="modal-actions">
+              <IonButton
+                expand="block"
+                color="medium"
+                onClick={() => setShowPickingList(false)}
+                className="close-modal-btn"
+              >
+                <IonIcon icon={closeOutline} slot="start" />
+                Cerrar
+              </IonButton>
+            </div>
           </IonContent>
         </IonModal>
-        {/* Confirmar completar tarea */}
+        {/* Modal de confirmación con diseño profesional */}
         <IonAlert
           isOpen={showConfirm}
           onDidDismiss={() => setShowConfirm(false)}
-          header="¿Finalizar tarea?"
-          message="¿Deseas marcar esta tarea como completada? Esto actualizará el estado del pedido."
+          cssClass="picking-confirm-alert"
+          header="Confirmar Finalización"
+          message="¿Estás seguro de que deseas marcar esta tarea como completada? Esta acción actualizará el estado del pedido."
           buttons={[
             {
               text: "Cancelar",
               role: "cancel",
+              cssClass: "alert-button-cancel",
             },
             {
-              text: "Completar",
+              text: "Completar Tarea",
+              cssClass: "alert-button-confirm",
               handler: () => {
-                console.log(
-                  "Tarea seleccionada al completar:",
-                  tareaSeleccionada
-                );
                 if (!tareaSeleccionada || !tareaSeleccionada.idAsignacion) {
-                  console.error(
-                    "Error: No hay idAsignacion en la tarea seleccionada"
-                  );
-                  setAlertMsg(
-                    "Error: No se encontró ID de asignación para esta tarea"
-                  );
+                  setAlertMsg("Error: No se encontró ID de asignación para esta tarea");
                   setShowAlert(true);
                   return false;
                 }
@@ -437,11 +576,20 @@ const Picking: React.FC = () => {
             },
           ]}
         />
+        
+        {/* Modal de notificaciones */}
         <IonAlert
           isOpen={showAlert}
           onDidDismiss={() => setShowAlert(false)}
+          cssClass="picking-notification-alert"
+          header="Notificación"
           message={alertMsg}
-          buttons={["Aceptar"]}
+          buttons={[
+            {
+              text: "Entendido",
+              cssClass: "alert-button-primary",
+            }
+          ]}
         />
       </IonContent>
     </IonPage>
