@@ -429,21 +429,33 @@ export const exportarIndumentariaPDF = async (prendas: IndumentariaItem[], filtr
     head: [["Código", "Nombre", "Color", "Tela", "Talle", "Categoría", "Precio", "Estado", "Stock", "Unidad", "Rack"]],
     body: tableData,
     startY: filtro ? 37 : 32,
-    styles: { fontSize: 8, halign: "center" },
-    headStyles: { fillColor: [254, 175, 0], halign: "center" },
-    columnStyles: {
-      0: { cellWidth: 15 }, // Código
-      1: { cellWidth: 20 }, // Nombre
-      2: { cellWidth: 15 }, // Color
-      3: { cellWidth: 15 }, // Tela
-      4: { cellWidth: 12 }, // Talle
-      5: { cellWidth: 18 }, // Categoría
-      6: { cellWidth: 15 }, // Precio
-      7: { cellWidth: 15 }, // Estado
-      8: { cellWidth: 12 }, // Stock
-      9: { cellWidth: 12 }, // Unidad
-      10: { cellWidth: 12 }, // Rack
+    styles: { 
+      fontSize: 8, 
+      halign: "center",
+      cellPadding: 2,
+      overflow: 'linebreak',
+      cellWidth: 'wrap'
     },
+    headStyles: { 
+      fillColor: [254, 175, 0], 
+      halign: "center",
+      fontStyle: 'bold'
+    },
+    columnStyles: {
+      0: { cellWidth: 'auto', minCellWidth: 15 }, // Código
+      1: { cellWidth: 'auto', minCellWidth: 25 }, // Nombre
+      2: { cellWidth: 'auto', minCellWidth: 15 }, // Color
+      3: { cellWidth: 'auto', minCellWidth: 15 }, // Tela
+      4: { cellWidth: 'auto', minCellWidth: 12 }, // Talle
+      5: { cellWidth: 'auto', minCellWidth: 20 }, // Categoría
+      6: { cellWidth: 'auto', minCellWidth: 15 }, // Precio
+      7: { cellWidth: 'auto', minCellWidth: 15 }, // Estado
+      8: { cellWidth: 'auto', minCellWidth: 12 }, // Stock
+      9: { cellWidth: 'auto', minCellWidth: 15 }, // Unidad
+      10: { cellWidth: 'auto', minCellWidth: 12 }, // Rack
+    },
+    tableWidth: 'auto',
+    margin: { left: 10, right: 10 }
   });
   
   // Guardar el PDF
