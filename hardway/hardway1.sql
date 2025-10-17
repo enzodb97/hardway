@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-08-2025 a las 00:36:08
+-- Tiempo de generación: 17-10-2025 a las 03:47:00
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,6 +20,25 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `hardway1`
 --
+
+DELIMITER $$
+--
+-- Procedimientos
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RegistrarStock` (IN `p_codigoIndumentaria` VARCHAR(50), IN `p_idRack` INT, IN `p_cantidad` INT)   BEGIN
+    DECLARE i INT DEFAULT 0;
+    
+    -- El bucle ejecuta el INSERT la cantidad de veces especificada (p_cantidad)
+    WHILE i < p_cantidad DO
+        -- Genera un ID único (UUID) para cada unidad de stock
+        INSERT INTO stock (idStock, codigoIndumentaria, idRack)
+        VALUES (UUID(), p_codigoIndumentaria, p_idRack);
+        
+        SET i = i + 1;
+    END WHILE;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -763,6 +782,8 @@ CREATE TABLE `movimientostock` (
 INSERT INTO `movimientostock` (`idMovimientoStock`, `idStock`, `fechaMovimiento`, `cantidad`, `observaciones`) VALUES
 ('MOV-1756247729019-1', 'STK001', '2025-08-26', -2, 'Movimiento a No Apto: prueba'),
 ('MOV-1756247729020-2', 'STK-NA-1756247729017', '2025-08-26', 2, 'Ingreso desde stock vendible: prueba'),
+('MOV-1760665520495-1', 'STK002', '2025-10-17', -3, 'Movimiento a No Apto: Sin especificar'),
+('MOV-1760665520496-2', 'STK-NA-1760665520494', '2025-10-17', 3, 'Ingreso desde stock vendible: Sin especificar'),
 ('MOV-20240110-001', 'STK007', '2024-01-10', -3, 'Venta Pedido PED-20240110-001'),
 ('MOV-20240115-001', 'STK004', '2024-01-15', -5, 'Venta Pedido PED-20240115-001'),
 ('MOV-20240125-001', 'STK001', '2024-01-25', -2, 'Venta Pedido PED-20240125-001'),
@@ -1387,6 +1408,7 @@ CREATE TABLE `stock` (
 
 INSERT INTO `stock` (`idStock`, `codigoIndumentaria`, `idRack`) VALUES
 ('STK-NA-1756247729017', 'IND001', 99),
+('STK-NA-1760665520494', 'IND002', 99),
 ('STK001', 'IND001', 1),
 ('STK002', 'IND002', 2),
 ('STK003', 'IND003', 3),
