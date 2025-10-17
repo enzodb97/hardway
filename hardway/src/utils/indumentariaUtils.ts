@@ -378,6 +378,93 @@ export async function obtenerIndumentariaPaginada(
   };
 }
 
+// Obtener indumentarias no aptas (en rack 99)
+export async function obtenerIndumentariasNoAptas(
+  page: number,
+  pageSize: number,
+  busqueda: string = ""
+): Promise<IndumentariaPage> {
+  const res = await axiosInstance.get("/api/indumentaria/no-aptas");
+  
+  // Mapear datos anidados del backend a estructura plana para el frontend
+  let prendas: IndumentariaItem[] = res.data.map((item: any) => {
+    // Extraer el número de rack correctamente
+    let numeroRack = 'N/A';
+    let idRack = 99;
+    
+    if (item.Stock) {
+      // Obtener idRack primero
+      if (item.Stock.idRack) {
+        idRack = item.Stock.idRack;
+      } else if (item.Stock.Rack && item.Stock.Rack.idRack) {
+        idRack = item.Stock.Rack.idRack;
+      }
+      
+      // Si es el rack 99 (No Apto), siempre mostrar "99"
+      if (idRack === 99) {
+        numeroRack = '99';
+      } else {
+        // Para otros racks, extraer el numeroRack normal
+        if (item.Stock.numeroRack) {
+          numeroRack = item.Stock.numeroRack.toString();
+        } else if (item.Stock.Rack && item.Stock.Rack.numeroRack) {
+          numeroRack = item.Stock.Rack.numeroRack.toString();
+        }
+      }
+    }
+    
+    return {
+      codigoIndumentaria: item.codigoIndumentaria,
+      nombre: item.DetalleIndumentarium?.NombreIndumentarium?.nombre || "Sin nombre",
+      color: item.DetalleIndumentarium?.Color?.color || "Sin color",
+      nombreTela: item.DetalleIndumentarium?.TelaIndumentarium?.tipoTela || "Sin tela",
+      talle: item.DetalleIndumentarium?.Talle?.talle || "Sin talle",
+      categoria: item.DetalleIndumentarium?.CategoriaIndumentarium?.categoria || "Sin categoría",
+      precio: parseFloat(item.DetalleIndumentarium?.PrecioIndumentarium?.precio || "0"),
+      estado: "No Apta", // Todas son No Aptas en este listado
+      cantidadIndumentaria: item.DetalleIndumentarium?.cantidadIndumentaria || 0,
+      unidad: item.DetalleIndumentarium?.UnidadMedidum?.nombreUnidad || "Unidad",
+      idIndumentaria: item.idDetalle,
+      Stock: {
+        numeroRack: numeroRack,
+        idRack: idRack
+      }
+    };
+  });
+  
+  // Filtro en frontend
+  if (busqueda) {
+    const normalizar = (str: any) =>
+      String(str ?? "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    prendas = prendas.filter(
+      (item) =>
+        normalizar(item.nombre).includes(normalizar(busqueda)) ||
+        normalizar(item.talle).includes(normalizar(busqueda)) ||
+        normalizar(item.color).includes(normalizar(busqueda)) ||
+        normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
+        (item.idIndumentaria &&
+          item.idIndumentaria.toString().includes(busqueda))
+    );
+  }
+  
+  // Ordenar por código de indumentaria de forma creciente
+  prendas.sort((a, b) => {
+    const numeroA = parseInt(a.codigoIndumentaria.replace(/\D/g, '')) || 0;
+    const numeroB = parseInt(b.codigoIndumentaria.replace(/\D/g, '')) || 0;
+    return numeroA - numeroB;
+  });
+  
+  const total = prendas.length;
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  return {
+    prendas: prendas.slice(start, end),
+    total,
+  };
+}
 
 
 // --- Exportar PDF ---

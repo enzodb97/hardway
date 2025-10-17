@@ -176,6 +176,150 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Obtener indumentarias no aptas (en rack 99)
+router.get("/no-aptas", async (req, res) => {
+  try {
+    const result = await sequelize.query(`
+      SELECT
+        I.codigoIndumentaria AS Codigo_Indumentaria,
+        S.idStock AS Id_Stock,
+        R.numeroRack AS Rack_Numero,
+        R.idRack AS Id_Rack,
+        R.descripcion AS Estado_Rack,
+        DI.idNombre,
+        DI.idColor,
+        DI.idTalle,
+        DI.idTela,
+        DI.idCategoria,
+        DI.idEstado,
+        DI.idPrecio,
+        DI.idUnidadMedida
+      FROM
+        indumentaria AS I
+      JOIN
+        stock AS S ON I.codigoIndumentaria = S.codigoIndumentaria
+      JOIN
+        rack AS R ON S.idRack = R.idRack
+      JOIN
+        detalleindumentaria AS DI ON I.idDetalle = DI.idDetalle
+      WHERE
+        R.idRack = 99
+      ORDER BY
+        I.codigoIndumentaria
+    `, {
+      type: Sequelize.QueryTypes.SELECT
+    });
+
+    // Agrupar por código de indumentaria y calcular cantidades
+    const indumentariasAgrupadas = {};
+    
+    for (const item of result) {
+      const codigo = item.Codigo_Indumentaria;
+      
+      if (!indumentariasAgrupadas[codigo]) {
+        indumentariasAgrupadas[codigo] = {
+          codigoIndumentaria: codigo,
+          idStock: item.Id_Stock,
+          rackNumero: item.Rack_Numero,
+          idRack: item.Id_Rack,
+          estadoRack: item.Estado_Rack,
+          idNombre: item.idNombre,
+          idColor: item.idColor,
+          idTalle: item.idTalle,
+          idTela: item.idTela,
+          idCategoria: item.idCategoria,
+          idEstado: item.idEstado,
+          idPrecio: item.idPrecio,
+          idUnidadMedida: item.idUnidadMedida,
+          stockIds: []
+        };
+      }
+      
+      indumentariasAgrupadas[codigo].stockIds.push(item.Id_Stock);
+    }
+
+    // Obtener detalles completos y calcular cantidades reales
+    const indumentariasNoAptas = await Promise.all(
+      Object.values(indumentariasAgrupadas).map(async (item) => {
+        const indumentaria = await Indumentaria.findOne({
+          where: { codigoIndumentaria: item.codigoIndumentaria },
+          include: [
+            {
+              model: DetalleIndumentaria,
+              as: "DetalleIndumentarium",
+              include: [
+                { model: NombreIndumentaria, as: "NombreIndumentarium" },
+                { model: Color },
+                { model: Talle },
+                { model: Tela, as: "TelaIndumentarium" },
+                { model: CategoriaIndumentaria, as: "CategoriaIndumentarium" },
+                { model: EstadoIndumentaria, as: "EstadoIndumentarium" },
+                { model: PrecioIndumentaria, as: "PrecioIndumentarium" },
+                { model: UnidadMedida, as: "UnidadMedidum" },
+              ],
+            },
+          ],
+        });
+
+        if (indumentaria) {
+          const itemJson = indumentaria.toJSON();
+          
+          // Calcular la cantidad total de stock no apto sumando los movimientos
+          let cantidadTotal = 0;
+          for (const stockId of item.stockIds) {
+            const movimientos = await MovimientoStock.findAll({
+              where: { idStock: stockId }
+            });
+            
+            const cantidadStock = movimientos.reduce((total, mov) => {
+              return total + (mov.cantidad || 0);
+            }, 0);
+            
+            cantidadTotal += cantidadStock;
+          }
+          
+          // Agregar la cantidad no apta al DetalleIndumentarium
+          if (itemJson.DetalleIndumentarium) {
+            itemJson.DetalleIndumentarium.cantidadIndumentaria = cantidadTotal;
+          }
+          
+          // Agregar información del rack
+          itemJson.Stock = {
+            numeroRack: item.rackNumero,
+            idRack: item.idRack,
+            Rack: {
+              numeroRack: item.rackNumero,
+              idRack: item.idRack,
+              descripcion: item.estadoRack
+            }
+          };
+          
+          return itemJson;
+        }
+        return null;
+      })
+    );
+
+    // Filtrar nulos
+    const indumentariasFiltradas = indumentariasNoAptas.filter(item => item !== null);
+
+    // Log para depuración
+    console.log(`✅ Indumentarias No Aptas encontradas: ${indumentariasFiltradas.length}`);
+    if (indumentariasFiltradas.length > 0) {
+      console.log('Ejemplo de datos:', JSON.stringify({
+        codigo: indumentariasFiltradas[0].codigoIndumentaria,
+        cantidad: indumentariasFiltradas[0].DetalleIndumentarium?.cantidadIndumentaria,
+        rack: indumentariasFiltradas[0].Stock
+      }, null, 2));
+    }
+
+    res.json(indumentariasFiltradas);
+  } catch (error) {
+    console.error("Error al obtener indumentarias no aptas:", error);
+    res.status(500).json({ error: "Error al obtener indumentarias no aptas", detalle: error.message });
+  }
+});
+
 // Crear nueva indumentaria
 router.post("/", async (req, res) => {
   const {

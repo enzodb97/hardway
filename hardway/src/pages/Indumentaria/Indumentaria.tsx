@@ -26,6 +26,7 @@ import { pencil, trash, add, search, shirt, document, playBack, playForward, che
 import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
+  obtenerIndumentariasNoAptas,
   IndumentariaItem,
   exportarIndumentariaPDF,
 } from "../../utils/indumentariaUtils";
@@ -42,11 +43,14 @@ const Indumentaria: React.FC = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [mostrarNoAptas, setMostrarNoAptas] = useState(false);
 
   const cargarIndumentaria = async () => {
     setLoading(true);
     try {
-      const data = await obtenerIndumentariaPaginada(page, PAGE_SIZE, busqueda);
+      const data = mostrarNoAptas 
+        ? await obtenerIndumentariasNoAptas(page, PAGE_SIZE, busqueda)
+        : await obtenerIndumentariaPaginada(page, PAGE_SIZE, busqueda);
       setPrendas(Array.isArray(data.prendas) ? data.prendas : []);
       setTotal(typeof data.total === "number" ? data.total : 0);
     } catch (error) {
@@ -62,7 +66,7 @@ const Indumentaria: React.FC = () => {
   useEffect(() => {
     cargarIndumentaria();
     // eslint-disable-next-line
-  }, [page, busqueda]);
+  }, [page, busqueda, mostrarNoAptas]);
 
   // Hook para refrescar automáticamente cuando se regresa a la página
   useIonViewWillEnter(() => {
@@ -234,9 +238,40 @@ const Indumentaria: React.FC = () => {
             <IonButton
               slot="end"
               onClick={() => history.push("/alta-indumentaria")}
+              disabled={mostrarNoAptas}
+              title={mostrarNoAptas ? "No disponible en vista de No Aptas" : "Agregar nueva indumentaria"}
             >
               <IonIcon icon={add} slot="start" />
               Nueva Indumentaria
+            </IonButton>
+          </IonItem>
+        </div>
+
+        {/* Filtro de indumentarias no aptas */}
+        <div className="filter-container" style={{ 
+          padding: '12px 16px', 
+          backgroundColor: mostrarNoAptas ? '#fff3cd' : 'transparent',
+          borderLeft: mostrarNoAptas ? '4px solid #ffc107' : 'none',
+          transition: 'all 0.3s ease'
+        }}>
+          <IonItem lines="none" style={{ '--background': 'transparent' }}>
+            <IonLabel style={{ 
+              color: mostrarNoAptas ? '#856404' : '#64748b',
+              fontWeight: mostrarNoAptas ? 'bold' : 'normal'
+            }}>
+              {mostrarNoAptas ? '🔍 Mostrando Indumentarias No Aptas' : 'Mostrar solo Indumentarias No Aptas'}
+            </IonLabel>
+            <IonButton
+              slot="end"
+              fill={mostrarNoAptas ? "solid" : "outline"}
+              color={mostrarNoAptas ? "warning" : "medium"}
+              onClick={() => {
+                setMostrarNoAptas(!mostrarNoAptas);
+                setPage(1); // Resetear a la primera página
+              }}
+            >
+              <IonIcon icon={trash} slot="start" />
+              {mostrarNoAptas ? 'Ver Todas' : 'Ver No Aptas'}
             </IonButton>
           </IonItem>
         </div>
@@ -245,10 +280,15 @@ const Indumentaria: React.FC = () => {
         <div className="total-counter">
           <IonIcon icon={shirt} style={{ color: '#fdb40b', fontSize: '1.2em' }} />
           <IonText>
-            Total de Indumentaria registradas: <b>{total}</b>
+            Total de {mostrarNoAptas ? 'Indumentarias No Aptas' : 'Indumentaria registradas'}: <b>{total}</b>
             {busqueda && (
               <span style={{ color: '#64748b', marginLeft: '8px' }}>
                 (filtradas por: "{busqueda}")
+              </span>
+            )}
+            {mostrarNoAptas && (
+              <span style={{ color: '#856404', marginLeft: '8px', fontWeight: 'bold' }}>
+                ⚠️ (Solo No Aptas - Rack 99)
               </span>
             )}
           </IonText>
@@ -338,36 +378,49 @@ const Indumentaria: React.FC = () => {
                 </IonCol>
                 <IonCol size="2">
                   <div className="actions-container">
-                    <IonButton
-                      fill="solid"
-                      color="primary"
-                      size="small"
-                      onClick={() =>
-                        history.push(
-                          `/alta-indumentaria/${item.codigoIndumentaria}`
-                        )
-                      }
-                    >
-                      <IonIcon icon={pencil} />
-                    </IonButton>
-                    <IonButton
-                      fill="solid"
-                      color="success"
-                      size="small"
-                      onClick={() => handleAgregarStock(item.codigoIndumentaria)}
-                      title="Agregar Stock"
-                    >
-                      <IonIcon icon={cubeOutline} />
-                    </IonButton>
-                    <IonButton
-                      fill="solid"
-                      color="warning"
-                      size="small"
-                      onClick={() => handleNoApta(item.codigoIndumentaria)}
-                      title="Mover a No Apta"
-                    >
-                      <IonIcon icon={trash} />
-                    </IonButton>
+                    {mostrarNoAptas ? (
+                      <IonText style={{ 
+                        color: '#856404', 
+                        fontSize: '0.85rem', 
+                        fontStyle: 'italic',
+                        padding: '8px'
+                      }}>
+                        Stock No Apto
+                      </IonText>
+                    ) : (
+                      <>
+                        <IonButton
+                          fill="solid"
+                          color="primary"
+                          size="small"
+                          onClick={() =>
+                            history.push(
+                              `/alta-indumentaria/${item.codigoIndumentaria}`
+                            )
+                          }
+                        >
+                          <IonIcon icon={pencil} />
+                        </IonButton>
+                        <IonButton
+                          fill="solid"
+                          color="success"
+                          size="small"
+                          onClick={() => handleAgregarStock(item.codigoIndumentaria)}
+                          title="Agregar Stock"
+                        >
+                          <IonIcon icon={cubeOutline} />
+                        </IonButton>
+                        <IonButton
+                          fill="solid"
+                          color="warning"
+                          size="small"
+                          onClick={() => handleNoApta(item.codigoIndumentaria)}
+                          title="Mover a No Apta"
+                        >
+                          <IonIcon icon={trash} />
+                        </IonButton>
+                      </>
+                    )}
                   </div>
                 </IonCol>
               </IonRow>
