@@ -24,7 +24,7 @@ import {
   useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward, cubeOutline, checkmarkCircle, warningOutline } from "ionicons/icons";
+import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward, cubeOutline, checkmarkCircle, warningOutline, close } from "ionicons/icons";
 import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
@@ -37,6 +37,8 @@ import {
   marcarComoScrap,
   MotivoNoApta,
   Rack,
+  obtenerCategoriasDisponibles,
+  filtrarPrendasPorCategoria,
 } from "../../utils/indumentariaUtils";
 import "./Indumentaria.css";
 
@@ -52,6 +54,11 @@ const Indumentaria: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [mostrarNoAptas, setMostrarNoAptas] = useState(false);
+  
+  // Estados para exportar PDF por categoría
+  const [categoriasDisponibles, setCategoriasDisponibles] = useState<string[]>([]);
+  const [showPDFModal, setShowPDFModal] = useState(false);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('Todas');
 
   const cargarIndumentaria = async () => {
     setLoading(true);
@@ -122,6 +129,20 @@ const Indumentaria: React.FC = () => {
     };
     
     cargarMotivos();
+  }, []);
+
+  // Cargar categorías disponibles para el filtro de PDF
+  useEffect(() => {
+    const cargarCategorias = async () => {
+      try {
+        const categorias = await obtenerCategoriasDisponibles();
+        setCategoriasDisponibles(['Todas', ...categorias]);
+      } catch (error) {
+        console.error('Error al cargar categorías:', error);
+      }
+    };
+    
+    cargarCategorias();
   }, []);
 
   // Manejar agregar stock
@@ -287,13 +308,33 @@ const Indumentaria: React.FC = () => {
     }
   };
 
-  // Función para exportar PDF
-  const handleExportarPDF = async () => {
+  // Función para abrir modal de opciones de PDF
+  const handleExportarPDF = () => {
+    setShowPDFModal(true);
+  };
+
+  // Función para generar PDF con filtros
+  const generarPDF = async () => {
     try {
       setLoading(true);
+      setShowPDFModal(false);
+      
       // Obtener todas las prendas (sin paginación) para el PDF
       const todasLasPrendas = await obtenerIndumentariaPaginada(1, 9999, busqueda);
-      await exportarIndumentariaPDF(todasLasPrendas.prendas, busqueda);
+      
+      // Filtrar por categoría si no es "Todas"
+      const prendasFiltradas = filtrarPrendasPorCategoria(
+        todasLasPrendas.prendas, 
+        categoriaSeleccionada
+      );
+      
+      // Exportar PDF con categoría seleccionada
+      await exportarIndumentariaPDF(
+        prendasFiltradas, 
+        busqueda,
+        categoriaSeleccionada !== 'Todas' ? categoriaSeleccionada : undefined
+      );
+      
       setAlertMsg("PDF generado exitosamente");
       setShowAlert(true);
     } catch (error) {
@@ -301,6 +342,7 @@ const Indumentaria: React.FC = () => {
       setShowAlert(true);
     } finally {
       setLoading(false);
+      setCategoriaSeleccionada('Todas');
     }
   };
 
@@ -341,7 +383,7 @@ const Indumentaria: React.FC = () => {
           <IonItem lines="none">
             <IonIcon icon={search} slot="start" style={{ color: '#64748b' }} />
             <IonInput
-              placeholder="Buscar por descripción, código, color o talle..."
+              placeholder="Buscar por descripción, código, color, talle o categoría..."
               value={busqueda}
               onIonChange={(e) => {
                 setPage(1);
@@ -1222,6 +1264,134 @@ const Indumentaria: React.FC = () => {
               >
                 <IonIcon icon={trash} slot="start" />
                 Confirmar Desecho
+              </IonButton>
+            </div>
+          </IonToolbar>
+        </IonFooter>
+      </IonModal>
+
+      {/* Modal para seleccionar categoría para PDF */}
+      <IonModal 
+        isOpen={showPDFModal} 
+        onDidDismiss={() => {
+          setShowPDFModal(false);
+          setCategoriaSeleccionada('Todas');
+        }}
+        className="modal-pdf-export"
+      >
+        <IonHeader className="modal-pdf-header-wrapper">
+          <IonToolbar className="modal-pdf-toolbar">
+            <IonTitle className="modal-pdf-header-title">
+              <div className="modal-pdf-header-content">
+                <IonIcon icon={document} className="modal-pdf-header-icon" />
+                <span>Exportar a PDF</span>
+              </div>
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        
+        <IonContent className="modal-pdf-content">
+          <div className="modal-pdf-container">
+            {/* Sección de encabezado */}
+            <div className="modal-pdf-intro">
+              <div className="modal-pdf-intro-icon">📄</div>
+              <h2 className="modal-pdf-title">Configurar Exportación</h2>
+              <p className="modal-pdf-description">
+                Configure las opciones para generar su documento PDF personalizado
+              </p>
+            </div>
+
+            {/* Formulario de selección */}
+            <div className="modal-pdf-form">
+              <IonItem lines="none" className="modal-pdf-item">
+                <IonLabel position="stacked" className="modal-pdf-label">
+                  <span className="modal-pdf-label-text">Categoría</span>
+                  <span className="modal-pdf-label-required">*</span>
+                </IonLabel>
+                <IonSelect
+                  placeholder="Seleccione una categoría"
+                  value={categoriaSeleccionada}
+                  onIonChange={(e) => setCategoriaSeleccionada(e.detail.value)}
+                  interface="action-sheet"
+                  className="modal-pdf-select"
+                  interfaceOptions={{
+                    header: 'Seleccione una categoría',
+                    cssClass: 'modal-pdf-action-sheet'
+                  }}
+                >
+                  {categoriasDisponibles.map((cat) => (
+                    <IonSelectOption key={cat} value={cat}>
+                      {cat}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+
+              {/* Indicadores de información */}
+              <div className="modal-pdf-indicators">
+                {categoriaSeleccionada !== 'Todas' && (
+                  <div className="modal-pdf-indicator modal-pdf-indicator-category">
+                    <div className="modal-pdf-indicator-icon">📋</div>
+                    <div className="modal-pdf-indicator-content">
+                      <p className="modal-pdf-indicator-title">PDF Filtrado</p>
+                      <p className="modal-pdf-indicator-text">
+                        Se incluirán únicamente productos de: <strong>{categoriaSeleccionada}</strong>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {categoriaSeleccionada === 'Todas' && (
+                  <div className="modal-pdf-indicator modal-pdf-indicator-all">
+                    <div className="modal-pdf-indicator-icon">📊</div>
+                    <div className="modal-pdf-indicator-content">
+                      <p className="modal-pdf-indicator-title">PDF Completo</p>
+                      <p className="modal-pdf-indicator-text">
+                        Se incluirán productos de todas las categorías disponibles
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {busqueda && (
+                  <div className="modal-pdf-indicator modal-pdf-indicator-search">
+                    <div className="modal-pdf-indicator-icon">🔍</div>
+                    <div className="modal-pdf-indicator-content">
+                      <p className="modal-pdf-indicator-title">Filtro de Búsqueda Activo</p>
+                      <p className="modal-pdf-indicator-text">
+                        Término de búsqueda: <strong>"{busqueda}"</strong>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </IonContent>
+        
+        <IonFooter className="modal-pdf-footer">
+          <IonToolbar className="modal-pdf-footer-toolbar">
+            <div className="modal-pdf-buttons">
+              <IonButton 
+                expand="block"
+                fill="outline"
+                onClick={() => {
+                  setShowPDFModal(false);
+                  setCategoriaSeleccionada('Todas');
+                }}
+                className="modal-pdf-btn-cancel"
+              >
+                <IonIcon icon={close} slot="start" />
+                Cancelar
+              </IonButton>
+              <IonButton 
+                expand="block"
+                onClick={generarPDF}
+                disabled={loading}
+                className="modal-pdf-btn-generate"
+              >
+                <IonIcon icon={document} slot="start" />
+                {loading ? 'Generando...' : 'Generar PDF'}
               </IonButton>
             </div>
           </IonToolbar>
