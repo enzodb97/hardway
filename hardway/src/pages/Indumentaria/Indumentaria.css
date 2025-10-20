@@ -1565,6 +1565,20 @@ ion-action-sheet * {
   color: #7d4aa3;
 }
 
+/* Indicador de No Aptas - Rojo/Naranja advertencia */
+.modal-pdf-indicator-no-aptas {
+  border-left-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.modal-pdf-indicator-no-aptas .modal-pdf-indicator-title {
+  color: #dc2626;
+}
+
+.modal-pdf-indicator-no-aptas .modal-pdf-indicator-text {
+  color: #ef4444;
+}
+
 /* Indicador de búsqueda activa - Verde azulado */
 .modal-pdf-indicator-search {
   border-left-color: #06b6d4;

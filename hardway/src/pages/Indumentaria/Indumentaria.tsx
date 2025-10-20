@@ -131,19 +131,32 @@ const Indumentaria: React.FC = () => {
     cargarMotivos();
   }, []);
 
-  // Cargar categorías disponibles para el filtro de PDF
+  // Cargar categorías disponibles para el filtro de PDF según el contexto
   useEffect(() => {
     const cargarCategorias = async () => {
       try {
-        const categorias = await obtenerCategoriasDisponibles();
-        setCategoriasDisponibles(['Todas', ...categorias]);
+        // Obtener las prendas del contexto actual
+        const prendasActuales = mostrarNoAptas 
+          ? await obtenerIndumentariasNoAptas(1, 9999, '')
+          : await obtenerIndumentariaPaginada(1, 9999, '');
+        
+        // Extraer categorías únicas de las prendas actuales
+        const categoriasUnicas = Array.from(
+          new Set(
+            prendasActuales.prendas
+              .map((prenda: IndumentariaItem) => prenda.categoria)
+              .filter((cat: string | undefined) => cat)
+          )
+        ) as string[];
+        
+        setCategoriasDisponibles(['Todas', ...categoriasUnicas.sort()]);
       } catch (error) {
         console.error('Error al cargar categorías:', error);
       }
     };
     
     cargarCategorias();
-  }, []);
+  }, [mostrarNoAptas]); // Recarga cuando cambia el filtro
 
   // Manejar agregar stock
   const handleAgregarStock = async (id: string) => {
@@ -319,8 +332,10 @@ const Indumentaria: React.FC = () => {
       setLoading(true);
       setShowPDFModal(false);
       
-      // Obtener todas las prendas (sin paginación) para el PDF
-      const todasLasPrendas = await obtenerIndumentariaPaginada(1, 9999, busqueda);
+      // Obtener todas las prendas según el filtro activo (No Aptas o todas)
+      const todasLasPrendas = mostrarNoAptas 
+        ? await obtenerIndumentariasNoAptas(1, 9999, busqueda)
+        : await obtenerIndumentariaPaginada(1, 9999, busqueda);
       
       // Filtrar por categoría si no es "Todas"
       const prendasFiltradas = filtrarPrendasPorCategoria(
@@ -328,11 +343,12 @@ const Indumentaria: React.FC = () => {
         categoriaSeleccionada
       );
       
-      // Exportar PDF con categoría seleccionada
+      // Exportar PDF con categoría seleccionada y tipo de filtro
       await exportarIndumentariaPDF(
         prendasFiltradas, 
         busqueda,
-        categoriaSeleccionada !== 'Todas' ? categoriaSeleccionada : undefined
+        categoriaSeleccionada !== 'Todas' ? categoriaSeleccionada : undefined,
+        mostrarNoAptas
       );
       
       setAlertMsg("PDF generado exitosamente");
@@ -1329,6 +1345,19 @@ const Indumentaria: React.FC = () => {
 
               {/* Indicadores de información */}
               <div className="modal-pdf-indicators">
+                {/* Indicador de modo No Aptas */}
+                {mostrarNoAptas && (
+                  <div className="modal-pdf-indicator modal-pdf-indicator-no-aptas">
+                    <div className="modal-pdf-indicator-icon">⚠️</div>
+                    <div className="modal-pdf-indicator-content">
+                      <p className="modal-pdf-indicator-title">Modo No Aptas Activo</p>
+                      <p className="modal-pdf-indicator-text">
+                        El PDF contendrá <strong>únicamente indumentarias no aptas</strong> (Rack 99)
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {categoriaSeleccionada !== 'Todas' && (
                   <div className="modal-pdf-indicator modal-pdf-indicator-category">
                     <div className="modal-pdf-indicator-icon">📋</div>
@@ -1341,7 +1370,7 @@ const Indumentaria: React.FC = () => {
                   </div>
                 )}
 
-                {categoriaSeleccionada === 'Todas' && (
+                {categoriaSeleccionada === 'Todas' && !mostrarNoAptas && (
                   <div className="modal-pdf-indicator modal-pdf-indicator-all">
                     <div className="modal-pdf-indicator-icon">📊</div>
                     <div className="modal-pdf-indicator-content">
