@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-10-2025 a las 03:47:00
+-- Tiempo de generación: 20-10-2025 a las 02:00:45
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -633,7 +633,8 @@ CREATE TABLE `estadoindumentaria` (
 
 INSERT INTO `estadoindumentaria` (`idEstado`, `estadoIndumentaria`) VALUES
 (1, 'Apta'),
-(2, 'No Apta');
+(2, 'No Apta'),
+(3, 'Desechado');
 
 -- --------------------------------------------------------
 
@@ -760,6 +761,32 @@ INSERT INTO `motivo_cancelacion` (`idMotivo`, `descripcion`) VALUES
 (4, 'Dirección de envío incorrecta'),
 (5, 'Pedido duplicado'),
 (6, 'Otro motivo (especificar en observaciones)');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `motivo_no_apta`
+--
+
+CREATE TABLE `motivo_no_apta` (
+  `idMotivo` int(11) NOT NULL,
+  `descripcion` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `motivo_no_apta`
+--
+
+INSERT INTO `motivo_no_apta` (`idMotivo`, `descripcion`) VALUES
+(1, 'Defecto de costura'),
+(2, 'Mancha irreparable'),
+(3, 'Problema de teñido / coloración'),
+(4, 'Daño en el empaque / transporte'),
+(5, 'Talla o etiqueta incorrecta'),
+(6, 'Descosido o costura fallida'),
+(7, 'Mancha permanente'),
+(8, 'Daño en la tela (roto o quemado)'),
+(9, 'Fallo de color o estampado');
 
 -- --------------------------------------------------------
 
@@ -1118,7 +1145,9 @@ INSERT INTO `movimientostock` (`idMovimientoStock`, `idStock`, `fechaMovimiento`
 ('MOV-PED-852855', 'STK003', '2025-06-20', -2, 'Descuento por pedido PED-2025-708'),
 ('MOV-PED-870580', 'STK001', '2025-06-16', -1, 'Descuento por pedido PED-2025-823'),
 ('MOV-PED-943756', 'STK001', '2025-06-16', -2, 'Descuento por pedido PED-2025-446'),
-('MOV-PED-965241', 'STK003', '2025-06-16', -2, 'Descuento por pedido PED-2025-663');
+('MOV-PED-965241', 'STK003', '2025-06-16', -2, 'Descuento por pedido PED-2025-663'),
+('MOV-SCRAP-1760918421513', 'STK-NA-1756247729017', '2025-10-20', -2, 'SCRAP (Desecho permanente): Sin motivo especificado'),
+('MOV-SCRAP-1760918424267', 'STK-NA-1760665520494', '2025-10-20', -3, 'SCRAP (Desecho permanente): Sin motivo especificado');
 
 -- --------------------------------------------------------
 
@@ -1444,6 +1473,32 @@ INSERT INTO `stock` (`idStock`, `codigoIndumentaria`, `idRack`) VALUES
 ('STK037', 'IND037', 8),
 ('STK038', 'IND038', 9),
 ('STK039', 'IND039', 10);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `stock_registro_fallo`
+--
+
+CREATE TABLE `stock_registro_fallo` (
+  `idRegistroFallo` int(11) NOT NULL,
+  `idStock` varchar(50) NOT NULL,
+  `fechaRegistro` datetime NOT NULL DEFAULT current_timestamp(),
+  `idMotivo` int(11) NOT NULL,
+  `estadoPostFallo` int(11) DEFAULT 2,
+  `fechaResolucion` datetime DEFAULT NULL,
+  `idUsuarioResolucion` int(11) DEFAULT NULL,
+  `observaciones` varchar(255) DEFAULT NULL,
+  `idRackOriginal` int(11) NOT NULL COMMENT 'Rack en el que estaba la unidad antes de ser marcada como No Apta (Para reingreso)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `stock_registro_fallo`
+--
+
+INSERT INTO `stock_registro_fallo` (`idRegistroFallo`, `idStock`, `fechaRegistro`, `idMotivo`, `estadoPostFallo`, `fechaResolucion`, `idUsuarioResolucion`, `observaciones`, `idRackOriginal`) VALUES
+(1, 'STK-NA-1756247729017', '2025-10-20 00:00:21', 1, NULL, '2025-10-20 00:00:21', NULL, '⚠️ SCRAP: 2 unidades desechadas permanentemente. Sin motivo especificado', 99),
+(2, 'STK-NA-1760665520494', '2025-10-20 00:00:24', 1, NULL, '2025-10-20 00:00:24', NULL, '⚠️ SCRAP: 3 unidades desechadas permanentemente. Sin motivo especificado', 99);
 
 -- --------------------------------------------------------
 
@@ -1796,6 +1851,12 @@ ALTER TABLE `motivo_cancelacion`
   ADD PRIMARY KEY (`idMotivo`);
 
 --
+-- Indices de la tabla `motivo_no_apta`
+--
+ALTER TABLE `motivo_no_apta`
+  ADD PRIMARY KEY (`idMotivo`);
+
+--
 -- Indices de la tabla `movimientostock`
 --
 ALTER TABLE `movimientostock`
@@ -1854,6 +1915,17 @@ ALTER TABLE `stock`
   ADD PRIMARY KEY (`idStock`),
   ADD KEY `codigoIndumentaria` (`codigoIndumentaria`),
   ADD KEY `fk_stock_rack` (`idRack`);
+
+--
+-- Indices de la tabla `stock_registro_fallo`
+--
+ALTER TABLE `stock_registro_fallo`
+  ADD PRIMARY KEY (`idRegistroFallo`),
+  ADD KEY `idStock` (`idStock`),
+  ADD KEY `idMotivo` (`idMotivo`),
+  ADD KEY `estadoPostFallo` (`estadoPostFallo`),
+  ADD KEY `idUsuarioResolucion` (`idUsuarioResolucion`),
+  ADD KEY `fk_fallo_rack_original` (`idRackOriginal`);
 
 --
 -- Indices de la tabla `talle`
@@ -1971,6 +2043,12 @@ ALTER TABLE `motivo_cancelacion`
   MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT de la tabla `motivo_no_apta`
+--
+ALTER TABLE `motivo_no_apta`
+  MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT de la tabla `nombreindumentaria`
 --
 ALTER TABLE `nombreindumentaria`
@@ -1993,6 +2071,12 @@ ALTER TABLE `precioindumentaria`
 --
 ALTER TABLE `rack`
   MODIFY `idRack` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+
+--
+-- AUTO_INCREMENT de la tabla `stock_registro_fallo`
+--
+ALTER TABLE `stock_registro_fallo`
+  MODIFY `idRegistroFallo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `talle`
@@ -2155,6 +2239,19 @@ ALTER TABLE `rol`
 ALTER TABLE `stock`
   ADD CONSTRAINT `fk_stock_rack` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`),
   ADD CONSTRAINT `stock_ibfk_1` FOREIGN KEY (`codigoIndumentaria`) REFERENCES `indumentaria` (`codigoIndumentaria`);
+
+--
+-- Filtros para la tabla `stock_registro_fallo`
+--
+ALTER TABLE `stock_registro_fallo`
+  ADD CONSTRAINT `fk_fallo_motivo` FOREIGN KEY (`idMotivo`) REFERENCES `motivo_no_apta` (`idMotivo`),
+  ADD CONSTRAINT `fk_fallo_rack_original` FOREIGN KEY (`idRackOriginal`) REFERENCES `rack` (`idRack`),
+  ADD CONSTRAINT `fk_fallo_stock` FOREIGN KEY (`idStock`) REFERENCES `stock` (`idStock`),
+  ADD CONSTRAINT `fk_fallo_usuario` FOREIGN KEY (`idUsuarioResolucion`) REFERENCES `usuario` (`idUsuario`),
+  ADD CONSTRAINT `stock_registro_fallo_ibfk_1` FOREIGN KEY (`idStock`) REFERENCES `stock` (`idStock`),
+  ADD CONSTRAINT `stock_registro_fallo_ibfk_2` FOREIGN KEY (`idMotivo`) REFERENCES `motivo_no_apta` (`idMotivo`),
+  ADD CONSTRAINT `stock_registro_fallo_ibfk_3` FOREIGN KEY (`estadoPostFallo`) REFERENCES `estadoindumentaria` (`idEstado`),
+  ADD CONSTRAINT `stock_registro_fallo_ibfk_4` FOREIGN KEY (`idUsuarioResolucion`) REFERENCES `usuario` (`idUsuario`);
 
 --
 -- Filtros para la tabla `usuario`

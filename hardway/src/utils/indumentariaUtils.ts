@@ -99,6 +99,11 @@ export interface Rack {
   descripcion?: string;
 }
 
+export interface MotivoNoApta {
+  idMotivo: number;
+  descripcion: string;
+}
+
 // Funciones para manejar auxiliares
 export const cargarAuxiliares = async () => {
   try {
@@ -550,4 +555,74 @@ export const exportarIndumentariaPDF = async (prendas: IndumentariaItem[], filtr
     ? `Listado_Indumentaria_Filtrado.pdf`
     : `Listado_Indumentaria.pdf`;
   doc.save(nombreArchivo);
+};
+
+// --- Funciones para manejo de indumentaria no apta ---
+
+// Obtener motivos predefinidos
+export const obtenerMotivosNoApta = async (): Promise<MotivoNoApta[]> => {
+  try {
+    const response = await axiosInstance.get('/api/indumentaria/motivos-no-apta');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener motivos:', error);
+    throw new Error('Error al obtener motivos predefinidos');
+  }
+};
+
+// Mover indumentaria a No Apta con motivo predefinido
+export const moverANoApta = async (
+  codigoIndumentaria: string, 
+  cantidad: number, 
+  idMotivo: number,
+  observaciones?: string
+) => {
+  try {
+    const response = await axiosInstance.post(`/api/indumentaria/${codigoIndumentaria}/no-apta`, {
+      cantidad,
+      idMotivo,
+      observaciones
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al mover a no apta');
+  }
+};
+
+// Reingresar indumentaria a stock (desde No Apta) - Vuelve automáticamente al rack original
+export const reingresarAStock = async (
+  codigoIndumentaria: string,
+  cantidad: number,
+  observaciones?: string,
+  idUsuario?: number
+) => {
+  try {
+    const response = await axiosInstance.post(`/api/indumentaria/${codigoIndumentaria}/reingreso`, {
+      cantidad,
+      observaciones,
+      idUsuario
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al reingresar a stock');
+  }
+};
+
+// Marcar como scrap (desecho)
+export const marcarComoScrap = async (
+  codigoIndumentaria: string,
+  cantidad: number,
+  observaciones?: string,
+  idUsuario?: number
+) => {
+  try {
+    const response = await axiosInstance.post(`/api/indumentaria/${codigoIndumentaria}/scrap`, {
+      cantidad,
+      observaciones,
+      idUsuario
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al marcar como scrap');
+  }
 };

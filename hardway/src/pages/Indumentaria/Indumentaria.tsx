@@ -19,16 +19,24 @@ import {
   IonSelect,
   IonSelectOption,
   IonLabel,
+  IonModal,
+  IonTextarea,
   useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward, cubeOutline } from "ionicons/icons";
+import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward, cubeOutline, checkmarkCircle, warningOutline } from "ionicons/icons";
 import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
   obtenerIndumentariasNoAptas,
   IndumentariaItem,
   exportarIndumentariaPDF,
+  obtenerMotivosNoApta,
+  moverANoApta,
+  reingresarAStock,
+  marcarComoScrap,
+  MotivoNoApta,
+  Rack,
 } from "../../utils/indumentariaUtils";
 import "./Indumentaria.css";
 
@@ -83,10 +91,38 @@ const Indumentaria: React.FC = () => {
   const [cantidadNoApta, setCantidadNoApta] = useState<number>(0);
   const [motivoNoApta, setMotivoNoApta] = useState<string>("");
 
+  // Estados para motivos predefinidos
+  const [motivosNoApta, setMotivosNoApta] = useState<MotivoNoApta[]>([]);
+  const [idMotivoSeleccionado, setIdMotivoSeleccionado] = useState<number | null>(null);
+
   // Estados para agregar stock
   const [showAgregarStockAlert, setShowAgregarStockAlert] = useState(false);
   const [cantidadAgregar, setCantidadAgregar] = useState<number>(0);
   const [motivoStock, setMotivoStock] = useState<string>("");
+
+  // Estados para reingreso
+  const [showReingresoAlert, setShowReingresoAlert] = useState(false);
+  const [cantidadReingreso, setCantidadReingreso] = useState<number>(0);
+  const [observacionesReingreso, setObservacionesReingreso] = useState<string>("");
+
+  // Estados para scrap
+  const [showScrapAlert, setShowScrapAlert] = useState(false);
+  const [cantidadScrap, setCantidadScrap] = useState<number>(0);
+  const [observacionesScrap, setObservacionesScrap] = useState<string>("");
+
+  // Cargar motivos predefinidos al montar el componente
+  useEffect(() => {
+    const cargarMotivos = async () => {
+      try {
+        const motivos = await obtenerMotivosNoApta();
+        setMotivosNoApta(motivos);
+      } catch (error) {
+        console.error('Error al cargar motivos:', error);
+      }
+    };
+    
+    cargarMotivos();
+  }, []);
 
   // Manejar agregar stock
   const handleAgregarStock = async (id: string) => {
@@ -160,6 +196,94 @@ const Indumentaria: React.FC = () => {
       setSelectedItem(null);
       setCantidadNoApta(0);
       setMotivoNoApta("");
+    }
+  };
+
+  // Manejar reingreso a stock (desde No Apta)
+  const handleReingreso = async (id: string) => {
+    console.log('Iniciando proceso de reingreso para:', id);
+    const prenda = prendas.find(p => p.codigoIndumentaria === id);
+    if (!prenda) return;
+    
+    if (prenda.cantidadIndumentaria <= 0) {
+      setAlertMsg("No hay stock no apto disponible para reingresar");
+      setShowAlert(true);
+      return;
+    }
+    
+    setSelectedItem(id);
+    setCantidadReingreso(1); // 👈 Valor por defecto en 1
+    setShowReingresoAlert(true);
+  };
+
+  // Confirmar reingreso a stock
+  const confirmarReingreso = async () => {
+    if (!selectedItem || cantidadReingreso <= 0) {
+      setAlertMsg("Por favor ingrese la cantidad a reingresar");
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      const response = await reingresarAStock(
+        selectedItem,
+        cantidadReingreso,
+        observacionesReingreso
+      );
+      
+      cargarIndumentaria();
+      setAlertMsg(response?.message || `${cantidadReingreso} unidades reingresadas correctamente a su rack original`);
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg(error.message || "Error al reingresar a stock");
+      setShowAlert(true);
+    } finally {
+      setShowReingresoAlert(false);
+      setSelectedItem(null);
+      setCantidadReingreso(0);
+      setObservacionesReingreso("");
+    }
+  };
+
+  // Manejar scrap (desecho)
+  const handleScrap = async (id: string) => {
+    console.log('Iniciando proceso de scrap para:', id);
+    const prenda = prendas.find(p => p.codigoIndumentaria === id);
+    if (!prenda) return;
+    
+    if (prenda.cantidadIndumentaria <= 0) {
+      setAlertMsg("No hay stock no apto disponible para marcar como scrap");
+      setShowAlert(true);
+      return;
+    }
+    
+    setSelectedItem(id);
+    setCantidadScrap(1); // 👈 Valor por defecto en 1
+    setShowScrapAlert(true);
+  };
+
+  // Confirmar scrap
+  const confirmarScrap = async () => {
+    if (!selectedItem || cantidadScrap <= 0) return;
+
+    try {
+      await marcarComoScrap(
+        selectedItem,
+        cantidadScrap,
+        observacionesScrap
+      );
+      
+      cargarIndumentaria();
+      setAlertMsg(`${cantidadScrap} unidades marcadas como scrap (desechadas)`);
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg(error.message || "Error al marcar como scrap");
+      setShowAlert(true);
+    } finally {
+      setShowScrapAlert(false);
+      setSelectedItem(null);
+      setCantidadScrap(0);
+      setObservacionesScrap("");
     }
   };
 
@@ -326,15 +450,22 @@ const Indumentaria: React.FC = () => {
                 <div className="empty-state">
                   <IonIcon icon={shirt} className="empty-icon" />
                   <h3 className="empty-title">
-                    {busqueda ? 'No se encontraron prendas' : 'No hay prendas registradas'}
+                    {mostrarNoAptas 
+                      ? 'No hay indumentarias no aptas' 
+                      : busqueda 
+                        ? 'No se encontraron indumentarias' 
+                        : 'No hay indumentarias registradas'
+                    }
                   </h3>
                   <p className="empty-description">
-                    {busqueda 
-                      ? `No hay Indumentariass que coincidan con "${busqueda}". Intenta con otros términos de búsqueda.`
-                      : 'Comienza agregando tu primera Indumentaria al inventario.'
+                    {mostrarNoAptas
+                      ? '✅ Excelente! No hay indumentarias marcadas como "No Aptas" en este momento.'
+                      : busqueda 
+                        ? `No hay Indumentariass que coincidan con "${busqueda}". Intenta con otros términos de búsqueda.`
+                        : 'Comienza agregando tu primera Indumentaria al inventario.'
                     }
                   </p>
-                  {!busqueda && (
+                  {!busqueda && !mostrarNoAptas && (
                     <IonButton 
                       style={{ marginTop: '20px' }}
                       onClick={() => history.push("/alta-indumentaria")}
@@ -379,14 +510,28 @@ const Indumentaria: React.FC = () => {
                 <IonCol size="2">
                   <div className="actions-container">
                     {mostrarNoAptas ? (
-                      <IonText style={{ 
-                        color: '#856404', 
-                        fontSize: '0.85rem', 
-                        fontStyle: 'italic',
-                        padding: '8px'
-                      }}>
-                        Stock No Apto
-                      </IonText>
+                      <>
+                        <IonButton
+                          fill="solid"
+                          color="success"
+                          size="small"
+                          onClick={() => handleReingreso(item.codigoIndumentaria)}
+                          title="Reingresar a Stock (Reparado)"
+                        >
+                          <IonIcon icon={cubeOutline} />
+                          <span style={{ marginLeft: '4px', fontSize: '0.75rem' }}>Reparar</span>
+                        </IonButton>
+                        <IonButton
+                          fill="solid"
+                          color="danger"
+                          size="small"
+                          onClick={() => handleScrap(item.codigoIndumentaria)}
+                          title="Marcar como Scrap (Desecho)"
+                        >
+                          <IonIcon icon={trash} />
+                          <span style={{ marginLeft: '4px', fontSize: '0.75rem' }}>Scrap</span>
+                        </IonButton>
+                      </>
                     ) : (
                       <>
                         <IonButton
@@ -533,92 +678,181 @@ const Indumentaria: React.FC = () => {
         onDidDismiss={() => setShowAlert(false)}
       />
 
-      {/* Alert para mover a No Apta */}
-      <IonAlert
-        isOpen={showNoAptaAlert}
-        header="Mover a No Apta"
-        subHeader={selectedItem ? `Indumentaria: ${selectedItem}` : ''}
-        message={alertMsg}
-        inputs={[
-          {
-            name: 'cantidad',
-            type: 'number',
-            placeholder: 'Cantidad',
-            min: 1,
-            max: selectedItem ? prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria : undefined
-          },
-          {
-            name: 'motivo',
-            type: 'text',
-            placeholder: 'Motivo (opcional)'
-          }
-        ]}
-        buttons={[
-          {
-            text: 'Cancelar',
-            role: 'cancel',
-            handler: () => {
-              setShowNoAptaAlert(false);
-              setSelectedItem(null);
-            }
-          },
-          {
-            text: 'Confirmar',
-            handler: async (data) => {
-              if (!selectedItem || !data.cantidad) {
-                setAlertMsg("Por favor ingrese una cantidad");
-                setShowAlert(true);
-                return false;
-              }
-              
-              const prenda = prendas.find(p => p.codigoIndumentaria === selectedItem);
-              if (!prenda) return false;
-              
-              const cantidad = Number(data.cantidad);
-              if (cantidad <= 0) {
-                setAlertMsg("La cantidad debe ser mayor a 0");
-                setShowAlert(true);
-                return false;
-              }
-              
-              if (cantidad > prenda.cantidadIndumentaria) {
-                setAlertMsg(`No hay suficiente stock disponible. Máximo disponible: ${prenda.cantidadIndumentaria}`);
-                setShowAlert(true);
-                return false;
-              }
-              
-              try {
-                console.log('Enviando datos:', {
-                  cantidad: cantidad,
-                  motivo: data.motivo || ''
-                });
-                
-                const response = await axiosInstance.post(`/api/indumentaria/${selectedItem}/no-apta`, {
-                  cantidad: cantidad,
-                  motivo: data.motivo || ''
-                });
-                
-                console.log('Respuesta:', response.data);
-                
-                cargarIndumentaria();
-                setAlertMsg("Stock movido a No Apto correctamente.");
-                setShowAlert(true);
-                setShowNoAptaAlert(false);
-                setSelectedItem(null);
-              } catch (error: any) {
-                console.error('Error detallado:', {
-                  mensaje: error.message,
-                  respuesta: error.response?.data,
-                  status: error.response?.status
-                });
-                setAlertMsg(error.response?.data?.error || "Error al mover stock a No Apto.");
-                setShowAlert(true);
-                return false;
-              }
-            }
-          }
-        ]}
-      />
+      {/* Modal para mover a No Apta */}
+      <IonModal 
+        isOpen={showNoAptaAlert} 
+        onDidDismiss={() => {
+          setShowNoAptaAlert(false);
+          setSelectedItem(null);
+          setIdMotivoSeleccionado(null);
+          setCantidadNoApta(0);
+          setMotivoNoApta('');
+        }}
+        className="modal-no-apta"
+      >
+        <IonHeader>
+          <IonToolbar color="warning">
+            <IonTitle>
+              <IonIcon icon={trash} style={{ marginRight: '8px' }} />
+              Mover a No Apta
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div className="modal-no-apta-container">
+            {/* Header con info del producto */}
+            <div className="modal-no-apta-header">
+              <div className="modal-no-apta-header-content">
+                <IonIcon icon={shirt} className="modal-no-apta-header-icon" />
+                <h3 className="modal-no-apta-header-title">
+                  Indumentaria: <span style={{ 
+                    fontFamily: '"Monaco", "Menlo", monospace',
+                    background: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    marginLeft: '8px'
+                  }}>{selectedItem || 'N/A'}</span>
+                </h3>
+              </div>
+              <p className="modal-no-apta-header-description">
+                {alertMsg || `Disponible: ${prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria || 0} unidades`}
+              </p>
+            </div>
+
+            {/* Campo de Cantidad */}
+            <IonItem className="modal-no-apta-item">
+              <IonLabel position="stacked" className="modal-no-apta-label">
+                Cantidad a mover <span className="modal-no-apta-label-required">*</span>
+              </IonLabel>
+              <IonInput
+                type="number"
+                placeholder="Ingrese la cantidad"
+                min={1}
+                max={prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria}
+                value={cantidadNoApta || ''}
+                onIonChange={(e) => setCantidadNoApta(Number(e.detail.value))}
+                className="modal-no-apta-input"
+              />
+            </IonItem>
+
+            {/* Selector de Motivo */}
+            <IonItem className="modal-no-apta-item">
+              <IonLabel position="stacked" className="modal-no-apta-label">
+                Motivo de rechazo <span className="modal-no-apta-label-required">*</span>
+              </IonLabel>
+              <IonSelect
+                placeholder="Seleccione un motivo"
+                value={idMotivoSeleccionado}
+                onIonChange={(e) => setIdMotivoSeleccionado(Number(e.detail.value))}
+                interface="popover"
+                className="modal-no-apta-select"
+              >
+                {motivosNoApta.length > 0 ? (
+                  motivosNoApta.map((motivo) => (
+                    <IonSelectOption key={motivo.idMotivo} value={motivo.idMotivo}>
+                      {motivo.descripcion}
+                    </IonSelectOption>
+                  ))
+                ) : (
+                  <IonSelectOption value={0} disabled>
+                    Cargando motivos...
+                  </IonSelectOption>
+                )}
+              </IonSelect>
+            </IonItem>
+
+            {/* Observaciones opcionales */}
+            <IonItem className="modal-no-apta-item">
+              <IonLabel position="stacked" className="modal-no-apta-label">
+                Observaciones <span className="modal-no-apta-label-optional">(opcional)</span>
+              </IonLabel>
+              <IonTextarea
+                placeholder="Detalles adicionales sobre el estado de la prenda..."
+                rows={4}
+                value={motivoNoApta}
+                onIonChange={(e) => setMotivoNoApta(e.detail.value || '')}
+                className="modal-no-apta-textarea"
+              />
+            </IonItem>
+
+            {/* Nota informativa */}
+            <div className="modal-no-apta-info">
+              <IonIcon icon={cubeOutline} className="modal-no-apta-info-icon" />
+              <IonText className="modal-no-apta-info-text">
+                La indumentaria se moverá al <strong>Rack 99</strong> (No Apta) y quedará registrada para su posterior evaluación.
+              </IonText>
+            </div>
+          </div>
+        </IonContent>
+        <IonFooter className="modal-no-apta-footer">
+          <IonToolbar>
+            <div className="modal-no-apta-buttons">
+              <IonButton 
+                expand="block"
+                fill="outline"
+                color="medium"
+                onClick={() => {
+                  setShowNoAptaAlert(false);
+                  setSelectedItem(null);
+                  setIdMotivoSeleccionado(null);
+                  setCantidadNoApta(0);
+                  setMotivoNoApta('');
+                }}
+                className="modal-no-apta-btn-cancel"
+              >
+                Cancelar
+              </IonButton>
+              <IonButton 
+                expand="block"
+                color="warning"
+                onClick={async () => {
+                  if (!selectedItem || cantidadNoApta <= 0 || !idMotivoSeleccionado) {
+                    setAlertMsg("Por favor complete todos los campos requeridos (cantidad y motivo)");
+                    setShowAlert(true);
+                    return;
+                  }
+                  
+                  const prenda = prendas.find(p => p.codigoIndumentaria === selectedItem);
+                  if (!prenda) return;
+                  
+                  if (cantidadNoApta > prenda.cantidadIndumentaria) {
+                    setAlertMsg(`No hay suficiente stock disponible. Máximo disponible: ${prenda.cantidadIndumentaria}`);
+                    setShowAlert(true);
+                    return;
+                  }
+                  
+                  try {
+                    const response = await moverANoApta(
+                      selectedItem,
+                      cantidadNoApta,
+                      idMotivoSeleccionado,
+                      motivoNoApta || ''
+                    );
+                    
+                    cargarIndumentaria();
+                    setAlertMsg(response.message || "Stock movido a No Apto correctamente.");
+                    setShowAlert(true);
+                    setShowNoAptaAlert(false);
+                    setSelectedItem(null);
+                    setIdMotivoSeleccionado(null);
+                    setCantidadNoApta(0);
+                    setMotivoNoApta('');
+                  } catch (error: any) {
+                    console.error('Error:', error);
+                    setAlertMsg(error.message || "Error al mover stock a No Apto.");
+                    setShowAlert(true);
+                  }
+                }}
+                className="modal-no-apta-btn-confirm"
+                style={{ flex: '2' }}
+              >
+                <IonIcon icon={trash} slot="start" />
+                Mover a No Apta
+              </IonButton>
+            </div>
+          </IonToolbar>
+        </IonFooter>
+      </IonModal>
 
       {/* Alert para agregar stock */}
       <IonAlert
@@ -701,6 +935,298 @@ const Indumentaria: React.FC = () => {
           }
         ]}
       />
+
+      {/* Modal para reingreso a stock */}
+      <IonModal 
+        isOpen={showReingresoAlert} 
+        onDidDismiss={() => {
+          setShowReingresoAlert(false);
+          setSelectedItem(null);
+          setCantidadReingreso(0);
+          setObservacionesReingreso('');
+        }}
+        className="modal-no-apta"
+      >
+        <IonHeader>
+          <IonToolbar color="success">
+            <IonTitle>
+              <IonIcon icon={cubeOutline} style={{ marginRight: '8px' }} />
+              Reingresar a Stock Original
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div className="modal-no-apta-container">
+            {/* Header con info del producto */}
+            <div className="modal-reingreso-header">
+              <div className="modal-reingreso-header-content">
+                <IonIcon icon={shirt} className="modal-reingreso-header-icon" />
+                <h3 className="modal-reingreso-header-title">
+                  Indumentaria: <span style={{ 
+                    fontFamily: '"Monaco", "Menlo", monospace',
+                    background: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    marginLeft: '8px'
+                  }}>{selectedItem || 'N/A'}</span>
+                </h3>
+              </div>
+              <p className="modal-reingreso-header-description">
+                Disponible para reingreso: {prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria || 0} unidades
+              </p>
+            </div>
+
+            {/* Campo de Cantidad */}
+            <IonItem className="modal-no-apta-item">
+              <IonLabel position="stacked" className="modal-no-apta-label">
+                Cantidad a reingresar <span className="modal-no-apta-label-required">*</span>
+              </IonLabel>
+              <IonInput
+                type="number"
+                placeholder="Ingrese la cantidad"
+                min={1}
+                max={prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria}
+                value={cantidadReingreso || ''}
+                onIonChange={(e) => setCantidadReingreso(Number(e.detail.value))}
+                className="modal-no-apta-input"
+              />
+            </IonItem>
+
+            {/* Observaciones opcionales */}
+            <IonItem className="modal-no-apta-item">
+              <IonLabel position="stacked" className="modal-no-apta-label">
+                Observaciones sobre la reparación <span className="modal-no-apta-label-optional">(opcional)</span>
+              </IonLabel>
+              <IonTextarea
+                placeholder="Describa la reparación realizada..."
+                rows={4}
+                value={observacionesReingreso}
+                onIonChange={(e) => setObservacionesReingreso(e.detail.value || '')}
+                className="modal-no-apta-textarea"
+              />
+            </IonItem>
+
+            {/* Nota informativa */}
+            <div className="modal-reingreso-info">
+              <IonIcon icon={checkmarkCircle} className="modal-reingreso-info-icon" />
+              <IonText className="modal-reingreso-info-text">
+                <strong>✅ Reingreso automático:</strong> La indumentaria será reparada y regresará <strong>automáticamente a su rack original</strong>, quedando disponible para venta nuevamente.
+              </IonText>
+            </div>
+          </div>
+        </IonContent>
+        <IonFooter className="modal-no-apta-footer">
+          <IonToolbar>
+            <div className="modal-no-apta-buttons">
+              <IonButton 
+                expand="block"
+                fill="outline"
+                color="medium"
+                onClick={() => {
+                  setShowReingresoAlert(false);
+                  setSelectedItem(null);
+                  setCantidadReingreso(0);
+                  setObservacionesReingreso('');
+                }}
+                className="modal-no-apta-btn-cancel"
+              >
+                Cancelar
+              </IonButton>
+              <IonButton 
+                expand="block"
+                color="success"
+                onClick={async () => {
+                  if (!selectedItem || cantidadReingreso <= 0) {
+                    setAlertMsg("Por favor ingrese la cantidad a reingresar");
+                    setShowAlert(true);
+                    return;
+                  }
+                  
+                  const prenda = prendas.find(p => p.codigoIndumentaria === selectedItem);
+                  if (!prenda) return;
+                  
+                  if (cantidadReingreso > prenda.cantidadIndumentaria) {
+                    setAlertMsg(`No hay suficiente stock disponible. Máximo disponible: ${prenda.cantidadIndumentaria}`);
+                    setShowAlert(true);
+                    return;
+                  }
+                  
+                  try {
+                    const response = await reingresarAStock(
+                      selectedItem,
+                      cantidadReingreso,
+                      observacionesReingreso || ''
+                    );
+                    
+                    cargarIndumentaria();
+                    setAlertMsg(response?.message || `${cantidadReingreso} unidades reingresadas correctamente a su rack original`);
+                    setShowAlert(true);
+                    setShowReingresoAlert(false);
+                    setSelectedItem(null);
+                    setCantidadReingreso(0);
+                    setObservacionesReingreso('');
+                  } catch (error: any) {
+                    console.error('Error:', error);
+                    setAlertMsg(error.message || "Error al reingresar a stock.");
+                    setShowAlert(true);
+                  }
+                }}
+                className="modal-reingreso-btn-confirm"
+                style={{ flex: '2' }}
+              >
+                <IonIcon icon={checkmarkCircle} slot="start" />
+                Reingresar a Rack Original
+              </IonButton>
+            </div>
+          </IonToolbar>
+        </IonFooter>
+      </IonModal>
+
+      {/* Modal para marcar como scrap */}
+      <IonModal 
+        isOpen={showScrapAlert} 
+        onDidDismiss={() => {
+          setShowScrapAlert(false);
+          setSelectedItem(null);
+          setCantidadScrap(0);
+          setObservacionesScrap('');
+        }}
+        className="modal-no-apta"
+      >
+        <IonHeader>
+          <IonToolbar color="danger">
+            <IonTitle>
+              <IonIcon icon={warningOutline} style={{ marginRight: '8px' }} />
+              Marcar como Scrap (Desecho)
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div className="modal-no-apta-container">
+            {/* Header con info del producto */}
+            <div className="modal-scrap-header">
+              <div className="modal-scrap-header-content">
+                <IonIcon icon={shirt} className="modal-scrap-header-icon" />
+                <h3 className="modal-scrap-header-title">
+                  Indumentaria: <span style={{ 
+                    fontFamily: '"Monaco", "Menlo", monospace',
+                    background: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    marginLeft: '8px'
+                  }}>{selectedItem || 'N/A'}</span>
+                </h3>
+              </div>
+              <p className="modal-scrap-header-description">
+                Disponible para desecho: {prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria || 0} unidades
+              </p>
+            </div>
+
+            {/* Campo de Cantidad */}
+            <IonItem className="modal-no-apta-item">
+              <IonLabel position="stacked" className="modal-no-apta-label">
+                Cantidad a desechar <span className="modal-no-apta-label-required">*</span>
+              </IonLabel>
+              <IonInput
+                type="number"
+                placeholder="Ingrese la cantidad"
+                min={1}
+                max={prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria}
+                value={cantidadScrap || ''}
+                onIonChange={(e) => setCantidadScrap(Number(e.detail.value))}
+                className="modal-no-apta-input"
+              />
+            </IonItem>
+
+            {/* Observaciones - Recomendadas */}
+            <IonItem className="modal-no-apta-item">
+              <IonLabel position="stacked" className="modal-no-apta-label">
+                Motivo del desecho <span style={{ color: '#f59e0b', fontWeight: '500', fontSize: '0.85em' }}>(recomendado)</span>
+              </IonLabel>
+              <IonTextarea
+                placeholder="Describa el motivo por el cual se desecha esta indumentaria..."
+                rows={4}
+                value={observacionesScrap}
+                onIonChange={(e) => setObservacionesScrap(e.detail.value || '')}
+                className="modal-no-apta-textarea"
+              />
+            </IonItem>
+
+            {/* Advertencia de scrap */}
+            <div className="modal-scrap-warning">
+              <IonIcon icon={warningOutline} className="modal-scrap-warning-icon" />
+              <IonText className="modal-scrap-warning-text">
+                <strong>⚠️ ADVERTENCIA:</strong> Esta acción marcará la indumentaria como desechada de forma permanente. La indumentaria no podrá ser recuperada ni vendida.
+              </IonText>
+            </div>
+          </div>
+        </IonContent>
+        <IonFooter className="modal-no-apta-footer">
+          <IonToolbar>
+            <div className="modal-no-apta-buttons">
+              <IonButton 
+                expand="block"
+                fill="outline"
+                color="medium"
+                onClick={() => {
+                  setShowScrapAlert(false);
+                  setSelectedItem(null);
+                  setCantidadScrap(0);
+                  setObservacionesScrap('');
+                }}
+                className="modal-no-apta-btn-cancel"
+              >
+                Cancelar
+              </IonButton>
+              <IonButton 
+                expand="block"
+                color="danger"
+                onClick={async () => {
+                  if (!selectedItem || cantidadScrap <= 0) {
+                    setAlertMsg("Por favor ingrese la cantidad a desechar");
+                    setShowAlert(true);
+                    return;
+                  }
+                  
+                  const prenda = prendas.find(p => p.codigoIndumentaria === selectedItem);
+                  if (!prenda) return;
+                  
+                  if (cantidadScrap > prenda.cantidadIndumentaria) {
+                    setAlertMsg(`No hay suficiente stock disponible. Máximo disponible: ${prenda.cantidadIndumentaria}`);
+                    setShowAlert(true);
+                    return;
+                  }
+                  
+                  try {
+                    const response = await marcarComoScrap(
+                      selectedItem,
+                      cantidadScrap,
+                      observacionesScrap || ''
+                    );
+                    
+                    cargarIndumentaria();
+                    setAlertMsg(response?.message || `${cantidadScrap} unidades marcadas como scrap (desechadas)`);
+                    setShowAlert(true);
+                    setShowScrapAlert(false);
+                    setSelectedItem(null);
+                    setCantidadScrap(0);
+                    setObservacionesScrap('');
+                  } catch (error: any) {
+                    console.error('Error:', error);
+                    setAlertMsg(error.message || "Error al marcar como scrap.");
+                    setShowAlert(true);
+                  }
+                }}
+                className="modal-scrap-btn-confirm"
+                style={{ flex: '2' }}
+              >
+                <IonIcon icon={trash} slot="start" />
+                Confirmar Desecho
+              </IonButton>
+            </div>
+          </IonToolbar>
+        </IonFooter>
+      </IonModal>
     </IonPage>
   );
 };

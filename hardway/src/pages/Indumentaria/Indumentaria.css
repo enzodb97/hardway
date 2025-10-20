@@ -967,3 +967,327 @@ ion-action-sheet * {
 /* Definición del selector de páginas ya está arriba */
 
 /* El action sheet mantendrá su posicionamiento por defecto de Ionic */
+
+/* ========================================
+   MODAL NO APTA - ESTILOS
+   ======================================== */
+
+/* Modal container */
+.modal-no-apta ion-content {
+  --background: #f8fafc !important;
+}
+
+/* Contenedor principal del modal */
+.modal-no-apta-container {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+/* Header con información del producto */
+.modal-no-apta-header {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #f59e0b;
+}
+
+.modal-no-apta-header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-no-apta-header-icon {
+  font-size: 1.5em;
+  color: #92400e;
+}
+
+.modal-no-apta-header-title {
+  margin: 0;
+  color: #92400e;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal-no-apta-header-description {
+  margin: 0;
+  color: #92400e;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Campos del formulario */
+.modal-no-apta-item {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.modal-no-apta-label {
+  color: #374151;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.modal-no-apta-label-required {
+  color: #ef4444;
+}
+
+.modal-no-apta-input {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.modal-no-apta-select {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.modal-no-apta-textarea {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-weight: 400;
+  color: #1e293b;
+}
+
+.modal-no-apta-label-optional {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.85em;
+}
+
+/* Nota informativa */
+.modal-no-apta-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid #3b82f6;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal-no-apta-info-icon {
+  color: #1e40af;
+  font-size: 1.5em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.modal-no-apta-info-text {
+  color: #1e40af;
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Footer del modal */
+.modal-no-apta-footer {
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid #e2e8f0;
+}
+
+.modal-no-apta-footer ion-toolbar {
+  --background: white;
+}
+
+.modal-no-apta-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.modal-no-apta-btn-cancel {
+  --border-radius: 12px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.modal-no-apta-btn-confirm {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  font-weight: 600;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modal-no-apta-btn-confirm:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(253, 180, 11, 0.4);
+}
+
+/* ========================================
+   MODAL REINGRESO - ESTILOS
+   ======================================== */
+
+/* Header con información del producto - Verde para éxito */
+.modal-reingreso-header {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #10b981;
+}
+
+.modal-reingreso-header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-reingreso-header-icon {
+  font-size: 1.5em;
+  color: #065f46;
+}
+
+.modal-reingreso-header-title {
+  margin: 0;
+  color: #065f46;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal-reingreso-header-description {
+  margin: 0;
+  color: #065f46;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Nota informativa para reingreso */
+.modal-reingreso-info {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid #10b981;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal-reingreso-info-icon {
+  color: #065f46;
+  font-size: 1.5em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.modal-reingreso-info-text {
+  color: #065f46;
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Botón confirmar para reingreso - Verde */
+.modal-reingreso-btn-confirm {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  font-weight: 600;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modal-reingreso-btn-confirm:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* ========================================
+   MODAL SCRAP - ESTILOS
+   ======================================== */
+
+/* Header con información del producto - Rojo para peligro */
+.modal-scrap-header {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #ef4444;
+}
+
+.modal-scrap-header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-scrap-header-icon {
+  font-size: 1.5em;
+  color: #991b1b;
+}
+
+.modal-scrap-header-title {
+  margin: 0;
+  color: #991b1b;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal-scrap-header-description {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Nota informativa para scrap - Advertencia */
+.modal-scrap-warning {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal-scrap-warning-icon {
+  color: #991b1b;
+  font-size: 1.5em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.modal-scrap-warning-text {
+  color: #991b1b;
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Botón confirmar para scrap - Rojo peligro */
+.modal-scrap-btn-confirm {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  font-weight: 600;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modal-scrap-btn-confirm:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}

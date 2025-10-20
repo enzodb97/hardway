@@ -11,6 +11,8 @@ const Indumentaria = require('./Indumentaria');
 const DetalleIndumentaria = require('./DetalleIndumentaria');
 const PedidoIndumentaria = require('./PedidoIndumentaria');
 const UnidadMedida = require('./UnidadMedida'); // Nuevo modelo
+const MotivoNoApta = require('./MotivoNoApta'); // Nuevo modelo
+const StockRegistroFallo = require('./StockRegistroFallo'); // Nuevo modelo
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
 const {
   Color,
@@ -197,6 +199,8 @@ module.exports = {
   EncargadoPicker,
   MotivoCancelacion,
   Rack,
+  MotivoNoApta,
+  StockRegistroFallo,
   
   // Función para configurar relaciones
   setupAssociations,
