@@ -383,6 +383,24 @@ ion-select::part(text) {
   text-overflow: ellipsis;
 }
 
+/* Mensaje de requisitos de contraseña */
+.password-requirements {
+  margin: -8px 0 12px 0;
+  padding: 12px;
+  background: rgba(var(--ion-color-warning-rgb), 0.1);
+  border-left: 3px solid var(--ion-color-warning);
+  border-radius: 4px;
+}
+
+.password-requirements ion-text {
+  display: block;
+  line-height: 1.5;
+}
+
+.password-requirements small {
+  font-size: 0.85rem;
+}
+
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .usuarios-form-item {

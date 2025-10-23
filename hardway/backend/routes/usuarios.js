@@ -2,6 +2,23 @@ const express = require('express');
 const router = express.Router();
 const { Usuario, Rol, TipoRol } = require('../models');
 
+// Función de validación de contraseña
+function validarPassword(password) {
+  if (!password || password.length < 8) {
+    return 'La contraseña debe tener al menos 8 caracteres.';
+  }
+  if (!/\d/.test(password)) {
+    return 'La contraseña debe contener al menos 1 número.';
+  }
+  if (!/[a-zA-Z]/.test(password)) {
+    return 'La contraseña debe contener al menos 1 letra.';
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return 'La contraseña debe contener al menos 1 carácter especial.';
+  }
+  return null;
+}
+
 // Obtener todos los usuarios
 router.get("/", async (req, res) => {
   try {
@@ -33,6 +50,12 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { username, password, rol } = req.body;
   try {
+    // Validar contraseña
+    const errorPassword = validarPassword(password);
+    if (errorPassword) {
+      return res.status(400).json({ error: errorPassword });
+    }
+
     // Busca el idRol correspondiente al tipoRol recibido
     const rolDB = await Rol.findOne({
       include: {
@@ -95,6 +118,12 @@ router.put("/:id", async (req, res) => {
 router.put("/:id/password", async (req, res) => {
   const { password } = req.body;
   try {
+    // Validar contraseña
+    const errorPassword = validarPassword(password);
+    if (errorPassword) {
+      return res.status(400).json({ error: errorPassword });
+    }
+
     const [updated] = await Usuario.update(
       { contrasena: password },
       { where: { idUsuario: req.params.id } }

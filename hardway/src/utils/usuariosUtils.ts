@@ -17,10 +17,32 @@ export function validarCamposUsuario(usuario: Partial<Usuario>): string | null {
   if (!usuario.rol) {
     return "El rol es obligatorio.";
   }
-  // Si es creación, la contraseña es obligatoria
-  if (usuario.password !== undefined && usuario.password.trim().length < 4) {
-    return "La contraseña debe tener al menos 4 caracteres.";
+  
+  // Validación de contraseña con criterios de seguridad
+  if (usuario.password !== undefined && usuario.password !== null) {
+    const password = usuario.password.trim();
+    
+    // Mínimo 8 caracteres
+    if (password.length < 8) {
+      return "La contraseña debe tener al menos 8 caracteres.";
+    }
+    
+    // Al menos 1 número
+    if (!/\d/.test(password)) {
+      return "La contraseña debe contener al menos 1 número.";
+    }
+    
+    // Al menos 1 letra
+    if (!/[a-zA-Z]/.test(password)) {
+      return "La contraseña debe contener al menos 1 letra.";
+    }
+    
+    // Al menos 1 carácter especial
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      return "La contraseña debe contener al menos 1 carácter especial (!@#$%^&*()_+-=[]{}etc.).";
+    }
   }
+  
   return null;
 }
 
@@ -63,5 +85,24 @@ export const editarUsuario = async (usuario: Usuario) => {
 
 // Cambiar contraseña
 export async function cambiarPassword(id: number, password: string) {
-  await axiosInstance.put(`/api/usuarios/${id}/password`, { password });
+  // Validar que la nueva contraseña cumpla con los criterios de seguridad
+  const passwordTrimmed = password.trim();
+  
+  if (passwordTrimmed.length < 8) {
+    throw new Error("La contraseña debe tener al menos 8 caracteres.");
+  }
+  
+  if (!/\d/.test(passwordTrimmed)) {
+    throw new Error("La contraseña debe contener al menos 1 número.");
+  }
+  
+  if (!/[a-zA-Z]/.test(passwordTrimmed)) {
+    throw new Error("La contraseña debe contener al menos 1 letra.");
+  }
+  
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordTrimmed)) {
+    throw new Error("La contraseña debe contener al menos 1 carácter especial.");
+  }
+  
+  await axiosInstance.put(`/api/usuarios/${id}/password`, { password: passwordTrimmed });
 }

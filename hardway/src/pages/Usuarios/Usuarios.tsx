@@ -276,8 +276,9 @@ const Usuarios: React.FC = () => {
       setAlertMsg("Contraseña actualizada correctamente");
       setShowAlert(true);
       setShowPasswordAlert(false);
-    } catch {
-      setAlertMsg("Error al actualizar contraseña");
+      setNuevaPassword("");
+    } catch (error: any) {
+      setAlertMsg(error.message || "Error al actualizar contraseña");
       setShowAlert(true);
     }
   };
@@ -342,6 +343,13 @@ const Usuarios: React.FC = () => {
                     clearInput
                   />
                 </IonItem>
+                <div className="password-requirements">
+                  <IonText color="medium">
+                    <small>
+                      <strong>Requisitos de seguridad:</strong> Mínimo 8 caracteres, 1 número, 1 letra y 1 carácter especial
+                    </small>
+                  </IonText>
+                </div>
                 <IonItem className="usuarios-form-item">
                   <IonIcon icon={ribbonOutline} slot="start" color="medium" />
                   <IonLabel position="floating">Rol</IonLabel>
@@ -598,20 +606,25 @@ const Usuarios: React.FC = () => {
           <IonAlert
             isOpen={showPasswordAlert}
             header="Cambiar Contraseña"
+            subHeader="La contraseña debe cumplir con los siguientes requisitos de seguridad:"
+            message="• Mínimo 8 caracteres<br/>• Al menos 1 número<br/>• Al menos 1 letra<br/>• Al menos 1 carácter especial (!@#$%^&*etc.)"
             inputs={[
               {
                 name: "password",
                 type: "password",
                 placeholder: "Nueva contraseña",
                 value: nuevaPassword,
-                attributes: { minLength: 4 },
+                attributes: { minLength: 8 },
               },
             ]}
             buttons={[
               {
                 text: "Cancelar",
                 role: "cancel",
-                handler: () => setShowPasswordAlert(false),
+                handler: () => {
+                  setShowPasswordAlert(false);
+                  setNuevaPassword("");
+                },
               },
               {
                 text: "Guardar",
