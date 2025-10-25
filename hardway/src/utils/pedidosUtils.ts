@@ -138,6 +138,7 @@ export interface Pedido {
   idCliente: number;
   idEstado: number;
   fechaPedido?: string; // <-- agrega esto
+  idEmpresaEnvio?: number; // <-- empresa de envío
   EstadoPedido?: EstadoPedido;
   Cliente?: Cliente;
   // otros campos si necesitas

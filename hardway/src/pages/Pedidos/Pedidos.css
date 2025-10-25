@@ -32,6 +32,10 @@
   --padding-bottom: 20px;
 }
 
+.text-center{
+  text-align: center;
+}
+
 .pedidos-buscador {
   margin: 0 0 24px 0;
   background: white;

@@ -45,6 +45,7 @@ app.use("/api/clientes", clientesRoutes);
 app.use("/api/pedidos", pedidosRoutes);
 app.use("/api/indumentaria", indumentariaRoutes);
 app.use("/api", auxiliaresRoutes);
+app.use("/api/auxiliares", auxiliaresRoutes);
 app.use("/api", ubicacionRoutes);
 app.use("/api/reportes", reportesRoutes);
 app.use("/api/picking", pickingRoutes);

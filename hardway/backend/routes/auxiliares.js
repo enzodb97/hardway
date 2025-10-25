@@ -196,6 +196,21 @@ router.get("/tiporoles", async (req, res) => {
   }
 });
 
+// Rutas para Empresas de Envío
+router.get("/empresas-envio", async (req, res) => {
+  try {
+    const [empresas] = await sequelize.query(`
+      SELECT idEmpresaEnvio, nombre 
+      FROM empresa_envio 
+      ORDER BY nombre ASC
+    `);
+    res.json(empresas);
+  } catch (error) {
+    console.error("Error al obtener empresas de envío:", error);
+    res.status(500).json({ error: "Error al obtener empresas de envío" });
+  }
+});
+
 // Rutas para Motivos de Cancelación
 router.get("/motivos-cancelacion", async (req, res) => {
   try {

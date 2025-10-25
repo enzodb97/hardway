@@ -10,6 +10,8 @@ const Pedido = sequelize.define(
     fechaPedido: DataTypes.DATE,
     fechaModificacion: DataTypes.DATE, // Para registrar modificaciones
     codigoSeguimiento: DataTypes.STRING,
+    numeroSeguimiento: DataTypes.STRING, // Número de seguimiento del envío
+    idEmpresaEnvio: DataTypes.INTEGER, // Empresa de envío seleccionada
     idMotivoCancelacion: DataTypes.INTEGER, // Para el motivo de cancelación
     idUsuarioCancelo: DataTypes.INTEGER, // Para el usuario que canceló
     idUsuarioCreo: DataTypes.INTEGER, // Para el usuario que creó el pedido

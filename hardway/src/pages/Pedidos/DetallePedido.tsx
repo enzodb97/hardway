@@ -28,6 +28,11 @@ const DetallePedido: React.FC = () => {
         const res = await axiosInstance.get(`/api/pedidos/${id}/detalle-plano`);
         setPrendas(res.data.items || []);
         setPedido(res.data.pedido);
+        
+        // Debug: verificar los datos del pedido
+        console.log("📦 Datos del pedido recibidos:", res.data.pedido);
+        console.log("🚚 Empresa de envío:", res.data.pedido?.empresaEnvio);
+        console.log("📋 Número de seguimiento:", res.data.pedido?.numeroSeguimiento);
       } catch (error) {
         console.error("Error al cargar pedido:", error);
       }
@@ -181,6 +186,68 @@ const DetallePedido: React.FC = () => {
 
         {/* Barra de progreso del pedido */}
         {pedido && <BarraProgreso />}
+
+        {/* Información del Cliente */}
+        {pedido && (
+          <div className="cliente-info-card">
+            <h3>📋 Información del Cliente</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <strong>Nombre completo:</strong>{" "}
+                {`${mostrar(pedido.clienteNombre)} ${mostrar(pedido.clienteApellido)}`.trim()}
+              </div>
+              <div className="info-item">
+                <strong>Documento:</strong> {mostrar(pedido.clienteDocumento)}
+              </div>
+              <div className="info-item">
+                <strong>Email:</strong> {mostrar(pedido.clienteEmail)}
+              </div>
+              <div className="info-item">
+                <strong>Teléfono:</strong> {mostrar(pedido.clienteTelefono)}
+              </div>
+              <div className="info-item full-width">
+                <strong>Dirección:</strong>{" "}
+                {pedido.clienteCalle && pedido.clienteNumero
+                  ? `${pedido.clienteCalle} ${pedido.clienteNumero}${
+                      pedido.clientePiso ? ` Piso ${pedido.clientePiso}` : ""
+                    }${
+                      pedido.clienteDepartamento
+                        ? ` Depto ${pedido.clienteDepartamento}`
+                        : ""
+                    }, ${pedido.clienteBarrio || ""}, ${
+                      pedido.clienteCiudad || ""
+                    } (CP: ${pedido.clienteCodigoPostal || "N/A"})`
+                  : "-"}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Información de Envío */}
+        {pedido && (pedido.empresaEnvio || pedido.numeroSeguimiento) && (
+          <div className="envio-info-card">
+            <h3>🚚 Información de Envío</h3>
+            <div className="info-grid">
+              {pedido.empresaEnvio && (
+                <div className="info-item">
+                  <strong>Empresa de envío:</strong>{" "}
+                  <span className="empresa-badge">{pedido.empresaEnvio}</span>
+                </div>
+              )}
+              {pedido.numeroSeguimiento && (
+                <div className="info-item">
+                  <strong>Número de seguimiento:</strong>{" "}
+                  <span className="tracking-number">{pedido.numeroSeguimiento}</span>
+                </div>
+              )}
+              {!pedido.numeroSeguimiento && pedido.empresaEnvio && (
+                <div className="info-item" style={{ color: '#64748b', fontStyle: 'italic' }}>
+                  <strong>Número de seguimiento:</strong> Aún no asignado
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Información del estado del pedido */}
         {pedido && (

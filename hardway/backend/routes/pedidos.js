@@ -60,7 +60,15 @@ router.get("/", async (req, res) => {
 
 // Crear pedido con prendas
 router.post("/", async (req, res) => {
-  const { idCliente, idEstado, prendas } = req.body;
+  const { idCliente, idEstado, prendas, idEmpresaEnvio } = req.body;
+  
+  // Debug: verificar qué se está recibiendo
+  console.log("📦 Datos recibidos en POST /api/pedidos:");
+  console.log("   - idCliente:", idCliente);
+  console.log("   - idEstado:", idEstado);
+  console.log("   - idEmpresaEnvio:", idEmpresaEnvio, "Tipo:", typeof idEmpresaEnvio);
+  console.log("   - prendas:", prendas?.length, "items");
+  
   const t = await sequelize.transaction();
   try {
     // Generar número de pedido: PED-YYYYMMDD-XXX (XXX = correlativo del día)
@@ -127,6 +135,7 @@ router.post("/", async (req, res) => {
         idEstado,
         idUsuarioCreo: req.usuarioAutenticado.idUsuario, // Registrar quien creó el pedido
         descuentoOrden,
+        idEmpresaEnvio: idEmpresaEnvio || null, // Agregar empresa de envío
       },
       { transaction: t }
     );
@@ -250,13 +259,33 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
         ucr.nombreUsuario AS usuarioCreo,
         um.nombreUsuario AS usuarioModifico,
         p.idCliente,
-        p.descuentoOrden
+        p.descuentoOrden,
+        p.codigoSeguimiento AS numeroSeguimiento,
+        ee.nombre AS empresaEnvio,
+        per.nombre AS clienteNombre,
+        per.apellido AS clienteApellido,
+        per.dni AS clienteDocumento,
+        cl.email AS clienteEmail,
+        cl.telefono AS clienteTelefono,
+        d.calle AS clienteCalle,
+        d.altura AS clienteNumero,
+        d.piso AS clientePiso,
+        d.departamento AS clienteDepartamento,
+        b.nombreBarrio AS clienteBarrio,
+        c.nombreCiudad AS clienteCiudad,
+        c.codigoPostal AS clienteCodigoPostal
       FROM pedido p
       JOIN estadopedido ep ON p.idEstado = ep.idEstado
       LEFT JOIN motivo_cancelacion mc ON p.idMotivoCancelacion = mc.idMotivo
       LEFT JOIN usuario uc ON p.idUsuarioCancelo = uc.idUsuario
       LEFT JOIN usuario ucr ON p.idUsuarioCreo = ucr.idUsuario
       LEFT JOIN usuario um ON p.idUsuarioModifico = um.idUsuario
+      LEFT JOIN empresa_envio ee ON p.idEmpresaEnvio = ee.idEmpresaEnvio
+      LEFT JOIN cliente cl ON p.idCliente = cl.idCliente
+      LEFT JOIN persona per ON cl.idPersona = per.idPersona
+      LEFT JOIN domicilio d ON per.idDomicilio = d.idDomicilio
+      LEFT JOIN barrio b ON d.idBarrio = b.idBarrio
+      LEFT JOIN ciudad c ON b.idCiudad = c.idCiudad
       WHERE p.numeroPedido = ?
       `,
       { replacements: [numeroPedido] }

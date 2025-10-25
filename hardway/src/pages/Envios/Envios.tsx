@@ -91,6 +91,11 @@ const Envios: React.FC = () => {
 
       const pedidosData = await obtenerPedidosAbonados();
       console.log("✅ Pedidos cargados:", pedidosData.length);
+      console.log("📦 Datos de pedidos con empresa:", pedidosData.map(p => ({
+        pedido: p.numeroPedido,
+        empresa: p.empresaEnvio,
+        idEmpresa: p.idEmpresaEnvio
+      })));
       setPedidos(pedidosData);
     } catch (error) {
       console.error("❌ Error cargando pedidos:", error);
@@ -402,6 +407,20 @@ const Envios: React.FC = () => {
                           </div>
                         </div>
                       </IonCol>
+
+                      {pedido.empresaEnvio && (
+                        <IonCol size="12">
+                          <div className="empresa-envio-container">
+                            <IonIcon icon={carOutline} className="empresa-envio-icon" />
+                            <div className="empresa-envio-content">
+                              <div className="empresa-envio-label">Empresa de Envío</div>
+                              <div className="empresa-envio-value">
+                                {pedido.empresaEnvio}
+                              </div>
+                            </div>
+                          </div>
+                        </IonCol>
+                      )}
 
                       <IonCol size="12">
                         <div className="action-container">

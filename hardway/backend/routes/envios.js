@@ -22,15 +22,18 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         pe.apellido,
         CONCAT(d.calle, ' ', d.altura, ', ', ci.nombreCiudad) AS direccion_envio,
         SUM(dp.cantidad) AS total_items,
-        p.codigoSeguimiento
+        p.codigoSeguimiento,
+        p.idEmpresaEnvio,
+        ee.nombre AS empresaEnvio
       FROM pedido p
       JOIN cliente c ON p.idCliente = c.idCliente
       JOIN persona pe ON c.idPersona = pe.idPersona
       JOIN domicilio d ON pe.idDomicilio = d.idDomicilio
       JOIN ciudad ci ON d.idCiudad = ci.idCiudad
       JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
+      LEFT JOIN empresa_envio ee ON p.idEmpresaEnvio = ee.idEmpresaEnvio
       WHERE p.idEstado = 3 AND p.estaActivo = 1
-      GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, p.codigoSeguimiento
+      GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, p.codigoSeguimiento, p.idEmpresaEnvio, ee.nombre
       ORDER BY p.fechaPedido DESC
     `);
     

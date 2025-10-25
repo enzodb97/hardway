@@ -15,6 +15,8 @@ import {
   IonModal,
   IonList,
   IonIcon,
+  IonSelect,
+  IonSelectOption,
 } from "@ionic/react";
 import {
   person,
@@ -25,6 +27,7 @@ import {
   arrowBack,
   checkmark,
   save,
+  carOutline,
 } from "ionicons/icons";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
@@ -82,6 +85,10 @@ const AltaPedido: React.FC = () => {
   const [showIndumentariaModal, setShowIndumentariaModal] = useState(false);
   const [filtroIndumentaria, setFiltroIndumentaria] = useState("");
 
+  // --- Empresas de Envío ---
+  const [empresasEnvio, setEmpresasEnvio] = useState<{ idEmpresaEnvio: number; nombre: string }[]>([]);
+  const [empresaEnvioSeleccionada, setEmpresaEnvioSeleccionada] = useState<string>("");
+
   // Calcular total y descuento si corresponde (después de los estados)
   const esVip = form.idCliente && vipIds.has(Number(form.idCliente));
   const totalPedido = prendasSeleccionadas.reduce((acc, prenda) => {
@@ -134,6 +141,21 @@ const AltaPedido: React.FC = () => {
       }));
       setIndumentaria(indumentariaMapeada);
     });
+  }, []);
+
+  // Cargar empresas de envío
+  useEffect(() => {
+    const cargarEmpresasEnvio = async () => {
+      try {
+        const resEmpresas = await axiosInstance.get("/api/auxiliares/empresas-envio");
+        setEmpresasEnvio(resEmpresas.data);
+      } catch (error) {
+        console.error("Error al cargar empresas de envío:", error);
+        setAlertMsg("Error al cargar las empresas de envío");
+        setShowAlert(true);
+      }
+    };
+    cargarEmpresasEnvio();
   }, []);
 
   // Almacenar datos de pedido para procesamiento posterior
@@ -286,6 +308,14 @@ const AltaPedido: React.FC = () => {
       setShowAlert(true);
       return;
     }
+
+    // Validar que se haya seleccionado una empresa de envío
+    if (!empresaEnvioSeleccionada) {
+      setAlertMsg("Debe seleccionar una empresa de envío");
+      setShowAlert(true);
+      return;
+    }
+
     try {
       const pedido = {
         idCliente: Number(form.idCliente),
@@ -299,7 +329,12 @@ const AltaPedido: React.FC = () => {
         total: totalConDescuento,
         descuento: descuento,
         esVip: esVip,
+        idEmpresaEnvio: Number(empresaEnvioSeleccionada), // Agregar empresa de envío
       };
+
+      console.log("📦 Datos del pedido a enviar:", pedido);
+      console.log("🚚 Empresa seleccionada:", empresaEnvioSeleccionada);
+      console.log("🚚 Empresa convertida a número:", Number(empresaEnvioSeleccionada));
 
       if (esEdicion && id) {
         // EDITAR pedido existente
@@ -431,6 +466,27 @@ const AltaPedido: React.FC = () => {
                       <IonInput value={form.idCliente} readonly />
                     </IonItem>
                   )}
+
+                  {/* Select de Empresa de Envío */}
+                  <IonItem className="form-item empresa-envio-item">
+                    <IonIcon icon={carOutline} slot="start" style={{ marginRight: '8px', color: '#fdb40b' }} />
+                    <IonLabel position="floating">Empresa de Envío *</IonLabel>
+                    <IonSelect
+                      value={empresaEnvioSeleccionada}
+                      placeholder="Seleccione una empresa"
+                      onIonChange={(e: CustomEvent) => setEmpresaEnvioSeleccionada(e.detail.value!)}
+                      interface="popover"
+                    >
+                      {empresasEnvio.map((empresa) => (
+                        <IonSelectOption 
+                          key={empresa.idEmpresaEnvio} 
+                          value={empresa.idEmpresaEnvio.toString()}
+                        >
+                          {empresa.nombre}
+                        </IonSelectOption>
+                      ))}
+                    </IonSelect>
+                  </IonItem>
                 </div>
               </div>
 
