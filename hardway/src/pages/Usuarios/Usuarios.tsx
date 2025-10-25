@@ -606,8 +606,11 @@ const Usuarios: React.FC = () => {
           <IonAlert
             isOpen={showPasswordAlert}
             header="Cambiar Contraseña"
-            subHeader="La contraseña debe cumplir con los siguientes requisitos de seguridad:"
-            message="• Mínimo 8 caracteres<br/>• Al menos 1 número<br/>• Al menos 1 letra<br/>• Al menos 1 carácter especial (!@#$%^&*etc.)"
+            subHeader="Requisitos de seguridad:"
+            message="            -Mínimo 8 caracteres 
+            -Al menos 1 número 
+            -Al menos 1 letra 
+            -Al menos 1 carácter especial (!@#$%^&*)"
             inputs={[
               {
                 name: "password",
@@ -633,6 +636,7 @@ const Usuarios: React.FC = () => {
                 },
               },
             ]}
+            cssClass="password-alert"
           />
         </div>
       </IonContent>

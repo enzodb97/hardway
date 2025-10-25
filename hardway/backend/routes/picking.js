@@ -27,12 +27,14 @@ router.get("/tareas-admin", async (req, res) => {
         ap.idAsignacion,
         ap.numeroPedido,
         p.fechaPedido,
+        p.idEstado,
         CONCAT(per.nombre, ' ', COALESCE(per.apellido, '')) AS nombreCliente,
         c.email AS emailCliente,
         c.telefono AS telefonoCliente,
         ap.fechaAsignacion,
         ap.observaciones,
         ap.legajoPicker,
+        ap.completado,
         CONCAT(p_picker.nombre, ' ', COALESCE(p_picker.apellido, '')) AS pickerAsignado,
         COUNT(dp.idDetallePedido) AS totalItems
       FROM asignacion_picking ap
@@ -42,12 +44,16 @@ router.get("/tareas-admin", async (req, res) => {
       LEFT JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona p_picker ON ep.idPersona = p_picker.idPersona
-      WHERE ap.completado = 0
-        AND p.estaActivo = 1
+      WHERE p.estaActivo = 1
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = ap.numeroPedido
+        )
       GROUP BY 
-        ap.idAsignacion, ap.numeroPedido, p.fechaPedido, per.nombre, per.apellido,
+        ap.idAsignacion, ap.numeroPedido, p.fechaPedido, p.idEstado, per.nombre, per.apellido,
         c.email, c.telefono, ap.fechaAsignacion, ap.observaciones,
-        ap.legajoPicker, p_picker.nombre, p_picker.apellido
+        ap.legajoPicker, ap.completado, p_picker.nombre, p_picker.apellido
       ORDER BY ap.fechaAsignacion ASC
     `);
     
@@ -92,11 +98,13 @@ router.get("/tareas", verificarAccesoPicking, async (req, res) => {
         ap.idAsignacion,
         ap.numeroPedido,
         p.fechaPedido,
+        p.idEstado,
         CONCAT(per.nombre, ' ', COALESCE(per.apellido, '')) AS nombreCliente,
         c.email AS emailCliente,
         c.telefono AS telefonoCliente,
         ap.fechaAsignacion,
         ap.observaciones,
+        ap.completado,
         COUNT(dp.idDetallePedido) AS totalItems
       FROM asignacion_picking ap
       JOIN pedido p ON ap.numeroPedido = p.numeroPedido
@@ -104,13 +112,18 @@ router.get("/tareas", verificarAccesoPicking, async (req, res) => {
       JOIN persona per ON c.idPersona = per.idPersona
       LEFT JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
       WHERE ap.legajoPicker = ? 
-        AND ap.completado = 0
         AND p.estaActivo = 1
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = ap.numeroPedido 
+            AND ap2.legajoPicker = ?
+        )
       GROUP BY 
-        ap.idAsignacion, ap.numeroPedido, p.fechaPedido, per.nombre, per.apellido,
-        c.email, c.telefono, ap.fechaAsignacion, ap.observaciones
+        ap.idAsignacion, ap.numeroPedido, p.fechaPedido, p.idEstado, per.nombre, per.apellido,
+        c.email, c.telefono, ap.fechaAsignacion, ap.observaciones, ap.completado
       ORDER BY ap.fechaAsignacion ASC
-    `, { replacements: [legajoPicker] });
+    `, { replacements: [legajoPicker, legajoPicker] });
     
     res.json(results);
   } catch (error) {
@@ -133,7 +146,7 @@ router.get("/tareas/:numeroPedido", verificarAccesoPicking, async (req, res) => 
       // Para admins, solo verificamos que el pedido exista en alguna asignación
       const [asignacionResult] = await sequelize.query(`
         SELECT * FROM asignacion_picking 
-        WHERE numeroPedido = ? AND completado = 0
+        WHERE numeroPedido = ?
       `, { replacements: [numeroPedido] });
       
       asignacion = asignacionResult;
@@ -144,7 +157,7 @@ router.get("/tareas/:numeroPedido", verificarAccesoPicking, async (req, res) => 
       // Verificar que la tarea esté asignada al picker
       const [asignacionResult] = await sequelize.query(`
         SELECT * FROM asignacion_picking 
-        WHERE numeroPedido = ? AND legajoPicker = ? AND completado = 0
+        WHERE numeroPedido = ? AND legajoPicker = ?
       `, { replacements: [numeroPedido, legajoPicker] });
       
       asignacion = asignacionResult;

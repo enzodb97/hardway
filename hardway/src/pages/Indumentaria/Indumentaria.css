@@ -286,6 +286,7 @@
 }
 
 .estado-badge {
+  text-align: center;
   padding: 4px 12px;
   border-radius: 16px;
   font-weight: 600;

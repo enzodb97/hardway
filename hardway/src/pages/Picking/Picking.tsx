@@ -60,6 +60,8 @@ const Picking: React.FC = () => {
       // Usar legajoPicker si el rol es Picker, sino username (para admin no importa)
       const pickerId = rol === "Picker" ? legajoPicker : username;
       const data = await cargarTareasPicking(rol || "", pickerId || "");
+      console.log("📋 Tareas cargadas desde backend:", data);
+      console.log("📊 Estados de las tareas:", data.map((t: any) => ({ pedido: t.numeroPedido, idEstado: t.idEstado, completado: t.completado })));
       setTareas(data);
       setTareasFiltradas(data); // Inicialmente mostrar todas las tareas
     } catch (err) {
@@ -73,18 +75,22 @@ const Picking: React.FC = () => {
   const filtrarTareas = (tipo: string) => {
     setFiltroActivo(tipo);
     
+    // Estados completados: Pendiente de Pago (2), Abonado (3), Despachado (4), Finalizado (5), Cancelado (6)
+    const estadosCompletados = [2, 3, 4, 5, 6];
+    
     switch (tipo) {
       case 'todos':
         setTareasFiltradas(tareas);
         break;
       case 'pendientes':
-        setTareasFiltradas(tareas.filter(tarea => !tarea.completada && !tarea.enProceso));
-        break;
-      case 'enProceso':
-        setTareasFiltradas(tareas.filter(tarea => tarea.enProceso));
+        // Tareas con estado "En Curso" (1) Y que no estén marcadas como completadas
+        setTareasFiltradas(tareas.filter(tarea => tarea.idEstado === 1 && !tarea.completado));
         break;
       case 'completadas':
-        setTareasFiltradas(tareas.filter(tarea => tarea.completada));
+        // Tareas completadas: pueden tener completado=1 O estar en estados finales
+        setTareasFiltradas(tareas.filter(tarea => 
+          tarea.completado === 1 || estadosCompletados.includes(tarea.idEstado)
+        ));
         break;
       default:
         setTareasFiltradas(tareas);
@@ -212,11 +218,12 @@ const Picking: React.FC = () => {
   };
 
   // Calcular estadísticas
+  const estadosCompletados = [2, 3, 4, 5, 6];
+  
   const stats = {
     total: tareas.length,
-    pendientes: tareas.filter(tarea => !tarea.completada).length,
-    completadas: tareas.filter(tarea => tarea.completada).length,
-    enProceso: tareas.filter(tarea => tarea.enProceso).length,
+    pendientes: tareas.filter(tarea => tarea.idEstado === 1 && !tarea.completado).length,
+    completadas: tareas.filter(tarea => tarea.completado === 1 || estadosCompletados.includes(tarea.idEstado)).length,
   };
 
   return (
@@ -240,7 +247,7 @@ const Picking: React.FC = () => {
         <div className="stats-dashboard">
           <IonGrid>
             <IonRow>
-              <IonCol size="12" sizeMd="3">
+              <IonCol size="12" sizeMd="4">
                 <div 
                   className={`stat-card total ${filtroActivo === 'todos' ? 'active' : ''}`}
                   onClick={() => filtrarTareas('todos')}
@@ -254,7 +261,7 @@ const Picking: React.FC = () => {
                   </div>
                 </div>
               </IonCol>
-              <IonCol size="12" sizeMd="3">
+              <IonCol size="12" sizeMd="4">
                 <div 
                   className={`stat-card pending ${filtroActivo === 'pendientes' ? 'active' : ''}`}
                   onClick={() => filtrarTareas('pendientes')}
@@ -268,21 +275,7 @@ const Picking: React.FC = () => {
                   </div>
                 </div>
               </IonCol>
-              <IonCol size="12" sizeMd="3">
-                <div 
-                  className={`stat-card in-progress ${filtroActivo === 'enProceso' ? 'active' : ''}`}
-                  onClick={() => filtrarTareas('enProceso')}
-                >
-                  <div className="stat-icon">
-                    <IonIcon icon={statsChartOutline} />
-                  </div>
-                  <div className="stat-content">
-                    <div className="stat-number">{stats.enProceso}</div>
-                    <div className="stat-label">En Proceso</div>
-                  </div>
-                </div>
-              </IonCol>
-              <IonCol size="12" sizeMd="3">
+              <IonCol size="12" sizeMd="4">
                 <div 
                   className={`stat-card completed ${filtroActivo === 'completadas' ? 'active' : ''}`}
                   onClick={() => filtrarTareas('completadas')}
@@ -319,7 +312,6 @@ const Picking: React.FC = () => {
                         {filtroActivo === 'todos' ? 'No hay tareas disponibles' : 
                          `No hay tareas ${
                            filtroActivo === 'pendientes' ? 'pendientes' :
-                           filtroActivo === 'enProceso' ? 'en proceso' :
                            filtroActivo === 'completadas' ? 'completadas' : ''
                          }`}
                       </h2>
@@ -328,7 +320,6 @@ const Picking: React.FC = () => {
                           'No tienes tareas de picking en este momento.' :
                           `No hay tareas ${
                             filtroActivo === 'pendientes' ? 'pendientes' :
-                            filtroActivo === 'enProceso' ? 'en proceso' :
                             filtroActivo === 'completadas' ? 'completadas' : ''
                           } disponibles.`}
                       </p>
@@ -415,17 +406,20 @@ const Picking: React.FC = () => {
                               Ver Lista
                             </IonButton>
                             
-                            <IonButton
-                              size="small"
-                              color="success"
-                              onClick={() => {
-                                setTareaSeleccionada(tarea);
-                                setShowConfirm(true);
-                              }}
-                            >
-                              <IonIcon icon={checkmarkCircleOutline} slot="start" />
-                              Completar
-                            </IonButton>
+                            {/* Solo mostrar botón Completar si el estado es "En Curso" (1) Y no está completado */}
+                            {tarea.idEstado === 1 && !tarea.completado && (
+                              <IonButton
+                                size="small"
+                                color="success"
+                                onClick={() => {
+                                  setTareaSeleccionada(tarea);
+                                  setShowConfirm(true);
+                                }}
+                              >
+                                <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                                Completar
+                              </IonButton>
+                            )}
                           </div>
                         </div>
                       ))}
