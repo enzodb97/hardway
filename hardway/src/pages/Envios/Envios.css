@@ -471,6 +471,148 @@ ion-card-header{
   background-clip: text;
 }
 
+/* Contenedor de Código de Seguimiento */
+.tracking-info-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(16, 220, 96, 0.2) 0%, rgba(16, 220, 96, 0.1) 100%);
+  border: 2px solid rgba(16, 220, 96, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(16, 220, 96, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.tracking-info-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #10dc60 0%, #0ec254 100%);
+  box-shadow: 0 0 10px rgba(16, 220, 96, 0.5);
+}
+
+.tracking-info-container:hover {
+  background: linear-gradient(135deg, rgba(16, 220, 96, 0.3) 0%, rgba(16, 220, 96, 0.15) 100%);
+  border-color: rgba(16, 220, 96, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 220, 96, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.tracking-icon {
+  font-size: 2rem;
+  color: #10dc60;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+  animation: checkmark-pulse 2s ease-in-out infinite;
+}
+
+@keyframes checkmark-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(16, 220, 96, 0.6));
+  }
+}
+
+.tracking-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tracking-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.tracking-value {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(90deg, #10dc60 0%, #28e070 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Contenedor de advertencia para pedidos sin código */
+.warning-tracking-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(255, 206, 84, 0.2) 0%, rgba(255, 206, 84, 0.1) 100%);
+  border: 2px solid rgba(255, 206, 84, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(255, 206, 84, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.warning-tracking-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #ffce54 0%, #f6bb42 100%);
+  box-shadow: 0 0 10px rgba(255, 206, 84, 0.5);
+}
+
+.warning-icon {
+  font-size: 2rem;
+  color: #ffce54;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+}
+
+.warning-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.warning-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.warning-value {
+  color: #ffce54;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-style: italic;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
 .action-container {
   display: flex;
   justify-content: center;

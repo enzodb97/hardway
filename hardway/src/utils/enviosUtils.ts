@@ -11,6 +11,7 @@ export interface PedidoEnvio {
   codigoSeguimiento?: string;
   idEmpresaEnvio?: number;
   empresaEnvio?: string;
+  idEstado: number;
 }
 
 // Trae todos los pedidos con estado 'Abonado' (idEstado = 3)

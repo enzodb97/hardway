@@ -61,8 +61,8 @@ const Envios: React.FC = () => {
   const [toastMsg, setToastMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("todos");
-  const [filtroActivo, setFiltroActivo] = useState<string>('todos');
+  const [filtroEstado, setFiltroEstado] = useState("pendientes");
+  const [filtroActivo, setFiltroActivo] = useState<string>('pendientes');
 
   // Paginación
   const [pagina, setPagina] = useState(1);
@@ -109,6 +109,15 @@ const Envios: React.FC = () => {
   const filtrarPedidos = () => {
     let pedidosFiltrados = [...pedidos];
 
+    console.log("🔍 Filtrando pedidos...");
+    console.log("📊 Total pedidos:", pedidos.length);
+    console.log("📋 Estados de pedidos:", pedidos.map(p => ({ 
+      pedido: p.numeroPedido, 
+      idEstado: p.idEstado, 
+      codigoSeguimiento: p.codigoSeguimiento 
+    })));
+    console.log("🎯 Filtro activo:", filtroEstado);
+
     // Filtrar por término de búsqueda
     if (searchTerm.trim()) {
       pedidosFiltrados = pedidosFiltrados.filter(
@@ -123,13 +132,22 @@ const Envios: React.FC = () => {
 
     // Filtrar por estado
     if (filtroEstado === "pendientes") {
+      // Pedidos con idEstado = 3 (Abonado, pendientes de despacho)
       pedidosFiltrados = pedidosFiltrados.filter(
-        (pedido) => !pedido.codigoSeguimiento
+        (pedido) => pedido.idEstado === 3
       );
+      console.log("✅ Pendientes filtrados:", pedidosFiltrados.length);
     } else if (filtroEstado === "despachados") {
+      // Pedidos con idEstado = 4 (Despachado)
       pedidosFiltrados = pedidosFiltrados.filter(
-        (pedido) => !!pedido.codigoSeguimiento
+        (pedido) => pedido.idEstado === 4
       );
+      console.log("✅ Despachados filtrados:", pedidosFiltrados.length);
+      console.log("📦 Pedidos despachados:", pedidosFiltrados.map(p => ({
+        pedido: p.numeroPedido,
+        codigo: p.codigoSeguimiento,
+        estado: p.idEstado
+      })));
     }
 
     setPedidosFiltrados(pedidosFiltrados);
@@ -230,7 +248,7 @@ const Envios: React.FC = () => {
                   >
                     <IonIcon icon={cubeOutline} className="stat-icon pending" />
                     <div className="stat-number">
-                      {pedidos.filter((p) => !p.codigoSeguimiento).length}
+                      {pedidos.filter((p) => p.idEstado === 3).length}
                     </div>
                     <div className="stat-label">Pendientes</div>
                   </div>
@@ -245,7 +263,7 @@ const Envios: React.FC = () => {
                       className="stat-icon dispatched"
                     />
                     <div className="stat-number">
-                      {pedidos.filter((p) => !!p.codigoSeguimiento).length}
+                      {pedidos.filter((p) => p.idEstado === 4).length}
                     </div>
                     <div className="stat-label">Despachados</div>
                   </div>
@@ -422,28 +440,55 @@ const Envios: React.FC = () => {
                         </IonCol>
                       )}
 
-                      <IonCol size="12">
-                        <div className="action-container">
-                          <IonButton
-                            expand="block"
-                            size="default"
-                            color={
-                              pedido.codigoSeguimiento ? "success" : "primary"
-                            }
-                            onClick={() => {
-                              setPedidoSeleccionado(pedido);
-                              setCodigoSeguimiento(
-                                pedido.codigoSeguimiento || ""
-                              );
-                            }}
-                            disabled={!!pedido.codigoSeguimiento}
-                          >
-                            {pedido.codigoSeguimiento
-                              ? "Despachado"
-                              : "Procesar"}
-                          </IonButton>
-                        </div>
-                      </IonCol>
+                      {/* Mostrar código de seguimiento si existe */}
+                      {pedido.codigoSeguimiento && (
+                        <IonCol size="12">
+                          <div className="tracking-info-container">
+                            <IonIcon icon={checkmarkCircleOutline} className="tracking-icon" />
+                            <div className="tracking-content">
+                              <div className="tracking-label">Código de Seguimiento</div>
+                              <div className="tracking-value">
+                                {pedido.codigoSeguimiento}
+                              </div>
+                            </div>
+                          </div>
+                        </IonCol>
+                      )}
+
+                      {/* Mostrar mensaje si está despachado pero sin código */}
+                      {pedido.idEstado === 4 && !pedido.codigoSeguimiento && (
+                        <IonCol size="12">
+                          <div className="warning-tracking-container">
+                            <IonIcon icon={timeOutline} className="warning-icon" />
+                            <div className="warning-content">
+                              <div className="warning-label">Código de Seguimiento</div>
+                              <div className="warning-value">
+                                Pedido despachado sin código asignado
+                              </div>
+                            </div>
+                          </div>
+                        </IonCol>
+                      )}
+
+                      {/* Solo mostrar botón si es estado 3 (Abonado/Pendiente) */}
+                      {pedido.idEstado === 3 && (
+                        <IonCol size="12">
+                          <div className="action-container">
+                            <IonButton
+                              expand="block"
+                              size="default"
+                              color="primary"
+                              onClick={() => {
+                                setPedidoSeleccionado(pedido);
+                                setCodigoSeguimiento("");
+                              }}
+                            >
+                              <IonIcon icon={carOutline} slot="start" />
+                              Procesar Despacho
+                            </IonButton>
+                          </div>
+                        </IonCol>
+                      )}
                     </IonRow>
                   </IonGrid>
                 </IonCardContent>

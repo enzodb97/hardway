@@ -10,7 +10,7 @@ const {
 } = require('../models');
 const { Domicilio, Ciudad } = require('../models/Ubicacion');
 
-// Obtener todos los pedidos 'Abonado' (idEstado = 3) para despacho
+// Obtener todos los pedidos 'Abonado' (idEstado = 3) y 'Despachado' (idEstado = 4) para despacho
 router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
   try {
     const [result] = await sequelize.query(`
@@ -24,7 +24,8 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         SUM(dp.cantidad) AS total_items,
         p.codigoSeguimiento,
         p.idEmpresaEnvio,
-        ee.nombre AS empresaEnvio
+        ee.nombre AS empresaEnvio,
+        p.idEstado
       FROM pedido p
       JOIN cliente c ON p.idCliente = c.idCliente
       JOIN persona pe ON c.idPersona = pe.idPersona
@@ -32,12 +33,14 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
       JOIN ciudad ci ON d.idCiudad = ci.idCiudad
       JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
       LEFT JOIN empresa_envio ee ON p.idEmpresaEnvio = ee.idEmpresaEnvio
-      WHERE p.idEstado = 3 AND p.estaActivo = 1
-      GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, p.codigoSeguimiento, p.idEmpresaEnvio, ee.nombre
+      WHERE p.idEstado IN (3, 4) AND p.estaActivo = 1
+      GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, p.codigoSeguimiento, p.idEmpresaEnvio, ee.nombre, p.idEstado
       ORDER BY p.fechaPedido DESC
     `);
     
-    console.log(`📦 Pedidos pendientes de envío: ${result.length}`);
+    console.log(`📦 Pedidos para envío: ${result.length} (Abonados + Despachados)`);
+    console.log(`   - Pendientes: ${result.filter(p => !p.codigoSeguimiento).length}`);
+    console.log(`   - Despachados: ${result.filter(p => p.codigoSeguimiento).length}`);
     res.json(result);
   } catch (error) {
     console.error("Error al obtener pedidos para despacho:", error);
