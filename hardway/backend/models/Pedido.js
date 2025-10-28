@@ -9,8 +9,7 @@ const Pedido = sequelize.define(
     idEstado: DataTypes.INTEGER,
     fechaPedido: DataTypes.DATE,
     fechaModificacion: DataTypes.DATE, // Para registrar modificaciones
-    codigoSeguimiento: DataTypes.STRING,
-    numeroSeguimiento: DataTypes.STRING, // Número de seguimiento del envío
+    codigoSeguimiento: DataTypes.STRING, // Código de seguimiento del envío
     idEmpresaEnvio: DataTypes.INTEGER, // Empresa de envío seleccionada
     idMotivoCancelacion: DataTypes.INTEGER, // Para el motivo de cancelación
     idUsuarioCancelo: DataTypes.INTEGER, // Para el usuario que canceló
@@ -20,6 +19,7 @@ const Pedido = sequelize.define(
     fechaCancelacion: DataTypes.DATE, // Para la fecha y hora exactas de cancelación
     estaActivo: DataTypes.TINYINT, // Para borrado lógico
     descuentoOrden: DataTypes.DECIMAL(10, 2), // Descuento global sobre el pedido
+    dummyUpdate: DataTypes.INTEGER, // Campo auxiliar para forzar actualizaciones
   },
   { tableName: "pedido", timestamps: false }
 );

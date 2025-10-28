@@ -334,6 +334,20 @@ ion-card-header{
   justify-content: center;
 }
 
+.despachador-badge {
+  background: rgba(253, 180, 11, 0.2);
+  border: 1px solid rgba(253, 180, 11, 0.4);
+  color: #fdb40b;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .pedido-date {
   display: flex;
   align-items: center;
@@ -466,6 +480,75 @@ ion-card-header{
   letter-spacing: 1.5px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   background: linear-gradient(90deg, #fdb40b 0%, #ffcc00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Contenedor de Información del Despachador */
+.despachador-info-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(93, 156, 236, 0.2) 0%, rgba(93, 156, 236, 0.1) 100%);
+  border: 2px solid rgba(93, 156, 236, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(93, 156, 236, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.despachador-info-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #5d9cec 0%, #4a89dc 100%);
+  box-shadow: 0 0 10px rgba(93, 156, 236, 0.5);
+}
+
+.despachador-info-container:hover {
+  background: linear-gradient(135deg, rgba(93, 156, 236, 0.3) 0%, rgba(93, 156, 236, 0.15) 100%);
+  border-color: rgba(93, 156, 236, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(93, 156, 236, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.despachador-info-icon {
+  font-size: 2rem;
+  color: #5d9cec;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+}
+
+.despachador-info-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.despachador-info-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.despachador-info-value {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(90deg, #5d9cec 0%, #7cb3f5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

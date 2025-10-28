@@ -10,9 +10,11 @@ const EstadoPedido = require('./EstadoPedido');
 const Indumentaria = require('./Indumentaria');
 const DetalleIndumentaria = require('./DetalleIndumentaria');
 const PedidoIndumentaria = require('./PedidoIndumentaria');
-const UnidadMedida = require('./UnidadMedida'); // Nuevo modelo
-const MotivoNoApta = require('./MotivoNoApta'); // Nuevo modelo
-const StockRegistroFallo = require('./StockRegistroFallo'); // Nuevo modelo
+const UnidadMedida = require('./UnidadMedida');
+const MotivoNoApta = require('./MotivoNoApta');
+const StockRegistroFallo = require('./StockRegistroFallo');
+const EmpresaEnvio = require('./EmpresaEnvio'); // Nuevo modelo
+const AsignacionPicking = require('./AsignacionPicking'); // Nuevo modelo
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
 const {
   Color,
@@ -88,7 +90,13 @@ const setupAssociations = () => {
   // Relaciones de Pedido
   Pedido.belongsTo(Cliente, { foreignKey: "idCliente" });
   Pedido.belongsTo(EstadoPedido, { foreignKey: "idEstado" });
+  Pedido.belongsTo(EmpresaEnvio, { foreignKey: "idEmpresaEnvio" }); // Nueva relación
   Pedido.hasMany(DetallePedido, { foreignKey: "numeroPedido" });
+  Pedido.hasMany(AsignacionPicking, { foreignKey: "numeroPedido" }); // Nueva relación
+
+  // Relaciones de AsignacionPicking
+  AsignacionPicking.belongsTo(Pedido, { foreignKey: "numeroPedido" });
+  AsignacionPicking.belongsTo(EncargadoPicker, { foreignKey: "legajoPicker", targetKey: "legajo" });
 
   // Relaciones de DetallePedido
   DetallePedido.belongsTo(Pedido, { foreignKey: "numeroPedido" });
@@ -191,7 +199,7 @@ module.exports = {
   EstadoIndumentaria,
   PrecioIndumentaria,
   NombreIndumentaria,
-  UnidadMedida, // Nuevo modelo exportado
+  UnidadMedida,
   
   // Modelos adicionales
   Stock,
@@ -201,6 +209,10 @@ module.exports = {
   Rack,
   MotivoNoApta,
   StockRegistroFallo,
+  
+  // Nuevos modelos para flujo unificado Picker/Despacho
+  EmpresaEnvio,
+  AsignacionPicking,
   
   // Función para configurar relaciones
   setupAssociations,

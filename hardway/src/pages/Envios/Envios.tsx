@@ -4,6 +4,7 @@ import {
   despacharPedido,
   PedidoEnvio,
 } from "../../utils/enviosUtils";
+import { useAuth } from "../../context/AuthContext";
 import {
   IonPage,
   IonHeader,
@@ -50,6 +51,7 @@ import {
 import "./Envios.css";
 
 const Envios: React.FC = () => {
+  const { username, rol, legajoPicker } = useAuth();
   const [pedidos, setPedidos] = useState<PedidoEnvio[]>([]);
   const [pedidosFiltrados, setPedidosFiltrados] = useState<PedidoEnvio[]>([]);
   const [codigoSeguimiento, setCodigoSeguimiento] = useState("");
@@ -85,16 +87,17 @@ const Envios: React.FC = () => {
     try {
       setLoading(true);
       console.log("🔍 Cargando pedidos de envío...");
-      const username = localStorage.getItem("username");
-      const isAuthenticated = localStorage.getItem("isAuthenticated");
-      console.log("📋 Estado de autenticación:", { username, isAuthenticated });
+      console.log("📋 Usuario autenticado:", { username, rol, legajoPicker });
 
-      const pedidosData = await obtenerPedidosAbonados();
+      // Pasar rol y legajoPicker para filtrar en el backend
+      const pedidosData = await obtenerPedidosAbonados(rol || undefined, legajoPicker || undefined);
       console.log("✅ Pedidos cargados:", pedidosData.length);
-      console.log("📦 Datos de pedidos con empresa:", pedidosData.map(p => ({
+      console.log("📦 Datos de pedidos:", pedidosData.map(p => ({
         pedido: p.numeroPedido,
+        despachador: p.nombreDespachador,
+        legajo: p.despachadorAsignado,
         empresa: p.empresaEnvio,
-        idEmpresa: p.idEmpresaEnvio
+        estado: p.idEstado
       })));
       setPedidos(pedidosData);
     } catch (error) {
@@ -354,6 +357,11 @@ const Envios: React.FC = () => {
                   <div className="pedido-header">
                     <div className="pedido-title">
                       <IonCardTitle>Pedido #{pedido.numeroPedido}</IonCardTitle>
+                      {rol === "Administrador" && pedido.nombreDespachador && (
+                        <div className="despachador-badge">
+                          {pedido.nombreDespachador}
+                        </div>
+                      )}
                       <IonBadge
                         color={pedido.codigoSeguimiento ? "success" : "warning"}
                         className="status-badge"
@@ -434,6 +442,23 @@ const Envios: React.FC = () => {
                               <div className="empresa-envio-label">Empresa de Envío</div>
                               <div className="empresa-envio-value">
                                 {pedido.empresaEnvio}
+                              </div>
+                            </div>
+                          </div>
+                        </IonCol>
+                      )}
+
+                      {/* Mostrar despachador asignado */}
+                      {pedido.nombreDespachador && (
+                        <IonCol size="12">
+                          <div className="despachador-info-container">
+                            <IonIcon icon={cubeOutline} className="despachador-info-icon" />
+                            <div className="despachador-info-content">
+                              <div className="despachador-info-label">
+                                {rol === "Administrador" ? "Despachador Asignado" : "Responsable"}
+                              </div>
+                              <div className="despachador-info-value">
+                                {pedido.nombreDespachador}
                               </div>
                             </div>
                           </div>

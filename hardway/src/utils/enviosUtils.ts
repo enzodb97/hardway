@@ -12,13 +12,23 @@ export interface PedidoEnvio {
   idEmpresaEnvio?: number;
   empresaEnvio?: string;
   idEstado: number;
+  despachadorAsignado?: string;
+  nombreDespachador?: string;
 }
 
-// Trae todos los pedidos con estado 'Abonado' (idEstado = 3)
-export const obtenerPedidosAbonados = async (): Promise<PedidoEnvio[]> => {
+// Trae todos los pedidos con estado 'Abonado' (idEstado = 3) y 'Despachado' (idEstado = 4)
+export const obtenerPedidosAbonados = async (rol?: string, legajoPicker?: string): Promise<PedidoEnvio[]> => {
   console.log("🚚 Iniciando obtenerPedidosAbonados...");
+  console.log("📋 Parámetros:", { rol, legajoPicker });
   try {
-    const res = await axiosInstance.get("/api/envios/pendientes");
+    const params = new URLSearchParams();
+    if (rol) params.append('rol', rol);
+    if (legajoPicker) params.append('legajoPicker', legajoPicker);
+    
+    const url = `/api/envios/pendientes${params.toString() ? '?' + params.toString() : ''}`;
+    console.log("🌐 URL de consulta:", url);
+    
+    const res = await axiosInstance.get(url);
     console.log("✅ Respuesta de envíos:", res.data.length, "pedidos");
     return res.data;
   } catch (error) {
