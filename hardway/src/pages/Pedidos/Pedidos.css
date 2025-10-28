@@ -1,16 +1,36 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 /* Mejorar visualización de la X para limpiar filtro de estados */
 .clear-filter-btn {
-  --color: #e53935;
-  font-weight: 600;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  min-width: auto;
+  margin: 0;
+}
+
+.clear-filter-btn ion-icon {
+  margin: 0;
+}
+
+/* Estilos para los items del filtro de estados */
+.estado-filter-item-row {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.estado-filter-item-row ion-label {
+  margin: 0;
+  padding: 0;
+}
+
+.estado-filter-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-.clear-filter-label {
-  color: #e53935;
-  font-weight: 600;
-  font-size: 1em;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  width: 100%;
 }
 
 /* Aplicar fuente Inter a todos los elementos */
@@ -690,23 +710,6 @@ ion-popover ion-item:hover {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.estado-filter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 2px solid #e2e8f0;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  font-weight: 700;
-  color: #1e293b;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
 /* Estilos para el filtro de fechas eliminados */
 
 /* Filtro de fechas eliminado */
@@ -774,6 +777,45 @@ ion-popover ion-item:hover {
   .pedidos-paginacion-text {
     font-size: 12px;
     text-align: center;
+  }
+
+  /* Responsive para modal de filtro de estados */
+  .estado-filter-popover {
+    --width: 90vw;
+    --max-width: 340px;
+  }
+
+  .estado-filter-header {
+    padding: 16px 18px;
+    font-size: 13px;
+  }
+
+  .estado-filter-header strong::before {
+    font-size: 16px;
+  }
+
+  .estado-filter-item-row {
+    margin: 6px 10px;
+  }
+
+  .estado-filter-item {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .estado-filter-checkbox {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+
+  .estado-filter-item .status-badge {
+    font-size: 10px;
+    padding: 5px 12px;
+  }
+
+  .clear-filter-btn ion-icon {
+    font-size: 20px;
   }
 }
 
@@ -936,12 +978,59 @@ ion-popover ion-item:hover {
 }
 
 /* Mejoras específicas para el checkbox marcado */
+.estado-filter-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  flex-shrink: 0;
+}
+
 .estado-filter-checkbox:not(:empty) {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border-color: #10b981;
   color: white;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  transform: scale(1.1);
+}
+
+/* Estilos mejorados para el popover de filtro de estados */
+.estado-filter-popover {
+  --width: 320px;
+  --max-height: 600px;
+  --border-radius: 16px;
+  --box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  --offset-y: 12px;
+  --offset-x: 0px;
+}
+
+.estado-filter-popover::part(backdrop) {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.estado-filter-popover::part(content) {
+  animation: popoverSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.estado-filter-popover ion-content {
+  --background: #ffffff;
+  --overflow: auto;
+  max-height: 550px;
+}
+
+.estado-filter-popover ion-list {
+  background: transparent;
+  padding: 0 0 12px 0;
+  min-height: auto;
 }
 
 /* Animación de entrada del popover */
@@ -956,9 +1045,139 @@ ion-popover ion-item:hover {
   }
 }
 
-ion-popover.estado-filter-popover::part(content) {
-  animation: popoverSlideIn 0.2s ease-out;
+/* Header del filtro mejorado */
+.estado-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  font-weight: 700;
+  color: white;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(253, 180, 11, 0.2);
 }
+
+.estado-filter-header strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.estado-filter-header strong::before {
+  content: "🔍";
+  font-size: 18px;
+}
+
+/* Botón de limpiar mejorado */
+.clear-filter-btn {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  min-width: auto;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.clear-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.clear-filter-btn ion-icon {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Items del filtro mejorados */
+.estado-filter-item-row {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  --background-hover: #f8fafc;
+  --background-activated: #f1f5f9;
+  margin: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.estado-filter-item-row:hover {
+  --background: #f8fafc;
+  border-color: #fdb40b;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.15);
+}
+
+.estado-filter-item-row:active {
+  transform: translateX(4px) scale(0.98);
+}
+
+.estado-filter-item-row ion-label {
+  margin: 0;
+  padding: 0;
+}
+
+.estado-filter-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 14px 20px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+/* Status badge dentro del filtro con mejor espaciado */
+.estado-filter-item .status-badge {
+  flex: 1;
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 11px;
+  padding: 6px 14px;
+  letter-spacing: 0.8px;
+}
+
+.estado-filter-item .status-badge:hover {
+  transform: none;
+}
+
+/* Animación de los items al cargar */
+@keyframes fadeInItem {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.estado-filter-item-row {
+  animation: fadeInItem 0.3s ease-out backwards;
+}
+
+.estado-filter-item-row:nth-child(1) { animation-delay: 0.05s; }
+.estado-filter-item-row:nth-child(2) { animation-delay: 0.1s; }
+.estado-filter-item-row:nth-child(3) { animation-delay: 0.15s; }
+.estado-filter-item-row:nth-child(4) { animation-delay: 0.2s; }
+.estado-filter-item-row:nth-child(5) { animation-delay: 0.25s; }
+.estado-filter-item-row:nth-child(6) { animation-delay: 0.3s; }
+.estado-filter-item-row:nth-child(7) { animation-delay: 0.35s; }
 
 /* Estilo específico para el botón de estado en el header */
 .estado-filter-button {

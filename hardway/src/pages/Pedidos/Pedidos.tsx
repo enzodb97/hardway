@@ -45,7 +45,7 @@ import {
 } from "../../utils/pedidosUtils";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
-import { pencil, trash, documentText, chevronDown, cash } from "ionicons/icons";
+import { pencil, trash, documentText, chevronDown, cash, close } from "ionicons/icons";
 import { IonPopover, IonList, IonModal } from "@ionic/react";
 import "./Pedidos.css";
 
@@ -925,8 +925,13 @@ const Pedidos: React.FC = () => {
           isOpen={showEstadoDropdown}
           onDidDismiss={() => setShowEstadoDropdown(false)}
           trigger="estado-filter-trigger"
+          triggerAction="click"
           showBackdrop={true}
           className="estado-filter-popover"
+          side="bottom"
+          alignment="center"
+          dismissOnSelect={false}
+          size="auto"
         >
           <IonContent>
             <div className="estado-filter-header">
@@ -939,11 +944,10 @@ const Pedidos: React.FC = () => {
                   className="clear-filter-btn"
                 >
                   <IonIcon
-                    icon="close-circle"
+                    icon={close}
                     color="danger"
-                    style={{ fontSize: 22, marginRight: 4 }}
+                    style={{ fontSize: 24 }}
                   />
-                  <span className="clear-filter-label">Limpiar</span>
                 </IonButton>
               )}
             </div>
@@ -958,8 +962,9 @@ const Pedidos: React.FC = () => {
                       setEstadosFiltrados
                     )
                   }
+                  className="estado-filter-item-row"
                 >
-                  <IonLabel>
+                  <IonLabel className="ion-text-center">
                     <div className="estado-filter-item">
                       <span className="estado-filter-checkbox">
                         {estadosFiltrados.includes(estado.id.toString())
