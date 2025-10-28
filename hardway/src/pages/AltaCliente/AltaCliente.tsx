@@ -456,9 +456,19 @@ const AltaCliente: React.FC = () => {
             </IonItem>
           </div>
 
-          <IonButton expand="block" type="submit" className="guardar-btn">
-            {esEdicion ? "Actualizar" : "Guardar"}
-          </IonButton>
+          <div className="button-group">
+            <IonButton
+              expand="block"
+              color="danger"
+              onClick={() => history.push("/Clientes")}
+              className="cancelar-btn"
+            >
+              Cancelar
+            </IonButton>
+            <IonButton expand="block" type="submit" className="guardar-btn">
+              {esEdicion ? "Actualizar" : "Guardar"}
+            </IonButton>
+          </div>
         </form>
       </IonContent>
 

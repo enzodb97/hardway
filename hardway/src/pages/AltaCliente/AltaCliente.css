@@ -144,9 +144,8 @@
   --color: #2d3436 !important;
   --background-activated: #ffd358 !important;
   --background-hover: #ffc732 !important;
-  margin: 25px auto 20px;
-  width: 60%;
-  max-width: 300px;
+  margin: 0;
+  width: 100%;
   min-height: 50px;
   font-weight: 600;
   border-radius: 12px;
@@ -158,6 +157,45 @@
 .guardar-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(253, 180, 11, 0.4);
+}
+
+/* Botón Cancelar */
+.cancelar-btn {
+  --background: #6c757d !important;
+  --color: #ffffff !important;
+  --background-activated: #5a6268 !important;
+  --background-hover: #545b62 !important;
+  margin: 0;
+  width: 100%;
+  min-height: 50px;
+  font-weight: 600;
+  border-radius: 12px;
+  font-size: 1.1em;
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cancelar-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(108, 117, 125, 0.4);
+}
+
+/* Contenedor de botones */
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 25px auto 20px;
+  width: 100%;
+  max-width: 600px;
+}
+
+@media (max-width: 600px) {
+  .button-group {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 100%;
+  }
 }
 
 /* Subformulario Domicilio */
