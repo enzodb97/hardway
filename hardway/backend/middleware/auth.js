@@ -329,24 +329,45 @@ const verificarAccesoEnvios = async (req, res, next) => {
     }
 
     const idTipoRol = usuario.Rol?.TipoRol?.idTipoRol;
+    const tipoRol = usuario.Rol?.TipoRol?.tipoRol;
 
-    // Administrador (1) y Encargado de Envíos (3) pueden acceder a envíos
-    if (idTipoRol !== 1 && idTipoRol !== 3) {
+    // Administrador (1), Envíos (3) y Picker (6) pueden acceder a envíos
+    // Los pickers necesitan acceso porque son responsables del despacho en el flujo unificado
+    if (idTipoRol !== 1 && idTipoRol !== 3 && idTipoRol !== 6) {
       return res.status(403).json({
         error: "Acceso denegado: permisos insuficientes para gestionar envíos",
         codigo: "INSUFFICIENT_PERMISSIONS",
-        rolActual: usuario.Rol?.TipoRol?.tipoRol,
+        rolActual: tipoRol,
+        rolesPermitidos: ["Administrador", "Envios", "Picker"]
       });
     }
 
-    console.log('✅ Acceso autorizado para envíos:', nombreUsuario);
+    console.log('✅ Acceso autorizado para envíos:', nombreUsuario, `(${tipoRol})`);
+
+    // Si es un picker, obtener su legajo para filtrar sus pedidos
+    let legajoPicker = null;
+    if (idTipoRol === 6 && usuario.idPersona) {
+      try {
+        const picker = await EncargadoPicker.findOne({
+          where: { idPersona: usuario.idPersona }
+        });
+        
+        if (picker) {
+          legajoPicker = picker.legajo;
+          console.log('📋 Legajo del picker:', legajoPicker);
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo legajo del picker:', error);
+      }
+    }
 
     // Pasar información del usuario al siguiente middleware/endpoint
     req.usuarioAutenticado = {
       idUsuario: usuario.idUsuario,
       nombreUsuario: usuario.nombreUsuario,
       idTipoRol: idTipoRol,
-      tipoRol: usuario.Rol?.TipoRol?.tipoRol,
+      tipoRol: tipoRol,
+      legajoPicker: legajoPicker, // Incluir legajo si es picker
     };
 
     next();

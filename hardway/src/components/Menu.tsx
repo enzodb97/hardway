@@ -52,13 +52,16 @@ const Menu: React.FC = () => {
   ) {
     appPages.push({ title: "Picking", url: "/picking", icon: cubeOutline });
   }
-  // Botón de gestión de Envíos visible para Administrador y Usuario Envios
+  
+  // Botón de gestión de Envíos visible para Administrador, Encargado de Logística, Envios y Picker
+  // Los pickers necesitan acceso a Envíos porque en el flujo unificado son responsables del despacho
   if (
     rol === "Encargado de Logística" ||
     rol === "Administrador" ||
-    rol === "Envios"
+    rol === "Envios" ||
+    rol === "Picker"
   ) {
-    appPages.push({ title: "Envíos", url: "/envios", icon: carOutline });
+    appPages.push({ title: "Despachos", url: "/envios", icon: carOutline });
   }
 
   const handleLogout = () => {
