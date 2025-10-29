@@ -610,20 +610,20 @@ const Envios: React.FC = () => {
         <IonModal
           isOpen={!!pedidoSeleccionado}
           onDidDismiss={() => setPedidoSeleccionado(null)}
-          className="tracking-modal"
+          className="envios-tracking-modal"
           backdropDismiss={true}
           showBackdrop={true}
         >
-          <div className="modal-content">
-            <div className="modal-header">
+          <div className="envios-modal-content">
+            <div className="envios-modal-header">
               <h2>Código de Seguimiento</h2>
               <p>Pedido #{pedidoSeleccionado?.numeroPedido}</p>
             </div>
 
-            <div className="modal-body">
-              <IonItem className="tracking-input">
+            <div className="envios-modal-body">
+              <IonItem className="envios-tracking-input">
                 <IonLabel position="stacked">
-                  <IonIcon icon={carOutline} className="icon-margin-right" />
+                  <IonIcon icon={carOutline} className="envios-icon-margin" />
                   Código de Seguimiento
                 </IonLabel>
                 <IonInput
@@ -636,15 +636,15 @@ const Envios: React.FC = () => {
               </IonItem>
 
               {pedidoSeleccionado?.codigoSeguimiento && (
-                <div className="tracking-display">
+                <div className="envios-tracking-display">
                   <IonIcon icon={checkmarkCircleOutline} color="success" />
                   <span>Este pedido ya fue despachado</span>
                 </div>
               )}
               
               {!pedidoSeleccionado?.codigoSeguimiento && (
-                <div className="warning-message">
-                  <div className="warning-content">
+                <div className="envios-warning-message">
+                  <div className="envios-warning-content">
                     <IonIcon icon={timeOutline} />
                     <span>Ingrese el código para completar el despacho</span>
                   </div>
@@ -652,21 +652,22 @@ const Envios: React.FC = () => {
               )}
             </div>
 
-            <div className="modal-actions">
+            <div className="envios-modal-actions" style={{ marginTop: '2rem' }}>
               <IonButton
                 expand="block"
                 onClick={handleDespachar}
                 disabled={!!pedidoSeleccionado?.codigoSeguimiento || loading}
                 color="primary"
+                className="envios-modal-btn-primary"
               >
                 {loading ? (
                   <>
-                    <IonSpinner name="circular" className="icon-margin-right" />
+                    <IonSpinner name="circular" className="envios-icon-margin" />
                     Procesando...
                   </>
                 ) : (
                   <>
-                    <IonIcon icon={checkmarkCircleOutline} className="icon-margin-right" />
+                    <IonIcon icon={checkmarkCircleOutline} className="envios-icon-margin" />
                     Marcar como Despachado
                   </>
                 )}
@@ -674,11 +675,12 @@ const Envios: React.FC = () => {
 
               <IonButton
                 expand="block"
-                fill="clear"
-                color="light"
+                fill="outline"
+                color="danger"
                 onClick={() => setPedidoSeleccionado(null)}
+                className="envios-modal-btn-cancel"
               >
-                <IonIcon icon={cubeOutline} className="icon-margin-right" />
+                <IonIcon icon={closeOutline} className="envios-icon-margin" />
                 Cancelar
               </IonButton>
             </div>

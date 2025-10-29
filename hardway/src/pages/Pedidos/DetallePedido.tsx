@@ -10,17 +10,21 @@ import {
   IonRow,
   IonCol,
   IonMenuButton,
+  IonIcon,
 } from "@ionic/react";
 import { useParams, useHistory } from "react-router-dom";
+import { documentTextOutline } from "ionicons/icons";
 import "./DetallePedido.css";
 import zepelin from "../../assets/images/zepelin.png";
 import axiosInstance from "../../config/axios";
+import { exportarPDFDetallePedido } from "../../utils/pedidosUtils";
 
 const DetallePedido: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const [prendas, setPrendas] = useState<any[]>([]);
   const [pedido, setPedido] = useState<any>(null);
+  const [generandoPDF, setGenerandoPDF] = useState(false);
 
   useEffect(() => {
     const cargarPedido = async () => {
@@ -53,6 +57,20 @@ const DetallePedido: React.FC = () => {
       style: "currency",
       currency: "ARS",
     });
+  };
+
+  // Función para generar PDF
+  const handleGenerarPDF = async () => {
+    setGenerandoPDF(true);
+    try {
+      await exportarPDFDetallePedido(id);
+      alert("PDF generado exitosamente");
+    } catch (error) {
+      alert("Error al generar el PDF");
+      console.error("Error:", error);
+    } finally {
+      setGenerandoPDF(false);
+    }
   };
 
   // Configuración de estados y progreso
@@ -176,6 +194,15 @@ const DetallePedido: React.FC = () => {
         <IonToolbar>
           <IonMenuButton slot="start" />
           <IonTitle>Detalle de Pedido</IonTitle>
+          <IonButton
+            slot="end"
+            fill="clear"
+            onClick={handleGenerarPDF}
+            disabled={generandoPDF}
+          >
+            <IonIcon icon={documentTextOutline} slot="start" />
+            {generandoPDF ? "Generando..." : "Emitir PDF"}
+          </IonButton>
         </IonToolbar>
       </IonHeader>
       <IonContent>

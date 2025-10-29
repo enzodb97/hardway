@@ -958,116 +958,445 @@
   color: #b0b0b0;
 }
 
-/* Modal Styles - Específicos para Envios */
-.envios-page ion-modal.tracking-modal {
-  --backdrop-opacity: 0.85;
-  --ion-background-color: transparent;
-  --background: transparent;
-  --ion-font-family: "Roboto", "Helvetica Neue", sans-serif;
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+/* Modal Styles - ÚNICOS para Envios */
+/* IMPORTANTE: Los modales de Ionic se renderizan fuera del contenedor .envios-page */
+.envios-tracking-modal {
+  --backdrop-opacity: 0.85 !important;
+  --ion-background-color: transparent !important;
+  --background: transparent !important;
+  --ion-font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
 }
 
-.envios-page ion-modal.tracking-modal .modal-wrapper {
+.envios-tracking-modal::part(backdrop) {
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+.envios-tracking-modal::part(content) {
   background: transparent !important;
 }
 
-.envios-page ion-modal.tracking-modal ion-content {
+.envios-tracking-modal .modal-wrapper {
+  background: transparent !important;
+}
+
+.envios-tracking-modal ion-content {
   --background: transparent !important;
   --ion-background-color: transparent !important;
 }
 
 /* Fuerza el fondo transparente en todos los elementos del modal */
-.envios-page ion-modal.tracking-modal,
-.envios-page ion-modal.tracking-modal > *,
-.envios-page ion-modal.tracking-modal .modal-wrapper,
-.envios-page ion-modal.tracking-modal ion-backdrop,
-.envios-page ion-modal.tracking-modal ion-content,
-.envios-page ion-modal.tracking-modal .ion-page {
+.envios-tracking-modal,
+.envios-tracking-modal > *,
+.envios-tracking-modal .modal-wrapper,
+.envios-tracking-modal ion-backdrop,
+.envios-tracking-modal ion-content,
+.envios-tracking-modal .ion-page {
   background: transparent !important;
   --background: transparent !important;
   --ion-background-color: transparent !important;
 }
 
-.envios-page .modal-content {
+.envios-modal-content {
   background: linear-gradient(135deg, 
     rgba(30, 30, 30, 0.98) 0%, 
     rgba(20, 20, 20, 0.98) 100%) !important;
-  backdrop-filter: blur(25px);
-  border: 3px solid #fdb40b;
-  border-radius: 24px;
-  padding: 2rem;
-  margin: 1rem auto;
-  max-width: 480px;
-  width: calc(100% - 2rem);
-  max-height: calc(100vh - 4rem);
-  margin-top: 5vh;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 3px solid #fdb40b !important;
+  border-radius: 24px !important;
+  padding: 2rem !important;
+  margin: 1rem auto !important;
+  max-width: 480px !important;
+  width: calc(100% - 2rem) !important;
+  max-height: calc(100vh - 4rem) !important;
+  min-height: 550px !important;
+  height: auto !important;
+  margin-top: 3vh !important;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
-              0 0 0 1px rgba(253, 180, 11, 0.3);
-  position: relative;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 400px;
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+              0 0 0 1px rgba(253, 180, 11, 0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  animation: envios-modal-appear 0.3s ease-out !important;
 }
 
-.envios-page .modal-content::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #fdb40b, #f39c12, #e67e22, #fdb40b);
-  animation: shimmer 2s linear infinite;
+@keyframes envios-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: 200px 0; }
+.envios-modal-content::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, #fdb40b, #f39c12, #e67e22, #fdb40b) !important;
+  background-size: 200% 100% !important;
+  animation: envios-modal-shimmer 2s linear infinite !important;
 }
 
-.envios-page .modal-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  position: relative;
-  flex-shrink: 0;
+@keyframes envios-modal-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-.envios-page .modal-header::before {
-  content: '📦';
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.75rem;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+.envios-modal-header {
+  text-align: center !important;
+  margin-bottom: 1.5rem !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
 }
 
-.envios-page .modal-header h2 {
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 800;
-  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
-  letter-spacing: 0.5px;
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+.envios-modal-header::before {
+  content: '📦' !important;
+  font-size: 2.5rem !important;
+  display: block !important;
+  margin-bottom: 0.75rem !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+.envios-modal-header h2 {
+  margin-bottom: 0.5rem !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7) !important;
+  letter-spacing: 0.5px !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
   color: #fdb40b !important;
 }
 
-.envios-page .modal-header p {
-  color: #fdb40b;
-  font-size: 1rem;
-  font-weight: 600;
-  background: rgba(253, 180, 11, 0.15);
-  padding: 0.4rem 0.8rem;
-  border-radius: 16px;
-  display: inline-block;
-  border: 1px solid rgba(253, 180, 11, 0.3);
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+.envios-modal-header p {
+  color: #fdb40b !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  background: rgba(253, 180, 11, 0.15) !important;
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 16px !important;
+  display: inline-block !important;
+  border: 1px solid rgba(253, 180, 11, 0.3) !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
 }
 
-.envios-page .modal-body {
-  margin-bottom: 2rem;
-  flex: 1;
-  min-height: 0;
+.envios-modal-body {
+  margin-bottom: 5rem !important;
+  padding-bottom: 2rem !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.envios-tracking-input {
+  --background: rgba(50, 50, 50, 0.8) !important;
+  --border-radius: 16px !important;
+  border-radius: 16px !important;
+  margin-bottom: 1rem !important;
+  border: 2px solid rgba(253, 180, 11, 0.4) !important;
+  transition: all 0.3s ease !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.envios-tracking-input:focus-within {
+  border-color: #fdb40b !important;
+  box-shadow: 0 0 0 3px rgba(253, 180, 11, 0.2),
+              0 8px 25px rgba(253, 180, 11, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.envios-tracking-input ion-label {
+  color: #fdb40b !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-tracking-input ion-input {
+  --color: #ffffff !important;
+  --placeholder-color: rgba(255, 255, 255, 0.5) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  --padding-start: 1.25rem !important;
+  --padding-end: 1.25rem !important;
+  --padding-top: 0.75rem !important;
+  --padding-bottom: 0.75rem !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-tracking-display {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 1rem !important;
+  background: rgba(16, 220, 96, 0.2) !important;
+  border-radius: 12px !important;
+  border: 2px solid rgba(16, 220, 96, 0.5) !important;
+  color: #10dc60 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(16, 220, 96, 0.3) !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-tracking-display ion-icon {
+  font-size: 2rem !important;
+  flex-shrink: 0 !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) !important;
+}
+
+.envios-tracking-display span {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.envios-modal-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  flex-shrink: 0 !important;
+  margin-top: 2rem !important;
+}
+
+.envios-modal-actions ion-button {
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.9rem !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  height: 50px !important;
+  --border-radius: 12px !important;
+}
+
+/*.envios-modal-btn-primary {
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4) !important;
+ --background: linear-gradient(135deg, #fdb40b 0%, #ff9800 100%) !important;
+}*/
+
+.envios-modal-btn-primary:hover:not([disabled]) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(253, 180, 11, 0.5) !important;
+}
+
+.envios-modal-btn-primary[disabled] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.envios-modal-btn-cancel {
+  --color: rgba(255, 255, 255, 0.7) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+  --background: transparent !important;
+  --box-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin-top: 0px !important;
+}
+
+.envios-modal-btn-cancel:hover {
+  --color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  --background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-2px) !important;
+  --box-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.envios-modal-btn-cancel:focus,
+.envios-modal-btn-cancel:active {
+  --box-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.envios-icon-margin {
+  margin-right: 8px !important;
+}
+
+/* Warning message styling - ÚNICO para Envios */
+.envios-warning-message {
+  padding: 1rem !important;
+  background: linear-gradient(135deg, rgba(255, 237, 78, 0.2) 0%, rgba(255, 237, 78, 0.1) 100%) !important;
+  border: 2px solid rgba(255, 237, 78, 0.6) !important;
+  border-radius: 12px !important;
+  margin-top: 1rem !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 16px rgba(255, 237, 78, 0.2) !important;
+}
+
+.envios-warning-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  color: #ffffff !important;
+}
+
+.envios-warning-content ion-icon {
+  font-size: 1.5rem !important;
+  color: #ffed4e !important;
+  flex-shrink: 0 !important;
+}
+
+.envios-warning-content span {
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* También mantener los estilos con prefijo .envios-page para otros elementos */
+.envios-page .envios-tracking-modal {
+  --backdrop-opacity: 0.85 !important;
+  --ion-background-color: transparent !important;
+  --background: transparent !important;
+  --ion-font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-page .envios-tracking-modal::part(backdrop) {
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+.envios-page .envios-tracking-modal::part(content) {
+  background: transparent !important;
+}
+
+.envios-page .envios-tracking-modal .modal-wrapper {
+  background: transparent !important;
+}
+
+.envios-page .envios-tracking-modal ion-content {
+  --background: transparent !important;
+  --ion-background-color: transparent !important;
+}
+
+/* Fuerza el fondo transparente en todos los elementos del modal */
+.envios-page .envios-tracking-modal,
+.envios-page .envios-tracking-modal > *,
+.envios-page .envios-tracking-modal .modal-wrapper,
+.envios-page .envios-tracking-modal ion-backdrop,
+.envios-page .envios-tracking-modal ion-content,
+.envios-page .envios-tracking-modal .ion-page {
+  background: transparent !important;
+  --background: transparent !important;
+  --ion-background-color: transparent !important;
+}
+
+.envios-page .envios-modal-content {
+  background: linear-gradient(135deg, 
+    rgba(30, 30, 30, 0.98) 0%, 
+    rgba(20, 20, 20, 0.98) 100%) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 3px solid #fdb40b !important;
+  border-radius: 24px !important;
+  padding: 2rem !important;
+  margin: 1rem auto !important;
+  max-width: 480px !important;
+  width: calc(100% - 2rem) !important;
+  max-height: calc(100vh - 4rem) !important;
+  min-height: 550px !important;
+  height: auto !important;
+  margin-top: 3vh !important;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
+              0 0 0 1px rgba(253, 180, 11, 0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  animation: envios-modal-appear 0.3s ease-out !important;
+}
+
+@keyframes envios-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.envios-page .envios-modal-content::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, #fdb40b, #f39c12, #e67e22, #fdb40b) !important;
+  background-size: 200% 100% !important;
+  animation: envios-modal-shimmer 2s linear infinite !important;
+}
+
+@keyframes envios-modal-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.envios-page .envios-modal-header {
+  text-align: center !important;
+  margin-bottom: 1.5rem !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+
+.envios-page .envios-modal-header::before {
+  content: '📦' !important;
+  font-size: 2.5rem !important;
+  display: block !important;
+  margin-bottom: 0.75rem !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+.envios-page .envios-modal-header h2 {
+  margin-bottom: 0.5rem !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7) !important;
+  letter-spacing: 0.5px !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  color: #fdb40b !important;
+}
+
+.envios-page .envios-modal-header p {
+  color: #fdb40b !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  background: rgba(253, 180, 11, 0.15) !important;
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 16px !important;
+  display: inline-block !important;
+  border: 1px solid rgba(253, 180, 11, 0.3) !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-page .envios-modal-body {
+  margin-bottom: 4rem !important;
+  padding-bottom: 2rem !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
 }
 
 .envios-page .tracking-input {
@@ -1081,14 +1410,27 @@
   position: relative;
 }
 
-.envios-page .tracking-input:focus-within {
+.envios-page .envios-tracking-input {
+  --background: rgba(50, 50, 50, 0.8);
+  --border-radius: 16px;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  border: 2px solid rgba(253, 180, 11, 0.4);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.envios-page .tracking-input:focus-within,
+.envios-page .envios-tracking-input:focus-within {
   border-color: #fdb40b;
   box-shadow: 0 0 0 3px rgba(253, 180, 11, 0.2),
               0 8px 25px rgba(253, 180, 11, 0.3);
   transform: translateY(-2px);
 }
 
-.envios-page .tracking-input ion-label {
+.envios-page .tracking-input ion-label,
+.envios-page .envios-tracking-input ion-label {
   color: #fdb40b !important;
   font-weight: 700;
   font-size: 0.85rem;
@@ -1098,7 +1440,8 @@
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.envios-page .tracking-input ion-input {
+.envios-page .tracking-input ion-input,
+.envios-page .envios-tracking-input ion-input {
   --color: #ffffff;
   --placeholder-color: rgba(255, 255, 255, 0.5);
   font-weight: 600;
@@ -1110,8 +1453,8 @@
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-
-.envios-page .tracking-display {
+.envios-page .tracking-display,
+.envios-page .envios-tracking-display {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1125,7 +1468,21 @@
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.envios-page .modal-actions {
+.envios-page .envios-tracking-display ion-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.envios-page .envios-tracking-display span {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.envios-page .modal-actions,
+.envios-page .envios-modal-actions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1133,7 +1490,8 @@
   margin-top: 2rem;
 }
 
-.envios-page .modal-actions ion-button {
+.envios-page .modal-actions ion-button,
+.envios-page .envios-modal-actions ion-button {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -1142,27 +1500,93 @@
   transition: all 0.3s ease;
   font-size: 0.9rem;
   font-family: "Roboto", "Helvetica Neue", sans-serif;
+  height: 50px;
+  --border-radius: 12px;
 }
 
-.envios-page .modal-actions ion-button:not([fill="clear"]) {
+.envios-page .modal-actions ion-button:not([fill="clear"]),
+.envios-page .envios-modal-btn-primary {
   box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9800 100%);
 }
 
-.envios-page .modal-actions ion-button:not([fill="clear"]):hover {
+.envios-page .modal-actions ion-button:not([fill="clear"]):hover,
+.envios-page .envios-modal-btn-primary:hover:not([disabled]) {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(253, 180, 11, 0.5);
 }
 
-.envios-page .modal-actions ion-button[fill="clear"] {
+.envios-page .envios-modal-btn-primary[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.envios-page .modal-actions ion-button[fill="clear"],
+.envios-page .envios-modal-btn-cancel {
   --color: rgba(255, 255, 255, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  --background: transparent;
+  --box-shadow: none;
+  box-shadow: none;
+  outline: none;
 }
 
-.envios-page .modal-actions ion-button[fill="clear"]:hover {
+.envios-page .modal-actions ion-button[fill="clear"]:hover,
+.envios-page .envios-modal-btn-cancel:hover {
   --color: #ffffff;
   border-color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.05);
+  --background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  --box-shadow: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.envios-page .envios-modal-btn-cancel:focus,
+.envios-page .envios-modal-btn-cancel:active {
+  --box-shadow: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.envios-page .envios-icon-margin {
+  margin-right: 8px;
+}
+
+/* Warning message styling - ÚNICO para Envios */
+.envios-page .warning-message,
+.envios-page .envios-warning-message {
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(255, 237, 78, 0.2) 0%, rgba(255, 237, 78, 0.1) 100%);
+  border: 2px solid rgba(255, 237, 78, 0.6);
+  border-radius: 12px;
+  margin-top: 1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(255, 237, 78, 0.2);
+}
+
+.envios-page .warning-content,
+.envios-page .envios-warning-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ffffff;
+}
+
+.envios-page .warning-content ion-icon,
+.envios-page .envios-warning-content ion-icon {
+  font-size: 1.5rem;
+  color: #ffed4e;
+  flex-shrink: 0;
+}
+
+.envios-page .warning-content span,
+.envios-page .envios-warning-content span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .envios-page ion-modal ion-button[expand="block"] {
@@ -1250,7 +1674,8 @@
     padding: 0.25rem;
   }
   
-  .envios-page .modal-content {
+  .envios-page .modal-content,
+  .envios-page .envios-modal-content {
     margin: 1rem;
     margin-top: 10vh;
   }
