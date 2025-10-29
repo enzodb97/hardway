@@ -1,5 +1,5 @@
 /* Envios Page - Improved Color Palette */
-*{
+.envios-page * {
   --ion-default-font: "Roboto", "Helvetica Neue", sans-serif !important;
 }
 
@@ -7,19 +7,19 @@
   --ion-background-color: transparent;
 }
 
-.envios-content {
+.envios-page .envios-content {
   padding: 1rem;
 }
 
 /* Header Styles */
-.header-icon {
+.envios-page .header-icon {
   margin-right: 8px;
   font-size: 1.2rem;
   color: #ffffff;
 }
 
 /* Stats Card */
-.stats-card {
+.envios-page .stats-card {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -28,25 +28,25 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.stats-card ion-grid {
+.envios-page .stats-card ion-grid {
   padding: 0;
 }
 
-.stats-card ion-row {
+.envios-page .stats-card ion-row {
   margin: 0;
 }
 
-.stats-card ion-col {
+.envios-page .stats-card ion-col {
   padding: 0.5rem;
 }
 
-.stat-col {
+.envios-page .stat-col {
   display: flex;
   justify-content: center;
   align-items: stretch;
 }
 
-.stat-item {
+.envios-page .stat-item {
   text-align: center;
   padding: 1.5rem 1rem;
   display: flex;
@@ -61,23 +61,23 @@
   transition: all 0.3s ease;
 }
 
-.stat-item:hover {
+.envios-page .stat-item:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
 
-.stat-item.active {
+.envios-page .stat-item.active {
   background: rgba(253, 180, 11, 0.2);
   border: 2px solid rgba(253, 180, 11, 0.8);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
 }
 
-.stat-item.active .stat-icon {
+.envios-page .stat-item.active .stat-icon {
   filter: drop-shadow(0 2px 4px rgba(253, 180, 11, 0.5));
 }
 
-.stat-icon {
+.envios-page .stat-icon {
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
   display: block;
@@ -85,19 +85,19 @@
   flex-shrink: 0;
 }
 
-.stat-icon.pending {
+.envios-page .stat-icon.pending {
   color: #ffed4e;
 }
 
-.stat-icon.dispatched {
+.envios-page .stat-icon.dispatched {
   color: #10dc60;
 }
 
-.stat-icon.total {
+.envios-page .stat-icon.total {
   color: #5d9cec;
 }
 
-.stat-number {
+.envios-page .stat-number {
   font-size: 2rem;
   font-weight: bold;
   color: #ffffff;
@@ -106,7 +106,7 @@
   flex-shrink: 0;
 }
 
-.stat-label {
+.envios-page .stat-label {
   font-size: 0.85rem;
   color: #e0e0e0;
   text-transform: uppercase;
@@ -117,7 +117,7 @@
 }
 
 /* Filters Card */
-.filters-card {
+.envios-page .filters-card {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -126,7 +126,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.custom-searchbar {
+.envios-page .custom-searchbar {
   --background: rgba(255, 255, 255, 0.2);
   --border-radius: 12px;
   --color: #ffffff;
@@ -134,7 +134,7 @@
   --icon-color: #ffffff;
 }
 
-.filter-chips {
+.envios-page .filter-chips {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-start;
@@ -142,7 +142,7 @@
   margin-top: 0.5rem;
 }
 
-.filter-chips ion-chip {
+.envios-page .filter-chips ion-chip {
   cursor: pointer;
   transition: all 0.2s ease;
   --background: rgba(255, 255, 255, 0.1);
@@ -154,7 +154,7 @@
 
 }
 
-.filter-chips ion-chip:hover {
+.envios-page .filter-chips ion-chip:hover {
   transform: scale(1.05);
   --background: rgba(253, 180, 11, 0.2);
   --color: #ffffff;
@@ -162,7 +162,7 @@
 }
 
 /* Loading State */
-.loading-container {
+.envios-page .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -176,20 +176,20 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.loading-container ion-spinner {
+.envios-page .loading-container ion-spinner {
   margin-bottom: 1rem;
   --color: #5d9cec;
   transform: scale(1.5);
 }
 
-.loading-container p {
+.envios-page .loading-container p {
   font-weight: 600;
   font-size: 1.1rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Empty State */
-.empty-state {
+.envios-page .empty-state {
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -204,7 +204,7 @@
   width: 100%;
 }
 
-.empty-state ion-card-content {
+.envios-page .empty-state ion-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -214,7 +214,7 @@
   margin: 0;
 }
 
-.empty-icon {
+.envios-page .empty-icon {
   font-size: 5rem;
   color: #fdb40b;
   margin: 0 auto 1.5rem auto;
@@ -224,7 +224,7 @@
   text-align: center;
 }
 
-.empty-state h3 {
+.envios-page .empty-state h3 {
   color: #ffffff;
   margin: 0 auto 1rem auto;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -234,7 +234,7 @@
   width: 100%;
 }
 
-.empty-state p {
+.envios-page .empty-state p {
   color: #d0d0d0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   margin: 0 auto;
@@ -245,7 +245,7 @@
 }
 
 /* Grid de pedidos */
-.pedidos-grid {
+.envios-page .pedidos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   gap: 24px;
@@ -253,7 +253,7 @@
 }
 
 /* Pedido Cards */
-.pedido-card {
+.envios-page .pedido-card {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -263,17 +263,17 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.pedido-card:hover {
+.envios-page .pedido-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
 
-ion-card-header{
+.envios-page ion-card-header{
   background: none !important;
 }
-.pedido-header {
+.envios-page .pedido-header {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -288,7 +288,7 @@ ion-card-header{
   height: 80px;
 }
 
-.pedido-header::before {
+.envios-page .pedido-header::before {
   content: '';
   position: absolute;
   top: 0;
@@ -302,7 +302,7 @@ ion-card-header{
 
 
 
-.pedido-title {
+.envios-page .pedido-title {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -313,7 +313,7 @@ ion-card-header{
   padding-left: 1.25rem;
 }
 
-.pedido-title ion-card-title {
+.envios-page .pedido-title ion-card-title {
   color: #ffffff;
   font-size: 1.2rem;
   margin: 0;
@@ -321,7 +321,7 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.status-badge {
+.envios-page .status-badge {
   border-radius: 12px;
   font-size: 0.75rem;
   padding: 0.3rem 0.8rem;
@@ -334,7 +334,7 @@ ion-card-header{
   justify-content: center;
 }
 
-.despachador-badge {
+.envios-page .despachador-badge {
   background: rgba(253, 180, 11, 0.2);
   border: 1px solid rgba(253, 180, 11, 0.4);
   color: #fdb40b;
@@ -348,7 +348,7 @@ ion-card-header{
   justify-content: center;
 }
 
-.pedido-date {
+.envios-page .pedido-date {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -362,14 +362,14 @@ ion-card-header{
   padding-right: 1.25rem;
 }
 
-.pedido-date ion-icon {
+.envios-page .pedido-date ion-icon {
   font-size: 0.9rem;
   color: #fdb40b;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 /* Info Items */
-.info-item {
+.envios-page .info-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -380,7 +380,7 @@ ion-card-header{
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.info-icon {
+.envios-page .info-icon {
   color: #5d9cec;
   font-size: 1.2rem;
   margin-top: 0.125rem;
@@ -388,7 +388,7 @@ ion-card-header{
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
-.info-label {
+.envios-page .info-label {
   font-size: 0.75rem;
   color: #b0b0b0;
   text-transform: uppercase;
@@ -397,7 +397,7 @@ ion-card-header{
   font-weight: 600;
 }
 
-.info-value {
+.envios-page .info-value {
   color: #ffffff;
   font-size: 0.9rem;
   word-break: break-word;
@@ -406,7 +406,7 @@ ion-card-header{
 }
 
 /* Contenedor de Empresa de Envío */
-.empresa-envio-container {
+.envios-page .empresa-envio-container {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -421,7 +421,7 @@ ion-card-header{
   overflow: hidden;
 }
 
-.empresa-envio-container::before {
+.envios-page .empresa-envio-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -432,14 +432,14 @@ ion-card-header{
   box-shadow: 0 0 10px rgba(253, 180, 11, 0.5);
 }
 
-.empresa-envio-container:hover {
+.envios-page .empresa-envio-container:hover {
   background: linear-gradient(135deg, rgba(253, 180, 11, 0.3) 0%, rgba(253, 180, 11, 0.15) 100%);
   border-color: rgba(253, 180, 11, 0.8);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(253, 180, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.empresa-envio-icon {
+.envios-page .empresa-envio-icon {
   font-size: 2rem;
   color: #fdb40b;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
@@ -456,14 +456,14 @@ ion-card-header{
   }
 }
 
-.empresa-envio-content {
+.envios-page .empresa-envio-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.empresa-envio-label {
+.envios-page .empresa-envio-label {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.75rem;
   font-weight: 600;
@@ -472,7 +472,7 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.empresa-envio-value {
+.envios-page .empresa-envio-value {
   color: #ffffff;
   font-size: 1.1rem;
   font-weight: 700;
@@ -486,7 +486,7 @@ ion-card-header{
 }
 
 /* Contenedor de Información del Despachador */
-.despachador-info-container {
+.envios-page .despachador-info-container {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -501,7 +501,7 @@ ion-card-header{
   overflow: hidden;
 }
 
-.despachador-info-container::before {
+.envios-page .despachador-info-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -512,28 +512,28 @@ ion-card-header{
   box-shadow: 0 0 10px rgba(93, 156, 236, 0.5);
 }
 
-.despachador-info-container:hover {
+.envios-page .despachador-info-container:hover {
   background: linear-gradient(135deg, rgba(93, 156, 236, 0.3) 0%, rgba(93, 156, 236, 0.15) 100%);
   border-color: rgba(93, 156, 236, 0.8);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(93, 156, 236, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.despachador-info-icon {
+.envios-page .despachador-info-icon {
   font-size: 2rem;
   color: #5d9cec;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   flex-shrink: 0;
 }
 
-.despachador-info-content {
+.envios-page .despachador-info-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.despachador-info-label {
+.envios-page .despachador-info-label {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.75rem;
   font-weight: 600;
@@ -542,7 +542,7 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.despachador-info-value {
+.envios-page .despachador-info-value {
   color: #ffffff;
   font-size: 1rem;
   font-weight: 700;
@@ -555,7 +555,7 @@ ion-card-header{
 }
 
 /* Contenedor de Código de Seguimiento */
-.tracking-info-container {
+.envios-page .tracking-info-container {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -571,7 +571,7 @@ ion-card-header{
   margin-top: 0.75rem;
 }
 
-.tracking-info-container::before {
+.envios-page .tracking-info-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -582,14 +582,14 @@ ion-card-header{
   box-shadow: 0 0 10px rgba(16, 220, 96, 0.5);
 }
 
-.tracking-info-container:hover {
+.envios-page .tracking-info-container:hover {
   background: linear-gradient(135deg, rgba(16, 220, 96, 0.3) 0%, rgba(16, 220, 96, 0.15) 100%);
   border-color: rgba(16, 220, 96, 0.8);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(16, 220, 96, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.tracking-icon {
+.envios-page .tracking-icon {
   font-size: 2rem;
   color: #10dc60;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
@@ -608,14 +608,14 @@ ion-card-header{
   }
 }
 
-.tracking-content {
+.envios-page .tracking-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.tracking-label {
+.envios-page .tracking-label {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.75rem;
   font-weight: 600;
@@ -624,7 +624,7 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.tracking-value {
+.envios-page .tracking-value {
   color: #ffffff;
   font-size: 1.1rem;
   font-weight: 700;
@@ -638,7 +638,7 @@ ion-card-header{
 }
 
 /* Contenedor de advertencia para pedidos sin código */
-.warning-tracking-container {
+.envios-page .warning-tracking-container {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -654,7 +654,7 @@ ion-card-header{
   margin-top: 0.75rem;
 }
 
-.warning-tracking-container::before {
+.envios-page .warning-tracking-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -665,21 +665,21 @@ ion-card-header{
   box-shadow: 0 0 10px rgba(255, 206, 84, 0.5);
 }
 
-.warning-icon {
+.envios-page .warning-icon {
   font-size: 2rem;
   color: #ffce54;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   flex-shrink: 0;
 }
 
-.warning-content {
+.envios-page .warning-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.warning-label {
+.envios-page .warning-label {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.75rem;
   font-weight: 600;
@@ -688,7 +688,7 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.warning-value {
+.envios-page .warning-value {
   color: #ffce54;
   font-size: 0.95rem;
   font-weight: 600;
@@ -696,7 +696,7 @@ ion-card-header{
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
-.action-container {
+.envios-page .action-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -705,7 +705,7 @@ ion-card-header{
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.action-container ion-button {
+.envios-page .action-container ion-button {
   --border-radius: 12px;
   --padding-start: 2rem;
   --padding-end: 2rem;
@@ -716,34 +716,236 @@ ion-card-header{
   letter-spacing: 0.5px;
 }
 
-/* Pagination */
-.pagination-card {
-  background: rgba(0, 0, 0, 0.6);
+/* Pagination mejorada ESPECÍFICA para Envios */
+.envios-page .pagination-card {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
   backdrop-filter: blur(15px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(253, 180, 11, 0.3);
   border-radius: 16px;
-  margin-top: 1rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
 }
 
-.pagination-container {
+.envios-page .pagination-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #fdb40b, #f39c12, transparent);
+  border-radius: 16px 16px 0 0;
+}
+
+.envios-page .pagination-container {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-  gap: 1rem;
-  
+  padding: 10px 0;
 }
 
-.pagination-info {
+.envios-page .pagination-container ion-button {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, rgba(50, 50, 50, 0.95), rgba(30, 30, 30, 0.95));
+  --background-hover: rgba(253, 180, 11, 0.2);
+  --color: rgba(255, 255, 255, 0.95);
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: rgba(255, 255, 255, 0.3);
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  min-width: 48px;
+  height: 48px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.envios-page .pagination-container ion-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.4), rgba(243, 156, 18, 0.4));
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.envios-page .pagination-container ion-button:hover:not([disabled])::before {
+  width: 120%;
+  height: 120%;
+}
+
+.envios-page .pagination-container ion-button:hover:not([disabled]) {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.3), rgba(243, 156, 18, 0.3));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.6);
+  --box-shadow: 0 6px 25px rgba(253, 180, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+.envios-page .pagination-container ion-button:active:not([disabled]) {
+  transform: translateY(0px);
+  --box-shadow: 0 2px 10px rgba(253, 180, 11, 0.3);
+}
+
+.envios-page .pagination-container ion-button[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  --border-color: rgba(255, 255, 255, 0.15);
+  --background: linear-gradient(135deg, rgba(40, 40, 40, 0.6), rgba(30, 30, 30, 0.6));
+}
+
+/* Botón Volver especial en Envios */
+.envios-page .pagination-container ion-button[color="warning"] {
+  --background: linear-gradient(135deg, #fdb40b, #f39c12);
+  --color: #000000;
+  --border-color: rgba(253, 180, 11, 0.8);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  min-width: 100px;
+  margin-right: 16px;
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.4);
+}
+
+.envios-page .pagination-container ion-button[color="warning"]:hover {
+  --background: linear-gradient(135deg, #ffed4e, #fdb40b);
+  --color: #000000;
+  --border-color: rgba(253, 180, 11, 1);
+  --box-shadow: 0 8px 30px rgba(253, 180, 11, 0.6);
+  transform: translateY(-3px) scale(1.02);
+}
+
+/* Botones de navegación con iconos en Envios */
+.envios-page .pagination-container ion-button[fill="clear"] {
+  --background: linear-gradient(135deg, rgba(50, 50, 50, 0.8), rgba(30, 30, 30, 0.8));
+  --color: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(255, 255, 255, 0.2);
+}
+
+.envios-page .pagination-container ion-button[fill="clear"]:hover:not([disabled]) {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.25), rgba(243, 156, 18, 0.25));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.6);
+}
+
+/* Selector de página en Envios */
+.envios-page .page-selector-wrapper {
+  position: relative;
+}
+
+.envios-page .page-selector-button {
+  min-width: 160px;
+  --background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(20, 20, 20, 0.8));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.5);
+  font-size: 0.95rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.envios-page .page-selector-button:hover {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.2), rgba(243, 156, 18, 0.2));
+  --color: #ffed4e;
+  --border-color: rgba(253, 180, 11, 0.8);
+}
+
+/* Dropdown del selector de página en Envios */
+.envios-page .page-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(20, 20, 20, 0.98));
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(253, 180, 11, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(253, 180, 11, 0.3);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  min-width: 160px;
+  margin-top: 8px;
+}
+
+/* Opciones del dropdown en Envios */
+.envios-page .page-option {
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(253, 180, 11, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.envios-page .page-option:last-child {
+  border-bottom: none;
+}
+
+.envios-page .page-option:hover:not(.active) {
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.15), rgba(243, 156, 18, 0.15));
+  color: #fdb40b;
+  padding-left: 24px;
+}
+
+.envios-page .page-option.active {
+  background: linear-gradient(135deg, #fdb40b, #f39c12);
+  color: #000000;
+  font-weight: 800;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+  border-left: 4px solid #ffed4e;
+}
+
+/* Resumen de paginación en Envios */
+.envios-page .pagination-summary {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(253, 180, 11, 0.3);
+  font-size: 0.95rem;
+  color: #fdb40b;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.1), rgba(243, 156, 18, 0.1));
+  padding: 16px 24px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+  box-shadow: inset 0 0 20px rgba(253, 180, 11, 0.1);
+}
+
+/* Iconos de paginación mejorados en Envios */
+.envios-page .pagination-container ion-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.envios-page .pagination-container ion-button:hover:not([disabled]) ion-icon {
+  transform: scale(1.15);
+}
+
+.envios-page .pagination-info {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   text-align: center;
   color: #e0e0e0;
+  padding: 0 10px;
 }
 
-.page-indicator {
+.envios-page .page-indicator {
   display: block;
   font-weight: 700;
   margin-bottom: 0.25rem;
@@ -751,13 +953,13 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.items-indicator {
+.envios-page .items-indicator {
   font-size: 0.85rem;
   color: #b0b0b0;
 }
 
-/* Modal Styles */
-ion-modal.tracking-modal {
+/* Modal Styles - Específicos para Envios */
+.envios-page ion-modal.tracking-modal {
   --backdrop-opacity: 0.85;
   --ion-background-color: transparent;
   --background: transparent;
@@ -765,28 +967,28 @@ ion-modal.tracking-modal {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-ion-modal.tracking-modal .modal-wrapper {
+.envios-page ion-modal.tracking-modal .modal-wrapper {
   background: transparent !important;
 }
 
-ion-modal.tracking-modal ion-content {
+.envios-page ion-modal.tracking-modal ion-content {
   --background: transparent !important;
   --ion-background-color: transparent !important;
 }
 
 /* Fuerza el fondo transparente en todos los elementos del modal */
-ion-modal.tracking-modal,
-ion-modal.tracking-modal > *,
-ion-modal.tracking-modal .modal-wrapper,
-ion-modal.tracking-modal ion-backdrop,
-ion-modal.tracking-modal ion-content,
-ion-modal.tracking-modal .ion-page {
+.envios-page ion-modal.tracking-modal,
+.envios-page ion-modal.tracking-modal > *,
+.envios-page ion-modal.tracking-modal .modal-wrapper,
+.envios-page ion-modal.tracking-modal ion-backdrop,
+.envios-page ion-modal.tracking-modal ion-content,
+.envios-page ion-modal.tracking-modal .ion-page {
   background: transparent !important;
   --background: transparent !important;
   --ion-background-color: transparent !important;
 }
 
-.modal-content {
+.envios-page .modal-content {
   background: linear-gradient(135deg, 
     rgba(30, 30, 30, 0.98) 0%, 
     rgba(20, 20, 20, 0.98) 100%) !important;
@@ -809,7 +1011,7 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.modal-content::before {
+.envios-page .modal-content::before {
   content: '';
   position: absolute;
   top: 0;
@@ -825,14 +1027,14 @@ ion-modal.tracking-modal .ion-page {
   100% { background-position: 200px 0; }
 }
 
-.modal-header {
+.envios-page .modal-header {
   text-align: center;
   margin-bottom: 1.5rem;
   position: relative;
   flex-shrink: 0;
 }
 
-.modal-header::before {
+.envios-page .modal-header::before {
   content: '📦';
   font-size: 2.5rem;
   display: block;
@@ -840,7 +1042,7 @@ ion-modal.tracking-modal .ion-page {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
-.modal-header h2 {
+.envios-page .modal-header h2 {
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
   font-weight: 800;
@@ -850,7 +1052,7 @@ ion-modal.tracking-modal .ion-page {
   color: #fdb40b !important;
 }
 
-.modal-header p {
+.envios-page .modal-header p {
   color: #fdb40b;
   font-size: 1rem;
   font-weight: 600;
@@ -862,13 +1064,13 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.modal-body {
+.envios-page .modal-body {
   margin-bottom: 2rem;
   flex: 1;
   min-height: 0;
 }
 
-.tracking-input {
+.envios-page .tracking-input {
   --background: rgba(50, 50, 50, 0.8);
   --border-radius: 16px;
   border-radius: 16px;
@@ -879,14 +1081,14 @@ ion-modal.tracking-modal .ion-page {
   position: relative;
 }
 
-.tracking-input:focus-within {
+.envios-page .tracking-input:focus-within {
   border-color: #fdb40b;
   box-shadow: 0 0 0 3px rgba(253, 180, 11, 0.2),
               0 8px 25px rgba(253, 180, 11, 0.3);
   transform: translateY(-2px);
 }
 
-.tracking-input ion-label {
+.envios-page .tracking-input ion-label {
   color: #fdb40b !important;
   font-weight: 700;
   font-size: 0.85rem;
@@ -896,7 +1098,7 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.tracking-input ion-input {
+.envios-page .tracking-input ion-input {
   --color: #ffffff;
   --placeholder-color: rgba(255, 255, 255, 0.5);
   font-weight: 600;
@@ -909,7 +1111,7 @@ ion-modal.tracking-modal .ion-page {
 }
 
 
-.tracking-display {
+.envios-page .tracking-display {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -923,7 +1125,7 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.modal-actions {
+.envios-page .modal-actions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -931,7 +1133,7 @@ ion-modal.tracking-modal .ion-page {
   margin-top: 2rem;
 }
 
-.modal-actions ion-button {
+.envios-page .modal-actions ion-button {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -942,85 +1144,113 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.modal-actions ion-button:not([fill="clear"]) {
+.envios-page .modal-actions ion-button:not([fill="clear"]) {
   box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
 }
 
-.modal-actions ion-button:not([fill="clear"]):hover {
+.envios-page .modal-actions ion-button:not([fill="clear"]):hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(253, 180, 11, 0.5);
 }
 
-.modal-actions ion-button[fill="clear"] {
+.envios-page .modal-actions ion-button[fill="clear"] {
   --color: rgba(255, 255, 255, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 }
 
-.modal-actions ion-button[fill="clear"]:hover {
+.envios-page .modal-actions ion-button[fill="clear"]:hover {
   --color: #ffffff;
   border-color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.05);
 }
 
-ion-modal ion-button[expand="block"] {
+.envios-page ion-modal ion-button[expand="block"] {
     margin-top: auto;
     font-weight: 600;
     --border-radius: 0px;
     height: 0px !important;
 }
 
-ion-modal ion-item {
+.envios-page ion-modal ion-item {
     --border-color: none;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .pedidos-grid {
+  .envios-page .pedidos-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   
-  .pagination-container {
-    flex-direction: column;
+  .envios-page .pagination-container {
+    flex-direction: row;
     text-align: center;
+    gap: 6px;
   }
   
-  .filter-chips {
+  .envios-page .pagination-container ion-button {
+    min-width: 40px !important;
+    height: 40px !important;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+  
+  .envios-page .pagination-container ion-button[color="warning"] {
+    min-width: 80px !important;
+    margin-right: 8px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .envios-page .page-selector-button {
+    min-width: 120px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .envios-page .pagination-card {
+    padding: 16px 12px !important;
+  }
+  
+  .envios-page .pagination-summary {
+    font-size: 0.8rem !important;
+    padding: 10px 16px !important;
+  }
+  
+  .envios-page .filter-chips {
     justify-content: center;
   }
   
-  .pedido-header {
+  .envios-page .pedido-header {
     text-align: center;
     padding: 0.75rem;
     margin: -1rem -1rem 1rem -1rem;
   }
   
-  .stat-item {
+  .envios-page .stat-item {
     padding: 1rem 0.5rem;
     min-height: 100px;
   }
   
-  .stat-icon {
+  .envios-page .stat-icon {
     font-size: 2rem;
     margin-bottom: 0.5rem;
   }
   
-  .stat-number {
+  .envios-page .stat-number {
     font-size: 1.5rem;
     margin-bottom: 0.25rem;
   }
   
-  .stat-label {
+  .envios-page .stat-label {
     font-size: 0.75rem;
     letter-spacing: 0.5px;
   }
   
-  .stats-card ion-col {
+  .envios-page .stats-card ion-col {
     padding: 0.25rem;
   }
   
-  .modal-content {
+  .envios-page .modal-content {
     margin: 1rem;
     margin-top: 10vh;
   }
@@ -1038,64 +1268,64 @@ ion-modal ion-item {
   }
 }
 
-.pedido-card {
+.envios-page .pedido-card {
   animation: fadeInUp 0.3s ease-out;
 }
 
-/* Focus and Hover States */
-ion-button {
+/* Focus and Hover States - Específicos para Envios */
+.envios-page ion-button {
   --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-ion-button:hover {
+.envios-page ion-button:hover {
   transform: translateY(-1px);
   transition: all 0.2s ease;
   --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-ion-button[color="primary"] {
+.envios-page ion-button[color="primary"] {
   --background: linear-gradient(135deg, #5d9cec, #4a90e2);
   --color: #ffffff;
 }
 
-ion-button[color="success"] {
+.envios-page ion-button[color="success"] {
   --background: linear-gradient(135deg, #10dc60, #0cd851);
   --color: #ffffff;
 }
 
-ion-button[color="warning"] {
+.envios-page ion-button[color="warning"] {
   --background: linear-gradient(135deg, #ffed4e, #ffc409);
   --color: #000000;
 }
 
-ion-chip:hover {
+.envios-page ion-chip:hover {
   transform: scale(1.05);
   transition: all 0.2s ease;
 }
 
 /* Custom Scrollbar */
-.envios-content::-webkit-scrollbar {
+.envios-page .envios-content::-webkit-scrollbar {
   width: 6px;
 }
 
-.envios-content::-webkit-scrollbar-track {
+.envios-page .envios-content::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.envios-content::-webkit-scrollbar-thumb {
+.envios-page .envios-content::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
   border-radius: 3px;
 }
 
-.envios-content::-webkit-scrollbar-thumb:hover {
+.envios-page .envios-content::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
 
 /* Warning message styling */
-.warning-message {
+.envios-page .warning-message {
   background: rgba(253, 180, 11, 0.1);
   padding: 0.75rem;
   border-radius: 10px;
@@ -1103,7 +1333,7 @@ ion-chip:hover {
   margin-top: 0.75rem;
 }
 
-.warning-content {
+.envios-page .warning-content {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1114,7 +1344,7 @@ ion-chip:hover {
 }
 
 /* Active Filter Indicator */
-.active-filter-card {
+.envios-page .active-filter-card {
   background: rgba(253, 180, 11, 0.15);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(253, 180, 11, 0.5);
@@ -1123,20 +1353,20 @@ ion-chip:hover {
   box-shadow: 0 4px 16px rgba(253, 180, 11, 0.2);
 }
 
-.active-filter-content {
+.envios-page .active-filter-content {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem;
 }
 
-.filter-icon {
+.envios-page .filter-icon {
   color: #fdb40b;
   font-size: 1.2rem;
   flex-shrink: 0;
 }
 
-.filter-text {
+.envios-page .filter-text {
   color: #ffffff;
   font-weight: 600;
   font-size: 0.9rem;
@@ -1144,7 +1374,7 @@ ion-chip:hover {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.clear-filter-btn {
+.envios-page .clear-filter-btn {
   --color: #fdb40b;
   --background-hover: rgba(253, 180, 11, 0.1);
   margin: 0;
@@ -1153,6 +1383,6 @@ ion-chip:hover {
 }
 
 /* Icon spacing for inline elements */
-.icon-margin-right {
+.envios-page .icon-margin-right {
   margin-right: 0.5rem;
 }

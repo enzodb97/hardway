@@ -16,6 +16,7 @@ import {
   IonIcon,
   IonToast,
 } from "@ionic/react";
+import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -57,6 +58,7 @@ const AnalisisCancelaciones: React.FC = () => {
   const [toastExcel, setToastExcel] = useState(false);
   const [toastPDF, setToastPDF] = useState(false);
   const fechaEmision = new Date().toLocaleString("es-AR");
+  const history = useHistory();
 
   useEffect(() => {
     axiosInstance.get("/api/reportes/cancelaciones-motivo").then((res) => {
@@ -364,6 +366,18 @@ const AnalisisCancelaciones: React.FC = () => {
                 onClick={exportarExcel}
               >
                 <IonIcon icon={downloadOutline} slot="start" /> Exportar Excel
+              </IonButton>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol size="12" className="ion-text-left" style={{ paddingLeft: "24px" }}>
+              <IonButton
+                color="warning"
+                size="small"
+                style={{ marginTop: 8, marginBottom: 16 }}
+                onClick={() => history.push("/Reportes")}
+              >
+                Volver
               </IonButton>
               <IonToast
                 isOpen={toastExcel}

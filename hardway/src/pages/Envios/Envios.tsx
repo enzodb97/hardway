@@ -47,6 +47,10 @@ import {
   layersOutline,
   filterOutline,
   closeOutline,
+  playBackOutline,
+  playForwardOutline,
+  playSkipBackOutline,
+  playSkipForwardOutline,
 } from "ionicons/icons";
 import "./Envios.css";
 
@@ -74,6 +78,12 @@ const Envios: React.FC = () => {
     (pagina - 1) * porPagina,
     pagina * porPagina
   );
+
+  // Funciones de navegación de página
+  const goToFirstPage = () => setPagina(1);
+  const goToLastPage = () => setPagina(totalPaginas);
+  const goToPreviousPage = () => setPagina(Math.max(1, pagina - 1));
+  const goToNextPage = () => setPagina(Math.min(totalPaginas, pagina + 1));
 
   useEffect(() => {
     cargarPedidos();
@@ -522,46 +532,75 @@ const Envios: React.FC = () => {
           </div>
         )}
 
-        {/* Paginación */}
+        {/* Paginación mejorada */}
         {totalPaginas > 1 && (
           <IonCard className="pagination-card">
             <IonCardContent>
               <div className="pagination-container">
+                {/* Botón Volver */}
                 <IonButton
-                  fill="outline"
+                  color="warning"
                   size="small"
-                  color="light"
-                  disabled={pagina === 1}
-                  onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                  onClick={() => window.history.back()}
                 >
-                  Anterior
+                  Volver
                 </IonButton>
 
+                {/* Ir al inicio */}
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  onClick={goToFirstPage}
+                  disabled={pagina === 1}
+                  title="Primera página"
+                >
+                  <IonIcon icon={playSkipBackOutline} />
+                </IonButton>
+
+                {/* Página anterior */}
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  onClick={goToPreviousPage}
+                  disabled={pagina === 1}
+                  title="Página anterior"
+                >
+                  <IonIcon icon={playBackOutline} />
+                </IonButton>
+
+                {/* Indicador de página actual */}
                 <div className="pagination-info">
                   <span className="page-indicator">
                     Página {pagina} de {totalPaginas}
                   </span>
-                  <span className="items-indicator">
-                    (
-                    {pedidosFiltrados.length === 0
-                      ? 0
-                      : (pagina - 1) * porPagina + 1}
-                    -{Math.min(pagina * porPagina, pedidosFiltrados.length)} de{" "}
-                    {pedidosFiltrados.length})
-                  </span>
                 </div>
 
+                {/* Página siguiente */}
                 <IonButton
-                  fill="outline"
+                  fill="clear"
                   size="small"
-                  color="light"
+                  onClick={goToNextPage}
                   disabled={pagina === totalPaginas}
-                  onClick={() =>
-                    setPagina((p) => Math.min(totalPaginas, p + 1))
-                  }
+                  title="Página siguiente"
                 >
-                  Siguiente
+                  <IonIcon icon={playForwardOutline} />
                 </IonButton>
+
+                {/* Ir al final */}
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  onClick={goToLastPage}
+                  disabled={pagina === totalPaginas}
+                  title="Última página"
+                >
+                  <IonIcon icon={playSkipForwardOutline} />
+                </IonButton>
+              </div>
+
+              {/* Información adicional de registros */}
+              <div className="pagination-summary">
+                Mostrando {(pagina - 1) * porPagina + 1} - {Math.min(pagina * porPagina, pedidosFiltrados.length)} de {pedidosFiltrados.length} pedidos
               </div>
             </IonCardContent>
           </IonCard>

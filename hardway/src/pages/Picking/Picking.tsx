@@ -17,6 +17,7 @@ import {
   IonSpinner,
   IonModal,
   IonInput,
+  IonFooter,
 } from "@ionic/react";
 import {
   checkmarkCircleOutline,
@@ -31,8 +32,14 @@ import {
   refreshOutline,
   timeOutline,
   statsChartOutline,
+  playBackOutline,
+  playForwardOutline,
+  playSkipBackOutline,
+  playSkipForwardOutline,
+  chevronDownOutline,
 } from "ionicons/icons";
 import { useAuth } from "../../context/AuthContext";
+import { useHistory } from "react-router-dom";
 import {
   cargarTareasPicking,
   verPickingList,
@@ -41,8 +48,11 @@ import {
 } from "../../utils/pickingUtils";
 import "./Picking.css";
 
+const PAGE_SIZE = 6; // Cantidad de tareas por página
+
 const Picking: React.FC = () => {
   const { username, rol, legajoPicker } = useAuth();
+  const history = useHistory();
   const [tareas, setTareas] = useState<any[]>([]);
   const [tareasFiltradas, setTareasFiltradas] = useState<any[]>([]);
   const [filtroActivo, setFiltroActivo] = useState<string>('todos');
@@ -53,6 +63,10 @@ const Picking: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [pickingList, setPickingList] = useState<any[]>([]);
   const [showPickingList, setShowPickingList] = useState(false);
+  
+  // Estados de paginación
+  const [page, setPage] = useState(1);
+  const [showPageDropdown, setShowPageDropdown] = useState(false);
 
   const cargarTareas = async () => {
     setLoading(true);
@@ -74,6 +88,7 @@ const Picking: React.FC = () => {
   // Función para filtrar tareas
   const filtrarTareas = (tipo: string) => {
     setFiltroActivo(tipo);
+    setPage(1); // Resetear a la primera página al filtrar
     
     // Estados completados: Pendiente de Pago (2), Abonado (3), Despachado (4), Finalizado (5), Cancelado (6)
     const estadosCompletados = [2, 3, 4, 5, 6];
@@ -226,6 +241,18 @@ const Picking: React.FC = () => {
     completadas: tareas.filter(tarea => tarea.completado === 1 || estadosCompletados.includes(tarea.idEstado)).length,
   };
 
+  // Lógica de paginación
+  const totalPages = Math.ceil(tareasFiltradas.length / PAGE_SIZE);
+  const startIndex = (page - 1) * PAGE_SIZE;
+  const endIndex = startIndex + PAGE_SIZE;
+  const tareasPaginadas = tareasFiltradas.slice(startIndex, endIndex);
+
+  // Funciones de navegación de página
+  const goToFirstPage = () => setPage(1);
+  const goToLastPage = () => setPage(totalPages);
+  const goToPreviousPage = () => setPage(Math.max(1, page - 1));
+  const goToNextPage = () => setPage(Math.min(totalPages, page + 1));
+
   return (
     <IonPage className="picking-page">
       <IonHeader>
@@ -334,7 +361,7 @@ const Picking: React.FC = () => {
                     </div>
                   ) : (
                     <div className="tasks-grid">
-                      {tareasFiltradas.map((tarea) => (
+                      {tareasPaginadas.map((tarea) => (
                         <div key={tarea.idAsignacion} className="task-card">
                           <div className="task-header">
                             <div className="task-title">
@@ -428,6 +455,101 @@ const Picking: React.FC = () => {
                 </IonCol>
               </IonRow>
             </IonGrid>
+          </div>
+        )}
+
+        {/* Paginación mejorada */}
+        {totalPages > 1 && (
+          <div className="pagination-footer">
+            <div className="pagination-controls">
+              {/* Botón Volver */}
+              <IonButton
+                color="warning"
+                size="small"
+                onClick={() => history.push("/dashboard")}
+              >
+                Volver
+              </IonButton>
+
+              {/* Ir al inicio */}
+              <IonButton
+                fill="clear"
+                size="small"
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                title="Primera página"
+              >
+                <IonIcon icon={playSkipBackOutline} />
+              </IonButton>
+
+              {/* Página anterior */}
+              <IonButton
+                fill="clear"
+                size="small"
+                onClick={goToPreviousPage}
+                disabled={page === 1}
+                title="Página anterior"
+              >
+                <IonIcon icon={playBackOutline} />
+              </IonButton>
+
+              {/* Selector de página */}
+              <div className="page-selector-wrapper">
+                <IonButton
+                  fill="outline"
+                  size="small"
+                  onClick={() => setShowPageDropdown(!showPageDropdown)}
+                  className="page-selector-button"
+                >
+                  Página {page} de {totalPages}
+                  <IonIcon icon={chevronDownOutline} slot="end" />
+                </IonButton>
+                
+                {showPageDropdown && (
+                  <div className="page-dropdown">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <div
+                        key={pageNum}
+                        onClick={() => {
+                          setPage(pageNum);
+                          setShowPageDropdown(false);
+                        }}
+                        className={`page-option ${pageNum === page ? 'active' : ''}`}
+                      >
+                        Página {pageNum}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Página siguiente */}
+              <IonButton
+                fill="clear"
+                size="small"
+                onClick={goToNextPage}
+                disabled={page === totalPages}
+                title="Página siguiente"
+              >
+                <IonIcon icon={playForwardOutline} />
+              </IonButton>
+
+              {/* Ir al final */}
+              <IonButton
+                fill="clear"
+                size="small"
+                onClick={goToLastPage}
+                disabled={page === totalPages}
+                title="Última página"
+              >
+                <IonIcon icon={playSkipForwardOutline} />
+              </IonButton>
+            </div>
+            
+            {/* Información adicional de registros */}
+            <div className="pagination-summary">
+              Mostrando {startIndex + 1} - {Math.min(endIndex, tareasFiltradas.length)} de {tareasFiltradas.length} tareas
+            </div>
           </div>
         )}
 

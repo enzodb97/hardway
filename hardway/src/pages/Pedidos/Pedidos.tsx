@@ -527,6 +527,14 @@ const Pedidos: React.FC = () => {
             <IonRow className="pedidos-paginacion-row">
               <IonCol size="12" className="pedidos-paginacion-col">
                 <IonButton
+                  color="warning"
+                  size="small"
+                  onClick={() => history.push("/dashboard")}
+                  style={{ marginRight: '16px' }}
+                >
+                  Volver
+                </IonButton>
+                <IonButton
                   size="small"
                   disabled={pagina === 1}
                   onClick={() => setPagina((p) => Math.max(1, p - 1))}

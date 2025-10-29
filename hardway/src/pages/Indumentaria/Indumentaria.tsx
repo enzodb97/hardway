@@ -636,6 +636,16 @@ const Indumentaria: React.FC = () => {
       {totalPages > 1 && (
         <IonFooter className="pagination-footer">
           <div className="pagination-controls">
+            {/* Botón Volver */}
+            <IonButton
+              color="warning"
+              size="small"
+              onClick={() => history.push("/dashboard")}
+              style={{ marginRight: '16px', minWidth: '90px' }}
+            >
+              Volver
+            </IonButton>
+            
             {/* Botón ir al inicio */}
             <IonButton
               fill="outline"

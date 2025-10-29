@@ -42,6 +42,11 @@ import {
   checkmarkCircle,
   closeCircle,
   time,
+  playSkipBackOutline,
+  playBackOutline,
+  playForwardOutline,
+  playSkipForwardOutline,
+  arrowBack,
 } from "ionicons/icons";
 import { useState, useEffect } from "react";
 import { useClientesVip } from "../../utils/useClientesVip";
@@ -68,6 +73,10 @@ const Clientes: React.FC = () => {
   const [filtroDocumento, setFiltroDocumento] = useState("");
   const [cargando, setCargando] = useState(false);
   const [soloVip, setSoloVip] = useState(false);
+
+  // Estados para paginación
+  const [paginaActual, setPaginaActual] = useState(1);
+  const CARDS_POR_PAGINA = 9;
 
   // Estados para alertas
   const [showAlert, setShowAlert] = useState(false);
@@ -119,6 +128,17 @@ const Clientes: React.FC = () => {
   });
 
   const totalClientes = clientes.length;
+
+  // Cálculos de paginación
+  const totalPaginas = Math.ceil(clientesFiltrados.length / CARDS_POR_PAGINA);
+  const indiceInicio = (paginaActual - 1) * CARDS_POR_PAGINA;
+  const indiceFin = indiceInicio + CARDS_POR_PAGINA;
+  const clientesPaginados = clientesFiltrados.slice(indiceInicio, indiceFin);
+
+  // Resetear a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [busqueda, filtroLocalidad, filtroDocumento, soloVip]);
 
   // Manejo de refresh
   const doRefresh = async (event: CustomEvent) => {
@@ -297,7 +317,7 @@ const Clientes: React.FC = () => {
   // Render de vista en tarjetas
   const renderVistaCards = () => (
     <div className="clients-grid">
-      {clientesFiltrados.map((cliente) => (
+      {clientesPaginados.map((cliente) => (
         <IonCard key={cliente.id} className="client-card">
           <IonCardHeader>
             <div className="card-header-content">
@@ -418,7 +438,7 @@ const Clientes: React.FC = () => {
   // Render de vista en lista compacta
   const renderVistaLista = () => (
     <div className="clients-list">
-      {clientesFiltrados.map((cliente) => (
+      {clientesPaginados.map((cliente) => (
         <div key={cliente.id} className="client-list-item">
           <div className="list-item-content">
             <div className="client-basic-info">
@@ -822,6 +842,79 @@ const Clientes: React.FC = () => {
               clienteId={clienteHistorial.id}
               clienteNombre={clienteHistorial.nombre}
             />
+          )}
+
+          {/* Paginación */}
+          {totalPaginas > 1 && (
+            <IonCard className="pagination-card">
+              <div className="pagination-container">
+                {/* Botón Volver */}
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  routerLink="/dashboard"
+                  className="back-btn"
+                >
+                  <IonIcon icon={arrowBack} slot="start" />
+                  Volver
+                </IonButton>
+
+                {/* Controles de paginación */}
+                <div className="pagination-controls">
+                  {/* Primera página */}
+                  <IonButton
+                    fill="clear"
+                    size="small"
+                    onClick={() => setPaginaActual(1)}
+                    disabled={paginaActual === 1}
+                    className="pagination-btn"
+                  >
+                    <IonIcon icon={playSkipBackOutline} />
+                  </IonButton>
+
+                  {/* Página anterior */}
+                  <IonButton
+                    fill="clear"
+                    size="small"
+                    onClick={() => setPaginaActual(paginaActual - 1)}
+                    disabled={paginaActual === 1}
+                    className="pagination-btn"
+                  >
+                    <IonIcon icon={playBackOutline} />
+                  </IonButton>
+
+                  <span className="page-total">Página {paginaActual} de {totalPaginas}</span>
+
+                  {/* Página siguiente */}
+                  <IonButton
+                    fill="clear"
+                    size="small"
+                    onClick={() => setPaginaActual(paginaActual + 1)}
+                    disabled={paginaActual === totalPaginas}
+                    className="pagination-btn"
+                  >
+                    <IonIcon icon={playForwardOutline} />
+                  </IonButton>
+
+                  {/* Última página */}
+                  <IonButton
+                    fill="clear"
+                    size="small"
+                    onClick={() => setPaginaActual(totalPaginas)}
+                    disabled={paginaActual === totalPaginas}
+                    className="pagination-btn"
+                  >
+                    <IonIcon icon={playSkipForwardOutline} />
+                  </IonButton>
+                </div>
+
+                {/* Resumen */}
+                <div className="pagination-summary">
+                  Mostrando {indiceInicio + 1} - {Math.min(indiceFin, clientesFiltrados.length)} de{" "}
+                  {clientesFiltrados.length} clientes
+                </div>
+              </div>
+            </IonCard>
           )}
         </div>
       </IonContent>
