@@ -1,43 +1,284 @@
-/* Dashboard.css */
+/* Dashboard.css - Estilos propios de la página Dashboard */
+.dashboard-page {
+  --background: #f5f7fa;
+}
+
 .dashboard-page .dashboard-content {
-  --background: #2b3238;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+/* Header de bienvenida */
+.dashboard-page .dashboard-welcome {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 24px 32px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-page .welcome-content {
+  max-width: 1200px;
+  margin: 0 auto;
   text-align: center;
 }
 
-.dashboard-page .dashboard-container {
-  max-width: auto;
-  padding: 2rem;
-}
-
-.dashboard-page .dashboard-title {
-  color: var(--ion-color-primary);
+.dashboard-page .welcome-title {
   font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-.dashboard-page .dashboard-subtitle {
-  color: var(--ion-color-medium);
+.dashboard-page .welcome-subtitle {
   font-size: 1.2rem;
-  margin-bottom: 3rem;
+  margin: 0 0 16px 0;
+  opacity: 0.95;
+  font-weight: 300;
 }
 
-.dashboard-page .dashboard-button {
-  --background: var(--ion-color-danger);
-  --background-hover: var(--ion-color-danger-shade);
-  max-width: 300px;
-  margin: 0 auto;
+.dashboard-page .role-badge {
+  --background: rgba(255, 255, 255, 0.2);
+  --color: white;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
 }
 
-/* Responsividad */
+.dashboard-page .welcome-time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.dashboard-page .welcome-time ion-icon {
+  font-size: 1.2rem;
+}
+
+/* Botón de logout en header */
+.dashboard-page .header-logout-btn {
+  --color: white;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.dashboard-page .header-logout-btn:hover {
+  --background: rgba(255, 255, 255, 0.1);
+}
+
+/* Sección de módulos */
+.dashboard-page .dashboard-modules {
+  background: #f5f7fa;
+  padding: 32px 16px;
+  min-height: calc(100vh - 280px);
+}
+
+.dashboard-page .modules-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2d3436;
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+/* Tarjetas de módulos */
+.dashboard-page .module-card {
+  margin: 0;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+  background: white;
+}
+
+.dashboard-page .module-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-page .card-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dashboard-page .card-icon {
+  font-size: 3.5rem;
+  padding: 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.dashboard-page .card-icon.color-primary {
+  color: #3880ff;
+  background: rgba(56, 128, 255, 0.1);
+}
+
+.dashboard-page .card-icon.color-secondary {
+  color: #3dc2ff;
+  background: rgba(61, 194, 255, 0.1);
+}
+
+.dashboard-page .card-icon.color-tertiary {
+  color: #5260ff;
+  background: rgba(82, 96, 255, 0.1);
+}
+
+.dashboard-page .card-icon.color-warning {
+  color: #ffc409;
+  background: rgba(255, 196, 9, 0.1);
+}
+
+.dashboard-page .card-icon.color-success {
+  color: #2dd36f;
+  background: rgba(45, 211, 111, 0.1);
+}
+
+.dashboard-page .card-icon.color-danger {
+  color: #eb445a;
+  background: rgba(235, 68, 90, 0.1);
+}
+
+.dashboard-page .card-icon.color-medium {
+  color: #92949c;
+  background: rgba(146, 148, 156, 0.1);
+}
+
+.dashboard-page .card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2d3436;
+  text-align: center;
+  margin: 0;
+}
+
+.dashboard-page .card-description {
+  font-size: 0.95rem;
+  color: #636e72;
+  text-align: center;
+  margin: 12px 0 0 0;
+  line-height: 1.5;
+}
+
+/* Footer */
+.dashboard-page .dashboard-footer {
+  background: #2d3436;
+  color: #b2bec3;
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.dashboard-page .dashboard-footer p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .dashboard-page .dashboard-title {
-    font-size: 2rem;
+  .dashboard-page .welcome-title {
+    font-size: 1.8rem;
   }
 
-  .dashboard-page .dashboard-subtitle {
+  .dashboard-page .welcome-subtitle {
     font-size: 1rem;
   }
+
+  .dashboard-page .modules-title {
+    font-size: 1.4rem;
+  }
+
+  .dashboard-page .card-icon {
+    font-size: 2.8rem;
+    padding: 16px;
+  }
+
+  .dashboard-page .card-title {
+    font-size: 1.1rem;
+  }
+
+  .dashboard-page .card-description {
+    font-size: 0.85rem;
+  }
+
+  .dashboard-page .dashboard-welcome {
+    padding: 32px 16px 24px 16px;
+  }
+
+  .dashboard-page .dashboard-modules {
+    padding: 24px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-page .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-page .welcome-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-page .welcome-time {
+    font-size: 0.85rem;
+  }
+
+  .dashboard-page .card-icon {
+    font-size: 2.5rem;
+    padding: 14px;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-page .module-card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.dashboard-page .module-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.dashboard-page .module-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dashboard-page .module-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.dashboard-page .module-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.dashboard-page .module-card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.dashboard-page .module-card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+.dashboard-page .module-card:nth-child(7) {
+  animation-delay: 0.7s;
 }

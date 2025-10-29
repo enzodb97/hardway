@@ -25,9 +25,13 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, history, location.state?.from?.pathname]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(username, password);
+    const success = await login(username, password);
+    if (success) {
+      const redirectPath = location.state?.from?.pathname || "/dashboard";
+      history.push(redirectPath);
+    }
   };
 
   return (
