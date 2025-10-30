@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-10-2025 a las 02:09:11
+-- Tiempo de generación: 30-10-2025 a las 22:28:39
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -1421,29 +1421,6 @@ INSERT INTO `rack` (`idRack`, `numeroRack`, `descripcion`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `rol`
---
-
-CREATE TABLE `rol` (
-  `idRol` int(11) NOT NULL,
-  `idTipoRol` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
-
---
--- Volcado de datos para la tabla `rol`
---
-
-INSERT INTO `rol` (`idRol`, `idTipoRol`) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(5, 5),
-(6, 6),
-(7, 7);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `stock`
 --
 
@@ -1602,6 +1579,7 @@ CREATE TABLE `tiporol` (
 --
 
 INSERT INTO `tiporol` (`idTipoRol`, `tipoRol`, `descripcionRol`) VALUES
+(0, 'Encargado de Pedidos', 'Gestiona el ciclo de vida de los pedidos'),
 (1, 'Administrador', 'Acceso completo al sistema'),
 (2, 'Vendedor', 'Puede realizar ventas'),
 (3, 'Envios', 'Encargado de Envios'),
@@ -1641,21 +1619,43 @@ CREATE TABLE `usuario` (
   `idUsuario` int(11) NOT NULL,
   `idPersona` int(11) DEFAULT NULL,
   `nombreUsuario` varchar(100) DEFAULT NULL,
-  `contrasena` varchar(100) DEFAULT NULL,
-  `idRol` int(11) DEFAULT NULL
+  `contrasena` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`idUsuario`, `idPersona`, `nombreUsuario`, `contrasena`, `idRol`) VALUES
-(1, 10, 'admin', 'admin123', 1),
-(2, 9, 'mariag', '123', 2),
-(5, 5, 'anamtz', '123', 6),
-(6, 6, 'luisrd', '123', 6),
-(7, 7, 'sofiag', '123', 7),
-(15, 8, 'envios', '123', 3);
+INSERT INTO `usuario` (`idUsuario`, `idPersona`, `nombreUsuario`, `contrasena`) VALUES
+(1, 10, 'admin', 'admin123'),
+(2, 9, 'mariag', '123'),
+(5, 5, 'anamtz', '123'),
+(6, 6, 'luisrd', '123'),
+(7, 7, 'sofiag', '123'),
+(15, 8, 'envios', '123');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuario_tiporol`
+--
+
+CREATE TABLE `usuario_tiporol` (
+  `idUsuario` int(11) NOT NULL,
+  `idTipoRol` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `usuario_tiporol`
+--
+
+INSERT INTO `usuario_tiporol` (`idUsuario`, `idTipoRol`) VALUES
+(1, 1),
+(2, 2),
+(5, 6),
+(6, 6),
+(7, 7),
+(15, 3);
 
 -- --------------------------------------------------------
 
@@ -1924,13 +1924,6 @@ ALTER TABLE `rack`
   ADD UNIQUE KEY `idx_numeroRack` (`numeroRack`);
 
 --
--- Indices de la tabla `rol`
---
-ALTER TABLE `rol`
-  ADD PRIMARY KEY (`idRol`),
-  ADD KEY `idTipoRol` (`idTipoRol`);
-
---
 -- Indices de la tabla `stock`
 --
 ALTER TABLE `stock`
@@ -1978,8 +1971,14 @@ ALTER TABLE `unidad_medida`
 --
 ALTER TABLE `usuario`
   ADD PRIMARY KEY (`idUsuario`),
-  ADD UNIQUE KEY `idPersona` (`idPersona`),
-  ADD KEY `idRol` (`idRol`);
+  ADD UNIQUE KEY `idPersona` (`idPersona`);
+
+--
+-- Indices de la tabla `usuario_tiporol`
+--
+ALTER TABLE `usuario_tiporol`
+  ADD PRIMARY KEY (`idUsuario`,`idTipoRol`),
+  ADD KEY `fk_utr_tiporol` (`idTipoRol`);
 
 --
 -- Indices de la tabla `vendedor`
@@ -2246,12 +2245,6 @@ ALTER TABLE `persona`
   ADD CONSTRAINT `persona_ibfk_1` FOREIGN KEY (`idDomicilio`) REFERENCES `domicilio` (`idDomicilio`);
 
 --
--- Filtros para la tabla `rol`
---
-ALTER TABLE `rol`
-  ADD CONSTRAINT `rol_ibfk_1` FOREIGN KEY (`idTipoRol`) REFERENCES `tiporol` (`idTipoRol`);
-
---
 -- Filtros para la tabla `stock`
 --
 ALTER TABLE `stock`
@@ -2274,8 +2267,14 @@ ALTER TABLE `stock_registro_fallo`
 -- Filtros para la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  ADD CONSTRAINT `usuario_ibfk_1` FOREIGN KEY (`idRol`) REFERENCES `rol` (`idRol`),
   ADD CONSTRAINT `usuario_ibfk_persona` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`);
+
+--
+-- Filtros para la tabla `usuario_tiporol`
+--
+ALTER TABLE `usuario_tiporol`
+  ADD CONSTRAINT `fk_utr_tiporol` FOREIGN KEY (`idTipoRol`) REFERENCES `tiporol` (`idTipoRol`),
+  ADD CONSTRAINT `fk_utr_usuario` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`);
 
 --
 -- Filtros para la tabla `vendedor`

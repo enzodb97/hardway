@@ -15,20 +15,21 @@ const RoleRoute: React.FC<RoleRouteProps> = ({
   requiredRoles,
   ...rest
 }) => {
-  const { isAuthenticated, rol } = useAuth();
+  const { isAuthenticated, roles, hasAnyRole } = useAuth(); // ✅ Usar roles y hasAnyRole
 
   return (
     <Route
       {...rest}
       render={(props) => {
-        if (isAuthenticated && rol && requiredRoles.includes(rol)) {
+        // ✅ Verificar si el usuario tiene ALGUNO de los roles requeridos
+        if (isAuthenticated && hasAnyRole(requiredRoles)) {
           return <Component {...props} />;
         } else if (isAuthenticated) {
           return (
             <Redirect
               to={{
                 pathname: "/acceso-restringido",
-                state: { rol, requiredRoles },
+                state: { roles, requiredRoles }, // ✅ Pasar roles (array)
               }}
             />
           );

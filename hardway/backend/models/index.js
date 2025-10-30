@@ -2,7 +2,7 @@
 const Cliente = require('./Cliente');
 const Persona = require('./Persona');
 const Usuario = require('./Usuario');
-const Rol = require('./Rol');
+// const Rol = require('./Rol'); // ❌ ELIMINADO - Tabla 'rol' ya no existe en BD
 const TipoRol = require('./TipoRol');
 const Pedido = require('./Pedido');
 const DetallePedido = require('./DetallePedido');
@@ -70,6 +70,33 @@ const MotivoCancelacion = sequelize.define(
   { tableName: "motivo_cancelacion", timestamps: false }
 );
 
+// ✅ Modelo para la tabla intermedia usuario_tiporol (N:M)
+const UsuarioTipoRol = sequelize.define(
+  "UsuarioTipoRol",
+  {
+    idUsuario: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      references: {
+        model: 'usuario',
+        key: 'idUsuario'
+      }
+    },
+    idTipoRol: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      references: {
+        model: 'tiporol',
+        key: 'idTipoRol'
+      }
+    }
+  },
+  { 
+    tableName: "usuario_tiporol", 
+    timestamps: false // ✅ CRÍTICO: Sin createdAt/updatedAt
+  }
+);
+
 const Rack = sequelize.define(
   "Rack",
   {
@@ -84,8 +111,25 @@ const Rack = sequelize.define(
 const setupAssociations = () => {
   // Relaciones básicas
   Cliente.belongsTo(Persona, { foreignKey: "idPersona" });
-  Usuario.belongsTo(Rol, { foreignKey: "idRol" });
-  Rol.belongsTo(TipoRol, { foreignKey: "idTipoRol" });
+  
+  // ✅ NUEVA RELACIÓN N:M: Usuario ←→ TipoRol (a través de usuario_tiporol)
+  Usuario.belongsToMany(TipoRol, {
+    through: UsuarioTipoRol, // ✅ Usar el modelo explícito en lugar de string
+    foreignKey: "idUsuario",
+    otherKey: "idTipoRol",
+    as: "roles" // Alias para acceder: usuario.roles
+  });
+  
+  TipoRol.belongsToMany(Usuario, {
+    through: UsuarioTipoRol, // ✅ Usar el modelo explícito en lugar de string
+    foreignKey: "idTipoRol",
+    otherKey: "idUsuario",
+    as: "usuarios" // Alias para acceder: tipoRol.usuarios
+  });
+  
+  // ❌ RELACIONES ANTIGUAS ELIMINADAS:
+  // Usuario.belongsTo(Rol, { foreignKey: "idRol" });
+  // Rol.belongsTo(TipoRol, { foreignKey: "idTipoRol" });
 
   // Relaciones de Pedido
   Pedido.belongsTo(Cliente, { foreignKey: "idCliente" });
@@ -177,7 +221,7 @@ module.exports = {
   Cliente,
   Persona,
   Usuario,
-  Rol,
+  // Rol, // ❌ ELIMINADO - Ya no existe en BD
   TipoRol,
   Pedido,
   DetallePedido,
@@ -206,6 +250,7 @@ module.exports = {
   MovimientoStock,
   EncargadoPicker,
   MotivoCancelacion,
+  UsuarioTipoRol, // ✅ Tabla intermedia N:M Usuario-TipoRol
   Rack,
   MotivoNoApta,
   StockRegistroFallo,

@@ -51,7 +51,7 @@ import "./Picking.css";
 const PAGE_SIZE = 6; // Cantidad de tareas por página
 
 const Picking: React.FC = () => {
-  const { username, rol, legajoPicker } = useAuth();
+  const { username, roles, hasRole, legajoPicker } = useAuth();
   const history = useHistory();
   const [tareas, setTareas] = useState<any[]>([]);
   const [tareasFiltradas, setTareasFiltradas] = useState<any[]>([]);
@@ -71,9 +71,11 @@ const Picking: React.FC = () => {
   const cargarTareas = async () => {
     setLoading(true);
     try {
-      // Usar legajoPicker si el rol es Picker, sino username (para admin no importa)
-      const pickerId = rol === "Picker" ? legajoPicker : username;
-      const data = await cargarTareasPicking(rol || "", pickerId || "");
+      // Usar legajoPicker si el usuario es Picker, sino username (para admin no importa)
+      const pickerId = hasRole("Picker") ? legajoPicker : username;
+      // Determinar el rol principal para el backend (mantener compatibilidad)
+      const rolPrincipal = hasRole("Administrador") ? "Administrador" : hasRole("Encargado de Picking") ? "Encargado de Picking" : "Picker";
+      const data = await cargarTareasPicking(rolPrincipal, pickerId || "");
       console.log("📋 Tareas cargadas desde backend:", data);
       console.log("📊 Estados de las tareas:", data.map((t: any) => ({ pedido: t.numeroPedido, idEstado: t.idEstado, completado: t.completado })));
       setTareas(data);
@@ -203,7 +205,7 @@ const Picking: React.FC = () => {
         "tipo:",
         typeof idAsignacion
       );
-      if (!idAsignacion && rol === "Administrador") {
+      if (!idAsignacion && hasRole("Administrador")) {
         console.error(
           "Error: Se requiere idAsignacion para completar tarea como admin"
         );
@@ -382,7 +384,7 @@ const Picking: React.FC = () => {
                               <IonIcon icon={cubeOutline} />
                               <span>Pedido {tarea.numeroPedido}</span>
                             </div>
-                            {rol === "Administrador" && tarea.pickerAsignado && (
+                            {hasRole("Administrador") && tarea.pickerAsignado && (
                               <div className="picker-badge">
                                 {tarea.pickerAsignado}
                               </div>

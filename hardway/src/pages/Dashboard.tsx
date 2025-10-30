@@ -34,7 +34,7 @@ import "./Dashboard.css";
 
 const Dashboard: React.FC = () => {
   const history = useHistory();
-  const { logout, username, rol } = useAuth();
+  const { logout, username, roles, hasAnyRole } = useAuth(); // ✅ Usar roles y hasAnyRole
   const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
@@ -109,9 +109,11 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  // Filtrar módulos según el rol del usuario
+  // ✅ Filtrar módulos según los roles del usuario (si tiene ALGUNO de los roles)
   const availableModules = modules.filter((module) =>
-    module.roles.includes(rol || "")
+    module.roles.some(requiredRole => 
+      roles.some(userRole => userRole.toLowerCase() === requiredRole.toLowerCase())
+    )
   );
 
   return (
@@ -141,9 +143,14 @@ const Dashboard: React.FC = () => {
             <p className="welcome-subtitle">
               Sistema de Gestión Pegasus
             </p>
-            <IonBadge color="primary" className="role-badge">
-              {rol}
-            </IonBadge>
+            {/* ✅ Mostrar todos los roles del usuario */}
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {roles.map((role, index) => (
+                <IonBadge key={index} color="primary" className="role-badge">
+                  {role}
+                </IonBadge>
+              ))}
+            </div>
           </div>
           <div className="welcome-time">
             <IonIcon icon={timeOutline} />

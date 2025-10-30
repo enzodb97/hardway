@@ -11,11 +11,11 @@ const Usuario = sequelize.define(
     },
     nombreUsuario: DataTypes.STRING,
     contrasena: DataTypes.STRING,
-    idRol: DataTypes.INTEGER,
-    idPersona: DataTypes.INTEGER, // Campo faltante
+    // idRol eliminado - ahora la relación es N:M a través de usuario_tiporol
+    idPersona: DataTypes.INTEGER,
   },
   {
-    tableName: "Usuario",
+    tableName: "usuario", // Nombre en minúscula para coincidir con la BD
     timestamps: false,
   }
 );

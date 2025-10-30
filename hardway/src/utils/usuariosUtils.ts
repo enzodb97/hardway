@@ -4,7 +4,9 @@ export interface Usuario {
   id: number;
   username: string;
   password?: string;
-  rol: string;
+  rol: string; // @deprecated - mantener por compatibilidad
+  roles?: string[]; // ✅ NUEVO: Array de nombres de roles
+  rolesIds?: number[]; // ✅ NUEVO: Array de IDs de roles
 }
 
 export const rolesDisponibles = ["admin", "vendedor", "consulta"];
@@ -14,8 +16,9 @@ export function validarCamposUsuario(usuario: Partial<Usuario>): string | null {
   if (!usuario.username || usuario.username.trim().length < 3) {
     return "El nombre de usuario debe tener al menos 3 caracteres.";
   }
-  if (!usuario.rol) {
-    return "El rol es obligatorio.";
+  // ✅ Validar que tenga al menos un rol
+  if (!usuario.rol && (!usuario.rolesIds || usuario.rolesIds.length === 0)) {
+    return "Debe asignar al menos un rol al usuario.";
   }
   
   // Validación de contraseña con criterios de seguridad
@@ -67,7 +70,12 @@ export const cargarUsuarios = async (): Promise<Usuario[]> => {
 
 // Crear usuario
 export const crearUsuario = async (nuevoUsuario: Omit<Usuario, "id">) => {
-  return await axiosInstance.post("/api/usuarios", nuevoUsuario);
+  // ✅ Enviar rolesIds si están disponibles, sino usar rol (compatibilidad)
+  const payload = nuevoUsuario.rolesIds && nuevoUsuario.rolesIds.length > 0
+    ? { username: nuevoUsuario.username, password: nuevoUsuario.password, roles: nuevoUsuario.rolesIds }
+    : nuevoUsuario;
+  
+  return await axiosInstance.post("/api/usuarios", payload);
 };
 
 // Eliminar usuario
@@ -77,10 +85,12 @@ export const eliminarUsuario = async (id: number) => {
 
 // Editar usuario
 export const editarUsuario = async (usuario: Usuario) => {
-  return await axiosInstance.put(`/api/usuarios/${usuario.id}`, {
-    username: usuario.username,
-    rol: usuario.rol,
-  });
+  // ✅ Enviar rolesIds si están disponibles, sino usar rol (compatibilidad)
+  const payload = usuario.rolesIds && usuario.rolesIds.length > 0
+    ? { username: usuario.username, roles: usuario.rolesIds }
+    : { username: usuario.username, rol: usuario.rol };
+    
+  return await axiosInstance.put(`/api/usuarios/${usuario.id}`, payload);
 };
 
 // Cambiar contraseña

@@ -55,7 +55,7 @@ import {
 import "./Envios.css";
 
 const Envios: React.FC = () => {
-  const { username, rol, legajoPicker } = useAuth();
+  const { username, roles, hasRole, legajoPicker } = useAuth();
   const [pedidos, setPedidos] = useState<PedidoEnvio[]>([]);
   const [pedidosFiltrados, setPedidosFiltrados] = useState<PedidoEnvio[]>([]);
   const [codigoSeguimiento, setCodigoSeguimiento] = useState("");
@@ -97,10 +97,11 @@ const Envios: React.FC = () => {
     try {
       setLoading(true);
       console.log("🔍 Cargando pedidos de envío...");
-      console.log("📋 Usuario autenticado:", { username, rol, legajoPicker });
+      console.log("📋 Usuario autenticado:", { username, roles: roles.join(", "), legajoPicker });
 
-      // Pasar rol y legajoPicker para filtrar en el backend
-      const pedidosData = await obtenerPedidosAbonados(rol || undefined, legajoPicker || undefined);
+      // Determinar rol principal para el backend (mantener compatibilidad)
+      const rolPrincipal = hasRole("Administrador") ? "Administrador" : hasRole("Encargado de Envíos") ? "Encargado de Envíos" : "Despachador";
+      const pedidosData = await obtenerPedidosAbonados(rolPrincipal || undefined, legajoPicker || undefined);
       console.log("✅ Pedidos cargados:", pedidosData.length);
       console.log("📦 Datos de pedidos:", pedidosData.map(p => ({
         pedido: p.numeroPedido,
@@ -367,7 +368,7 @@ const Envios: React.FC = () => {
                   <div className="pedido-header">
                     <div className="pedido-title">
                       <IonCardTitle>Pedido #{pedido.numeroPedido}</IonCardTitle>
-                      {rol === "Administrador" && pedido.nombreDespachador && (
+                      {hasRole("Administrador") && pedido.nombreDespachador && (
                         <div className="despachador-badge">
                           {pedido.nombreDespachador}
                         </div>
@@ -465,7 +466,7 @@ const Envios: React.FC = () => {
                             <IonIcon icon={cubeOutline} className="despachador-info-icon" />
                             <div className="despachador-info-content">
                               <div className="despachador-info-label">
-                                {rol === "Administrador" ? "Despachador Asignado" : "Responsable"}
+                                {hasRole("Administrador") ? "Despachador Asignado" : "Responsable"}
                               </div>
                               <div className="despachador-info-value">
                                 {pedido.nombreDespachador}
