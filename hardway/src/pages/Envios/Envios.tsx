@@ -97,11 +97,36 @@ const Envios: React.FC = () => {
     try {
       setLoading(true);
       console.log("🔍 Cargando pedidos de envío...");
-      console.log("📋 Usuario autenticado:", { username, roles: roles.join(", "), legajoPicker });
+      console.log("📋 Usuario autenticado:", { 
+        username, 
+        roles: roles.join(", "), 
+        legajoPicker,
+        esAdmin: hasRole("Administrador")
+      });
 
-      // Determinar rol principal para el backend (mantener compatibilidad)
-      const rolPrincipal = hasRole("Administrador") ? "Administrador" : hasRole("Encargado de Envíos") ? "Encargado de Envíos" : "Despachador";
-      const pedidosData = await obtenerPedidosAbonados(rolPrincipal || undefined, legajoPicker || undefined);
+      // ✅ ADMINISTRADOR: Ve TODOS los pedidos sin filtros
+      // ✅ PICKER/DESPACHADOR: Solo ve los pedidos asignados a su legajo
+      let rolPrincipal;
+      let legajoParaFiltrar;
+
+      if (hasRole("Administrador")) {
+        // Administrador ve TODO sin restricciones
+        rolPrincipal = "Administrador";
+        legajoParaFiltrar = undefined; // Sin filtro de legajo
+        console.log("👑 Administrador: Cargando TODOS los pedidos");
+      } else if (hasRole("Picker") || hasRole("Despachador") || hasRole("Encargado de Envíos")) {
+        // Picker/Despachador solo ve sus pedidos asignados
+        rolPrincipal = "Picker";
+        legajoParaFiltrar = legajoPicker;
+        console.log(`📦 Picker/Despachador: Cargando solo pedidos del legajo ${legajoPicker}`);
+      } else {
+        // Otros roles (por si acaso)
+        rolPrincipal = roles[0]; // Usar el primer rol
+        legajoParaFiltrar = undefined;
+      }
+
+      const pedidosData = await obtenerPedidosAbonados(rolPrincipal, legajoParaFiltrar || undefined);
+      
       console.log("✅ Pedidos cargados:", pedidosData.length);
       console.log("📦 Datos de pedidos:", pedidosData.map(p => ({
         pedido: p.numeroPedido,
@@ -110,6 +135,7 @@ const Envios: React.FC = () => {
         empresa: p.empresaEnvio,
         estado: p.idEstado
       })));
+      
       setPedidos(pedidosData);
     } catch (error) {
       console.error("❌ Error cargando pedidos:", error);
