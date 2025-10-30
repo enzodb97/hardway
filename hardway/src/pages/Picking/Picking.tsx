@@ -274,7 +274,7 @@ const Picking: React.FC = () => {
         <div className="stats-dashboard">
           <IonGrid>
             <IonRow>
-              <IonCol size="12" sizeMd="4">
+              <IonCol size="12" sizeMd="3">
                 <div 
                   className={`stat-card total ${filtroActivo === 'todos' ? 'active' : ''}`}
                   onClick={() => filtrarTareas('todos')}
@@ -288,7 +288,7 @@ const Picking: React.FC = () => {
                   </div>
                 </div>
               </IonCol>
-              <IonCol size="12" sizeMd="4">
+              <IonCol size="12" sizeMd="3">
                 <div 
                   className={`stat-card pending ${filtroActivo === 'pendientes' ? 'active' : ''}`}
                   onClick={() => filtrarTareas('pendientes')}
@@ -302,7 +302,7 @@ const Picking: React.FC = () => {
                   </div>
                 </div>
               </IonCol>
-              <IonCol size="12" sizeMd="4">
+              <IonCol size="12" sizeMd="3">
                 <div 
                   className={`stat-card completed ${filtroActivo === 'completadas' ? 'active' : ''}`}
                   onClick={() => filtrarTareas('completadas')}
@@ -313,6 +313,20 @@ const Picking: React.FC = () => {
                   <div className="stat-content">
                     <div className="stat-number">{stats.completadas}</div>
                     <div className="stat-label">Completadas</div>
+                  </div>
+                </div>
+              </IonCol>
+              <IonCol size="12" sizeMd="3">
+                <div 
+                  className="stat-card stock-report"
+                  onClick={() => history.push('/reportes/stock-actual')}
+                >
+                  <div className="stat-icon">
+                    <IonIcon icon={statsChartOutline} />
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">📊</div>
+                    <div className="stat-label">Stock Actual</div>
                   </div>
                 </div>
               </IonCol>
