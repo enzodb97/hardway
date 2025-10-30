@@ -33,6 +33,7 @@ import {
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./Reportes.css";
 import "./ProductosMasPedidos.table.css";
+import "./StockActual.css";
 import { checkmarkCircle } from "ionicons/icons";
 interface StockActual {
   codigoIndumentaria: string;
@@ -295,83 +296,84 @@ const StockActual: React.FC = () => {
   };
   const bajoStock = stock.filter((s: any) => s.stock_actual <= 30);
   return (
-    <IonPage>
+    <IonPage className="stock-actual-page">
       <IonHeader>
-        <IonToolbar color="warning">
-          <IonTitle>Stock Actual</IonTitle>
+        <IonToolbar className="stock-actual-toolbar">
+          <IonTitle>📊 Stock Actual</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className="stock-actual-content">
         <IonGrid>
+          {/* Título y Estadísticas */}
           <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <h2 className="reporte-titulo">Stock Actual de Productos</h2>
-              <div className="reporte-fecha">
-                Fecha de emisión: {fechaEmision}
-              </div>
-              <div>
-                Productos con Stock menor a 30:{" "}
-                <strong>{bajoStock.length}</strong>
-              </div>
-              <div style={{ fontWeight: "bold", margin: "8px 0" }}>
-                Total de ítems: {stock.length}
+            <IonCol size="12">
+              <div className="stock-title-section">
+                <h1 className="stock-main-title">Stock Actual de Productos</h1>
+                <div className="stock-emission-date">
+                  Fecha de emisión: {fechaEmision}
+                </div>
+                
+                <div className="stock-stats-row">
+                  <div className="stock-stat-card">
+                    <div className="stock-stat-icon">📦</div>
+                    <div className="stock-stat-content">
+                      <div className="stock-stat-number">{stock.length}</div>
+                      <div className="stock-stat-label">Total Ítems</div>
+                    </div>
+                  </div>
+                  
+                  <div className="stock-stat-card low-stock">
+                    <div className="stock-stat-icon">⚠️</div>
+                    <div className="stock-stat-content">
+                      <div className="stock-stat-number">{bajoStock.length}</div>
+                      <div className="stock-stat-label">Stock Bajo (≤30)</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </IonCol>
           </IonRow>
+          {/* Tabla de Stock */}
           <IonRow>
             <IonCol size="12">
-              <IonCard>
+              <IonCard className="stock-table-card">
                 <IonCardContent>
                   <IonGrid>
-                    <IonRow className="table-header">
-                      <IonCol size="1.71" className="celda-centrada">
-                        Código
-                      </IonCol>
-                      <IonCol size="1.71" className="celda-centrada">
-                        Producto
-                      </IonCol>
-                      <IonCol size="1.71" className="celda-centrada">
-                        Talle
-                      </IonCol>
-                      <IonCol size="1.71" className="celda-centrada">
-                        Color
-                      </IonCol>
-                      <IonCol size="1.71" className="celda-centrada">
-                        Tela
-                      </IonCol>
-                      <IonCol size="1.71" className="celda-centrada">
-                        Rack
-                      </IonCol>
-                      <IonCol size="1.71" className="celda-centrada">
-                        Stock Actual
-                      </IonCol>
+                    <IonRow className="stock-table-header">
+                      <IonCol size="1.71">Código</IonCol>
+                      <IonCol size="1.71">Producto</IonCol>
+                      <IonCol size="1.71">Talle</IonCol>
+                      <IonCol size="1.71">Color</IonCol>
+                      <IonCol size="1.71">Tela</IonCol>
+                      <IonCol size="1.71">Rack</IonCol>
+                      <IonCol size="1.71">Stock Actual</IonCol>
                     </IonRow>
                     {stockAMostrar.map((s, idx) => (
                       <IonRow
-                        key={s.codigoIndumentaria + "-" + s.rack}
-                        className={`reporte-tabla-fila${
-                          s.stock_actual <= 30 ? " stock-bajo" : ""
+                        key={s.codigoIndumentaria + "-" + s.rack + "-" + idx}
+                        className={`stock-table-row${
+                          s.stock_actual <= 30 ? " stock-low" : ""
                         }`}
                       >
-                        <IonCol size="1.71" className="celda-centrada">
+                        <IonCol size="1.71" className="stock-table-cell">
                           {s.codigoIndumentaria}
                         </IonCol>
-                        <IonCol size="1.71" className="celda-centrada">
+                        <IonCol size="1.71" className="stock-table-cell">
                           {s.nombre_producto}
                         </IonCol>
-                        <IonCol size="1.71" className="celda-centrada">
+                        <IonCol size="1.71" className="stock-table-cell">
                           {s.talle}
                         </IonCol>
-                        <IonCol size="1.71" className="celda-centrada">
+                        <IonCol size="1.71" className="stock-table-cell">
                           {s.color}
                         </IonCol>
-                        <IonCol size="1.71" className="celda-centrada">
+                        <IonCol size="1.71" className="stock-table-cell">
                           {s.tela}
                         </IonCol>
-                        <IonCol size="1.71" className="celda-centrada">
+                        <IonCol size="1.71" className="stock-table-cell">
                           {s.rack}
                         </IonCol>
-                        <IonCol size="1.71" className="celda-centrada">
+                        <IonCol size="1.71" className="stock-table-cell">
                           {s.stock_actual}
                         </IonCol>
                       </IonRow>
@@ -381,84 +383,92 @@ const StockActual: React.FC = () => {
               </IonCard>
             </IonCol>
           </IonRow>
-          {/* Paginación */}
+          {/* Controles de Paginación y Exportación */}
           <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <IonButton
-                size="small"
-                disabled={pagina === 1 || mostrarTodos}
-                onClick={() => setPagina((p) => Math.max(1, p - 1))}
-              >
-                Anterior
-              </IonButton>
-              <span style={{ margin: "0 12px" }}>
-                Página {pagina} de {totalPaginas}
-              </span>
-              <IonButton
-                size="small"
-                disabled={pagina === totalPaginas || mostrarTodos}
-                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-              >
-                Siguiente
-              </IonButton>
-              <IonButton
-                size="small"
-                fill="clear"
-                onClick={() => {
-                  setMostrarTodos((prev) => !prev);
-                  setPagina(1);
-                }}
-                style={{ marginLeft: 8 }}
-              >
-                {mostrarTodos ? "Ver paginado" : "Ver todos"}
-              </IonButton>
-              <IonButton
-                color="primary"
-                size="small"
-                style={{ marginTop: 8, marginBottom: 16, marginLeft: 8 }}
-                onClick={exportarExcel}
-              >
-                <IonIcon icon={downloadOutline} slot="start" />
-                Exportar a Excel
-              </IonButton>{" "}
-              <IonButton
-                color="primary"
-                size="small"
-                style={{ marginTop: 8, marginBottom: 16 }}
-                onClick={exportarPDF}
-              >
-                <IonIcon icon={documentText} slot="start" />
-                PDF
-              </IonButton>
-              <IonToast
-                isOpen={toastExcel}
-                onDidDismiss={() => setToastExcel(false)}
-                message="¡Excel exportado exitosamente!"
-                duration={1800}
-                color="success"
-                icon={checkmarkCircle}
-                position="top"
-              />
-              <IonToast
-                isOpen={toastPDF}
-                onDidDismiss={() => setToastPDF(false)}
-                message="¡PDF exportado exitosamente!"
-                duration={1800}
-                color="success"
-                icon={checkmarkCircle}
-                position="top"
-              />
+            <IonCol size="12">
+              <div className="stock-actions-container">
+                <div className="stock-pagination-container">
+                  <IonButton
+                    size="small"
+                    disabled={pagina === 1 || mostrarTodos}
+                    onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                  >
+                    Anterior
+                  </IonButton>
+                  
+                  <div className="stock-pagination-info">
+                    Página {pagina} de {totalPaginas}
+                  </div>
+                  
+                  <IonButton
+                    size="small"
+                    disabled={pagina === totalPaginas || mostrarTodos}
+                    onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                  >
+                    Siguiente
+                  </IonButton>
+                </div>
+                
+                <IonButton
+                  size="small"
+                  className="stock-btn-toggle"
+                  onClick={() => {
+                    setMostrarTodos((prev) => !prev);
+                    setPagina(1);
+                  }}
+                >
+                  {mostrarTodos ? "Ver Paginado" : "Ver Todos"}
+                </IonButton>
+                
+                <IonButton
+                  className="stock-btn-export"
+                  size="small"
+                  onClick={exportarExcel}
+                >
+                  <IonIcon icon={downloadOutline} slot="start" />
+                  Exportar Excel
+                </IonButton>
+                
+                <IonButton
+                  className="stock-btn-pdf"
+                  size="small"
+                  onClick={exportarPDF}
+                >
+                  <IonIcon icon={documentText} slot="start" />
+                  Exportar PDF
+                </IonButton>
+                
+                <IonButton
+                  className="stock-btn-back"
+                  size="small"
+                  routerLink="/reportes"
+                >
+                  Volver
+                </IonButton>
+              </div>
             </IonCol>
           </IonRow>
-          <IonButton
-            color="medium"
-            size="small"
-            routerLink="/reportes"
-            style={{ minWidth: 80 }}
-          >
-            Volver
-          </IonButton>
         </IonGrid>
+        
+        {/* Toasts de notificación */}
+        <IonToast
+          isOpen={toastExcel}
+          onDidDismiss={() => setToastExcel(false)}
+          message="¡Excel exportado exitosamente!"
+          duration={1800}
+          cssClass="stock-toast-success"
+          icon={checkmarkCircle}
+          position="top"
+        />
+        <IonToast
+          isOpen={toastPDF}
+          onDidDismiss={() => setToastPDF(false)}
+          message="¡PDF exportado exitosamente!"
+          duration={1800}
+          cssClass="stock-toast-success"
+          icon={checkmarkCircle}
+          position="top"
+        />
       </IonContent>
     </IonPage>
   );
