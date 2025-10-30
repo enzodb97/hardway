@@ -32,7 +32,6 @@ import {
   Legend,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import "./Reportes.css";
 import "./ProductosMasPedidos.table.css";
 import "./ProductosMasPedidos.css";
 import { checkmarkCircle } from "ionicons/icons";

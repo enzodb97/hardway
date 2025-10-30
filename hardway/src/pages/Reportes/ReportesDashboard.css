@@ -167,7 +167,6 @@
 }
 
 .reporte-tarjeta {
-  backdrop-filter: blur(15px);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -220,7 +219,7 @@
 .reporte-lista {
   list-style: none;
   padding: 0;
-  margin: 0 0 1rem 0;
+  margin: 15 0 1rem 0;
 }
 
 .reporte-lista li {
@@ -252,6 +251,7 @@
 }
 
 .reporte-info-text {
+  margin-top: auto;
   color: #ffffff;
   font-size: 0.95rem;
   line-height: 1.5;

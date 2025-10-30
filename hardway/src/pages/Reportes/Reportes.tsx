@@ -19,7 +19,6 @@ import {
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import { people, cube, trendingUp, close } from "ionicons/icons";
-import "./Reportes.css";
 import "./ReportesDashboard.css";
 
 const Reportes: React.FC = () => {

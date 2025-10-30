@@ -33,7 +33,6 @@ import {
   ArcElement,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import "./Reportes.css";
 import "./ProductosMasPedidos.table.css";
 import "./AnalisisCancelaciones.css";
 

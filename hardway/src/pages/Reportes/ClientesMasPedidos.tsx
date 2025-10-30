@@ -33,7 +33,6 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./ProductosMasPedidos.table.css";
-import "./Reportes.css";
 import "./ClientesMasPedidos.css";
 
 // Registrar componentes y plugins
