@@ -5,7 +5,7 @@
 
 /* Página principal */
 .analisis-cancelaciones-page {
-  --background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
   min-height: 100vh;
 }
 

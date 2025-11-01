@@ -77,6 +77,8 @@ router.get("/stock-actual", async (req, res) => {
           color co ON di.idColor = co.idColor
       JOIN
           tela te ON di.idTela = te.idTela
+      WHERE
+          r.idRack != 99
       GROUP BY
           i.codigoIndumentaria,
           ni.nombre,

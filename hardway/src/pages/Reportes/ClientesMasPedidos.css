@@ -1,7 +1,7 @@
 /* Clientes de Alto Valor - Estilos Profesionales */
 
 .clientes-alto-valor-page {
-  --background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
   --ion-background-color: transparent;
 }
 
