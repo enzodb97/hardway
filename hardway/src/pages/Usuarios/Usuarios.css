@@ -383,6 +383,24 @@ ion-select::part(text) {
   text-overflow: ellipsis;
 }
 
+/* Mensaje de requisitos de contraseña */
+.password-requirements {
+  margin: -8px 0 12px 0;
+  padding: 12px;
+  background: rgba(var(--ion-color-warning-rgb), 0.1);
+  border-left: 3px solid var(--ion-color-warning);
+  border-radius: 4px;
+}
+
+.password-requirements ion-text {
+  display: block;
+  line-height: 1.5;
+}
+
+.password-requirements small {
+  font-size: 0.85rem;
+}
+
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .usuarios-form-item {
@@ -397,4 +415,27 @@ ion-select::part(text) {
     --background: var(--ion-background-color);
     --ion-item-background: var(--ion-background-color);
   }
+}
+
+/* Estilos personalizados para el alert de contraseña */
+.password-alert .alert-head.sc-ion-alert-md {
+  padding-bottom: 0 !important;
+}
+
+.password-alert .alert-message {
+  white-space: pre-wrap !important;
+  line-height: 1.8 !important;
+  text-align: left !important;
+  font-size: 0.9rem !important;
+  padding: 12px 16px !important;
+}
+
+.password-alert .alert-sub-title {
+  font-weight: 600 !important;
+  color: var(--ion-color-primary) !important;
+  margin-bottom: 8px !important;
+}
+
+.password-alert .alert-wrapper {
+  max-width: 400px !important;
 }

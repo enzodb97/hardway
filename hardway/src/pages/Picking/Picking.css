@@ -1,6 +1,6 @@
 /* Picking Page - Professional Design */
 .picking-page {
-  --ion-background-color: transparent;
+  background-color: transparent;
 }
 
 .picking-content {
@@ -1092,4 +1092,281 @@ ion-button[color="primary"] {
     flex-direction: column;
     align-items: flex-start;
   }
+  
+  /* Responsive para paginación de Picking */
+  .picking-page .pagination-controls {
+    justify-content: center !important;
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+  
+  .picking-page .pagination-controls ion-button {
+    min-width: 40px !important;
+    height: 40px !important;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+  
+  .picking-page .pagination-controls ion-button[color="warning"] {
+    min-width: 80px !important;
+    margin-right: 8px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .picking-page .pagination-controls ion-button[fill="outline"] {
+    min-width: 120px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .picking-page .pagination-footer {
+    padding: 16px 12px !important;
+    border-radius: 16px !important;
+  }
+  
+  .picking-page .pagination-summary {
+    font-size: 0.8rem !important;
+    padding: 10px 16px !important;
+  }
 }
+
+/* Paginación profesional ESPECÍFICA para Picking */
+.picking-page .pagination-footer {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(253, 180, 11, 0.3);
+  padding: 24px 20px;
+  margin-top: 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.picking-page .pagination-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #fdb40b, #f39c12, transparent);
+  border-radius: 16px 16px 0 0;
+}
+
+.picking-page .pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 10px;
+}
+
+.picking-page .pagination-controls ion-button {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, rgba(50, 50, 50, 0.95), rgba(30, 30, 30, 0.95));
+  --background-hover: rgba(253, 180, 11, 0.2);
+  --color: rgba(255, 255, 255, 0.95);
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: rgba(255, 255, 255, 0.3);
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  min-width: 48px;
+  height: 48px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.picking-page .pagination-controls ion-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.4), rgba(243, 156, 18, 0.4));
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.picking-page .pagination-controls ion-button:hover:not([disabled])::before {
+  width: 120%;
+  height: 120%;
+}
+
+.picking-page .pagination-controls ion-button:hover:not([disabled]) {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.3), rgba(243, 156, 18, 0.3));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.6);
+  --box-shadow: 0 6px 25px rgba(253, 180, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+.picking-page .pagination-controls ion-button:active:not([disabled]) {
+  transform: translateY(0px);
+  --box-shadow: 0 2px 10px rgba(253, 180, 11, 0.3);
+}
+
+.picking-page .pagination-controls ion-button[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  --border-color: rgba(255, 255, 255, 0.15);
+  --background: linear-gradient(135deg, rgba(40, 40, 40, 0.6), rgba(30, 30, 30, 0.6));
+}
+
+/* Botón Volver especial en Picking */
+.picking-page .pagination-controls ion-button[color="warning"] {
+  --background: linear-gradient(135deg, #fdb40b, #f39c12);
+  --color: #000000;
+  --border-color: rgba(253, 180, 11, 0.8);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  min-width: 100px;
+  margin-right: 16px;
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.4);
+}
+
+.picking-page .pagination-controls ion-button[color="warning"]:hover {
+  --background: linear-gradient(135deg, #ffed4e, #fdb40b);
+  --color: #000000;
+  --border-color: rgba(253, 180, 11, 1);
+  --box-shadow: 0 8px 30px rgba(253, 180, 11, 0.6);
+  transform: translateY(-3px) scale(1.02);
+}
+
+/* Botones de navegación con iconos en Picking */
+.picking-page .pagination-controls ion-button[fill="clear"] {
+  --background: linear-gradient(135deg, rgba(50, 50, 50, 0.8), rgba(30, 30, 30, 0.8));
+  --color: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(255, 255, 255, 0.2);
+}
+
+.picking-page .pagination-controls ion-button[fill="clear"]:hover:not([disabled]) {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.25), rgba(243, 156, 18, 0.25));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.6);
+}
+
+/* Selector de página estilo mejorado en Picking */
+.picking-page .pagination-controls ion-button[fill="outline"] {
+  --background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(20, 20, 20, 0.8));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.5);
+  min-width: 160px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.picking-page .pagination-controls ion-button[fill="outline"]:hover {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.2), rgba(243, 156, 18, 0.2));
+  --color: #ffed4e;
+  --border-color: rgba(253, 180, 11, 0.8);
+}
+
+/* Wrapper del selector de página */
+.picking-page .page-selector-wrapper {
+  position: relative;
+}
+
+.picking-page .page-selector-button {
+  min-width: 140px;
+}
+
+/* Dropdown del selector de página */
+.picking-page .page-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(20, 20, 20, 0.98));
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(253, 180, 11, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(253, 180, 11, 0.3);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  min-width: 160px;
+  margin-top: 8px;
+}
+
+/* Opciones del dropdown */
+.picking-page .page-option {
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(253, 180, 11, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.picking-page .page-option:last-child {
+  border-bottom: none;
+}
+
+.picking-page .page-option:hover:not(.active) {
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.15), rgba(243, 156, 18, 0.15));
+  color: #fdb40b;
+  padding-left: 24px;
+}
+
+.picking-page .page-option.active {
+  background: linear-gradient(135deg, #fdb40b, #f39c12);
+  color: #000000;
+  font-weight: 800;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+  border-left: 4px solid #ffed4e;
+}
+
+/* Resumen de paginación mejorado en Picking */
+.picking-page .pagination-summary {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(253, 180, 11, 0.3);
+  font-size: 0.95rem;
+  color: #fdb40b;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.1), rgba(243, 156, 18, 0.1));
+  padding: 16px 24px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+  box-shadow: inset 0 0 20px rgba(253, 180, 11, 0.1);
+}
+
+/* Iconos de paginación mejorados en Picking */
+.picking-page .pagination-controls ion-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.picking-page .pagination-controls ion-button:hover:not([disabled]) ion-icon {
+  transform: scale(1.15);
+}
+
+/* Animación de entrada para paginación de Picking */
+@keyframes fadeInUpPicking {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.picking-page .pagination-footer {
+  animation: fadeInUpPicking 0.4s ease-out;
+}
+

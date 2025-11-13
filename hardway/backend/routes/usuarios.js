@@ -1,17 +1,121 @@
 const express = require('express');
 const router = express.Router();
-const { Usuario, Rol, TipoRol } = require('../models');
+const { Usuario, TipoRol, sequelize, EncargadoPicker, Persona } = require('../models'); // ✅ Agregados EncargadoPicker y Persona
+
+// ✅ NUEVO: Función para generar legajo único de picker
+async function generarLegajoPicker() {
+  try {
+    // Buscar el último legajo creado con formato LP###
+    const ultimoPicker = await EncargadoPicker.findOne({
+      where: {
+        legajo: {
+          [sequelize.Sequelize.Op.like]: 'LP%'
+        }
+      },
+      order: [['legajo', 'DESC']]
+    });
+
+    let nuevoNumero = 1;
+    
+    if (ultimoPicker && ultimoPicker.legajo) {
+      // Extraer el número del legajo (ej: "LP007" -> 7)
+      const numeroActual = parseInt(ultimoPicker.legajo.substring(2));
+      if (!isNaN(numeroActual)) {
+        nuevoNumero = numeroActual + 1;
+      }
+    }
+
+    // Formatear con padding de 3 dígitos (ej: 1 -> "001", 15 -> "015")
+    const legajo = `LP${String(nuevoNumero).padStart(3, '0')}`;
+    console.log(`📋 Legajo generado: ${legajo}`);
+    return legajo;
+  } catch (error) {
+    console.error("Error al generar legajo:", error);
+    throw new Error("No se pudo generar el legajo");
+  }
+}
+
+// ✅ NUEVO: Función para gestionar alta/baja de picker
+async function gestionarRolPicker(usuario, rolesIds) {
+  const ID_ROL_PICKER = 6; // ID del rol Picker según tu BD
+  const tieneRolPicker = rolesIds.includes(ID_ROL_PICKER);
+  
+  try {
+    // Verificar si el usuario ya tiene registro en encargadopicker
+    const pickerExistente = await EncargadoPicker.findOne({
+      where: { idPersona: usuario.idPersona }
+    });
+
+    if (tieneRolPicker && !pickerExistente) {
+      // ✅ ALTA: Usuario recibe rol Picker por primera vez
+      if (!usuario.idPersona) {
+        throw new Error("El usuario debe tener una persona asociada para ser Picker");
+      }
+
+      const legajo = await generarLegajoPicker();
+      
+      await EncargadoPicker.create({
+        legajo: legajo,
+        idPersona: usuario.idPersona
+      });
+
+      console.log(`✅ Picker creado: legajo=${legajo}, idPersona=${usuario.idPersona}`);
+      return { accion: 'ALTA', legajo };
+      
+    } else if (!tieneRolPicker && pickerExistente) {
+      // ✅ BAJA: Usuario pierde rol Picker (opcional: eliminar o mantener)
+      // Por ahora solo registramos en consola, no eliminamos por integridad referencial
+      console.log(`⚠️ Usuario perdió rol Picker, pero se mantiene legajo ${pickerExistente.legajo}`);
+      return { accion: 'BAJA', legajo: pickerExistente.legajo };
+    }
+
+    return { accion: 'NINGUNA' };
+  } catch (error) {
+    console.error("Error al gestionar rol picker:", error);
+    throw error;
+  }
+}
+
+// Función de validación de contraseña
+function validarPassword(password) {
+  if (!password || password.length < 8) {
+    return 'La contraseña debe tener al menos 8 caracteres.';
+  }
+  if (!/\d/.test(password)) {
+    return 'La contraseña debe contener al menos 1 número.';
+  }
+  if (!/[a-zA-Z]/.test(password)) {
+    return 'La contraseña debe contener al menos 1 letra.';
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return 'La contraseña debe contener al menos 1 carácter especial.';
+  }
+  return null;
+}
+
+// ✅ NUEVO: Obtener todos los tipos de rol disponibles
+router.get("/tipos-rol", async (req, res) => {
+  try {
+    const tiposRol = await TipoRol.findAll({
+      attributes: ["idTipoRol", "tipoRol", "descripcionRol"],
+      order: [["tipoRol", "ASC"]]
+    });
+    res.json(tiposRol);
+  } catch (error) {
+    console.error("Error al obtener tipos de rol:", error);
+    res.status(500).json({ error: "Error al obtener tipos de rol" });
+  }
+});
 
 // Obtener todos los usuarios
 router.get("/", async (req, res) => {
   try {
     const usuarios = await Usuario.findAll({
       include: {
-        model: Rol,
-        include: {
-          model: TipoRol,
-          attributes: ["tipoRol"],
-        },
+        model: TipoRol,
+        as: "roles", // ✅ Usar alias definido en la relación N:M
+        attributes: ["idTipoRol", "tipoRol"],
+        through: { attributes: [] } // No incluir campos de la tabla intermedia
       },
     });
 
@@ -19,7 +123,8 @@ router.get("/", async (req, res) => {
     const usuariosFormateados = usuarios.map((u) => ({
       id: u.idUsuario,
       username: u.nombreUsuario,
-      rol: u.Rol?.TipoRol?.tipoRol || "",
+      roles: u.roles.map(r => r.tipoRol), // Array de strings: ["Vendedor", "Admin"]
+      rolesIds: u.roles.map(r => r.idTipoRol) // Array de IDs: [2, 8]
     }));
 
     res.json(usuariosFormateados);
@@ -31,24 +136,59 @@ router.get("/", async (req, res) => {
 
 // Crear usuario
 router.post("/", async (req, res) => {
-  const { username, password, rol } = req.body;
+  const { username, password, roles } = req.body; // ✅ Ahora recibe array: roles: [2, 8]
   try {
-    // Busca el idRol correspondiente al tipoRol recibido
-    const rolDB = await Rol.findOne({
-      include: {
-        model: TipoRol,
-        where: { tipoRol: rol },
-      },
-    });
-    if (!rolDB) {
-      return res.status(400).json({ error: "Rol no válido" });
+    // Validar contraseña
+    const errorPassword = validarPassword(password);
+    if (errorPassword) {
+      return res.status(400).json({ error: errorPassword });
     }
-    const nuevo = await Usuario.create({
+
+    // Validar que se enviaron roles
+    if (!roles || !Array.isArray(roles) || roles.length === 0) {
+      return res.status(400).json({ error: "Debe asignar al menos un rol" });
+    }
+
+    // Verificar que todos los roles existen
+    const rolesDB = await TipoRol.findAll({
+      where: { idTipoRol: roles }
+    });
+
+    if (rolesDB.length !== roles.length) {
+      return res.status(400).json({ error: "Uno o más roles no son válidos" });
+    }
+
+    // Crear usuario
+    const nuevoUsuario = await Usuario.create({
       nombreUsuario: username,
       contrasena: password,
-      idRol: rolDB.idRol,
     });
-    res.json({ id: nuevo.idUsuario, username: nuevo.nombreUsuario, rol });
+
+    // Asignar roles mediante la tabla intermedia usuario_tiporol
+    await nuevoUsuario.setRoles(roles); // Sequelize maneja el INSERT en usuario_tiporol
+
+    // ✅ NUEVO: Gestionar alta de picker si corresponde
+    let resultadoPicker = { accion: 'NINGUNA' };
+    if (nuevoUsuario.idPersona) {
+      resultadoPicker = await gestionarRolPicker(nuevoUsuario, roles);
+    }
+
+    // Obtener usuario con roles para responder
+    const usuarioConRoles = await Usuario.findByPk(nuevoUsuario.idUsuario, {
+      include: {
+        model: TipoRol,
+        as: "roles",
+        attributes: ["idTipoRol", "tipoRol"],
+        through: { attributes: [] }
+      }
+    });
+
+    res.json({ 
+      id: usuarioConRoles.idUsuario, 
+      username: usuarioConRoles.nombreUsuario, 
+      roles: usuarioConRoles.roles.map(r => r.tipoRol),
+      picker: resultadoPicker.accion === 'ALTA' ? { legajo: resultadoPicker.legajo } : null
+    });
   } catch (error) {
     console.error("Error al crear usuario:", error);
     res.status(400).json({ error: "No se pudo crear el usuario" });
@@ -66,25 +206,48 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Actualizar usuario (nombre de usuario y rol)
+// Actualizar usuario (nombre de usuario y roles)
 router.put("/:id", async (req, res) => {
-  const { username, rol } = req.body;
+  const { username, roles } = req.body; // ✅ Ahora recibe array: roles: [2, 8]
   try {
-    // Busca el idRol correspondiente al tipoRol recibido
-    const rolDB = await Rol.findOne({
-      include: {
-        model: TipoRol,
-        where: { tipoRol: rol },
-      },
-    });
-    if (!rolDB) {
-      return res.status(400).json({ error: "Rol no válido" });
+    // Validar que se enviaron roles
+    if (!roles || !Array.isArray(roles) || roles.length === 0) {
+      return res.status(400).json({ error: "Debe asignar al menos un rol" });
     }
-    await Usuario.update(
-      { nombreUsuario: username, idRol: rolDB.idRol },
-      { where: { idUsuario: req.params.id } }
-    );
-    res.json({ success: true });
+
+    // Verificar que todos los roles existen
+    const rolesDB = await TipoRol.findAll({
+      where: { idTipoRol: roles }
+    });
+
+    if (rolesDB.length !== roles.length) {
+      return res.status(400).json({ error: "Uno o más roles no son válidos" });
+    }
+
+    // Buscar usuario
+    const usuario = await Usuario.findByPk(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    // Actualizar nombre de usuario
+    await usuario.update({ nombreUsuario: username });
+
+    // Actualizar roles (reemplaza los anteriores)
+    await usuario.setRoles(roles); // Sequelize hace DELETE + INSERT en usuario_tiporol
+
+    // ✅ NUEVO: Gestionar alta/baja de picker según cambios en roles
+    let resultadoPicker = { accion: 'NINGUNA' };
+    if (usuario.idPersona) {
+      resultadoPicker = await gestionarRolPicker(usuario, roles);
+    } else if (roles.includes(6)) { // Si intentan asignar rol Picker pero no tiene idPersona
+      console.warn(`⚠️ Usuario ${usuario.nombreUsuario} recibió rol Picker pero no tiene idPersona asociado`);
+    }
+
+    res.json({ 
+      success: true,
+      picker: resultadoPicker.accion !== 'NINGUNA' ? resultadoPicker : null
+    });
   } catch (error) {
     console.error("Error al actualizar usuario:", error);
     res.status(400).json({ error: "No se pudo actualizar el usuario" });
@@ -95,6 +258,12 @@ router.put("/:id", async (req, res) => {
 router.put("/:id/password", async (req, res) => {
   const { password } = req.body;
   try {
+    // Validar contraseña
+    const errorPassword = validarPassword(password);
+    if (errorPassword) {
+      return res.status(400).json({ error: errorPassword });
+    }
+
     const [updated] = await Usuario.update(
       { contrasena: password },
       { where: { idUsuario: req.params.id } }
@@ -117,18 +286,17 @@ router.get("/validate", async (req, res) => {
     const usuario = await Usuario.findOne({
       where: { nombreUsuario: username },
       include: {
-        model: Rol,
-        include: {
-          model: TipoRol,
-          attributes: ["tipoRol"],
-        },
+        model: TipoRol,
+        as: "roles",
+        attributes: ["tipoRol"],
+        through: { attributes: [] }
       },
     });
 
     if (usuario) {
       res.json({ 
         valid: true, 
-        rol: usuario.Rol?.TipoRol?.tipoRol || "" 
+        roles: usuario.roles.map(r => r.tipoRol) // Array: ["Vendedor", "Admin"]
       });
     } else {
       res.json({ valid: false });

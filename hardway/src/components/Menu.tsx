@@ -34,7 +34,7 @@ interface AppPage {
 const Menu: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
-  const { logout, username, rol } = useAuth();
+  const { logout, username, roles, hasAnyRole } = useAuth(); // ✅ Usar roles y hasAnyRole
 
   const appPages: AppPage[] = [
     /*{ title: "Inicio", url: "/Inicio", icon: homeOutline },*/
@@ -44,21 +44,15 @@ const Menu: React.FC = () => {
     { title: "Usuarios", url: "/usuarios", icon: personOutline },
     { title: "Indumentaria", url: "/indumentaria", icon: shirtOutline },
   ];
-  // Botón de gestión de Picking visible para Picker, Encargado de Picking y Administrador
-  if (
-    rol === "Encargado de Picking" ||
-    rol === "Administrador" ||
-    rol === "Picker"
-  ) {
+  
+  // ✅ Botón de gestión de Picking visible para usuarios con roles específicos
+  if (hasAnyRole(["Encargado de Picking", "Administrador", "Picker"])) {
     appPages.push({ title: "Picking", url: "/picking", icon: cubeOutline });
   }
-  // Botón de gestión de Envíos visible para Administrador y Usuario Envios
-  if (
-    rol === "Encargado de Logística" ||
-    rol === "Administrador" ||
-    rol === "Envios"
-  ) {
-    appPages.push({ title: "Envíos", url: "/envios", icon: carOutline });
+  
+  // ✅ Botón de gestión de Envíos visible para usuarios con roles específicos
+  if (hasAnyRole(["Encargado de Logística", "Administrador", "Envios", "Picker"])) {
+    appPages.push({ title: "Despachos", url: "/envios", icon: carOutline });
   }
 
   const handleLogout = () => {

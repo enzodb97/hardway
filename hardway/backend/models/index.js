@@ -2,7 +2,7 @@
 const Cliente = require('./Cliente');
 const Persona = require('./Persona');
 const Usuario = require('./Usuario');
-const Rol = require('./Rol');
+// const Rol = require('./Rol'); // ❌ ELIMINADO - Tabla 'rol' ya no existe en BD
 const TipoRol = require('./TipoRol');
 const Pedido = require('./Pedido');
 const DetallePedido = require('./DetallePedido');
@@ -10,7 +10,11 @@ const EstadoPedido = require('./EstadoPedido');
 const Indumentaria = require('./Indumentaria');
 const DetalleIndumentaria = require('./DetalleIndumentaria');
 const PedidoIndumentaria = require('./PedidoIndumentaria');
-const UnidadMedida = require('./UnidadMedida'); // Nuevo modelo
+const UnidadMedida = require('./UnidadMedida');
+const MotivoNoApta = require('./MotivoNoApta');
+const StockRegistroFallo = require('./StockRegistroFallo');
+const EmpresaEnvio = require('./EmpresaEnvio'); // Nuevo modelo
+const AsignacionPicking = require('./AsignacionPicking'); // Nuevo modelo
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
 const {
   Color,
@@ -66,6 +70,33 @@ const MotivoCancelacion = sequelize.define(
   { tableName: "motivo_cancelacion", timestamps: false }
 );
 
+// ✅ Modelo para la tabla intermedia usuario_tiporol (N:M)
+const UsuarioTipoRol = sequelize.define(
+  "UsuarioTipoRol",
+  {
+    idUsuario: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      references: {
+        model: 'usuario',
+        key: 'idUsuario'
+      }
+    },
+    idTipoRol: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      references: {
+        model: 'tiporol',
+        key: 'idTipoRol'
+      }
+    }
+  },
+  { 
+    tableName: "usuario_tiporol", 
+    timestamps: false // ✅ CRÍTICO: Sin createdAt/updatedAt
+  }
+);
+
 const Rack = sequelize.define(
   "Rack",
   {
@@ -80,13 +111,36 @@ const Rack = sequelize.define(
 const setupAssociations = () => {
   // Relaciones básicas
   Cliente.belongsTo(Persona, { foreignKey: "idPersona" });
-  Usuario.belongsTo(Rol, { foreignKey: "idRol" });
-  Rol.belongsTo(TipoRol, { foreignKey: "idTipoRol" });
+  
+  // ✅ NUEVA RELACIÓN N:M: Usuario ←→ TipoRol (a través de usuario_tiporol)
+  Usuario.belongsToMany(TipoRol, {
+    through: UsuarioTipoRol, // ✅ Usar el modelo explícito en lugar de string
+    foreignKey: "idUsuario",
+    otherKey: "idTipoRol",
+    as: "roles" // Alias para acceder: usuario.roles
+  });
+  
+  TipoRol.belongsToMany(Usuario, {
+    through: UsuarioTipoRol, // ✅ Usar el modelo explícito en lugar de string
+    foreignKey: "idTipoRol",
+    otherKey: "idUsuario",
+    as: "usuarios" // Alias para acceder: tipoRol.usuarios
+  });
+  
+  // ❌ RELACIONES ANTIGUAS ELIMINADAS:
+  // Usuario.belongsTo(Rol, { foreignKey: "idRol" });
+  // Rol.belongsTo(TipoRol, { foreignKey: "idTipoRol" });
 
   // Relaciones de Pedido
   Pedido.belongsTo(Cliente, { foreignKey: "idCliente" });
   Pedido.belongsTo(EstadoPedido, { foreignKey: "idEstado" });
+  Pedido.belongsTo(EmpresaEnvio, { foreignKey: "idEmpresaEnvio" }); // Nueva relación
   Pedido.hasMany(DetallePedido, { foreignKey: "numeroPedido" });
+  Pedido.hasMany(AsignacionPicking, { foreignKey: "numeroPedido" }); // Nueva relación
+
+  // Relaciones de AsignacionPicking
+  AsignacionPicking.belongsTo(Pedido, { foreignKey: "numeroPedido" });
+  AsignacionPicking.belongsTo(EncargadoPicker, { foreignKey: "legajoPicker", targetKey: "legajo" });
 
   // Relaciones de DetallePedido
   DetallePedido.belongsTo(Pedido, { foreignKey: "numeroPedido" });
@@ -167,7 +221,7 @@ module.exports = {
   Cliente,
   Persona,
   Usuario,
-  Rol,
+  // Rol, // ❌ ELIMINADO - Ya no existe en BD
   TipoRol,
   Pedido,
   DetallePedido,
@@ -189,14 +243,21 @@ module.exports = {
   EstadoIndumentaria,
   PrecioIndumentaria,
   NombreIndumentaria,
-  UnidadMedida, // Nuevo modelo exportado
+  UnidadMedida,
   
   // Modelos adicionales
   Stock,
   MovimientoStock,
   EncargadoPicker,
   MotivoCancelacion,
+  UsuarioTipoRol, // ✅ Tabla intermedia N:M Usuario-TipoRol
   Rack,
+  MotivoNoApta,
+  StockRegistroFallo,
+  
+  // Nuevos modelos para flujo unificado Picker/Despacho
+  EmpresaEnvio,
+  AsignacionPicking,
   
   // Función para configurar relaciones
   setupAssociations,

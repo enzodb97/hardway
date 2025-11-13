@@ -1,4 +1,4 @@
-const { Usuario, Rol, TipoRol, EncargadoPicker } = require('../models');
+const { Usuario, TipoRol, EncargadoPicker } = require('../models');
 
 // Middleware de autorización para endpoints de pedidos
 const verificarAccesoPedidos = async (req, res, next) => {
@@ -52,13 +52,12 @@ const verificarAccesoPedidos = async (req, res, next) => {
   try {
     const usuario = await Usuario.findOne({
       where: { nombreUsuario },
-      include: {
-        model: Rol,
-        include: {
-          model: TipoRol,
-          attributes: ["idTipoRol", "tipoRol"],
-        },
-      },
+      include: [{
+        model: TipoRol,
+        as: 'roles',
+        attributes: ["idTipoRol", "tipoRol"],
+        through: { attributes: [] } // Excluir atributos de la tabla intermedia
+      }]
     });
 
     if (!usuario) {
@@ -68,14 +67,16 @@ const verificarAccesoPedidos = async (req, res, next) => {
       });
     }
 
-    const idTipoRol = usuario.Rol?.TipoRol?.idTipoRol;
+    // Verificar si el usuario tiene rol de Administrador (1) o Vendedor (2)
+    const tieneAcceso = usuario.roles?.some(rol => 
+      rol.idTipoRol === 1 || rol.idTipoRol === 2
+    );
 
-    // Solo Administrador (1) y Vendedor (2) pueden acceder a pedidos
-    if (idTipoRol !== 1 && idTipoRol !== 2) {
+    if (!tieneAcceso) {
       return res.status(403).json({
         error: "Acceso denegado: permisos insuficientes para gestionar pedidos",
         codigo: "INSUFFICIENT_PERMISSIONS",
-        rolActual: usuario.Rol?.TipoRol?.tipoRol,
+        rolesActuales: usuario.roles?.map(r => r.tipoRol) || [],
       });
     }
 
@@ -85,8 +86,10 @@ const verificarAccesoPedidos = async (req, res, next) => {
     req.usuarioAutenticado = {
       idUsuario: usuario.idUsuario,
       nombreUsuario: usuario.nombreUsuario,
-      idTipoRol: idTipoRol,
-      tipoRol: usuario.Rol?.TipoRol?.tipoRol,
+      roles: usuario.roles?.map(r => ({ idTipoRol: r.idTipoRol, tipoRol: r.tipoRol })) || [],
+      // Mantener compatibilidad con código legacy
+      idTipoRol: usuario.roles?.[0]?.idTipoRol,
+      tipoRol: usuario.roles?.[0]?.tipoRol,
     };
 
     next();
@@ -113,13 +116,12 @@ const verificarAutenticacion = async (req, res, next) => {
   try {
     const usuario = await Usuario.findOne({
       where: { nombreUsuario },
-      include: {
-        model: Rol,
-        include: {
-          model: TipoRol,
-          attributes: ["idTipoRol", "tipoRol"],
-        },
-      },
+      include: [{
+        model: TipoRol,
+        as: 'roles',
+        attributes: ["idTipoRol", "tipoRol"],
+        through: { attributes: [] }
+      }]
     });
 
     if (!usuario) {
@@ -132,8 +134,10 @@ const verificarAutenticacion = async (req, res, next) => {
     req.usuarioAutenticado = {
       idUsuario: usuario.idUsuario,
       nombreUsuario: usuario.nombreUsuario,
-      idTipoRol: usuario.Rol?.TipoRol?.idTipoRol,
-      tipoRol: usuario.Rol?.TipoRol?.tipoRol,
+      roles: usuario.roles?.map(r => ({ idTipoRol: r.idTipoRol, tipoRol: r.tipoRol })) || [],
+      // Mantener compatibilidad
+      idTipoRol: usuario.roles?.[0]?.idTipoRol,
+      tipoRol: usuario.roles?.[0]?.tipoRol,
     };
 
     next();
@@ -158,6 +162,45 @@ const verificarAccesoPicking = async (req, res, next) => {
     nombreusuario: nombreUsuario,
     authorization: req.headers.authorization ? 'Presente' : 'Ausente'
   });
+
+  // ✅ PRIMERO: Verificar si es Administrador (acceso total sin restricciones)
+  if (nombreUsuario) {
+    try {
+      const usuario = await Usuario.findOne({
+        where: { nombreUsuario },
+        include: [{
+          model: TipoRol,
+          as: 'roles',
+          attributes: ["idTipoRol", "tipoRol"],
+          through: { attributes: [] }
+        }]
+      });
+
+      // Verificar si tiene el rol de Administrador (ID=1)
+      const esAdmin = usuario?.roles?.some(rol => 
+        rol.tipoRol === 'Administrador' || rol.idTipoRol === 1
+      );
+
+      if (esAdmin) {
+        console.log('👑 Administrador detectado: Acceso total sin restricciones');
+        req.esAdmin = true;
+        req.pickerAutenticado = {
+          esAdmin: true,
+          idPersona: usuario.idPersona || null,
+          nombreUsuario: usuario.nombreUsuario
+        };
+        req.usuarioAutenticado = {
+          idUsuario: usuario.idUsuario,
+          nombreUsuario: usuario.nombreUsuario,
+          roles: usuario.roles?.map(r => ({ idTipoRol: r.idTipoRol, tipoRol: r.tipoRol })) || []
+        };
+        next();
+        return; // Salir inmediatamente, sin más validaciones
+      }
+    } catch (error) {
+      console.error('❌ Error al verificar si el usuario es administrador:', error);
+    }
+  }
   
   // Si no hay legajo en headers, intentar extraerlo del token o del nombreUsuario
   if (!legajoPicker) {
@@ -216,38 +259,6 @@ const verificarAccesoPicking = async (req, res, next) => {
       } catch (error) {
         console.error('❌ Error extrayendo legajo del nombreUsuario:', error);
       }
-    }
-  }
-
-  // Si es un administrador, permitir acceso sin legajo de picker
-  if (!legajoPicker && nombreUsuario) {
-    try {
-      // Verificar si el usuario es un administrador
-      const usuario = await Usuario.findOne({
-        where: { nombreUsuario },
-        include: [{
-          model: Rol,
-          include: [TipoRol]
-        }]
-      });
-
-      if (usuario && usuario.Rol && usuario.Rol.TipoRol && usuario.Rol.TipoRol.tipoRol === 'Administrador') {
-        console.log('✅ Usuario administrador verificado, permitiendo acceso sin legajo de picker');
-        // Crear un legajo especial para administradores
-        req.esAdmin = true;  // Flag para indicar que es administrador
-        
-        // Establecer un objeto pickerAutenticado vacío para administradores
-        // para evitar errores de referencia nula
-        req.pickerAutenticado = {
-          esAdmin: true,
-          idPersona: usuario.idPersona || null
-        };
-        
-        next();
-        return;  // Importante: salir de la función aquí para evitar verificaciones adicionales
-      }
-    } catch (error) {
-      console.error('❌ Error al verificar si el usuario es administrador:', error);
     }
   }
 
@@ -312,13 +323,12 @@ const verificarAccesoEnvios = async (req, res, next) => {
   try {
     const usuario = await Usuario.findOne({
       where: { nombreUsuario },
-      include: {
-        model: Rol,
-        include: {
-          model: TipoRol,
-          attributes: ["idTipoRol", "tipoRol"],
-        },
-      },
+      include: [{
+        model: TipoRol,
+        as: 'roles',
+        attributes: ["idTipoRol", "tipoRol"],
+        through: { attributes: [] }
+      }]
     });
 
     if (!usuario) {
@@ -328,25 +338,70 @@ const verificarAccesoEnvios = async (req, res, next) => {
       });
     }
 
-    const idTipoRol = usuario.Rol?.TipoRol?.idTipoRol;
+    // ✅ ADMINISTRADOR: Acceso total sin restricciones
+    const esAdmin = usuario.roles?.some(rol => rol.idTipoRol === 1);
+    
+    if (esAdmin) {
+      console.log('👑 Administrador detectado: Acceso total a envíos');
+      req.usuarioAutenticado = {
+        idUsuario: usuario.idUsuario,
+        nombreUsuario: usuario.nombreUsuario,
+        roles: usuario.roles?.map(r => ({ idTipoRol: r.idTipoRol, tipoRol: r.tipoRol })) || [],
+        idTipoRol: 1,
+        tipoRol: 'Administrador',
+        esAdmin: true,
+        legajoPicker: null // Admin no necesita legajo
+      };
+      next();
+      return; // Salir sin más validaciones
+    }
 
-    // Administrador (1) y Encargado de Envíos (3) pueden acceder a envíos
-    if (idTipoRol !== 1 && idTipoRol !== 3) {
+    // Administrador (1), Envíos (3) y Picker (6) pueden acceder a envíos
+    const tieneAcceso = usuario.roles?.some(rol => 
+      rol.idTipoRol === 1 || rol.idTipoRol === 3 || rol.idTipoRol === 6
+    );
+
+    if (!tieneAcceso) {
       return res.status(403).json({
         error: "Acceso denegado: permisos insuficientes para gestionar envíos",
         codigo: "INSUFFICIENT_PERMISSIONS",
-        rolActual: usuario.Rol?.TipoRol?.tipoRol,
+        rolesActuales: usuario.roles?.map(r => r.tipoRol) || [],
+        rolesPermitidos: ["Administrador", "Envios", "Picker"]
       });
     }
 
-    console.log('✅ Acceso autorizado para envíos:', nombreUsuario);
+    const rolesString = usuario.roles?.map(r => r.tipoRol).join(", ") || "";
+    console.log('✅ Acceso autorizado para envíos:', nombreUsuario, `(${rolesString})`);
+
+    // Si es un picker, obtener su legajo para filtrar sus pedidos
+    let legajoPicker = null;
+    const esPicker = usuario.roles?.some(rol => rol.idTipoRol === 6);
+    
+    if (esPicker && usuario.idPersona) {
+      try {
+        const picker = await EncargadoPicker.findOne({
+          where: { idPersona: usuario.idPersona }
+        });
+        
+        if (picker) {
+          legajoPicker = picker.legajo;
+          console.log('📋 Legajo del picker:', legajoPicker);
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo legajo del picker:', error);
+      }
+    }
 
     // Pasar información del usuario al siguiente middleware/endpoint
     req.usuarioAutenticado = {
       idUsuario: usuario.idUsuario,
       nombreUsuario: usuario.nombreUsuario,
-      idTipoRol: idTipoRol,
-      tipoRol: usuario.Rol?.TipoRol?.tipoRol,
+      roles: usuario.roles?.map(r => ({ idTipoRol: r.idTipoRol, tipoRol: r.tipoRol })) || [],
+      // Mantener compatibilidad
+      idTipoRol: usuario.roles?.[0]?.idTipoRol,
+      tipoRol: usuario.roles?.[0]?.tipoRol,
+      legajoPicker: legajoPicker, // Incluir legajo si es picker
+      esAdmin: false
     };
 
     next();

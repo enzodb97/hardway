@@ -1,0 +1,427 @@
+/* Stock Actual - Estilos Profesionales */
+
+.stock-actual-page {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  --ion-background-color: transparent;
+}
+
+.stock-actual-page * {
+  --ion-default-font: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+/* Header personalizado */
+.stock-actual-toolbar {
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9800 100%);
+  --color: #000000;
+  border-bottom: 3px solid rgba(253, 180, 11, 0.5);
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.3);
+}
+
+.stock-actual-toolbar ion-title {
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Content styling */
+.stock-actual-content {
+  --padding-top: 1.5rem;
+  --padding-bottom: 1.5rem;
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+}
+
+/* Título principal */
+.stock-title-section {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(253, 180, 11, 0.3);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.stock-title-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #fdb40b, #f39c12, transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.stock-main-title {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #fdb40b 0%, #ffcc00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.stock-main-title::before {
+  content: '📊 ';
+  -webkit-text-fill-color: #fdb40b;
+}
+
+.stock-emission-date {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Stats Cards */
+.stock-stats-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.stock-stat-card {
+  background: linear-gradient(135deg, rgba(50, 50, 50, 0.8), rgba(30, 30, 30, 0.8));
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.stock-stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(253, 180, 11, 0.6);
+  box-shadow: 0 6px 24px rgba(253, 180, 11, 0.3);
+}
+
+.stock-stat-card.low-stock {
+  border-color: rgba(255, 82, 82, 0.5);
+  background: linear-gradient(135deg, rgba(139, 0, 0, 0.3), rgba(80, 0, 0, 0.3));
+}
+
+.stock-stat-card.low-stock:hover {
+  border-color: rgba(255, 82, 82, 0.8);
+  box-shadow: 0 6px 24px rgba(255, 82, 82, 0.4);
+}
+
+.stock-stat-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.stock-stat-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.stock-stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.stock-stat-card.low-stock .stock-stat-number {
+  color: #ff5252;
+}
+
+.stock-stat-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+/* Tabla de datos */
+.stock-table-card {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(253, 180, 11, 0.3);
+  border-radius: 20px;
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.stock-table-header {
+  background: linear-gradient(135deg, #fdb40b, #f39c12);
+  padding: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #000000;
+  border-bottom: 3px solid rgba(253, 180, 11, 0.5);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.stock-table-header ion-col {
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-table-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  padding: 0.75rem 0;
+}
+
+.stock-table-row:hover {
+  background: rgba(253, 180, 11, 0.1);
+}
+
+.stock-table-row.stock-low {
+  background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(139, 0, 0, 0.15));
+  border-left: 4px solid #ff5252;
+}
+
+.stock-table-row.stock-low:hover {
+  background: linear-gradient(135deg, rgba(255, 82, 82, 0.25), rgba(139, 0, 0, 0.25));
+}
+
+.stock-table-cell {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-table-row.stock-low .stock-table-cell {
+  color: #ff8a80;
+  font-weight: 700;
+}
+
+/* Controles de acción */
+.stock-actions-container {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(253, 180, 11, 0.3);
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.stock-actions-container ion-button {
+  --border-radius: 12px;
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.stock-actions-container ion-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(253, 180, 11, 0.4);
+}
+
+.stock-btn-export {
+  --background: linear-gradient(135deg, #10dc60, #0ec254);
+  --color: #000000;
+}
+
+.stock-btn-pdf {
+  --background: linear-gradient(135deg, #5d9cec, #4a89dc);
+  --color: #ffffff;
+}
+
+.stock-btn-toggle {
+  --background: linear-gradient(135deg, #ffce54, #f6bb42);
+  --color: #000000;
+}
+
+.stock-btn-back {
+  --background: linear-gradient(135deg, rgba(100, 100, 100, 0.8), rgba(60, 60, 60, 0.8));
+  --color: #ffffff;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Paginación */
+.stock-pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+}
+
+.stock-pagination-info {
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.2), rgba(243, 156, 18, 0.2));
+  border: 2px solid rgba(253, 180, 11, 0.5);
+  border-radius: 12px;
+  padding: 0.5rem 1.25rem;
+  color: #fdb40b;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.stock-pagination-container ion-button {
+  --border-radius: 10px;
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  font-weight: 600;
+  min-width: 100px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.stock-pagination-container ion-button:not([disabled]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
+}
+
+.stock-pagination-container ion-button[disabled] {
+  opacity: 0.3;
+}
+
+/* Toast personalizado */
+.stock-toast-success {
+  --background: linear-gradient(135deg, #10dc60, #0ec254);
+  --color: #000000;
+  --border-radius: 16px;
+  --box-shadow: 0 8px 24px rgba(16, 220, 96, 0.4);
+  font-weight: 700;
+}
+
+/* Estado vacío */
+.stock-empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(253, 180, 11, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.stock-empty-icon {
+  font-size: 5rem;
+  color: #fdb40b;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+  margin-bottom: 1.5rem;
+}
+
+.stock-empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.stock-empty-message {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto 2rem auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stock-main-title {
+    font-size: 1.5rem;
+  }
+  
+  .stock-stat-card {
+    min-width: 100%;
+  }
+  
+  .stock-table-cell {
+    font-size: 0.75rem;
+    padding: 0.25rem;
+  }
+  
+  .stock-table-header {
+    font-size: 0.7rem;
+    padding: 0.75rem 0.25rem;
+  }
+  
+  .stock-actions-container {
+    padding: 1rem;
+  }
+  
+  .stock-actions-container ion-button {
+    min-width: 100%;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stock-table-card,
+.stock-actions-container,
+.stock-title-section {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Scrollbar personalizado */
+.stock-actual-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.stock-actual-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.stock-actual-content::-webkit-scrollbar-thumb {
+  background: rgba(253, 180, 11, 0.5);
+  border-radius: 4px;
+}
+
+.stock-actual-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(253, 180, 11, 0.8);
+}

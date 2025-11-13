@@ -4,7 +4,9 @@ export interface Usuario {
   id: number;
   username: string;
   password?: string;
-  rol: string;
+  rol: string; // @deprecated - mantener por compatibilidad
+  roles?: string[]; // ✅ NUEVO: Array de nombres de roles
+  rolesIds?: number[]; // ✅ NUEVO: Array de IDs de roles
 }
 
 export const rolesDisponibles = ["admin", "vendedor", "consulta"];
@@ -14,13 +16,36 @@ export function validarCamposUsuario(usuario: Partial<Usuario>): string | null {
   if (!usuario.username || usuario.username.trim().length < 3) {
     return "El nombre de usuario debe tener al menos 3 caracteres.";
   }
-  if (!usuario.rol) {
-    return "El rol es obligatorio.";
+  // ✅ Validar que tenga al menos un rol
+  if (!usuario.rol && (!usuario.rolesIds || usuario.rolesIds.length === 0)) {
+    return "Debe asignar al menos un rol al usuario.";
   }
-  // Si es creación, la contraseña es obligatoria
-  if (usuario.password !== undefined && usuario.password.trim().length < 4) {
-    return "La contraseña debe tener al menos 4 caracteres.";
+  
+  // Validación de contraseña con criterios de seguridad
+  if (usuario.password !== undefined && usuario.password !== null) {
+    const password = usuario.password.trim();
+    
+    // Mínimo 8 caracteres
+    if (password.length < 8) {
+      return "La contraseña debe tener al menos 8 caracteres.";
+    }
+    
+    // Al menos 1 número
+    if (!/\d/.test(password)) {
+      return "La contraseña debe contener al menos 1 número.";
+    }
+    
+    // Al menos 1 letra
+    if (!/[a-zA-Z]/.test(password)) {
+      return "La contraseña debe contener al menos 1 letra.";
+    }
+    
+    // Al menos 1 carácter especial
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      return "La contraseña debe contener al menos 1 carácter especial (!@#$%^&*()_+-=[]{}etc.).";
+    }
   }
+  
   return null;
 }
 
@@ -45,7 +70,12 @@ export const cargarUsuarios = async (): Promise<Usuario[]> => {
 
 // Crear usuario
 export const crearUsuario = async (nuevoUsuario: Omit<Usuario, "id">) => {
-  return await axiosInstance.post("/api/usuarios", nuevoUsuario);
+  // ✅ Enviar rolesIds si están disponibles, sino usar rol (compatibilidad)
+  const payload = nuevoUsuario.rolesIds && nuevoUsuario.rolesIds.length > 0
+    ? { username: nuevoUsuario.username, password: nuevoUsuario.password, roles: nuevoUsuario.rolesIds }
+    : nuevoUsuario;
+  
+  return await axiosInstance.post("/api/usuarios", payload);
 };
 
 // Eliminar usuario
@@ -55,13 +85,34 @@ export const eliminarUsuario = async (id: number) => {
 
 // Editar usuario
 export const editarUsuario = async (usuario: Usuario) => {
-  return await axiosInstance.put(`/api/usuarios/${usuario.id}`, {
-    username: usuario.username,
-    rol: usuario.rol,
-  });
+  // ✅ Enviar rolesIds si están disponibles, sino usar rol (compatibilidad)
+  const payload = usuario.rolesIds && usuario.rolesIds.length > 0
+    ? { username: usuario.username, roles: usuario.rolesIds }
+    : { username: usuario.username, rol: usuario.rol };
+    
+  return await axiosInstance.put(`/api/usuarios/${usuario.id}`, payload);
 };
 
 // Cambiar contraseña
 export async function cambiarPassword(id: number, password: string) {
-  await axiosInstance.put(`/api/usuarios/${id}/password`, { password });
+  // Validar que la nueva contraseña cumpla con los criterios de seguridad
+  const passwordTrimmed = password.trim();
+  
+  if (passwordTrimmed.length < 8) {
+    throw new Error("La contraseña debe tener al menos 8 caracteres.");
+  }
+  
+  if (!/\d/.test(passwordTrimmed)) {
+    throw new Error("La contraseña debe contener al menos 1 número.");
+  }
+  
+  if (!/[a-zA-Z]/.test(passwordTrimmed)) {
+    throw new Error("La contraseña debe contener al menos 1 letra.");
+  }
+  
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordTrimmed)) {
+    throw new Error("La contraseña debe contener al menos 1 carácter especial.");
+  }
+  
+  await axiosInstance.put(`/api/usuarios/${id}/password`, { password: passwordTrimmed });
 }

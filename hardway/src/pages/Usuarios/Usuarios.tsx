@@ -51,13 +51,14 @@ import zepelin from "../../assets/images/zepelin.png";
 import axiosInstance from "../../config/axios";
 
 const Usuarios: React.FC = () => {
-  const { rol } = useAuth();
+  const { roles, hasRole } = useAuth(); // ✅ Usar roles y hasRole
   
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [nuevoUsuario, setNuevoUsuario] = useState<Omit<Usuario, "id">>({
     username: "",
     password: "",
-    rol: "vendedor",
+    rol: "vendedor", // @deprecated - mantener por compatibilidad
+    roles: [], // ✅ NUEVO: Array de IDs de roles seleccionados
   });
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
@@ -69,7 +70,7 @@ const Usuarios: React.FC = () => {
   const [usuarioPasswordId, setUsuarioPasswordId] = useState<number | null>(
     null
   );
-  const [rolesDisponibles, setRolesDisponibles] = useState<string[]>([]);
+  const [rolesDisponibles, setRolesDisponibles] = useState<{idTipoRol: number, tipoRol: string}[]>([]); // ✅ MODIFICADO
   const [mostrarListaUsuarios, setMostrarListaUsuarios] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -111,7 +112,8 @@ const Usuarios: React.FC = () => {
 
   // TEMPORALMENTE COMENTAMOS LA VALIDACIÓN DE ROL PARA DEBUGGEAR
   // Solo admin puede ver esta página
-  if (rol !== "Administrador" && rol !== null) {
+  // ✅ ACTUALIZADO: Verificar si tiene rol de Administrador
+  if (!hasRole("Administrador") && roles.length > 0) {
     return (
       <IonPage>
         <IonHeader>
@@ -125,7 +127,7 @@ const Usuarios: React.FC = () => {
             No tienes acceso a esta sección
           </h2>
           <p style={{ textAlign: "center" }}>
-            Tu rol actual: {rol || "No definido"}
+            Tus roles actuales: {roles.join(", ")}
           </p>
           <p style={{ textAlign: "center" }}>
             Rol requerido: Administrador
@@ -135,8 +137,8 @@ const Usuarios: React.FC = () => {
     );
   }
 
-  // Si rol es null, mostrar cargando
-  if (rol === null) {
+  // Si roles está vacío, mostrar cargando
+  if (roles.length === 0) {
     return (
       <IonPage>
         <IonHeader>
@@ -156,7 +158,7 @@ const Usuarios: React.FC = () => {
 
   // Cargar usuarios y roles al montar
   useEffect(() => {
-    if (rol !== "Administrador") {
+    if (!hasRole("Administrador")) {
       return;
     }
     
@@ -168,18 +170,17 @@ const Usuarios: React.FC = () => {
       setShowAlert(true);
     });
     
-    // Cargar roles desde el backend
-    axiosInstance.get("/api/tiporoles")
+    // ✅ Cargar tipos de rol desde el backend
+    axiosInstance.get("/api/usuarios/tipos-rol")
       .then((res: any) => {
-        const roles = res.data.map((r: any) => r.tipoRol);
-        setRolesDisponibles(roles);
+        setRolesDisponibles(res.data); // Array de {idTipoRol, tipoRol, descripcionRol}
       })
       .catch((error) => {
-        console.error("Usuarios.tsx: Error al cargar roles:", error);
+        console.error("Usuarios.tsx: Error al cargar tipos de rol:", error);
         setAlertMsg("Error al cargar roles disponibles");
         setShowAlert(true);
       });
-  }, [rol]); // Agregar rol como dependencia
+  }, [roles, hasRole]); // ✅ Actualizar dependencias
 
   // Crear usuario
   const handleCrear = async (e: React.FormEvent) => {
@@ -200,7 +201,7 @@ const Usuarios: React.FC = () => {
       await crearUsuario(nuevoUsuario);
       setAlertMsg("Usuario creado correctamente");
       setShowAlert(true);
-      setNuevoUsuario({ username: "", password: "", rol: "vendedor" });
+      setNuevoUsuario({ username: "", password: "", rol: "vendedor", roles: [], rolesIds: [] }); // ✅ Resetear también roles
       cargarUsuarios().then(setUsuarios);
     } catch {
       setAlertMsg("Error al crear usuario");
@@ -276,8 +277,9 @@ const Usuarios: React.FC = () => {
       setAlertMsg("Contraseña actualizada correctamente");
       setShowAlert(true);
       setShowPasswordAlert(false);
-    } catch {
-      setAlertMsg("Error al actualizar contraseña");
+      setNuevaPassword("");
+    } catch (error: any) {
+      setAlertMsg(error.message || "Error al actualizar contraseña");
       setShowAlert(true);
     }
   };
@@ -342,27 +344,40 @@ const Usuarios: React.FC = () => {
                     clearInput
                   />
                 </IonItem>
+                <div className="password-requirements">
+                  <IonText color="medium">
+                    <small>
+                      <strong>Requisitos de seguridad:</strong> Mínimo 8 caracteres, 1 número, 1 letra y 1 carácter especial
+                    </small>
+                  </IonText>
+                </div>
                 <IonItem className="usuarios-form-item">
                   <IonIcon icon={ribbonOutline} slot="start" color="medium" />
-                  <IonLabel position="floating">Rol</IonLabel>
+                  <IonLabel position="floating">Roles</IonLabel>
                   <IonSelect
-                    value={nuevoUsuario.rol}
-                    onIonChange={(e) =>
-                      setNuevoUsuario({ ...nuevoUsuario, rol: e.detail.value! })
-                    }
-                    required
-                    interface="popover"
-                    interfaceOptions={{
-                      cssClass: 'roles-select-popover',
-                      alignment: 'end',
-                      side: 'end'
+                    value={nuevoUsuario.rolesIds || []}
+                    multiple={true}
+                    cancelText="Cancelar"
+                    okText="Aceptar"
+                    onIonChange={(e) => {
+                      const selectedIds = e.detail.value as number[];
+                      const selectedRoles = rolesDisponibles
+                        .filter(rol => selectedIds.includes(rol.idTipoRol))
+                        .map(rol => rol.tipoRol);
+                      
+                      setNuevoUsuario({
+                        ...nuevoUsuario,
+                        rolesIds: selectedIds,
+                        roles: selectedRoles,
+                        rol: selectedRoles[0] || "" // mantener compatibilidad
+                      });
                     }}
-                    style={{ textAlign: 'right', paddingRight: '16px' }}
-                    placeholder="Seleccione un rol"
+                    interface="alert"
+                    placeholder="Seleccione uno o más roles"
                   >
                     {rolesDisponibles.map((rol) => (
-                      <IonSelectOption key={rol} value={rol}>
-                        {rol}
+                      <IonSelectOption key={rol.idTipoRol} value={rol.idTipoRol}>
+                        {rol.tipoRol}
                       </IonSelectOption>
                     ))}
                   </IonSelect>
@@ -454,21 +469,31 @@ const Usuarios: React.FC = () => {
                     </IonItem>
                     <IonItem className="usuarios-form-item">
                       <IonIcon icon={ribbonOutline} slot="start" color="medium" />
-                      <IonLabel position="floating">Rol</IonLabel>
+                      <IonLabel position="floating">Roles</IonLabel>
                       <IonSelect
-                        value={editando.rol}
-                        onIonChange={(e) =>
-                          setEditando({ ...editando, rol: e.detail.value! })
-                        }
-                        required
-                        interface="popover"
-                        interfaceOptions={{
-                          cssClass: 'roles-select-popover'
+                        value={editando.rolesIds || []}
+                        multiple={true}
+                        cancelText="Cancelar"
+                        okText="Aceptar"
+                        onIonChange={(e) => {
+                          const selectedIds = e.detail.value as number[];
+                          const selectedRoles = rolesDisponibles
+                            .filter(rol => selectedIds.includes(rol.idTipoRol))
+                            .map(rol => rol.tipoRol);
+                          
+                          setEditando({
+                            ...editando,
+                            rolesIds: selectedIds,
+                            roles: selectedRoles,
+                            rol: selectedRoles[0] || "" // mantener compatibilidad
+                          });
                         }}
+                        interface="alert"
+                        placeholder="Seleccione uno o más roles"
                       >
                         {rolesDisponibles.map((rol) => (
-                          <IonSelectOption key={rol} value={rol}>
-                            {rol}
+                          <IonSelectOption key={rol.idTipoRol} value={rol.idTipoRol}>
+                            {rol.tipoRol}
                           </IonSelectOption>
                         ))}
                       </IonSelect>
@@ -501,10 +526,21 @@ const Usuarios: React.FC = () => {
                     <IonIcon icon={personCircleOutline} slot="start" color="medium" />
                     <IonLabel>
                       <strong>{usuario.username}</strong>
-                      <IonChip color="primary" outline={true}>
-                        <IonIcon icon={ribbonOutline} />
-                        <IonLabel>{usuario.rol}</IonLabel>
-                      </IonChip>
+                      <div>
+                        {usuario.roles && usuario.roles.length > 0 ? (
+                          usuario.roles.map((rol, index) => (
+                            <IonChip key={index} color="primary" outline={true}>
+                              <IonIcon icon={ribbonOutline} />
+                              <IonLabel>{rol}</IonLabel>
+                            </IonChip>
+                          ))
+                        ) : (
+                          <IonChip color="medium" outline={true}>
+                            <IonIcon icon={ribbonOutline} />
+                            <IonLabel>{usuario.rol || "Sin rol"}</IonLabel>
+                          </IonChip>
+                        )}
+                      </div>
                     </IonLabel>
                     <IonButton
                       fill="clear"
@@ -598,20 +634,28 @@ const Usuarios: React.FC = () => {
           <IonAlert
             isOpen={showPasswordAlert}
             header="Cambiar Contraseña"
+            subHeader="Requisitos de seguridad:"
+            message="            -Mínimo 8 caracteres 
+            -Al menos 1 número 
+            -Al menos 1 letra 
+            -Al menos 1 carácter especial (!@#$%^&*)"
             inputs={[
               {
                 name: "password",
                 type: "password",
                 placeholder: "Nueva contraseña",
                 value: nuevaPassword,
-                attributes: { minLength: 4 },
+                attributes: { minLength: 8 },
               },
             ]}
             buttons={[
               {
                 text: "Cancelar",
                 role: "cancel",
-                handler: () => setShowPasswordAlert(false),
+                handler: () => {
+                  setShowPasswordAlert(false);
+                  setNuevaPassword("");
+                },
               },
               {
                 text: "Guardar",
@@ -620,6 +664,7 @@ const Usuarios: React.FC = () => {
                 },
               },
             ]}
+            cssClass="password-alert"
           />
         </div>
       </IonContent>

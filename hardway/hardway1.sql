@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-08-2025 a las 00:36:08
+-- Tiempo de generación: 30-10-2025 a las 22:28:39
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,6 +20,25 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `hardway1`
 --
+
+DELIMITER $$
+--
+-- Procedimientos
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RegistrarStock` (IN `p_codigoIndumentaria` VARCHAR(50), IN `p_idRack` INT, IN `p_cantidad` INT)   BEGIN
+    DECLARE i INT DEFAULT 0;
+    
+    -- El bucle ejecuta el INSERT la cantidad de veces especificada (p_cantidad)
+    WHILE i < p_cantidad DO
+        -- Genera un ID único (UUID) para cada unidad de stock
+        INSERT INTO stock (idStock, codigoIndumentaria, idRack)
+        VALUES (UUID(), p_codigoIndumentaria, p_idRack);
+        
+        SET i = i + 1;
+    END WHILE;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -61,21 +80,33 @@ CREATE TABLE `asignacion_picking` (
   `legajoPicker` varchar(20) NOT NULL,
   `fechaAsignacion` datetime NOT NULL DEFAULT current_timestamp(),
   `fechaCompletado` datetime DEFAULT NULL,
+  `fechaDespachado` datetime DEFAULT NULL,
   `observaciones` varchar(255) DEFAULT NULL,
-  `completado` tinyint(1) NOT NULL DEFAULT 0
+  `completado` tinyint(1) NOT NULL DEFAULT 0,
+  `despachado` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Indica si el encargado ha completado la tarea de Despacho (registro de tracking y entrega a la empresa)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `asignacion_picking`
 --
 
-INSERT INTO `asignacion_picking` (`idAsignacion`, `numeroPedido`, `legajoPicker`, `fechaAsignacion`, `fechaCompletado`, `observaciones`, `completado`) VALUES
-(29, 'PED-2025-112', 'LP005', '2025-06-18 06:35:53', '2025-06-18 20:14:32', 'Asignación desde panel gerente', 1),
-(30, 'PED-2025-113', 'LP006', '2025-06-18 06:36:03', NULL, 'Asignación desde panel gerente', 0),
-(31, 'PED-2025-112', 'LP005', '2025-06-18 20:14:32', NULL, 'Asignación desde panel gerente', 0),
-(32, 'PED-2025-407', 'LP006', '2025-06-19 05:26:00', NULL, 'Asignación desde panel gerente', 0),
-(35, 'PED-2025-521', 'LP005', '2025-06-20 02:20:08', NULL, 'Asignación desde panel gerente', 0),
-(36, 'PED-2025-747', 'LP006', '2025-07-01 23:48:21', NULL, 'Asignación desde panel gerente', 0);
+INSERT INTO `asignacion_picking` (`idAsignacion`, `numeroPedido`, `legajoPicker`, `fechaAsignacion`, `fechaCompletado`, `fechaDespachado`, `observaciones`, `completado`, `despachado`) VALUES
+(29, 'PED-2025-112', 'LP005', '2025-06-18 06:35:53', '2025-06-18 20:14:32', NULL, 'Asignación desde panel gerente', 1, 0),
+(30, 'PED-2025-113', 'LP006', '2025-06-18 06:36:03', '2025-10-28 01:07:38', NULL, 'Tarea completada desde frontend', 1, 0),
+(31, 'PED-2025-112', 'LP005', '2025-06-18 20:14:32', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
+(32, 'PED-2025-407', 'LP006', '2025-06-19 05:26:00', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
+(35, 'PED-2025-521', 'LP005', '2025-06-20 02:20:08', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
+(36, 'PED-2025-747', 'LP006', '2025-07-01 23:48:21', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
+(37, 'PED-2025-429', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(38, 'PED-2025-118', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(39, 'PED-2025-109', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(40, 'PED-2025-104', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(41, 'PED-2025-027', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(42, 'PED-2025-023', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(43, 'PED-2025-021', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(44, 'PED-2025-017', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(45, 'PED-2025-016', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
+(46, 'PED-2025-115', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -547,6 +578,27 @@ INSERT INTO `domicilio` (`idDomicilio`, `calle`, `altura`, `piso`, `departamento
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `empresa_envio`
+--
+
+CREATE TABLE `empresa_envio` (
+  `idEmpresaEnvio` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL COMMENT 'Nombre comercial de la empresa de envío'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `empresa_envio`
+--
+
+INSERT INTO `empresa_envio` (`idEmpresaEnvio`, `nombre`) VALUES
+(2, 'Andreani'),
+(1, 'Correo Argentino'),
+(3, 'OCA'),
+(4, 'Via Cargo');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `encargadoindumentaria`
 --
 
@@ -588,18 +640,6 @@ INSERT INTO `encargadopicker` (`legajo`, `idPersona`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `encargadopicker_stock`
---
-
-CREATE TABLE `encargadopicker_stock` (
-  `id` int(11) NOT NULL,
-  `legajo` varchar(20) DEFAULT NULL,
-  `idStock` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `estadoindumentaria`
 --
 
@@ -614,7 +654,8 @@ CREATE TABLE `estadoindumentaria` (
 
 INSERT INTO `estadoindumentaria` (`idEstado`, `estadoIndumentaria`) VALUES
 (1, 'Apta'),
-(2, 'No Apta');
+(2, 'No Apta'),
+(3, 'Desechado');
 
 -- --------------------------------------------------------
 
@@ -745,6 +786,32 @@ INSERT INTO `motivo_cancelacion` (`idMotivo`, `descripcion`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `motivo_no_apta`
+--
+
+CREATE TABLE `motivo_no_apta` (
+  `idMotivo` int(11) NOT NULL,
+  `descripcion` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `motivo_no_apta`
+--
+
+INSERT INTO `motivo_no_apta` (`idMotivo`, `descripcion`) VALUES
+(1, 'Defecto de costura'),
+(2, 'Mancha irreparable'),
+(3, 'Problema de teñido / coloración'),
+(4, 'Daño en el empaque / transporte'),
+(5, 'Talla o etiqueta incorrecta'),
+(6, 'Descosido o costura fallida'),
+(7, 'Mancha permanente'),
+(8, 'Daño en la tela (roto o quemado)'),
+(9, 'Fallo de color o estampado');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `movimientostock`
 --
 
@@ -763,6 +830,8 @@ CREATE TABLE `movimientostock` (
 INSERT INTO `movimientostock` (`idMovimientoStock`, `idStock`, `fechaMovimiento`, `cantidad`, `observaciones`) VALUES
 ('MOV-1756247729019-1', 'STK001', '2025-08-26', -2, 'Movimiento a No Apto: prueba'),
 ('MOV-1756247729020-2', 'STK-NA-1756247729017', '2025-08-26', 2, 'Ingreso desde stock vendible: prueba'),
+('MOV-1760665520495-1', 'STK002', '2025-10-17', -3, 'Movimiento a No Apto: Sin especificar'),
+('MOV-1760665520496-2', 'STK-NA-1760665520494', '2025-10-17', 3, 'Ingreso desde stock vendible: Sin especificar'),
 ('MOV-20240110-001', 'STK007', '2024-01-10', -3, 'Venta Pedido PED-20240110-001'),
 ('MOV-20240115-001', 'STK004', '2024-01-15', -5, 'Venta Pedido PED-20240115-001'),
 ('MOV-20240125-001', 'STK001', '2024-01-25', -2, 'Venta Pedido PED-20240125-001'),
@@ -1097,7 +1166,9 @@ INSERT INTO `movimientostock` (`idMovimientoStock`, `idStock`, `fechaMovimiento`
 ('MOV-PED-852855', 'STK003', '2025-06-20', -2, 'Descuento por pedido PED-2025-708'),
 ('MOV-PED-870580', 'STK001', '2025-06-16', -1, 'Descuento por pedido PED-2025-823'),
 ('MOV-PED-943756', 'STK001', '2025-06-16', -2, 'Descuento por pedido PED-2025-446'),
-('MOV-PED-965241', 'STK003', '2025-06-16', -2, 'Descuento por pedido PED-2025-663');
+('MOV-PED-965241', 'STK003', '2025-06-16', -2, 'Descuento por pedido PED-2025-663'),
+('MOV-SCRAP-1760918421513', 'STK-NA-1756247729017', '2025-10-20', -2, 'SCRAP (Desecho permanente): Sin motivo especificado'),
+('MOV-SCRAP-1760918424267', 'STK-NA-1760665520494', '2025-10-20', -3, 'SCRAP (Desecho permanente): Sin motivo especificado');
 
 -- --------------------------------------------------------
 
@@ -1147,97 +1218,98 @@ CREATE TABLE `pedido` (
   `idUsuarioCancelo` int(11) DEFAULT NULL,
   `idEstado` int(11) DEFAULT NULL,
   `estaActivo` tinyint(1) NOT NULL DEFAULT 1,
-  `dummyUpdate` int(11) DEFAULT NULL
+  `dummyUpdate` int(11) DEFAULT NULL,
+  `idEmpresaEnvio` int(11) DEFAULT NULL COMMENT 'Clave foránea de la empresa de envío seleccionada por el cliente o sistema'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `pedido`
 --
 
-INSERT INTO `pedido` (`numeroPedido`, `idCliente`, `idUsuarioCreo`, `idUsuarioModifico`, `fechaPedido`, `fechaModificacion`, `codigoSeguimiento`, `descuentoOrden`, `idMotivoCancelacion`, `observacionCancelacion`, `fechaCancelacion`, `idUsuarioCancelo`, `idEstado`, `estaActivo`, `dummyUpdate`) VALUES
-('PED-20240110-001', 28, 1, NULL, '2024-01-10 10:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240115-001', 29, 2, NULL, '2024-01-15 11:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240120-001', 30, 1, NULL, '2024-01-21 12:00:00', '2025-07-23 13:29:15', NULL, 0.00, 1, NULL, '2024-01-21 12:00:00', 2, 6, 0, NULL),
-('PED-20240125-001', 31, 2, NULL, '2024-01-25 13:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240201-001', 32, 1, NULL, '2024-02-01 14:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240205-001', 33, 2, NULL, '2024-02-06 15:00:00', '2025-07-23 13:33:48', NULL, 0.00, 4, NULL, '2024-02-06 15:00:00', 1, 6, 0, NULL),
-('PED-20240210-001', 34, 1, NULL, '2024-02-10 16:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240215-001', 35, 2, NULL, '2024-02-16 17:00:00', '2025-07-23 13:33:57', NULL, 0.00, 6, 'Cliente solicitó envío express no disponible.', '2024-02-16 17:00:00', 1, 6, 0, NULL),
-('PED-20240220-001', 36, 1, NULL, '2024-02-20 18:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240225-001', 37, 2, NULL, '2024-02-25 19:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240410-001', 38, 1, NULL, '2024-04-10 10:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240415-001', 39, 2, NULL, '2024-04-16 11:00:00', '2025-07-23 13:35:51', NULL, 0.00, 2, NULL, '2024-04-16 11:00:00', 1, 6, 0, NULL),
-('PED-20240420-001', 40, 1, NULL, '2024-04-20 12:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240425-001', 41, 2, NULL, '2024-04-25 13:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240501-001', 42, 1, NULL, '2024-05-02 14:00:00', '2025-07-23 13:34:07', NULL, 0.00, 3, NULL, '2024-05-02 14:00:00', 2, 6, 0, NULL),
-('PED-20240505-001', 43, 2, NULL, '2024-05-05 15:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240510-001', 44, 1, NULL, '2024-05-10 16:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240515-001', 45, 2, NULL, '2024-05-15 17:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240520-001', 46, 1, NULL, '2024-05-20 18:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240525-001', 47, 2, NULL, '2024-05-26 19:00:00', '2025-07-23 13:34:14', NULL, 0.00, 5, NULL, '2024-05-26 19:00:00', 1, 6, 0, NULL),
-('PED-20240710-001', 1, 1, NULL, '2024-07-10 10:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240715-001', 2, 2, NULL, '2024-07-16 11:00:00', '2025-07-23 13:34:22', NULL, 0.00, 1, NULL, '2024-07-16 11:00:00', 2, 6, 0, NULL),
-('PED-20240720-001', 3, 1, NULL, '2024-07-20 12:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240725-001', 4, 2, NULL, '2024-07-26 13:00:00', '2025-07-23 13:34:30', NULL, 0.00, 2, NULL, '2024-07-26 13:00:00', 1, 6, 0, NULL),
-('PED-20240801-001', 5, 1, NULL, '2024-08-01 14:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240805-001', 6, 2, NULL, '2024-08-05 15:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240810-001', 7, 1, NULL, '2024-08-11 16:00:00', '2025-07-23 13:34:37', NULL, 0.00, 3, NULL, '2024-08-11 16:00:00', 2, 6, 0, NULL),
-('PED-20240815-001', 8, 2, NULL, '2024-08-15 17:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240820-001', 9, 1, NULL, '2024-08-20 18:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20240825-001', 10, 2, NULL, '2024-08-25 19:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241010-001', 28, 1, NULL, '2024-10-10 10:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241015-001', 29, 2, NULL, '2024-10-15 11:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241020-001', 30, 1, NULL, '2024-10-21 12:00:00', '2025-07-23 13:34:45', NULL, 0.00, 4, NULL, '2024-10-21 12:00:00', 2, 6, 0, NULL),
-('PED-20241025-001', 31, 2, NULL, '2024-10-25 13:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241101-001', 32, 1, NULL, '2024-11-01 14:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241105-001', 33, 2, NULL, '2024-11-05 15:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241110-001', 34, 1, NULL, '2024-11-10 16:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241115-001', 35, 2, NULL, '2024-11-16 17:00:00', '2025-07-23 13:34:52', NULL, 0.00, 1, NULL, '2024-11-16 17:00:00', 1, 6, 0, NULL),
-('PED-20241120-001', 36, 1, NULL, '2024-11-20 18:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-20241125-001', 37, 2, NULL, '2024-11-25 19:00:00', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-014', 28, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-015', 29, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-016', 28, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-017', 30, NULL, NULL, '2025-06-16 15:34:33', '2025-06-18 13:52:53', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-018', 31, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-019', 32, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-020', 33, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL),
-('PED-2025-021', 34, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-022', 35, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-023', 33, NULL, NULL, '2025-06-16 15:34:33', '2025-06-18 13:53:07', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-024', 36, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-025', 37, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-026', 38, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL),
-('PED-2025-027', 39, NULL, NULL, '2025-06-16 15:34:33', '2025-06-18 13:51:00', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-028', 40, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 4, 1, NULL),
-('PED-2025-029', 36, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-030', 41, NULL, NULL, '2025-06-16 15:34:33', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-101', 28, NULL, NULL, '2025-06-16 15:44:01', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-102', 29, NULL, NULL, '2025-06-16 15:44:01', '2025-06-20 00:16:13', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-103', 30, NULL, NULL, '2025-06-16 15:44:01', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL),
-('PED-2025-104', 28, NULL, NULL, '2025-06-16 15:44:01', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-105', 31, NULL, NULL, '2025-06-16 15:44:01', '2025-06-18 20:13:57', 'HD-54545-AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-106', 32, NULL, NULL, '2025-06-16 15:44:01', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-107', 33, NULL, NULL, '2025-06-16 15:44:01', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-108', 34, NULL, NULL, '2025-06-16 15:44:01', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL),
-('PED-2025-109', 35, NULL, NULL, '2025-06-16 15:44:01', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-110', 36, NULL, NULL, '2025-06-16 15:44:02', '2025-06-18 20:07:18', 'HD112312345AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-111', 37, NULL, NULL, '2025-06-16 15:44:02', '2025-06-18 20:08:48', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-112', 37, NULL, NULL, '2025-06-16 15:44:02', '2025-06-20 00:17:38', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-113', 38, NULL, NULL, '2025-06-16 15:44:02', '2025-06-18 03:35:37', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-114', 39, NULL, NULL, '2025-06-16 15:44:02', '2025-06-18 20:09:22', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-115', 40, NULL, NULL, '2025-06-14 15:44:02', '2025-06-18 13:53:01', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-116', 41, NULL, NULL, '2025-06-16 15:44:02', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-117', 1, NULL, NULL, '2025-06-16 15:44:02', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-118', 2, NULL, NULL, '2025-06-16 15:44:02', '2025-06-18 20:09:51', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-119', 3, NULL, NULL, '2025-06-16 15:44:02', '2025-06-18 20:11:36', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL),
-('PED-2025-120', 4, NULL, NULL, '2025-06-16 15:44:02', '2025-06-20 00:16:52', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-172', 1, NULL, NULL, '2025-06-16 03:55:34', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-333', 4, NULL, NULL, '2025-06-16 04:01:30', NULL, NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-407', 1, NULL, NULL, '2025-06-18 21:30:36', '2025-07-01 17:46:08', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-429', 28, NULL, NULL, '2025-06-16 20:43:17', '2025-06-18 19:59:09', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL),
-('PED-2025-521', 1, 2, 1, '2025-06-20 02:19:11', '2025-07-01 23:45:18', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL),
-('PED-2025-747', 1, 1, 1, '2025-07-01 23:47:40', '2025-07-01 23:54:42', NULL, 0.00, 3, NULL, NULL, 1, 6, 0, NULL);
+INSERT INTO `pedido` (`numeroPedido`, `idCliente`, `idUsuarioCreo`, `idUsuarioModifico`, `fechaPedido`, `fechaModificacion`, `codigoSeguimiento`, `descuentoOrden`, `idMotivoCancelacion`, `observacionCancelacion`, `fechaCancelacion`, `idUsuarioCancelo`, `idEstado`, `estaActivo`, `dummyUpdate`, `idEmpresaEnvio`) VALUES
+('PED-20240110-001', 28, 1, NULL, '2024-01-10 10:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-20240115-001', 29, 2, NULL, '2024-01-15 11:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20240120-001', 30, 1, NULL, '2024-01-21 12:00:00', '2025-10-25 17:06:29', NULL, 0.00, 1, NULL, '2024-01-21 12:00:00', 2, 6, 0, NULL, 2),
+('PED-20240125-001', 31, 2, NULL, '2024-01-25 13:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20240201-001', 32, 1, NULL, '2024-02-01 14:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-20240205-001', 33, 2, NULL, '2024-02-06 15:00:00', '2025-10-25 17:06:29', NULL, 0.00, 4, NULL, '2024-02-06 15:00:00', 1, 6, 0, NULL, 2),
+('PED-20240210-001', 34, 1, NULL, '2024-02-10 16:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-20240215-001', 35, 2, NULL, '2024-02-16 17:00:00', '2025-10-25 17:06:29', NULL, 0.00, 6, 'Cliente solicitó envío express no disponible.', '2024-02-16 17:00:00', 1, 6, 0, NULL, 2),
+('PED-20240220-001', 36, 1, NULL, '2024-02-20 18:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-20240225-001', 37, 2, NULL, '2024-02-25 19:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-20240410-001', 38, 1, NULL, '2024-04-10 10:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20240415-001', 39, 2, NULL, '2024-04-16 11:00:00', '2025-10-25 17:06:29', NULL, 0.00, 2, NULL, '2024-04-16 11:00:00', 1, 6, 0, NULL, 4),
+('PED-20240420-001', 40, 1, NULL, '2024-04-20 12:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20240425-001', 41, 2, NULL, '2024-04-25 13:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-20240501-001', 42, 1, NULL, '2024-05-02 14:00:00', '2025-10-25 17:06:29', NULL, 0.00, 3, NULL, '2024-05-02 14:00:00', 2, 6, 0, NULL, 1),
+('PED-20240505-001', 43, 2, NULL, '2024-05-05 15:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-20240510-001', 44, 1, NULL, '2024-05-10 16:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-20240515-001', 45, 2, NULL, '2024-05-15 17:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-20240520-001', 46, 1, NULL, '2024-05-20 18:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-20240525-001', 47, 2, NULL, '2024-05-26 19:00:00', '2025-10-25 17:06:29', NULL, 0.00, 5, NULL, '2024-05-26 19:00:00', 1, 6, 0, NULL, 2),
+('PED-20240710-001', 1, 1, NULL, '2024-07-10 10:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-20240715-001', 2, 2, NULL, '2024-07-16 11:00:00', '2025-10-25 17:06:29', NULL, 0.00, 1, NULL, '2024-07-16 11:00:00', 2, 6, 0, NULL, 4),
+('PED-20240720-001', 3, 1, NULL, '2024-07-20 12:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-20240725-001', 4, 2, NULL, '2024-07-26 13:00:00', '2025-10-25 17:06:29', NULL, 0.00, 2, NULL, '2024-07-26 13:00:00', 1, 6, 0, NULL, 2),
+('PED-20240801-001', 5, 1, NULL, '2024-08-01 14:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-20240805-001', 6, 2, NULL, '2024-08-05 15:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-20240810-001', 7, 1, NULL, '2024-08-11 16:00:00', '2025-10-25 17:06:29', NULL, 0.00, 3, NULL, '2024-08-11 16:00:00', 2, 6, 0, NULL, 3),
+('PED-20240815-001', 8, 2, NULL, '2024-08-15 17:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-20240820-001', 9, 1, NULL, '2024-08-20 18:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20240825-001', 10, 2, NULL, '2024-08-25 19:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-20241010-001', 28, 1, NULL, '2024-10-10 10:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20241015-001', 29, 2, NULL, '2024-10-15 11:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20241020-001', 30, 1, NULL, '2024-10-21 12:00:00', '2025-10-25 17:06:29', NULL, 0.00, 4, NULL, '2024-10-21 12:00:00', 2, 6, 0, NULL, 1),
+('PED-20241025-001', 31, 2, NULL, '2024-10-25 13:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-20241101-001', 32, 1, NULL, '2024-11-01 14:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-20241105-001', 33, 2, NULL, '2024-11-05 15:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-20241110-001', 34, 1, NULL, '2024-11-10 16:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20241115-001', 35, 2, NULL, '2024-11-16 17:00:00', '2025-10-25 17:06:29', NULL, 0.00, 1, NULL, '2024-11-16 17:00:00', 1, 6, 0, NULL, 3),
+('PED-20241120-001', 36, 1, NULL, '2024-11-20 18:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-20241125-001', 37, 2, NULL, '2024-11-25 19:00:00', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-2025-014', 28, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 3),
+('PED-2025-015', 29, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 2),
+('PED-2025-016', 28, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 1),
+('PED-2025-017', 30, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 3),
+('PED-2025-018', 31, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-2025-019', 32, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 3),
+('PED-2025-020', 33, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL, 4),
+('PED-2025-021', 34, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 1),
+('PED-2025-022', 35, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 2),
+('PED-2025-023', 33, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 3),
+('PED-2025-024', 36, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 2),
+('PED-2025-025', 37, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 3),
+('PED-2025-026', 38, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL, 3),
+('PED-2025-027', 39, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 4),
+('PED-2025-028', 40, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', 'HD-47954-AR', 0.00, NULL, NULL, NULL, NULL, 4, 1, NULL, 4),
+('PED-2025-029', 36, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-2025-030', 41, NULL, NULL, '2025-06-16 15:34:33', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 4),
+('PED-2025-101', 28, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 4),
+('PED-2025-102', 29, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 2),
+('PED-2025-103', 30, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL, 1),
+('PED-2025-104', 28, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 4),
+('PED-2025-105', 31, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', 'HD-54545-AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-2025-106', 32, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
+('PED-2025-107', 33, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 2),
+('PED-2025-108', 34, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 2, 1, NULL, 1),
+('PED-2025-109', 35, NULL, NULL, '2025-06-16 15:44:01', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 1),
+('PED-2025-110', 36, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', 'HD112312345AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-2025-111', 37, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
+('PED-2025-112', 37, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 1),
+('PED-2025-113', 38, NULL, NULL, '2025-06-16 15:44:02', '2025-10-28 01:07:47', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 4),
+('PED-2025-114', 39, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-2025-115', 40, NULL, NULL, '2025-06-14 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 2),
+('PED-2025-116', 41, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-2025-117', 1, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 3),
+('PED-2025-118', 2, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 3),
+('PED-2025-119', 3, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
+('PED-2025-120', 4, NULL, NULL, '2025-06-16 15:44:02', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 4),
+('PED-2025-172', 1, NULL, NULL, '2025-06-16 03:55:34', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 1),
+('PED-2025-333', 4, NULL, NULL, '2025-06-16 04:01:30', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 4),
+('PED-2025-407', 1, NULL, NULL, '2025-06-18 21:30:36', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 2),
+('PED-2025-429', 28, NULL, NULL, '2025-06-16 20:43:17', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 3, 1, NULL, 2),
+('PED-2025-521', 1, 2, 1, '2025-06-20 02:19:11', '2025-10-25 17:06:29', NULL, 0.00, NULL, NULL, NULL, NULL, 1, 1, NULL, 1),
+('PED-2025-747', 1, 1, 1, '2025-07-01 23:47:40', '2025-10-25 17:06:29', NULL, 0.00, 3, NULL, NULL, 1, 6, 0, NULL, 2);
 
 -- --------------------------------------------------------
 
@@ -1349,29 +1421,6 @@ INSERT INTO `rack` (`idRack`, `numeroRack`, `descripcion`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `rol`
---
-
-CREATE TABLE `rol` (
-  `idRol` int(11) NOT NULL,
-  `idTipoRol` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
-
---
--- Volcado de datos para la tabla `rol`
---
-
-INSERT INTO `rol` (`idRol`, `idTipoRol`) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(5, 5),
-(6, 6),
-(7, 7);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `stock`
 --
 
@@ -1387,6 +1436,7 @@ CREATE TABLE `stock` (
 
 INSERT INTO `stock` (`idStock`, `codigoIndumentaria`, `idRack`) VALUES
 ('STK-NA-1756247729017', 'IND001', 99),
+('STK-NA-1760665520494', 'IND002', 99),
 ('STK001', 'IND001', 1),
 ('STK002', 'IND002', 2),
 ('STK003', 'IND003', 3),
@@ -1422,6 +1472,32 @@ INSERT INTO `stock` (`idStock`, `codigoIndumentaria`, `idRack`) VALUES
 ('STK037', 'IND037', 8),
 ('STK038', 'IND038', 9),
 ('STK039', 'IND039', 10);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `stock_registro_fallo`
+--
+
+CREATE TABLE `stock_registro_fallo` (
+  `idRegistroFallo` int(11) NOT NULL,
+  `idStock` varchar(50) NOT NULL,
+  `fechaRegistro` datetime NOT NULL DEFAULT current_timestamp(),
+  `idMotivo` int(11) NOT NULL,
+  `estadoPostFallo` int(11) DEFAULT 2,
+  `fechaResolucion` datetime DEFAULT NULL,
+  `idUsuarioResolucion` int(11) DEFAULT NULL,
+  `observaciones` varchar(255) DEFAULT NULL,
+  `idRackOriginal` int(11) NOT NULL COMMENT 'Rack en el que estaba la unidad antes de ser marcada como No Apta (Para reingreso)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `stock_registro_fallo`
+--
+
+INSERT INTO `stock_registro_fallo` (`idRegistroFallo`, `idStock`, `fechaRegistro`, `idMotivo`, `estadoPostFallo`, `fechaResolucion`, `idUsuarioResolucion`, `observaciones`, `idRackOriginal`) VALUES
+(1, 'STK-NA-1756247729017', '2025-10-20 00:00:21', 1, NULL, '2025-10-20 00:00:21', NULL, '⚠️ SCRAP: 2 unidades desechadas permanentemente. Sin motivo especificado', 99),
+(2, 'STK-NA-1760665520494', '2025-10-20 00:00:24', 1, NULL, '2025-10-20 00:00:24', NULL, '⚠️ SCRAP: 3 unidades desechadas permanentemente. Sin motivo especificado', 99);
 
 -- --------------------------------------------------------
 
@@ -1503,6 +1579,7 @@ CREATE TABLE `tiporol` (
 --
 
 INSERT INTO `tiporol` (`idTipoRol`, `tipoRol`, `descripcionRol`) VALUES
+(0, 'Encargado de Pedidos', 'Gestiona el ciclo de vida de los pedidos'),
 (1, 'Administrador', 'Acceso completo al sistema'),
 (2, 'Vendedor', 'Puede realizar ventas'),
 (3, 'Envios', 'Encargado de Envios'),
@@ -1542,21 +1619,43 @@ CREATE TABLE `usuario` (
   `idUsuario` int(11) NOT NULL,
   `idPersona` int(11) DEFAULT NULL,
   `nombreUsuario` varchar(100) DEFAULT NULL,
-  `contrasena` varchar(100) DEFAULT NULL,
-  `idRol` int(11) DEFAULT NULL
+  `contrasena` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`idUsuario`, `idPersona`, `nombreUsuario`, `contrasena`, `idRol`) VALUES
-(1, 10, 'admin', 'admin123', 1),
-(2, 9, 'mariag', '123', 2),
-(5, 5, 'anamtz', '123', 6),
-(6, 6, 'luisrd', '123', 6),
-(7, 7, 'sofiag', '123', 7),
-(15, 8, 'envios', '123', 3);
+INSERT INTO `usuario` (`idUsuario`, `idPersona`, `nombreUsuario`, `contrasena`) VALUES
+(1, 10, 'admin', 'admin123'),
+(2, 9, 'mariag', '123'),
+(5, 5, 'anamtz', '123'),
+(6, 6, 'luisrd', '123'),
+(7, 7, 'sofiag', '123'),
+(15, 8, 'envios', '123');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuario_tiporol`
+--
+
+CREATE TABLE `usuario_tiporol` (
+  `idUsuario` int(11) NOT NULL,
+  `idTipoRol` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `usuario_tiporol`
+--
+
+INSERT INTO `usuario_tiporol` (`idUsuario`, `idTipoRol`) VALUES
+(1, 1),
+(2, 2),
+(5, 6),
+(6, 6),
+(7, 7),
+(15, 3);
 
 -- --------------------------------------------------------
 
@@ -1713,6 +1812,13 @@ ALTER TABLE `domicilio`
   ADD KEY `idCiudad` (`idCiudad`);
 
 --
+-- Indices de la tabla `empresa_envio`
+--
+ALTER TABLE `empresa_envio`
+  ADD PRIMARY KEY (`idEmpresaEnvio`),
+  ADD UNIQUE KEY `uk_nombre_envio` (`nombre`);
+
+--
 -- Indices de la tabla `encargadoindumentaria`
 --
 ALTER TABLE `encargadoindumentaria`
@@ -1732,14 +1838,6 @@ ALTER TABLE `encargadopedidos`
 ALTER TABLE `encargadopicker`
   ADD PRIMARY KEY (`legajo`),
   ADD KEY `idPersona` (`idPersona`);
-
---
--- Indices de la tabla `encargadopicker_stock`
---
-ALTER TABLE `encargadopicker_stock`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `legajo` (`legajo`),
-  ADD KEY `idStock` (`idStock`);
 
 --
 -- Indices de la tabla `estadoindumentaria`
@@ -1774,6 +1872,12 @@ ALTER TABLE `motivo_cancelacion`
   ADD PRIMARY KEY (`idMotivo`);
 
 --
+-- Indices de la tabla `motivo_no_apta`
+--
+ALTER TABLE `motivo_no_apta`
+  ADD PRIMARY KEY (`idMotivo`);
+
+--
 -- Indices de la tabla `movimientostock`
 --
 ALTER TABLE `movimientostock`
@@ -1796,7 +1900,8 @@ ALTER TABLE `pedido`
   ADD KEY `fk_pedido_motivo_cancelacion` (`idMotivoCancelacion`),
   ADD KEY `fk_pedido_usuario_cancelo` (`idUsuarioCancelo`),
   ADD KEY `fk_pedido_usuario_creo` (`idUsuarioCreo`),
-  ADD KEY `fk_pedido_usuario_modifico` (`idUsuarioModifico`);
+  ADD KEY `fk_pedido_usuario_modifico` (`idUsuarioModifico`),
+  ADD KEY `fk_pedido_empresa` (`idEmpresaEnvio`);
 
 --
 -- Indices de la tabla `persona`
@@ -1819,19 +1924,23 @@ ALTER TABLE `rack`
   ADD UNIQUE KEY `idx_numeroRack` (`numeroRack`);
 
 --
--- Indices de la tabla `rol`
---
-ALTER TABLE `rol`
-  ADD PRIMARY KEY (`idRol`),
-  ADD KEY `idTipoRol` (`idTipoRol`);
-
---
 -- Indices de la tabla `stock`
 --
 ALTER TABLE `stock`
   ADD PRIMARY KEY (`idStock`),
   ADD KEY `codigoIndumentaria` (`codigoIndumentaria`),
   ADD KEY `fk_stock_rack` (`idRack`);
+
+--
+-- Indices de la tabla `stock_registro_fallo`
+--
+ALTER TABLE `stock_registro_fallo`
+  ADD PRIMARY KEY (`idRegistroFallo`),
+  ADD KEY `idStock` (`idStock`),
+  ADD KEY `idMotivo` (`idMotivo`),
+  ADD KEY `estadoPostFallo` (`estadoPostFallo`),
+  ADD KEY `idUsuarioResolucion` (`idUsuarioResolucion`),
+  ADD KEY `fk_fallo_rack_original` (`idRackOriginal`);
 
 --
 -- Indices de la tabla `talle`
@@ -1862,8 +1971,14 @@ ALTER TABLE `unidad_medida`
 --
 ALTER TABLE `usuario`
   ADD PRIMARY KEY (`idUsuario`),
-  ADD UNIQUE KEY `idPersona` (`idPersona`),
-  ADD KEY `idRol` (`idRol`);
+  ADD UNIQUE KEY `idPersona` (`idPersona`);
+
+--
+-- Indices de la tabla `usuario_tiporol`
+--
+ALTER TABLE `usuario_tiporol`
+  ADD PRIMARY KEY (`idUsuario`,`idTipoRol`),
+  ADD KEY `fk_utr_tiporol` (`idTipoRol`);
 
 --
 -- Indices de la tabla `vendedor`
@@ -1880,7 +1995,7 @@ ALTER TABLE `vendedor`
 -- AUTO_INCREMENT de la tabla `asignacion_picking`
 --
 ALTER TABLE `asignacion_picking`
-  MODIFY `idAsignacion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `idAsignacion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT de la tabla `barrio`
@@ -1931,10 +2046,10 @@ ALTER TABLE `domicilio`
   MODIFY `idDomicilio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
--- AUTO_INCREMENT de la tabla `encargadopicker_stock`
+-- AUTO_INCREMENT de la tabla `empresa_envio`
 --
-ALTER TABLE `encargadopicker_stock`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `empresa_envio`
+  MODIFY `idEmpresaEnvio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `estadoindumentaria`
@@ -1947,6 +2062,12 @@ ALTER TABLE `estadoindumentaria`
 --
 ALTER TABLE `motivo_cancelacion`
   MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `motivo_no_apta`
+--
+ALTER TABLE `motivo_no_apta`
+  MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `nombreindumentaria`
@@ -1971,6 +2092,12 @@ ALTER TABLE `precioindumentaria`
 --
 ALTER TABLE `rack`
   MODIFY `idRack` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+
+--
+-- AUTO_INCREMENT de la tabla `stock_registro_fallo`
+--
+ALTER TABLE `stock_registro_fallo`
+  MODIFY `idRegistroFallo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `talle`
@@ -2011,7 +2138,9 @@ ALTER TABLE `adminsistemas`
 --
 ALTER TABLE `asignacion_picking`
   ADD CONSTRAINT `fk_asignacion_pedido` FOREIGN KEY (`numeroPedido`) REFERENCES `pedido` (`numeroPedido`),
-  ADD CONSTRAINT `fk_asignacion_picker` FOREIGN KEY (`legajoPicker`) REFERENCES `encargadopicker` (`legajo`);
+  ADD CONSTRAINT `fk_asignacion_pedido_final` FOREIGN KEY (`numeroPedido`) REFERENCES `pedido` (`numeroPedido`),
+  ADD CONSTRAINT `fk_asignacion_picker` FOREIGN KEY (`legajoPicker`) REFERENCES `encargadopicker` (`legajo`),
+  ADD CONSTRAINT `fk_asignacion_picker_final` FOREIGN KEY (`legajoPicker`) REFERENCES `encargadopicker` (`legajo`);
 
 --
 -- Filtros para la tabla `barrio`
@@ -2080,13 +2209,6 @@ ALTER TABLE `encargadopicker`
   ADD CONSTRAINT `encargadopicker_ibfk_1` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`);
 
 --
--- Filtros para la tabla `encargadopicker_stock`
---
-ALTER TABLE `encargadopicker_stock`
-  ADD CONSTRAINT `encargadopicker_stock_ibfk_1` FOREIGN KEY (`legajo`) REFERENCES `encargadopicker` (`legajo`),
-  ADD CONSTRAINT `encargadopicker_stock_ibfk_2` FOREIGN KEY (`idStock`) REFERENCES `stock` (`idStock`);
-
---
 -- Filtros para la tabla `gerentegeneral`
 --
 ALTER TABLE `gerentegeneral`
@@ -2108,6 +2230,7 @@ ALTER TABLE `movimientostock`
 -- Filtros para la tabla `pedido`
 --
 ALTER TABLE `pedido`
+  ADD CONSTRAINT `fk_pedido_empresa` FOREIGN KEY (`idEmpresaEnvio`) REFERENCES `empresa_envio` (`idEmpresaEnvio`),
   ADD CONSTRAINT `fk_pedido_motivo_cancelacion` FOREIGN KEY (`idMotivoCancelacion`) REFERENCES `motivo_cancelacion` (`idMotivo`),
   ADD CONSTRAINT `fk_pedido_usuario_cancelo` FOREIGN KEY (`idUsuarioCancelo`) REFERENCES `usuario` (`idUsuario`),
   ADD CONSTRAINT `fk_pedido_usuario_creo` FOREIGN KEY (`idUsuarioCreo`) REFERENCES `usuario` (`idUsuario`),
@@ -2122,12 +2245,6 @@ ALTER TABLE `persona`
   ADD CONSTRAINT `persona_ibfk_1` FOREIGN KEY (`idDomicilio`) REFERENCES `domicilio` (`idDomicilio`);
 
 --
--- Filtros para la tabla `rol`
---
-ALTER TABLE `rol`
-  ADD CONSTRAINT `rol_ibfk_1` FOREIGN KEY (`idTipoRol`) REFERENCES `tiporol` (`idTipoRol`);
-
---
 -- Filtros para la tabla `stock`
 --
 ALTER TABLE `stock`
@@ -2135,11 +2252,29 @@ ALTER TABLE `stock`
   ADD CONSTRAINT `stock_ibfk_1` FOREIGN KEY (`codigoIndumentaria`) REFERENCES `indumentaria` (`codigoIndumentaria`);
 
 --
+-- Filtros para la tabla `stock_registro_fallo`
+--
+ALTER TABLE `stock_registro_fallo`
+  ADD CONSTRAINT `fk_fallo_motivo` FOREIGN KEY (`idMotivo`) REFERENCES `motivo_no_apta` (`idMotivo`),
+  ADD CONSTRAINT `fk_fallo_rack_original` FOREIGN KEY (`idRackOriginal`) REFERENCES `rack` (`idRack`),
+  ADD CONSTRAINT `fk_fallo_stock` FOREIGN KEY (`idStock`) REFERENCES `stock` (`idStock`),
+  ADD CONSTRAINT `fk_fallo_usuario` FOREIGN KEY (`idUsuarioResolucion`) REFERENCES `usuario` (`idUsuario`),
+  ADD CONSTRAINT `stock_registro_fallo_ibfk_1` FOREIGN KEY (`idStock`) REFERENCES `stock` (`idStock`),
+  ADD CONSTRAINT `stock_registro_fallo_ibfk_2` FOREIGN KEY (`idMotivo`) REFERENCES `motivo_no_apta` (`idMotivo`),
+  ADD CONSTRAINT `stock_registro_fallo_ibfk_4` FOREIGN KEY (`idUsuarioResolucion`) REFERENCES `usuario` (`idUsuario`);
+
+--
 -- Filtros para la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  ADD CONSTRAINT `usuario_ibfk_1` FOREIGN KEY (`idRol`) REFERENCES `rol` (`idRol`),
   ADD CONSTRAINT `usuario_ibfk_persona` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`);
+
+--
+-- Filtros para la tabla `usuario_tiporol`
+--
+ALTER TABLE `usuario_tiporol`
+  ADD CONSTRAINT `fk_utr_tiporol` FOREIGN KEY (`idTipoRol`) REFERENCES `tiporol` (`idTipoRol`),
+  ADD CONSTRAINT `fk_utr_usuario` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`);
 
 --
 -- Filtros para la tabla `vendedor`

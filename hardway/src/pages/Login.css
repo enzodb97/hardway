@@ -65,6 +65,7 @@ form {
   font-size: 1.8rem;
   text-align: center;
   margin-bottom: 1rem;
+  justify-content: center;
 }
 
 .form-instruction {

@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { downloadOutline, checkmarkCircle } from "ionicons/icons";
+import { downloadOutline, checkmarkCircle, arrowBackOutline, barChartOutline, documentTextOutline } from "ionicons/icons";
 import React, { useEffect, useState, useRef } from "react";
 import {
   IonPage,
@@ -33,7 +33,7 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./ProductosMasPedidos.table.css";
-import "./Reportes.css";
+import "./ClientesMasPedidos.css";
 
 // Registrar componentes y plugins
 Chart.register(
@@ -170,7 +170,7 @@ const ClientesMasPedidos: React.FC = () => {
     ];
 
     // Agregar filas de datos
-    (clientesOrdenados || []).forEach((c: ClienteReporte) => {
+    (top10Clientes || []).forEach((c: ClienteReporte) => {
       wsClientes.addRow({
         idCliente: c.idCliente,
         nombreApellido: `${c.nombre} ${c.apellido}`,
@@ -240,7 +240,7 @@ const ClientesMasPedidos: React.FC = () => {
           extension: "png",
         });
         wsClientes.addImage(imageId, {
-          tl: { col: 0, row: clientesOrdenados.length + 3 },
+          tl: { col: 0, row: top10Clientes.length + 3 },
           ext: { width: 1000, height: 600 },
         });
       }
@@ -268,15 +268,27 @@ const ClientesMasPedidos: React.FC = () => {
   const clientesOrdenados = [...clientes].sort(
     (a, b) => b.total_valor - a.total_valor
   );
+  
+  // Solo tomar los top 10 para el reporte
+  const top10Clientes = clientesOrdenados.slice(0, 10);
+  
   const clientesAMostrar = mostrarTodos
-    ? clientesOrdenados
-    : clientesOrdenados.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE);
+    ? top10Clientes
+    : top10Clientes.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE);
 
   const totalPaginas = mostrarTodos
     ? 1
-    : Math.ceil(clientes.length / PAGE_SIZE);
+    : Math.ceil(top10Clientes.length / PAGE_SIZE);
 
   const fechaEmision = new Date().toLocaleString("es-AR");
+
+  // Calcular estadísticas (solo top 10)
+  const totalClientes = top10Clientes.length;
+  const valorTotalAcumulado = top10Clientes.reduce((sum, c) => {
+    // Asegurar que el valor sea un número
+    const valor = typeof c.total_valor === 'number' ? c.total_valor : parseFloat(c.total_valor) || 0;
+    return sum + valor;
+  }, 0);
 
   // Exportar PDF con opción de incluir gráfico
   const exportarPDF = async () => {
@@ -327,18 +339,18 @@ const ClientesMasPedidos: React.FC = () => {
 
   // Prepara los datos para el gráfico (por valor total)
   const data = {
-    labels: clientesOrdenados.map((c) => `${c.nombre} ${c.apellido}`),
+    labels: top10Clientes.map((c) => `${c.nombre} ${c.apellido}`),
     datasets: [
       {
         label: "Valor Total de Pedidos ($)",
-        data: clientesOrdenados.map((c) => c.total_valor),
-        backgroundColor: colores.slice(0, clientesOrdenados.length),
+        data: top10Clientes.map((c) => c.total_valor),
+        backgroundColor: colores.slice(0, top10Clientes.length),
         borderRadius: 8,
         maxBarThickness: 32,
       },
     ],
   };
-  const maxValor = Math.max(...clientesOrdenados.map((c) => c.total_valor), 0);
+  const maxValor = Math.max(...top10Clientes.map((c) => c.total_valor), 0);
 
   const chartOptions = {
     indexAxis: "y" as const, // Barras horizontales
@@ -350,12 +362,16 @@ const ClientesMasPedidos: React.FC = () => {
         text: "Top 10 Clientes por Valor Total de Pedidos",
         font: { size: 18 },
         padding: { top: 10, bottom: 20 },
+        color: '#ffffff', // Texto blanco
       },
       datalabels: {
         anchor: "end" as const,
         align: "end" as const,
-        color: "#333",
-        font: { weight: "bold" as const },
+        color: "#ffffff", // Cambio a blanco para mejor visibilidad
+        font: { 
+          weight: "bold" as const,
+          size: 12,
+        },
         offset: 16,
         formatter: (value: number) => `$${value.toLocaleString()}`,
         clamp: true,
@@ -365,7 +381,7 @@ const ClientesMasPedidos: React.FC = () => {
         callbacks: {
           label: function (context: any) {
             const idx = context.dataIndex;
-            const c = clientesOrdenados[idx];
+            const c = top10Clientes[idx];
             return [
               `Valor total: $${c.total_valor.toLocaleString()}`,
               `Total pedidos: ${c.total_pedidos}`,
@@ -381,184 +397,190 @@ const ClientesMasPedidos: React.FC = () => {
           display: true,
           text: "Valor Total de Pedidos ($)",
           font: { size: 14 },
+          color: '#ffffff', // Texto blanco
         },
         beginAtZero: true,
-        ticks: { precision: 0 },
+        ticks: { 
+          precision: 0,
+          color: '#ffffff', // Números en blanco
+        },
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)', // Grid sutil
+        },
       },
       y: {
         title: {
           display: true,
           text: "Cliente",
           font: { size: 14 },
+          color: '#ffffff', // Texto blanco
+        },
+        ticks: {
+          color: '#ffffff', // Nombres en blanco
+        },
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)', // Grid sutil
         },
       },
     },
   };
 
   return (
-    <IonPage>
+    <IonPage className="clientes-alto-valor-page">
       <IonHeader>
-        <IonToolbar color="warning">
-          <IonTitle>Clientes de Alto Valor</IonTitle>
+        <IonToolbar className="clientes-alto-valor-toolbar">
+          <IonTitle>👑 Clientes de Alto Valor</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className="clientes-alto-valor-content">
         <IonGrid>
+          {/* Título y Estadísticas */}
           <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <h2 style={{ margin: "16px 0 8px 0" }}>
-                Top 10 Clientes de Alto Valor
-              </h2>
-              <div style={{ fontSize: 14, color: "#888" }}>
-                Fecha de emisión: {fechaEmision}
+            <IonCol size="12">
+              <div className="clientes-title-section">
+                <h1 className="clientes-main-title">Top 10 Clientes de Alto Valor</h1>
+                <div className="clientes-emission-date">
+                  Fecha de emisión: {fechaEmision}
+                </div>
+                
+                <div className="clientes-stats-row">
+                  <div className="clientes-stat-card">
+                    <div className="clientes-stat-icon">👥</div>
+                    <div className="clientes-stat-content">
+                      <div className="clientes-stat-number">{totalClientes}</div>
+                      <div className="clientes-stat-label">Total Clientes</div>
+                    </div>
+                  </div>
+                  
+                  <div className="clientes-stat-card">
+                    <div className="clientes-stat-icon">💰</div>
+                    <div className="clientes-stat-content">
+                      <div className="clientes-stat-number">${valorTotalAcumulado.toLocaleString()}</div>
+                      <div className="clientes-stat-label">Valor Acumulado</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </IonCol>
           </IonRow>
           <IonRow>
             <IonCol size="12">
-              <IonCard>
+              <IonCard className="clientes-table-card">
                 <IonCardContent>
-                  <IonGrid>
-                    <IonRow className="table-header">
-                      <IonCol
-                        size="2"
-                        className="celda-centrada"
-                        title="Número único de cliente"
-                      >
-                        N° Cliente
-                      </IonCol>
-                      <IonCol
-                        size="3"
-                        className="celda-centrada"
-                        title="Nombre y apellido del cliente"
-                      >
-                        Nombre y Apellido
-                      </IonCol>
-                      <IonCol
-                        size="3"
-                        className="celda-centrada"
-                        title="Correo electrónico del cliente"
-                      >
-                        Email
-                      </IonCol>
-                      <IonCol
-                        size="2"
-                        className="celda-centrada"
-                        title="Cantidad total de pedidos realizados"
-                      >
-                        Total Pedidos
-                      </IonCol>
-                      <IonCol
-                        size="2"
-                        className="celda-centrada"
-                        title="Suma total de los pedidos en pesos"
-                      >
-                        Valor Total ($)
-                      </IonCol>
+                  <IonGrid className="clientes-table-grid">
+                    {/* Header */}
+                    <IonRow className="clientes-table-header">
+                      <IonCol size="2" className="clientes-table-cell">N° Cliente</IonCol>
+                      <IonCol size="3" className="clientes-table-cell">Nombre y Apellido</IonCol>
+                      <IonCol size="3" className="clientes-table-cell">Email</IonCol>
+                      <IonCol size="2" className="clientes-table-cell">Total Pedidos</IonCol>
+                      <IonCol size="2" className="clientes-table-cell">Valor Total ($)</IonCol>
                     </IonRow>
-                    {clientesAMostrar.map((c, idx) => (
-                      <IonRow key={c.idCliente} className="reporte-tabla-fila">
-                        <IonCol size="2" className="celda-centrada">
-                          {c.idCliente}
-                        </IonCol>
-                        <IonCol
-                          size="3"
-                          className="celda-centrada"
-                        >{`${c.nombre} ${c.apellido}`}</IonCol>
-                        <IonCol size="3" className="celda-centrada">
-                          {c.email || ""}
-                        </IonCol>
-                        <IonCol size="2" className="celda-centrada">
-                          {c.total_pedidos}
-                        </IonCol>
-                        <IonCol size="2" className="celda-centrada">
-                          ${c.total_valor.toLocaleString()}
-                        </IonCol>
-                      </IonRow>
-                    ))}
+                    
+                    {/* Datos */}
+                    {clientesAMostrar.map((c, idx) => {
+                      const ranking = (pagina - 1) * 10 + idx + 1;
+                      const isTopClient = ranking <= 3;
+                      return (
+                        <IonRow key={c.idCliente} className={`clientes-table-row ${isTopClient ? 'top-client' : ''}`}>
+                          <IonCol size="2" className="clientes-table-cell">
+                            {c.idCliente}
+                            {isTopClient && <span className="clientes-vip-badge">⭐</span>}
+                          </IonCol>
+                          <IonCol size="3" className="clientes-table-cell">
+                            {`${c.nombre} ${c.apellido}`}
+                          </IonCol>
+                          <IonCol size="3" className="clientes-table-cell">
+                            {c.email || "Sin email"}
+                          </IonCol>
+                          <IonCol size="2" className="clientes-table-cell" style={{ textAlign: "right" }}>
+                            {c.total_pedidos}
+                          </IonCol>
+                          <IonCol size="2" className="clientes-table-cell clientes-valor-alto" style={{ textAlign: "right" }}>
+                            ${c.total_valor.toLocaleString()}
+                          </IonCol>
+                        </IonRow>
+                      );
+                    })}
                   </IonGrid>
                 </IonCardContent>
               </IonCard>
             </IonCol>
           </IonRow>
-          {/* Paginación */}
+          {/* Paginación y Acciones */}
           <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <IonButton
-                size="small"
-                disabled={pagina === 1 || mostrarTodos}
-                onClick={() => setPagina((p) => Math.max(1, p - 1))}
-              >
-                Anterior
-              </IonButton>
-              <span style={{ margin: "0 12px" }}>
-                Página {pagina} de {totalPaginas}
-              </span>
-              <IonButton
-                size="small"
-                disabled={pagina === totalPaginas || mostrarTodos}
-                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-              >
-                Siguiente
-              </IonButton>
-              <IonButton
-                size="small"
-                fill="clear"
-                onClick={() => {
-                  setMostrarTodos((prev) => !prev);
-                  setPagina(1);
-                }}
-                style={{ marginLeft: 8 }}
-              >
-                {mostrarTodos ? "Ver paginado" : "Ver todos"}
-              </IonButton>
+            <IonCol size="12">
+              <div className="clientes-pagination-container">
+                <IonButton
+                  className="clientes-btn-pagination"
+                  size="small"
+                  disabled={pagina === 1 || mostrarTodos}
+                  onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                >
+                  Anterior
+                </IonButton>
+                <span className="clientes-pagination-info">
+                  Página {pagina} de {totalPaginas}
+                </span>
+                <IonButton
+                  className="clientes-btn-pagination"
+                  size="small"
+                  disabled={pagina === totalPaginas || mostrarTodos}
+                  onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                >
+                  Siguiente
+                </IonButton>
+                <IonButton
+                  className="clientes-btn-toggle"
+                  size="small"
+                  fill="clear"
+                  onClick={() => {
+                    setMostrarTodos((prev) => !prev);
+                    setPagina(1);
+                  }}
+                >
+                  {mostrarTodos ? "Ver paginado" : "Ver todos"}
+                </IonButton>
+              </div>
+            </IonCol>
+          </IonRow>
 
-              <IonButton
-                color="primary"
-                size="small"
-                style={{ marginTop: 8, marginBottom: 16, marginRight: 8 }}
-                onClick={exportarExcel}
-              >
-                <IonIcon icon={downloadOutline} slot="start" />
-                Exportar a Excel
-              </IonButton>
-              <IonButton
-                size="small"
-                fill={incluirGrafico ? "solid" : "outline"}
-                color={incluirGrafico ? "primary" : "medium"} // Cambia "success" por "primary"
-                onClick={() => setIncluirGrafico((prev) => !prev)}
-                style={{ marginLeft: 8, marginBottom: 8 }}
-              >
-                {incluirGrafico
-                  ? "Quitar gráfico del PDF"
-                  : "Incluir gráfico en PDF"}
-              </IonButton>
-              <IonButton
-                color="primary"
-                size="small"
-                style={{ marginTop: 8, marginBottom: 16 }}
-                onClick={exportarPDF}
-              >
-                <IonIcon icon={documentText} slot="start" />
-                PDF
-              </IonButton>
+          <IonRow>
+            <IonCol size="12">
+              <div className="clientes-actions-container">
+                <IonButton
+                  className="clientes-btn-export"
+                  size="small"
+                  onClick={exportarExcel}
+                >
+                  <IonIcon icon={downloadOutline} slot="start" />
+                  Exportar a Excel
+                </IonButton>
+                <IonButton
+                  className={`clientes-btn-chart ${incluirGrafico ? 'active' : ''}`}
+                  size="small"
+                  fill={incluirGrafico ? "solid" : "outline"}
+                  onClick={() => setIncluirGrafico((prev) => !prev)}
+                >
+                  {incluirGrafico
+                    ? "Quitar gráfico del PDF"
+                    : "Incluir gráfico en PDF"}
+                </IonButton>
+                <IonButton
+                  className="clientes-btn-pdf"
+                  size="small"
+                  onClick={exportarPDF}
+                >
+                  <IonIcon icon={documentText} slot="start" />
+                  PDF
+                </IonButton>
+              </div>
             </IonCol>
           </IonRow>
           {/* Gráfico de barras */}
           <IonRow>
             <IonCol size="12">
-              <div
-                style={{
-                  background: "white",
-                  borderRadius: 12,
-                  padding: 24,
-                  marginBottom: 24,
-                  width: "100%",
-                  maxWidth: "1200px",
-                  margin: "0 auto",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-                }}
-              >
+              <div className="clientes-chart-container">
                 <Bar
                   ref={chartRef}
                   data={data}
@@ -571,8 +593,9 @@ const ClientesMasPedidos: React.FC = () => {
             </IonCol>
           </IonRow>
           <IonRow>
-            <IonCol size="12">
-              <IonButton onClick={() => history.goBack()} color="medium">
+            <IonCol size="12" className="ion-text-left">
+              <IonButton className="clientes-btn-back" onClick={() => history.goBack()} fill="clear">
+                <IonIcon icon={arrowBackOutline} slot="start" />
                 Volver
               </IonButton>
             </IonCol>
@@ -583,7 +606,7 @@ const ClientesMasPedidos: React.FC = () => {
           onDidDismiss={() => setShowToast({ open: false, message: "" })}
           message={showToast.message}
           duration={1800}
-          color="success"
+          cssClass="clientes-toast-success"
           icon={checkmarkCircle}
           position="bottom"
         />

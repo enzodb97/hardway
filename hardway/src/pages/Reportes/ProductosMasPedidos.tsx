@@ -16,6 +16,7 @@ import {
   IonIcon,
   IonToast,
 } from "@ionic/react";
+import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -31,8 +32,8 @@ import {
   Legend,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import "./Reportes.css";
 import "./ProductosMasPedidos.table.css";
+import "./ProductosMasPedidos.css";
 import { checkmarkCircle } from "ionicons/icons";
 
 // Registrar componentes y plugins
@@ -68,6 +69,7 @@ const ProductosMasPedidos: React.FC = () => {
   const [graficoListo, setGraficoListo] = useState(false);
   const fechaEmision = new Date().toLocaleString("es-AR");
   const [showToast, setShowToast] = useState({ open: false, message: "" });
+  const history = useHistory();
 
   useEffect(() => {
     axiosInstance
@@ -88,6 +90,10 @@ const ProductosMasPedidos: React.FC = () => {
       productosPorTemporada[p.temporada] = [];
     productosPorTemporada[p.temporada].push(p);
   });
+
+  // Calcular estadísticas
+  const totalProductos = productos.length;
+  const temporadasUnicas = Object.keys(productosPorTemporada).length;
 
   const temporadas = Object.keys(productosPorTemporada);
   React.useEffect(() => {
@@ -152,6 +158,39 @@ const ProductosMasPedidos: React.FC = () => {
     };
   };
 
+  // Plugin para agregar contorno negro a los textos
+  const textOutlinePlugin = {
+    id: 'textOutline',
+    beforeDraw: (chart: any) => {
+      const ctx = chart.ctx;
+      ctx.save();
+      
+      // Guardar el método original fillText
+      const originalFillText = ctx.fillText;
+      
+      // Sobrescribir fillText para agregar contorno
+      ctx.fillText = function(text: string, x: number, y: number, maxWidth?: number) {
+        // Dibujar contorno negro
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.miterLimit = 2;
+        
+        if (maxWidth) {
+          ctx.strokeText(text, x, y, maxWidth);
+        } else {
+          ctx.strokeText(text, x, y);
+        }
+        
+        // Llamar al fillText original para el texto
+        originalFillText.call(ctx, text, x, y, maxWidth);
+      };
+    },
+    afterDraw: (chart: any) => {
+      chart.ctx.restore();
+    }
+  };
+
   // Mejorar opciones del gráfico para responsive
   const getChartOptions = (
     temporada: string,
@@ -171,20 +210,25 @@ const ProductosMasPedidos: React.FC = () => {
           `Temporada seleccionada: ${temporada}`,
         ],
         font: { size: 20, family: "Montserrat, Arial, sans-serif" },
-        color: "#0057ff",
+        color: "#ffffff",
         padding: { top: 10, bottom: 8 },
         align: "center" as const,
       },
       datalabels: {
         anchor: "end" as const,
         align: "end" as const,
-        color: "#0057ff",
+        color: "#ffffff",
         font: { weight: "bold" as const, size: 14 },
         formatter: (value: number) => value,
         clamp: true,
         display: true,
       },
       tooltip: {
+        backgroundColor: "rgba(30, 30, 30, 0.95)",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        borderColor: "#755bd4ff",
+        borderWidth: 2,
         callbacks: {
           label: function (context: any) {
             const idx = context.dataIndex;
@@ -215,22 +259,29 @@ const ProductosMasPedidos: React.FC = () => {
           display: true,
           text: "Cantidad Total",
           font: { size: 15, family: "Poppins, Arial, sans-serif" },
-          color: "#333",
+          color: "#ffffff",
         },
         beginAtZero: true,
         max: Math.max(...productos.map((p) => p.total_vendido), 0) + 1,
-        ticks: { precision: 0, font: { size: 13 } },
-        grid: { color: "#e0e0e0" },
+        ticks: { 
+          precision: 0, 
+          font: { size: 13 },
+          color: "#ffffff"
+        },
+        grid: { color: "rgba(255, 255, 255, 0.1)" },
       },
       y: {
         title: {
           display: true,
           text: "Producto",
           font: { size: 15, family: "Poppins, Arial, sans-serif" },
-          color: "#333",
+          color: "#ffffff",
         },
-        ticks: { font: { size: 13 } },
-        grid: { color: "#e0e0e0" },
+        ticks: { 
+          font: { size: 13 },
+          color: "#ffffff"
+        },
+        grid: { color: "rgba(255, 255, 255, 0.1)" },
       },
     },
   });
@@ -513,129 +564,82 @@ const ProductosMasPedidos: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage className="productos-pedidos-page">
       <IonHeader>
-        <IonToolbar color="warning">
-          <IonTitle>Productos más pedidos por Temporada</IonTitle>
+        <IonToolbar className="productos-pedidos-toolbar">
+          <IonTitle>📦 Productos Más Pedidos</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className="productos-pedidos-content">
         <IonGrid>
           <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <h2 className="reporte-titulo">
-                Top 10 Productos Más Pedidos por Temporada
-              </h2>
-              <div className="reporte-fecha">
-                Fecha de emisión: {fechaEmision}
-              </div>
-            </IonCol>
-          </IonRow>
-          <IonRow style={{ marginBottom: 16, alignItems: "center" }}>
-            <IonCol
-              size="12"
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <label htmlFor="temporada-select" style={{ fontWeight: 500 }}>
-                  Temporada:
-                </label>
-                <select
-                  id="temporada-select"
-                  value={temporadaSeleccionada}
-                  onChange={(e) => setTemporadaSeleccionada(e.target.value)}
-                  style={{
-                    padding: 6,
-                    borderRadius: 6,
-                    border: "1px solid #ccc",
-                    minWidth: 120,
-                  }}
-                >
-                  {temporadas.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+            <IonCol size="12">
+              <div className="productos-title-section">
+                <h1 className="productos-main-title">
+                  Top 10 Productos Más Pedidos por Temporada
+                </h1>
+                <div className="productos-emission-date">
+                  Fecha de emisión: {fechaEmision}
+                </div>
+                
+                <div className="productos-stats-row">
+                  <div className="productos-stat-card">
+                    <div className="productos-stat-icon">📦</div>
+                    <div className="productos-stat-content">
+                      <div className="productos-stat-number">{totalProductos}</div>
+                      <div className="productos-stat-label">Total Productos</div>
+                    </div>
+                  </div>
+                  
+                  <div className="productos-stat-card">
+                    <div className="productos-stat-icon">🗓️</div>
+                    <div className="productos-stat-content">
+                      <div className="productos-stat-number">{temporadasUnicas}</div>
+                      <div className="productos-stat-label">Temporadas</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="productos-filter-section">
+                  <label htmlFor="temporada-select" className="productos-filter-label">
+                    Temporada:
+                  </label>
+                  <select
+                    id="temporada-select"
+                    value={temporadaSeleccionada}
+                    onChange={(e) => setTemporadaSeleccionada(e.target.value)}
+                    className="productos-select"
+                  >
+                    {temporadas.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </IonCol>
           </IonRow>
           {temporadaSeleccionada && (
-            <IonRow style={{ marginBottom: 32 }}>
+            <IonRow>
               <IonCol size="12">
-                <IonCard>
+                <IonCard className="productos-table-card">
                   <IonCardContent>
-                    <h3 style={{ textAlign: "center", marginBottom: 16 }}>
-                      Temporada Seleccionada: {temporadaSeleccionada}
-                    </h3>
-                    <IonGrid>
-                      <IonRow
-                        className="table-header"
-                        style={{
-                          fontWeight: "bold",
-                          background: "#0057ff",
-                          color: "white",
-                        }}
-                      >
-                        <IonCol
-                          size="1"
-                          className="celda-centrada"
-                          title="Ranking según cantidad vendida"
-                        >
-                          Ranking
-                        </IonCol>
-                        <IonCol
-                          size="3"
-                          className="celda-centrada"
-                          title="Nombre del producto"
-                        >
-                          Producto
-                        </IonCol>
-                        <IonCol
-                          size="2"
-                          className="celda-centrada"
-                          title="Código interno de indumentaria"
-                        >
-                          Código
-                        </IonCol>
-                        <IonCol
-                          size="2"
-                          className="celda-centrada"
-                          title="Cantidad total vendida"
-                        >
-                          Cantidad
-                        </IonCol>
-                        <IonCol
-                          size="1"
-                          className="celda-centrada"
-                          title="Talle del producto"
-                        >
-                          Talle
-                        </IonCol>
-                        <IonCol
-                          size="1"
-                          className="celda-centrada"
-                          title="Tipo de tela"
-                        >
-                          Tela
-                        </IonCol>
-                        <IonCol
-                          size="2"
-                          className="celda-centrada"
-                          title="Color principal"
-                        >
-                          Color
-                        </IonCol>
+                    <IonGrid className="productos-table-grid">
+                      <IonRow className="productos-table-header">
+                        <IonCol size="1" className="productos-table-cell">Ranking</IonCol>
+                        <IonCol size="3" className="productos-table-cell">Producto</IonCol>
+                        <IonCol size="2" className="productos-table-cell">Código</IonCol>
+                        <IonCol size="1" className="productos-table-cell">Cantidad</IonCol>
+                        <IonCol size="1" className="productos-table-cell">Talle</IonCol>
+                        <IonCol size="2" className="productos-table-cell">Tela</IonCol>
+                        <IonCol size="2" className="productos-table-cell">Color</IonCol>
                       </IonRow>
+                      
                       {(productosPorTemporada[temporadaSeleccionada] || []).map(
                         (p, idx) => (
                           <IonRow
-                            className="reporte-tabla-fila"
+                            className={`productos-table-row ${p.ranking <= 3 ? 'top-ranking' : ''}`}
                             key={
                               p.codigoIndumentaria +
                               "-" +
@@ -648,113 +652,109 @@ const ProductosMasPedidos: React.FC = () => {
                               p.color
                             }
                           >
-                            <IonCol size="1" className="celda-centrada">
-                              {p.ranking}
+                            <IonCol size="1" className="productos-table-cell">
+                              {p.ranking <= 3 ? (
+                                <span className="productos-ranking-badge">
+                                  #{p.ranking} 🏆
+                                </span>
+                              ) : (
+                                `#${p.ranking}`
+                              )}
                             </IonCol>
-                            <IonCol size="3" className="celda-centrada">
+                            <IonCol size="3" className="productos-table-cell">
                               {p.nombre_producto}
                             </IonCol>
-                            <IonCol size="2" className="celda-centrada">
+                            <IonCol size="2" className="productos-table-cell">
                               {p.codigoIndumentaria}
                             </IonCol>
-                            <IonCol size="2" className="celda-centrada">
+                            <IonCol size="1" className="productos-table-cell productos-quantity-high">
                               {p.total_vendido}
                             </IonCol>
-                            <IonCol size="1" className="celda-centrada">
+                            <IonCol size="1" className="productos-table-cell">
                               {p.talle}
                             </IonCol>
-                            <IonCol size="1" className="celda-centrada">
+                            <IonCol size="2" className="productos-table-cell">
                               {p.tela}
                             </IonCol>
-                            <IonCol size="2" className="celda-centrada">
+                            <IonCol size="2" className="productos-table-cell">
                               {p.color}
                             </IonCol>
                           </IonRow>
                         )
                       )}
                     </IonGrid>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        flexWrap: "wrap",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <IonButton
-                        color="primary"
-                        size="small"
-                        onClick={exportarExcel}
-                        style={{ minWidth: 120 }}
-                      >
-                        <IonIcon icon={downloadOutline} slot="start" />
-                        Exportar a Excel
-                      </IonButton>
-                      <IonButton
-                        size="small"
-                        fill={incluirGrafico ? "solid" : "outline"}
-                        color={incluirGrafico ? "primary" : "medium"}
-                        onClick={() => setIncluirGrafico((prev) => !prev)}
-                        style={{ minWidth: 120 }}
-                      >
-                        {incluirGrafico
-                          ? "Quitar gráfico del PDF"
-                          : "Incluir gráfico en PDF"}
-                      </IonButton>
-                      <IonButton
-                        color="primary"
-                        size="small"
-                        onClick={exportarPDF}
-                        style={{ minWidth: 80 }}
-                      >
-                        <IonIcon icon={documentText} slot="start" />
-                        PDF
-                      </IonButton>
-                    </div>
-                    <div
-                      style={{
-                        width: "100%",
-                        minHeight: 420,
-                        maxWidth: 1200,
-                        margin: "0 auto",
-                        background: "#fff",
-                        borderRadius: 12,
-                        boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-                        padding: 24,
-                      }}
-                    >
-                      <Bar
-                        key={temporadaSeleccionada}
-                        ref={(el) => {
-                          chartRefs.current[temporadaSeleccionada] = el;
-                        }}
-                        data={getChartData(
-                          productosPorTemporada[temporadaSeleccionada] || []
-                        )}
-                        options={getChartOptions(
-                          temporadaSeleccionada,
-                          productosPorTemporada[temporadaSeleccionada] || []
-                        )}
-                        plugins={[ChartDataLabels] as any}
-                        width={1200}
-                        height={420}
-                      />
-                    </div>
                   </IonCardContent>
                 </IonCard>
               </IonCol>
             </IonRow>
           )}
+
+          {temporadaSeleccionada && (
+            <IonRow>
+              <IonCol size="12">
+                <div className="productos-chart-container">
+                  <Bar
+                    key={temporadaSeleccionada}
+                    ref={(el) => {
+                      chartRefs.current[temporadaSeleccionada] = el;
+                    }}
+                    data={getChartData(
+                      productosPorTemporada[temporadaSeleccionada] || []
+                    )}
+                    options={getChartOptions(
+                      temporadaSeleccionada,
+                      productosPorTemporada[temporadaSeleccionada] || []
+                    )}
+                    plugins={[ChartDataLabels, textOutlinePlugin] as any}
+                    width={1200}
+                    height={420}
+                  />
+                </div>
+              </IonCol>
+            </IonRow>
+          )}
+
           <IonRow>
             <IonCol size="12">
-              <IonButton
-                color="medium"
-                size="small"
-                routerLink="/reportes"
-                style={{ minWidth: 80 }}
-              >
-                Volver
-              </IonButton>
+              <div className="productos-actions-container">
+                <IonButton
+                  className="productos-btn-export"
+                  size="small"
+                  onClick={exportarExcel}
+                >
+                  <IonIcon icon={downloadOutline} slot="start" />
+                  Exportar Excel
+                </IonButton>
+                
+                <IonButton
+                  className={incluirGrafico ? "productos-btn-toggle" : "productos-btn-toggle outline"}
+                  size="small"
+                  fill={incluirGrafico ? "solid" : "outline"}
+                  onClick={() => setIncluirGrafico((prev) => !prev)}
+                >
+                  {incluirGrafico
+                    ? "Quitar gráfico del PDF"
+                    : "Incluir gráfico en PDF"}
+                </IonButton>
+                
+                <IonButton
+                  className="productos-btn-pdf"
+                  size="small"
+                  onClick={exportarPDF}
+                >
+                  <IonIcon icon={documentText} slot="start" />
+                  PDF
+                </IonButton>
+                
+                <IonButton
+                  className="productos-btn-back"
+                  size="small"
+                  fill="clear"
+                  onClick={() => history.push("/reportes")}
+                >
+                  Volver
+                </IonButton>
+              </div>
             </IonCol>
           </IonRow>
         </IonGrid>
@@ -763,9 +763,9 @@ const ProductosMasPedidos: React.FC = () => {
           onDidDismiss={() => setShowToast({ open: false, message: "" })}
           message={showToast.message}
           duration={1800}
-          color="success"
+          cssClass="productos-toast-success"
           icon={checkmarkCircle}
-          position="bottom"
+          position="top"
         />
       </IonContent>
     </IonPage>

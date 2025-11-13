@@ -1,0 +1,378 @@
+/* ===================================
+   PÁGINA: ANÁLISIS DE CANCELACIONES
+   Tema: Rojo/Naranja (Alertas)
+   =================================== */
+
+/* Página principal */
+.analisis-cancelaciones-page {
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  min-height: 100vh;
+}
+
+.analisis-cancelaciones-content {
+  --background: transparent;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+/* Toolbar */
+.analisis-cancelaciones-toolbar {
+  --background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  --color: white;
+  --border-color: rgba(255, 107, 107, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+}
+
+.analisis-cancelaciones-toolbar ion-title {
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Sección del título */
+.analisis-title-section {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 107, 107, 0.3);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.analisis-title-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ff6b6b, #ee5a24, transparent);
+  animation: shimmer-red 3s infinite;
+}
+
+.analisis-main-title {
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
+  letter-spacing: 1px;
+}
+
+.analisis-emission-date {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+/* Estadísticas */
+.analisis-stats-row {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.analisis-stat-card {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 36, 0.1));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 107, 107, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.2);
+}
+
+.analisis-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4);
+  border-color: rgba(255, 107, 107, 0.5);
+}
+
+.analisis-stat-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.analisis-stat-content {
+  flex: 1;
+}
+
+.analisis-stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ff6b6b;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.analisis-stat-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+/* Tabla de datos */
+.analisis-table-card {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 107, 107, 0.3);
+  border-radius: 20px;
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  position: relative;
+}
+
+.analisis-table-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ff6b6b, #ee5a24, transparent);
+  animation: shimmer-red 3s infinite;
+}
+
+.analisis-table-card ion-card-content {
+  padding: 0;
+}
+
+.analisis-table-grid {
+  padding: 0;
+}
+
+.analisis-table-header {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  border-bottom: 3px solid rgba(255, 107, 107, 0.5);
+  font-size: 0.85rem;
+  min-height: 60px;
+  margin: 0;
+}
+
+.analisis-table-header ion-col {
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.5rem;
+}
+
+.analisis-table-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  min-height: 60px;
+  margin: 0;
+}
+
+.analisis-table-row:hover {
+  background: rgba(255, 107, 107, 0.15);
+}
+
+.analisis-table-row ion-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.analisis-percentage-high {
+  font-weight: 800 !important;
+  color: #ff6b6b !important;
+  font-size: 1rem !important;
+}
+
+/* Gráfico container */
+.analisis-chart-container {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 107, 107, 0.3);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.analisis-chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ff6b6b, #ee5a24, transparent);
+}
+
+/* Controles de acción */
+.analisis-actions-container {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 107, 107, 0.3);
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.analisis-actions-container ion-button {
+  --border-radius: 12px;
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.analisis-actions-container ion-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(255, 107, 107, 0.4);
+}
+
+.analisis-btn-export {
+  --background: linear-gradient(135deg, #10dc60, #0ec254);
+  --background-hover: linear-gradient(135deg, #0ec254, #0aa948);
+  --color: white;
+}
+
+.analisis-btn-pdf {
+  --background: linear-gradient(135deg, #3880ff, #2d6eda);
+  --background-hover: linear-gradient(135deg, #2d6eda, #2562c7);
+  --color: white;
+}
+
+.analisis-btn-back {
+  --background: transparent;
+  --background-hover: rgba(255, 107, 107, 0.1);
+  --color: #ff6b6b;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #ff6b6b;
+}
+
+.analisis-btn-back:hover {
+  --background: rgba(255, 107, 107, 0.2);
+}
+
+/* Toast personalizado */
+.analisis-toast-success {
+  --background: linear-gradient(135deg, #10dc60, #0ec254);
+  --color: white;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(16, 220, 96, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .analisis-main-title {
+    font-size: 1.5rem;
+  }
+  
+  .analisis-stat-card {
+    min-width: 100%;
+  }
+  
+  .analisis-table-row ion-col,
+  .analisis-table-header ion-col {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .analisis-table-header {
+    font-size: 0.7rem;
+  }
+  
+  .analisis-actions-container {
+    padding: 1rem;
+    flex-direction: column;
+  }
+  
+  .analisis-actions-container ion-button {
+    width: 100%;
+  }
+  
+  .analisis-chart-container {
+    padding: 1rem;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer-red {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.analisis-table-card,
+.analisis-actions-container,
+.analisis-chart-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.analisis-table-card {
+  animation-delay: 0.1s;
+}
+
+.analisis-chart-container {
+  animation-delay: 0.2s;
+}
+
+.analisis-actions-container {
+  animation-delay: 0.3s;
+}

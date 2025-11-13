@@ -323,9 +323,8 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                             <IonInput
                               value={form.codigoIndumentaria}
                               onIonChange={(e) => handleChange("codigoIndumentaria", e.detail.value!)}
-                              
                               readonly={true}
-                              placeholder="Generado automáticamente"
+                              placeholder={esEdicion ? "No modificable en edición" : "Generado automáticamente"}
                               className="readonly-input"
                             />
                           </IonItem>
@@ -336,8 +335,9 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                             <IonInput
                               value={form.nombre}
                               onIonChange={(e) => handleChange("nombre", e.detail.value!)}
-                              
-                              placeholder="Ej: Camisa Oxford"
+                              readonly={esEdicion}
+                              placeholder={esEdicion ? "No modificable en edición" : "Ej: Camisa Oxford"}
+                              className={esEdicion ? "readonly-input" : ""}
                             />
                           </IonItem>
                         </IonCol>

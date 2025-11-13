@@ -277,6 +277,142 @@ ion-content h2 {
   color: #0054e9;
 }
 
+/* Estilos para el recuadro de información del cliente */
+.cliente-info-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  padding: 20px;
+  border-left: 4px solid #3b82f6;
+}
+
+.cliente-info-card h3 {
+  color: #1e40af;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Estilos para el recuadro de información de envío */
+.envio-info-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  padding: 20px;
+  border-left: 4px solid #fdb40b;
+}
+
+.envio-info-card h3 {
+  color: #d97706;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Grid para mostrar información */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  font-size: 14px;
+  color: #374151 !important;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.info-item strong {
+  color: #1f2937;
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Badge para empresa de envío */
+.empresa-badge {
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(253, 180, 11, 0.3);
+  display: inline-block;
+}
+
+/* Número de seguimiento */
+.tracking-number {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  color: #075985;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-family: "Monaco", "Menlo", monospace;
+  font-size: 15px;
+  border: 2px solid #0ea5e9;
+  display: inline-block;
+  letter-spacing: 1px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cliente-info-card,
+  .envio-info-card {
+    margin: 0 8px 16px 8px;
+    padding: 16px;
+  }
+  
+  .cliente-info-card h3,
+  .envio-info-card h3 {
+    font-size: 16px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .info-item {
+    font-size: 13px;
+    padding: 10px;
+  }
+  
+  .empresa-badge {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+  
+  .tracking-number {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
+
 /* Estilos para el recuadro de motivo de cancelación */
 .motivo-cancelacion-card {
   background: white;

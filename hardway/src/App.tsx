@@ -30,7 +30,6 @@ import ProductosMasPedidos from "./pages/Reportes/ProductosMasPedidos";
 import Picking from "./pages/Picking/Picking";
 import Envios from "./pages/Envios/Envios";
 import DebugAuth from "./pages/DebugAuth";
-import UsuariosSimple from "./pages/UsuariosSimple";
 import AccesoRestringido from "./pages/AccesoRestringido";
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
@@ -111,7 +110,7 @@ const AppRouter = () => {
               exact
               path="/envios"
               component={Envios}
-              requiredRoles={["Administrador", "Envios"]}
+              requiredRoles={["Administrador", "Envios", "Picker"]}
             />
             <Route exact path="/detalle-pedido/:id">
               <DetallePedido />

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Usuario, Rol, TipoRol, Persona } = require('../models');
+const { Usuario, TipoRol, Persona } = require('../models'); // ❌ Eliminado: Rol
 
 // Modelo EncargadoPicker (temporal hasta que se mueva)
 const { DataTypes } = require("sequelize");
@@ -25,13 +25,15 @@ router.post("/login", async (req, res) => {
   console.log(`🔐 Intento de login: ${nombreUsuario}`);
   
   try {
-    // Busca el usuario y su rol
+    // ✅ Busca el usuario con sus MÚLTIPLES roles
     const usuario = await Usuario.findOne({
       where: { nombreUsuario },
-      attributes: ['idUsuario', 'nombreUsuario', 'contrasena', 'idRol', 'idPersona'], // Incluir idPersona
+      attributes: ['idUsuario', 'nombreUsuario', 'contrasena', 'idPersona'],
       include: {
-        model: Rol,
-        include: { model: TipoRol },
+        model: TipoRol,
+        as: "roles", // Usar alias de la relación N:M
+        attributes: ['idTipoRol', 'tipoRol'],
+        through: { attributes: [] } // No incluir campos de usuario_tiporol
       },
     });
     
@@ -39,7 +41,7 @@ router.post("/login", async (req, res) => {
       id: usuario.idUsuario,
       nombre: usuario.nombreUsuario,
       idPersona: usuario.idPersona,
-      rol: usuario.Rol?.TipoRol?.tipoRol
+      roles: usuario.roles?.map(r => r.tipoRol) || []
     } : 'No encontrado');
     
     if (!usuario || usuario.contrasena !== passwordToCheck) {
@@ -47,14 +49,13 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
     
-    // Si es picker, buscar el legajo real
+    // ✅ Verificar si tiene algún rol de tipo "Picker"
     let legajoPicker = null;
-    if (
-      usuario.Rol &&
-      usuario.Rol.TipoRol &&
-      usuario.Rol.TipoRol.tipoRol &&
-      usuario.Rol.TipoRol.tipoRol.toLowerCase().includes("picker")
-    ) {
+    const esPicker = usuario.roles?.some(rol => 
+      rol.tipoRol && rol.tipoRol.toLowerCase().includes("picker")
+    );
+    
+    if (esPicker) {
       console.log(`🏷️ Buscando legajo para picker ${nombreUsuario}...`);
       
       // Verificar que el usuario tenga idPersona válido
@@ -76,12 +77,16 @@ router.post("/login", async (req, res) => {
     
     console.log(`✅ Login exitoso para ${nombreUsuario}`);
     
+    // ✅ Devolver array de roles
     res.json({
       token: 'temp-token-' + usuario.idUsuario, // Token temporal para testing
       id: usuario.idUsuario,
       nombreUsuario: usuario.nombreUsuario,
-      rolNombre: usuario.Rol?.TipoRol?.tipoRol || "",
-      tipoRol: usuario.Rol?.TipoRol?.tipoRol || "",
+      roles: usuario.roles?.map(r => r.tipoRol) || [], // Array: ["Vendedor", "Admin"]
+      rolesIds: usuario.roles?.map(r => r.idTipoRol) || [], // Array: [2, 8]
+      // Mantener compatibilidad temporal con código antiguo
+      rolNombre: usuario.roles?.[0]?.tipoRol || "", // Primer rol (deprecated)
+      tipoRol: usuario.roles?.[0]?.tipoRol || "", // Primer rol (deprecated)
       legajoPicker, // null si no es picker
     });
   } catch (error) {

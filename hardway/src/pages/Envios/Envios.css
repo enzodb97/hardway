@@ -1,5 +1,5 @@
 /* Envios Page - Improved Color Palette */
-*{
+.envios-page * {
   --ion-default-font: "Roboto", "Helvetica Neue", sans-serif !important;
 }
 
@@ -7,19 +7,19 @@
   --ion-background-color: transparent;
 }
 
-.envios-content {
+.envios-page .envios-content {
   padding: 1rem;
 }
 
 /* Header Styles */
-.header-icon {
+.envios-page .header-icon {
   margin-right: 8px;
   font-size: 1.2rem;
   color: #ffffff;
 }
 
 /* Stats Card */
-.stats-card {
+.envios-page .stats-card {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -28,25 +28,25 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.stats-card ion-grid {
+.envios-page .stats-card ion-grid {
   padding: 0;
 }
 
-.stats-card ion-row {
+.envios-page .stats-card ion-row {
   margin: 0;
 }
 
-.stats-card ion-col {
+.envios-page .stats-card ion-col {
   padding: 0.5rem;
 }
 
-.stat-col {
+.envios-page .stat-col {
   display: flex;
   justify-content: center;
   align-items: stretch;
 }
 
-.stat-item {
+.envios-page .stat-item {
   text-align: center;
   padding: 1.5rem 1rem;
   display: flex;
@@ -61,23 +61,23 @@
   transition: all 0.3s ease;
 }
 
-.stat-item:hover {
+.envios-page .stat-item:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
 
-.stat-item.active {
+.envios-page .stat-item.active {
   background: rgba(253, 180, 11, 0.2);
   border: 2px solid rgba(253, 180, 11, 0.8);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(253, 180, 11, 0.3);
 }
 
-.stat-item.active .stat-icon {
+.envios-page .stat-item.active .stat-icon {
   filter: drop-shadow(0 2px 4px rgba(253, 180, 11, 0.5));
 }
 
-.stat-icon {
+.envios-page .stat-icon {
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
   display: block;
@@ -85,19 +85,19 @@
   flex-shrink: 0;
 }
 
-.stat-icon.pending {
+.envios-page .stat-icon.pending {
   color: #ffed4e;
 }
 
-.stat-icon.dispatched {
+.envios-page .stat-icon.dispatched {
   color: #10dc60;
 }
 
-.stat-icon.total {
+.envios-page .stat-icon.total {
   color: #5d9cec;
 }
 
-.stat-number {
+.envios-page .stat-number {
   font-size: 2rem;
   font-weight: bold;
   color: #ffffff;
@@ -106,7 +106,7 @@
   flex-shrink: 0;
 }
 
-.stat-label {
+.envios-page .stat-label {
   font-size: 0.85rem;
   color: #e0e0e0;
   text-transform: uppercase;
@@ -117,7 +117,7 @@
 }
 
 /* Filters Card */
-.filters-card {
+.envios-page .filters-card {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -126,7 +126,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.custom-searchbar {
+.envios-page .custom-searchbar {
   --background: rgba(255, 255, 255, 0.2);
   --border-radius: 12px;
   --color: #ffffff;
@@ -134,7 +134,7 @@
   --icon-color: #ffffff;
 }
 
-.filter-chips {
+.envios-page .filter-chips {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-start;
@@ -142,7 +142,7 @@
   margin-top: 0.5rem;
 }
 
-.filter-chips ion-chip {
+.envios-page .filter-chips ion-chip {
   cursor: pointer;
   transition: all 0.2s ease;
   --background: rgba(255, 255, 255, 0.1);
@@ -154,7 +154,7 @@
 
 }
 
-.filter-chips ion-chip:hover {
+.envios-page .filter-chips ion-chip:hover {
   transform: scale(1.05);
   --background: rgba(253, 180, 11, 0.2);
   --color: #ffffff;
@@ -162,7 +162,7 @@
 }
 
 /* Loading State */
-.loading-container {
+.envios-page .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -176,20 +176,20 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.loading-container ion-spinner {
+.envios-page .loading-container ion-spinner {
   margin-bottom: 1rem;
   --color: #5d9cec;
   transform: scale(1.5);
 }
 
-.loading-container p {
+.envios-page .loading-container p {
   font-weight: 600;
   font-size: 1.1rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Empty State */
-.empty-state {
+.envios-page .empty-state {
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -204,7 +204,7 @@
   width: 100%;
 }
 
-.empty-state ion-card-content {
+.envios-page .empty-state ion-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -214,7 +214,7 @@
   margin: 0;
 }
 
-.empty-icon {
+.envios-page .empty-icon {
   font-size: 5rem;
   color: #fdb40b;
   margin: 0 auto 1.5rem auto;
@@ -224,7 +224,7 @@
   text-align: center;
 }
 
-.empty-state h3 {
+.envios-page .empty-state h3 {
   color: #ffffff;
   margin: 0 auto 1rem auto;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -234,7 +234,7 @@
   width: 100%;
 }
 
-.empty-state p {
+.envios-page .empty-state p {
   color: #d0d0d0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   margin: 0 auto;
@@ -245,7 +245,7 @@
 }
 
 /* Grid de pedidos */
-.pedidos-grid {
+.envios-page .pedidos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   gap: 24px;
@@ -253,7 +253,7 @@
 }
 
 /* Pedido Cards */
-.pedido-card {
+.envios-page .pedido-card {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -263,17 +263,17 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.pedido-card:hover {
+.envios-page .pedido-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
 
-ion-card-header{
+.envios-page ion-card-header{
   background: none !important;
 }
-.pedido-header {
+.envios-page .pedido-header {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -288,7 +288,7 @@ ion-card-header{
   height: 80px;
 }
 
-.pedido-header::before {
+.envios-page .pedido-header::before {
   content: '';
   position: absolute;
   top: 0;
@@ -302,7 +302,7 @@ ion-card-header{
 
 
 
-.pedido-title {
+.envios-page .pedido-title {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -313,7 +313,7 @@ ion-card-header{
   padding-left: 1.25rem;
 }
 
-.pedido-title ion-card-title {
+.envios-page .pedido-title ion-card-title {
   color: #ffffff;
   font-size: 1.2rem;
   margin: 0;
@@ -321,7 +321,7 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.status-badge {
+.envios-page .status-badge {
   border-radius: 12px;
   font-size: 0.75rem;
   padding: 0.3rem 0.8rem;
@@ -334,7 +334,21 @@ ion-card-header{
   justify-content: center;
 }
 
-.pedido-date {
+.envios-page .despachador-badge {
+  background: rgba(253, 180, 11, 0.2);
+  border: 1px solid rgba(253, 180, 11, 0.4);
+  color: #fdb40b;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.envios-page .pedido-date {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,16 +362,16 @@ ion-card-header{
   padding-right: 1.25rem;
 }
 
-.pedido-date ion-icon {
+.envios-page .pedido-date ion-icon {
   font-size: 0.9rem;
   color: #fdb40b;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 /* Info Items */
-.info-item {
+.envios-page .info-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
   padding: 0.5rem;
@@ -366,7 +380,7 @@ ion-card-header{
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.info-icon {
+.envios-page .info-icon {
   color: #5d9cec;
   font-size: 1.2rem;
   margin-top: 0.125rem;
@@ -374,7 +388,7 @@ ion-card-header{
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
-.info-label {
+.envios-page .info-label {
   font-size: 0.75rem;
   color: #b0b0b0;
   text-transform: uppercase;
@@ -383,7 +397,7 @@ ion-card-header{
   font-weight: 600;
 }
 
-.info-value {
+.envios-page .info-value {
   color: #ffffff;
   font-size: 0.9rem;
   word-break: break-word;
@@ -391,7 +405,298 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.action-container {
+/* Contenedor de Empresa de Envío */
+.envios-page .empresa-envio-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.2) 0%, rgba(253, 180, 11, 0.1) 100%);
+  border: 2px solid rgba(253, 180, 11, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.envios-page .empresa-envio-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #fdb40b 0%, #ff9800 100%);
+  box-shadow: 0 0 10px rgba(253, 180, 11, 0.5);
+}
+
+.envios-page .empresa-envio-container:hover {
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.3) 0%, rgba(253, 180, 11, 0.15) 100%);
+  border-color: rgba(253, 180, 11, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.envios-page .empresa-envio-icon {
+  font-size: 2rem;
+  color: #fdb40b;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.envios-page .empresa-envio-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.envios-page .empresa-envio-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.envios-page .empresa-envio-value {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(90deg, #fdb40b 0%, #ffcc00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Contenedor de Información del Despachador */
+.envios-page .despachador-info-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(93, 156, 236, 0.2) 0%, rgba(93, 156, 236, 0.1) 100%);
+  border: 2px solid rgba(93, 156, 236, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(93, 156, 236, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.envios-page .despachador-info-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #5d9cec 0%, #4a89dc 100%);
+  box-shadow: 0 0 10px rgba(93, 156, 236, 0.5);
+}
+
+.envios-page .despachador-info-container:hover {
+  background: linear-gradient(135deg, rgba(93, 156, 236, 0.3) 0%, rgba(93, 156, 236, 0.15) 100%);
+  border-color: rgba(93, 156, 236, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(93, 156, 236, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.envios-page .despachador-info-icon {
+  font-size: 2rem;
+  color: #5d9cec;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+}
+
+.envios-page .despachador-info-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.envios-page .despachador-info-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.envios-page .despachador-info-value {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(90deg, #5d9cec 0%, #7cb3f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Contenedor de Código de Seguimiento */
+.envios-page .tracking-info-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(16, 220, 96, 0.2) 0%, rgba(16, 220, 96, 0.1) 100%);
+  border: 2px solid rgba(16, 220, 96, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(16, 220, 96, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.envios-page .tracking-info-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #10dc60 0%, #0ec254 100%);
+  box-shadow: 0 0 10px rgba(16, 220, 96, 0.5);
+}
+
+.envios-page .tracking-info-container:hover {
+  background: linear-gradient(135deg, rgba(16, 220, 96, 0.3) 0%, rgba(16, 220, 96, 0.15) 100%);
+  border-color: rgba(16, 220, 96, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 220, 96, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.envios-page .tracking-icon {
+  font-size: 2rem;
+  color: #10dc60;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+  animation: checkmark-pulse 2s ease-in-out infinite;
+}
+
+@keyframes checkmark-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(16, 220, 96, 0.6));
+  }
+}
+
+.envios-page .tracking-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.envios-page .tracking-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.envios-page .tracking-value {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(90deg, #10dc60 0%, #28e070 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Contenedor de advertencia para pedidos sin código */
+.envios-page .warning-tracking-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(255, 206, 84, 0.2) 0%, rgba(255, 206, 84, 0.1) 100%);
+  border: 2px solid rgba(255, 206, 84, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(255, 206, 84, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.envios-page .warning-tracking-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #ffce54 0%, #f6bb42 100%);
+  box-shadow: 0 0 10px rgba(255, 206, 84, 0.5);
+}
+
+.envios-page .warning-icon {
+  font-size: 2rem;
+  color: #ffce54;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+}
+
+.envios-page .warning-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.envios-page .warning-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.envios-page .warning-value {
+  color: #ffce54;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-style: italic;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.envios-page .action-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -400,7 +705,7 @@ ion-card-header{
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.action-container ion-button {
+.envios-page .action-container ion-button {
   --border-radius: 12px;
   --padding-start: 2rem;
   --padding-end: 2rem;
@@ -411,34 +716,236 @@ ion-card-header{
   letter-spacing: 0.5px;
 }
 
-/* Pagination */
-.pagination-card {
-  background: rgba(0, 0, 0, 0.6);
+/* Pagination mejorada ESPECÍFICA para Envios */
+.envios-page .pagination-card {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
   backdrop-filter: blur(15px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(253, 180, 11, 0.3);
   border-radius: 16px;
-  margin-top: 1rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
 }
 
-.pagination-container {
+.envios-page .pagination-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #fdb40b, #f39c12, transparent);
+  border-radius: 16px 16px 0 0;
+}
+
+.envios-page .pagination-container {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-  gap: 1rem;
-  
+  padding: 10px 0;
 }
 
-.pagination-info {
+.envios-page .pagination-container ion-button {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, rgba(50, 50, 50, 0.95), rgba(30, 30, 30, 0.95));
+  --background-hover: rgba(253, 180, 11, 0.2);
+  --color: rgba(255, 255, 255, 0.95);
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: rgba(255, 255, 255, 0.3);
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  min-width: 48px;
+  height: 48px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.envios-page .pagination-container ion-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.4), rgba(243, 156, 18, 0.4));
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.envios-page .pagination-container ion-button:hover:not([disabled])::before {
+  width: 120%;
+  height: 120%;
+}
+
+.envios-page .pagination-container ion-button:hover:not([disabled]) {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.3), rgba(243, 156, 18, 0.3));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.6);
+  --box-shadow: 0 6px 25px rgba(253, 180, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+.envios-page .pagination-container ion-button:active:not([disabled]) {
+  transform: translateY(0px);
+  --box-shadow: 0 2px 10px rgba(253, 180, 11, 0.3);
+}
+
+.envios-page .pagination-container ion-button[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  --border-color: rgba(255, 255, 255, 0.15);
+  --background: linear-gradient(135deg, rgba(40, 40, 40, 0.6), rgba(30, 30, 30, 0.6));
+}
+
+/* Botón Volver especial en Envios */
+.envios-page .pagination-container ion-button[color="warning"] {
+  --background: linear-gradient(135deg, #fdb40b, #f39c12);
+  --color: #000000;
+  --border-color: rgba(253, 180, 11, 0.8);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  min-width: 100px;
+  margin-right: 16px;
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.4);
+}
+
+.envios-page .pagination-container ion-button[color="warning"]:hover {
+  --background: linear-gradient(135deg, #ffed4e, #fdb40b);
+  --color: #000000;
+  --border-color: rgba(253, 180, 11, 1);
+  --box-shadow: 0 8px 30px rgba(253, 180, 11, 0.6);
+  transform: translateY(-3px) scale(1.02);
+}
+
+/* Botones de navegación con iconos en Envios */
+.envios-page .pagination-container ion-button[fill="clear"] {
+  --background: linear-gradient(135deg, rgba(50, 50, 50, 0.8), rgba(30, 30, 30, 0.8));
+  --color: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(255, 255, 255, 0.2);
+}
+
+.envios-page .pagination-container ion-button[fill="clear"]:hover:not([disabled]) {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.25), rgba(243, 156, 18, 0.25));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.6);
+}
+
+/* Selector de página en Envios */
+.envios-page .page-selector-wrapper {
+  position: relative;
+}
+
+.envios-page .page-selector-button {
+  min-width: 160px;
+  --background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(20, 20, 20, 0.8));
+  --color: #fdb40b;
+  --border-color: rgba(253, 180, 11, 0.5);
+  font-size: 0.95rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.envios-page .page-selector-button:hover {
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.2), rgba(243, 156, 18, 0.2));
+  --color: #ffed4e;
+  --border-color: rgba(253, 180, 11, 0.8);
+}
+
+/* Dropdown del selector de página en Envios */
+.envios-page .page-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(20, 20, 20, 0.98));
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(253, 180, 11, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(253, 180, 11, 0.3);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  min-width: 160px;
+  margin-top: 8px;
+}
+
+/* Opciones del dropdown en Envios */
+.envios-page .page-option {
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(253, 180, 11, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.envios-page .page-option:last-child {
+  border-bottom: none;
+}
+
+.envios-page .page-option:hover:not(.active) {
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.15), rgba(243, 156, 18, 0.15));
+  color: #fdb40b;
+  padding-left: 24px;
+}
+
+.envios-page .page-option.active {
+  background: linear-gradient(135deg, #fdb40b, #f39c12);
+  color: #000000;
+  font-weight: 800;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+  border-left: 4px solid #ffed4e;
+}
+
+/* Resumen de paginación en Envios */
+.envios-page .pagination-summary {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(253, 180, 11, 0.3);
+  font-size: 0.95rem;
+  color: #fdb40b;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.1), rgba(243, 156, 18, 0.1));
+  padding: 16px 24px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+  box-shadow: inset 0 0 20px rgba(253, 180, 11, 0.1);
+}
+
+/* Iconos de paginación mejorados en Envios */
+.envios-page .pagination-container ion-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.envios-page .pagination-container ion-button:hover:not([disabled]) ion-icon {
+  transform: scale(1.15);
+}
+
+.envios-page .pagination-info {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   text-align: center;
   color: #e0e0e0;
+  padding: 0 10px;
 }
 
-.page-indicator {
+.envios-page .page-indicator {
   display: block;
   font-weight: 700;
   margin-bottom: 0.25rem;
@@ -446,124 +953,453 @@ ion-card-header{
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.items-indicator {
+.envios-page .items-indicator {
   font-size: 0.85rem;
   color: #b0b0b0;
 }
 
-/* Modal Styles */
-ion-modal.tracking-modal {
-  --backdrop-opacity: 0.85;
-  --ion-background-color: transparent;
-  --background: transparent;
-  --ion-font-family: "Roboto", "Helvetica Neue", sans-serif;
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+/* Modal Styles - ÚNICOS para Envios */
+/* IMPORTANTE: Los modales de Ionic se renderizan fuera del contenedor .envios-page */
+.envios-tracking-modal {
+  --backdrop-opacity: 0.85 !important;
+  --ion-background-color: transparent !important;
+  --background: transparent !important;
+  --ion-font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
 }
 
-ion-modal.tracking-modal .modal-wrapper {
+.envios-tracking-modal::part(backdrop) {
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+.envios-tracking-modal::part(content) {
   background: transparent !important;
 }
 
-ion-modal.tracking-modal ion-content {
+.envios-tracking-modal .modal-wrapper {
+  background: transparent !important;
+}
+
+.envios-tracking-modal ion-content {
   --background: transparent !important;
   --ion-background-color: transparent !important;
 }
 
 /* Fuerza el fondo transparente en todos los elementos del modal */
-ion-modal.tracking-modal,
-ion-modal.tracking-modal > *,
-ion-modal.tracking-modal .modal-wrapper,
-ion-modal.tracking-modal ion-backdrop,
-ion-modal.tracking-modal ion-content,
-ion-modal.tracking-modal .ion-page {
+.envios-tracking-modal,
+.envios-tracking-modal > *,
+.envios-tracking-modal .modal-wrapper,
+.envios-tracking-modal ion-backdrop,
+.envios-tracking-modal ion-content,
+.envios-tracking-modal .ion-page {
   background: transparent !important;
   --background: transparent !important;
   --ion-background-color: transparent !important;
 }
 
-.modal-content {
+.envios-modal-content {
   background: linear-gradient(135deg, 
     rgba(30, 30, 30, 0.98) 0%, 
     rgba(20, 20, 20, 0.98) 100%) !important;
-  backdrop-filter: blur(25px);
-  border: 3px solid #fdb40b;
-  border-radius: 24px;
-  padding: 2rem;
-  margin: 1rem auto;
-  max-width: 480px;
-  width: calc(100% - 2rem);
-  max-height: calc(100vh - 4rem);
-  margin-top: 5vh;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 3px solid #fdb40b !important;
+  border-radius: 24px !important;
+  padding: 2rem !important;
+  margin: 1rem auto !important;
+  max-width: 480px !important;
+  width: calc(100% - 2rem) !important;
+  max-height: calc(100vh - 4rem) !important;
+  min-height: 550px !important;
+  height: auto !important;
+  margin-top: 3vh !important;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
-              0 0 0 1px rgba(253, 180, 11, 0.3);
-  position: relative;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 400px;
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+              0 0 0 1px rgba(253, 180, 11, 0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  animation: envios-modal-appear 0.3s ease-out !important;
 }
 
-.modal-content::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #fdb40b, #f39c12, #e67e22, #fdb40b);
-  animation: shimmer 2s linear infinite;
+@keyframes envios-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: 200px 0; }
+.envios-modal-content::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, #fdb40b, #f39c12, #e67e22, #fdb40b) !important;
+  background-size: 200% 100% !important;
+  animation: envios-modal-shimmer 2s linear infinite !important;
 }
 
-.modal-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  position: relative;
-  flex-shrink: 0;
+@keyframes envios-modal-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-.modal-header::before {
-  content: '📦';
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.75rem;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+.envios-modal-header {
+  text-align: center !important;
+  margin-bottom: 1.5rem !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
 }
 
-.modal-header h2 {
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 800;
-  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
-  letter-spacing: 0.5px;
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+.envios-modal-header::before {
+  content: '📦' !important;
+  font-size: 2.5rem !important;
+  display: block !important;
+  margin-bottom: 0.75rem !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+.envios-modal-header h2 {
+  margin-bottom: 0.5rem !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7) !important;
+  letter-spacing: 0.5px !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
   color: #fdb40b !important;
 }
 
-.modal-header p {
-  color: #fdb40b;
-  font-size: 1rem;
-  font-weight: 600;
-  background: rgba(253, 180, 11, 0.15);
-  padding: 0.4rem 0.8rem;
-  border-radius: 16px;
-  display: inline-block;
-  border: 1px solid rgba(253, 180, 11, 0.3);
-  font-family: "Roboto", "Helvetica Neue", sans-serif;
+.envios-modal-header p {
+  color: #fdb40b !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  background: rgba(253, 180, 11, 0.15) !important;
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 16px !important;
+  display: inline-block !important;
+  border: 1px solid rgba(253, 180, 11, 0.3) !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
 }
 
-.modal-body {
-  margin-bottom: 2rem;
-  flex: 1;
-  min-height: 0;
+.envios-modal-body {
+  margin-bottom: 5rem !important;
+  padding-bottom: 2rem !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
 }
 
-.tracking-input {
+.envios-tracking-input {
+  --background: rgba(50, 50, 50, 0.8) !important;
+  --border-radius: 16px !important;
+  border-radius: 16px !important;
+  margin-bottom: 1rem !important;
+  border: 2px solid rgba(253, 180, 11, 0.4) !important;
+  transition: all 0.3s ease !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.envios-tracking-input:focus-within {
+  border-color: #fdb40b !important;
+  box-shadow: 0 0 0 3px rgba(253, 180, 11, 0.2),
+              0 8px 25px rgba(253, 180, 11, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.envios-tracking-input ion-label {
+  color: #fdb40b !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-tracking-input ion-input {
+  --color: #ffffff !important;
+  --placeholder-color: rgba(255, 255, 255, 0.5) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  --padding-start: 1.25rem !important;
+  --padding-end: 1.25rem !important;
+  --padding-top: 0.75rem !important;
+  --padding-bottom: 0.75rem !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-tracking-display {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 1rem !important;
+  background: rgba(16, 220, 96, 0.2) !important;
+  border-radius: 12px !important;
+  border: 2px solid rgba(16, 220, 96, 0.5) !important;
+  color: #10dc60 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(16, 220, 96, 0.3) !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-tracking-display ion-icon {
+  font-size: 2rem !important;
+  flex-shrink: 0 !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) !important;
+}
+
+.envios-tracking-display span {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.envios-modal-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  flex-shrink: 0 !important;
+  margin-top: 2rem !important;
+}
+
+.envios-modal-actions ion-button {
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.9rem !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  height: 50px !important;
+  --border-radius: 12px !important;
+}
+
+/*.envios-modal-btn-primary {
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4) !important;
+ --background: linear-gradient(135deg, #fdb40b 0%, #ff9800 100%) !important;
+}*/
+
+.envios-modal-btn-primary:hover:not([disabled]) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(253, 180, 11, 0.5) !important;
+}
+
+.envios-modal-btn-primary[disabled] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.envios-modal-btn-cancel {
+  --color: rgba(255, 255, 255, 0.7) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+  --background: transparent !important;
+  --box-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin-top: 0px !important;
+}
+
+.envios-modal-btn-cancel:hover {
+  --color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  --background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-2px) !important;
+  --box-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.envios-modal-btn-cancel:focus,
+.envios-modal-btn-cancel:active {
+  --box-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.envios-icon-margin {
+  margin-right: 8px !important;
+}
+
+/* Warning message styling - ÚNICO para Envios */
+.envios-warning-message {
+  padding: 1rem !important;
+  background: linear-gradient(135deg, rgba(255, 237, 78, 0.2) 0%, rgba(255, 237, 78, 0.1) 100%) !important;
+  border: 2px solid rgba(255, 237, 78, 0.6) !important;
+  border-radius: 12px !important;
+  margin-top: 1rem !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 16px rgba(255, 237, 78, 0.2) !important;
+}
+
+.envios-warning-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  color: #ffffff !important;
+}
+
+.envios-warning-content ion-icon {
+  font-size: 1.5rem !important;
+  color: #ffed4e !important;
+  flex-shrink: 0 !important;
+}
+
+.envios-warning-content span {
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* También mantener los estilos con prefijo .envios-page para otros elementos */
+.envios-page .envios-tracking-modal {
+  --backdrop-opacity: 0.85 !important;
+  --ion-background-color: transparent !important;
+  --background: transparent !important;
+  --ion-font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-page .envios-tracking-modal::part(backdrop) {
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+.envios-page .envios-tracking-modal::part(content) {
+  background: transparent !important;
+}
+
+.envios-page .envios-tracking-modal .modal-wrapper {
+  background: transparent !important;
+}
+
+.envios-page .envios-tracking-modal ion-content {
+  --background: transparent !important;
+  --ion-background-color: transparent !important;
+}
+
+/* Fuerza el fondo transparente en todos los elementos del modal */
+.envios-page .envios-tracking-modal,
+.envios-page .envios-tracking-modal > *,
+.envios-page .envios-tracking-modal .modal-wrapper,
+.envios-page .envios-tracking-modal ion-backdrop,
+.envios-page .envios-tracking-modal ion-content,
+.envios-page .envios-tracking-modal .ion-page {
+  background: transparent !important;
+  --background: transparent !important;
+  --ion-background-color: transparent !important;
+}
+
+.envios-page .envios-modal-content {
+  background: linear-gradient(135deg, 
+    rgba(30, 30, 30, 0.98) 0%, 
+    rgba(20, 20, 20, 0.98) 100%) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 3px solid #fdb40b !important;
+  border-radius: 24px !important;
+  padding: 2rem !important;
+  margin: 1rem auto !important;
+  max-width: 480px !important;
+  width: calc(100% - 2rem) !important;
+  max-height: calc(100vh - 4rem) !important;
+  min-height: 550px !important;
+  height: auto !important;
+  margin-top: 3vh !important;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
+              0 0 0 1px rgba(253, 180, 11, 0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  animation: envios-modal-appear 0.3s ease-out !important;
+}
+
+@keyframes envios-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.envios-page .envios-modal-content::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, #fdb40b, #f39c12, #e67e22, #fdb40b) !important;
+  background-size: 200% 100% !important;
+  animation: envios-modal-shimmer 2s linear infinite !important;
+}
+
+@keyframes envios-modal-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.envios-page .envios-modal-header {
+  text-align: center !important;
+  margin-bottom: 1.5rem !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+
+.envios-page .envios-modal-header::before {
+  content: '📦' !important;
+  font-size: 2.5rem !important;
+  display: block !important;
+  margin-bottom: 0.75rem !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+.envios-page .envios-modal-header h2 {
+  margin-bottom: 0.5rem !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7) !important;
+  letter-spacing: 0.5px !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  color: #fdb40b !important;
+}
+
+.envios-page .envios-modal-header p {
+  color: #fdb40b !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  background: rgba(253, 180, 11, 0.15) !important;
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 16px !important;
+  display: inline-block !important;
+  border: 1px solid rgba(253, 180, 11, 0.3) !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+}
+
+.envios-page .envios-modal-body {
+  margin-bottom: 4rem !important;
+  padding-bottom: 2rem !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.envios-page .tracking-input {
   --background: rgba(50, 50, 50, 0.8);
   --border-radius: 16px;
   border-radius: 16px;
@@ -574,14 +1410,27 @@ ion-modal.tracking-modal .ion-page {
   position: relative;
 }
 
-.tracking-input:focus-within {
+.envios-page .envios-tracking-input {
+  --background: rgba(50, 50, 50, 0.8);
+  --border-radius: 16px;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  border: 2px solid rgba(253, 180, 11, 0.4);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.envios-page .tracking-input:focus-within,
+.envios-page .envios-tracking-input:focus-within {
   border-color: #fdb40b;
   box-shadow: 0 0 0 3px rgba(253, 180, 11, 0.2),
               0 8px 25px rgba(253, 180, 11, 0.3);
   transform: translateY(-2px);
 }
 
-.tracking-input ion-label {
+.envios-page .tracking-input ion-label,
+.envios-page .envios-tracking-input ion-label {
   color: #fdb40b !important;
   font-weight: 700;
   font-size: 0.85rem;
@@ -591,7 +1440,8 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.tracking-input ion-input {
+.envios-page .tracking-input ion-input,
+.envios-page .envios-tracking-input ion-input {
   --color: #ffffff;
   --placeholder-color: rgba(255, 255, 255, 0.5);
   font-weight: 600;
@@ -603,8 +1453,8 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-
-.tracking-display {
+.envios-page .tracking-display,
+.envios-page .envios-tracking-display {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -618,7 +1468,21 @@ ion-modal.tracking-modal .ion-page {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.modal-actions {
+.envios-page .envios-tracking-display ion-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.envios-page .envios-tracking-display span {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.envios-page .modal-actions,
+.envios-page .envios-modal-actions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -626,7 +1490,8 @@ ion-modal.tracking-modal .ion-page {
   margin-top: 2rem;
 }
 
-.modal-actions ion-button {
+.envios-page .modal-actions ion-button,
+.envios-page .envios-modal-actions ion-button {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -635,87 +1500,182 @@ ion-modal.tracking-modal .ion-page {
   transition: all 0.3s ease;
   font-size: 0.9rem;
   font-family: "Roboto", "Helvetica Neue", sans-serif;
+  height: 50px;
+  --border-radius: 12px;
 }
 
-.modal-actions ion-button:not([fill="clear"]) {
+.envios-page .modal-actions ion-button:not([fill="clear"]),
+.envios-page .envios-modal-btn-primary {
   box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9800 100%);
 }
 
-.modal-actions ion-button:not([fill="clear"]):hover {
+.envios-page .modal-actions ion-button:not([fill="clear"]):hover,
+.envios-page .envios-modal-btn-primary:hover:not([disabled]) {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(253, 180, 11, 0.5);
 }
 
-.modal-actions ion-button[fill="clear"] {
+.envios-page .envios-modal-btn-primary[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.envios-page .modal-actions ion-button[fill="clear"],
+.envios-page .envios-modal-btn-cancel {
   --color: rgba(255, 255, 255, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  --background: transparent;
+  --box-shadow: none;
+  box-shadow: none;
+  outline: none;
 }
 
-.modal-actions ion-button[fill="clear"]:hover {
+.envios-page .modal-actions ion-button[fill="clear"]:hover,
+.envios-page .envios-modal-btn-cancel:hover {
   --color: #ffffff;
   border-color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.05);
+  --background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  --box-shadow: none;
+  box-shadow: none;
+  outline: none;
 }
 
-ion-modal ion-button[expand="block"] {
+.envios-page .envios-modal-btn-cancel:focus,
+.envios-page .envios-modal-btn-cancel:active {
+  --box-shadow: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.envios-page .envios-icon-margin {
+  margin-right: 8px;
+}
+
+/* Warning message styling - ÚNICO para Envios */
+.envios-page .warning-message,
+.envios-page .envios-warning-message {
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(255, 237, 78, 0.2) 0%, rgba(255, 237, 78, 0.1) 100%);
+  border: 2px solid rgba(255, 237, 78, 0.6);
+  border-radius: 12px;
+  margin-top: 1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(255, 237, 78, 0.2);
+}
+
+.envios-page .warning-content,
+.envios-page .envios-warning-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ffffff;
+}
+
+.envios-page .warning-content ion-icon,
+.envios-page .envios-warning-content ion-icon {
+  font-size: 1.5rem;
+  color: #ffed4e;
+  flex-shrink: 0;
+}
+
+.envios-page .warning-content span,
+.envios-page .envios-warning-content span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.envios-page ion-modal ion-button[expand="block"] {
     margin-top: auto;
     font-weight: 600;
     --border-radius: 0px;
     height: 0px !important;
 }
 
-ion-modal ion-item {
+.envios-page ion-modal ion-item {
     --border-color: none;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .pedidos-grid {
+  .envios-page .pedidos-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   
-  .pagination-container {
-    flex-direction: column;
+  .envios-page .pagination-container {
+    flex-direction: row;
     text-align: center;
+    gap: 6px;
   }
   
-  .filter-chips {
+  .envios-page .pagination-container ion-button {
+    min-width: 40px !important;
+    height: 40px !important;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+  
+  .envios-page .pagination-container ion-button[color="warning"] {
+    min-width: 80px !important;
+    margin-right: 8px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .envios-page .page-selector-button {
+    min-width: 120px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .envios-page .pagination-card {
+    padding: 16px 12px !important;
+  }
+  
+  .envios-page .pagination-summary {
+    font-size: 0.8rem !important;
+    padding: 10px 16px !important;
+  }
+  
+  .envios-page .filter-chips {
     justify-content: center;
   }
   
-  .pedido-header {
+  .envios-page .pedido-header {
     text-align: center;
     padding: 0.75rem;
     margin: -1rem -1rem 1rem -1rem;
   }
   
-  .stat-item {
+  .envios-page .stat-item {
     padding: 1rem 0.5rem;
     min-height: 100px;
   }
   
-  .stat-icon {
+  .envios-page .stat-icon {
     font-size: 2rem;
     margin-bottom: 0.5rem;
   }
   
-  .stat-number {
+  .envios-page .stat-number {
     font-size: 1.5rem;
     margin-bottom: 0.25rem;
   }
   
-  .stat-label {
+  .envios-page .stat-label {
     font-size: 0.75rem;
     letter-spacing: 0.5px;
   }
   
-  .stats-card ion-col {
+  .envios-page .stats-card ion-col {
     padding: 0.25rem;
   }
   
-  .modal-content {
+  .envios-page .modal-content,
+  .envios-page .envios-modal-content {
     margin: 1rem;
     margin-top: 10vh;
   }
@@ -733,64 +1693,64 @@ ion-modal ion-item {
   }
 }
 
-.pedido-card {
+.envios-page .pedido-card {
   animation: fadeInUp 0.3s ease-out;
 }
 
-/* Focus and Hover States */
-ion-button {
+/* Focus and Hover States - Específicos para Envios */
+.envios-page ion-button {
   --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-ion-button:hover {
+.envios-page ion-button:hover {
   transform: translateY(-1px);
   transition: all 0.2s ease;
   --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-ion-button[color="primary"] {
+.envios-page ion-button[color="primary"] {
   --background: linear-gradient(135deg, #5d9cec, #4a90e2);
   --color: #ffffff;
 }
 
-ion-button[color="success"] {
+.envios-page ion-button[color="success"] {
   --background: linear-gradient(135deg, #10dc60, #0cd851);
   --color: #ffffff;
 }
 
-ion-button[color="warning"] {
+.envios-page ion-button[color="warning"] {
   --background: linear-gradient(135deg, #ffed4e, #ffc409);
   --color: #000000;
 }
 
-ion-chip:hover {
+.envios-page ion-chip:hover {
   transform: scale(1.05);
   transition: all 0.2s ease;
 }
 
 /* Custom Scrollbar */
-.envios-content::-webkit-scrollbar {
+.envios-page .envios-content::-webkit-scrollbar {
   width: 6px;
 }
 
-.envios-content::-webkit-scrollbar-track {
+.envios-page .envios-content::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.envios-content::-webkit-scrollbar-thumb {
+.envios-page .envios-content::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
   border-radius: 3px;
 }
 
-.envios-content::-webkit-scrollbar-thumb:hover {
+.envios-page .envios-content::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
 
 /* Warning message styling */
-.warning-message {
+.envios-page .warning-message {
   background: rgba(253, 180, 11, 0.1);
   padding: 0.75rem;
   border-radius: 10px;
@@ -798,7 +1758,7 @@ ion-chip:hover {
   margin-top: 0.75rem;
 }
 
-.warning-content {
+.envios-page .warning-content {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -809,7 +1769,7 @@ ion-chip:hover {
 }
 
 /* Active Filter Indicator */
-.active-filter-card {
+.envios-page .active-filter-card {
   background: rgba(253, 180, 11, 0.15);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(253, 180, 11, 0.5);
@@ -818,20 +1778,20 @@ ion-chip:hover {
   box-shadow: 0 4px 16px rgba(253, 180, 11, 0.2);
 }
 
-.active-filter-content {
+.envios-page .active-filter-content {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem;
 }
 
-.filter-icon {
+.envios-page .filter-icon {
   color: #fdb40b;
   font-size: 1.2rem;
   flex-shrink: 0;
 }
 
-.filter-text {
+.envios-page .filter-text {
   color: #ffffff;
   font-weight: 600;
   font-size: 0.9rem;
@@ -839,7 +1799,7 @@ ion-chip:hover {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.clear-filter-btn {
+.envios-page .clear-filter-btn {
   --color: #fdb40b;
   --background-hover: rgba(253, 180, 11, 0.1);
   margin: 0;
@@ -848,6 +1808,161 @@ ion-chip:hover {
 }
 
 /* Icon spacing for inline elements */
-.icon-margin-right {
+.envios-page .icon-margin-right {
   margin-right: 0.5rem;
+}
+
+/* Botón de editar código de seguimiento */
+.envios-page .tracking-info-container ion-button {
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+  --background-hover: rgba(93, 156, 236, 0.2);
+  --background-activated: rgba(93, 156, 236, 0.3);
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.envios-page .tracking-info-container ion-button ion-icon {
+  font-size: 1.3rem;
+  color: #5d9cec;
+}
+
+.envios-page .tracking-info-container ion-button:hover {
+  transform: scale(1.1);
+}
+
+/* Mensaje informativo en el modal */
+.envios-page .envios-info-message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(93, 156, 236, 0.15) 0%, rgba(93, 156, 236, 0.05) 100%);
+  border: 2px solid rgba(93, 156, 236, 0.4);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(93, 156, 236, 0.15);
+  color: #0cd851 !important;
+}
+
+.envios-page .envios-info-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+}
+.envios-page .envios-info-content span{
+  color: #ffffff;
+}
+
+.envios-page .envios-info-content ion-icon {
+  color: #5d9cec;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.envios-page .envios-info-content strong {
+  color: #5d9cec;
+  font-weight: 700;
+}
+
+/* Botones de exportación PDF */
+.envios-page .pdf-export-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.envios-page .pdf-export-buttons ion-button {
+  --border-radius: 12px;
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  --background: rgba(0, 0, 0, 0.7);
+  --color: #ffffff;
+  --border-width: 2px;
+  --border-style: solid;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.envios-page .pdf-export-buttons ion-button[color="primary"] {
+  --border-color: rgba(93, 156, 236, 0.6);
+  --background: linear-gradient(135deg, rgba(93, 156, 236, 0.2), rgba(93, 156, 236, 0.1));
+  --color: #5d9cec;
+}
+
+.envios-page .pdf-export-buttons ion-button[color="primary"]:hover:not([disabled]) {
+  --border-color: rgba(93, 156, 236, 0.8);
+  --background: linear-gradient(135deg, rgba(93, 156, 236, 0.3), rgba(93, 156, 236, 0.2));
+  --color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(93, 156, 236, 0.4);
+}
+
+.envios-page .pdf-export-buttons ion-button[color="secondary"] {
+  --border-color: rgba(253, 180, 11, 0.6);
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.2), rgba(253, 180, 11, 0.1));
+  --color: #fdb40b;
+}
+
+.envios-page .pdf-export-buttons ion-button[color="secondary"]:hover:not([disabled]) {
+  --border-color: rgba(253, 180, 11, 0.8);
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.3), rgba(253, 180, 11, 0.2));
+  --color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
+}
+
+.envios-page .pdf-export-buttons ion-button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  --border-color: rgba(255, 255, 255, 0.2);
+  --background: rgba(50, 50, 50, 0.5);
+  --color: rgba(255, 255, 255, 0.5);
+  transform: none;
+  box-shadow: none;
+}
+
+.envios-page .pdf-export-buttons ion-icon {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Animación de pulso para botones activos */
+@keyframes pdf-button-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(93, 156, 236, 0.4);
+  }
+}
+
+.envios-page .pdf-export-buttons ion-button:not([disabled]):active {
+  animation: pdf-button-pulse 0.6s ease-in-out;
+}
+
+/* Responsive para botones PDF */
+@media (max-width: 768px) {
+  .envios-page .pdf-export-buttons {
+    justify-content: center;
+    margin-top: 0.75rem;
+  }
+  
+  .envios-page .pdf-export-buttons ion-button {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    font-size: 0.85rem;
+    min-width: 130px;
+  }
 }

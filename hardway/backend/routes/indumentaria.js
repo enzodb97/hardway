@@ -15,6 +15,8 @@ const {
   Stock,
   MovimientoStock,
   Rack,
+  MotivoNoApta,
+  StockRegistroFallo,
   sequelize
 } = require('../models');
 
@@ -44,6 +46,19 @@ router.get("/racks/disponibles", async (req, res) => {
   } catch (error) {
     console.error('Error al obtener racks disponibles:', error);
     res.status(500).json({ error: 'Error al obtener racks disponibles', detalle: error.message });
+  }
+});
+
+// Obtener motivos predefinidos para marcar como No Apta
+router.get("/motivos-no-apta", async (req, res) => {
+  try {
+    const motivos = await MotivoNoApta.findAll({
+      order: [['idMotivo', 'ASC']]
+    });
+    res.json(motivos);
+  } catch (error) {
+    console.error('Error al obtener motivos de no apta:', error);
+    res.status(500).json({ error: 'Error al obtener motivos', detalle: error.message });
   }
 });
 
@@ -173,6 +188,155 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error("Error al obtener indumentaria:", error);
     res.status(500).json({ error: "Error al obtener indumentaria", detalle: error.message });
+  }
+});
+
+// Obtener indumentarias no aptas (en rack 99)
+router.get("/no-aptas", async (req, res) => {
+  try {
+    const result = await sequelize.query(`
+      SELECT
+        I.codigoIndumentaria AS Codigo_Indumentaria,
+        S.idStock AS Id_Stock,
+        R.numeroRack AS Rack_Numero,
+        R.idRack AS Id_Rack,
+        R.descripcion AS Estado_Rack,
+        DI.idNombre,
+        DI.idColor,
+        DI.idTalle,
+        DI.idTela,
+        DI.idCategoria,
+        DI.idEstado,
+        DI.idPrecio,
+        DI.idUnidadMedida
+      FROM
+        indumentaria AS I
+      JOIN
+        stock AS S ON I.codigoIndumentaria = S.codigoIndumentaria
+      JOIN
+        rack AS R ON S.idRack = R.idRack
+      JOIN
+        detalleindumentaria AS DI ON I.idDetalle = DI.idDetalle
+      WHERE
+        R.idRack = 99
+      ORDER BY
+        I.codigoIndumentaria
+    `, {
+      type: Sequelize.QueryTypes.SELECT
+    });
+
+    // Agrupar por código de indumentaria y calcular cantidades
+    const indumentariasAgrupadas = {};
+    
+    for (const item of result) {
+      const codigo = item.Codigo_Indumentaria;
+      
+      if (!indumentariasAgrupadas[codigo]) {
+        indumentariasAgrupadas[codigo] = {
+          codigoIndumentaria: codigo,
+          idStock: item.Id_Stock,
+          rackNumero: item.Rack_Numero,
+          idRack: item.Id_Rack,
+          estadoRack: item.Estado_Rack,
+          idNombre: item.idNombre,
+          idColor: item.idColor,
+          idTalle: item.idTalle,
+          idTela: item.idTela,
+          idCategoria: item.idCategoria,
+          idEstado: item.idEstado,
+          idPrecio: item.idPrecio,
+          idUnidadMedida: item.idUnidadMedida,
+          stockIds: []
+        };
+      }
+      
+      indumentariasAgrupadas[codigo].stockIds.push(item.Id_Stock);
+    }
+
+    // Obtener detalles completos y calcular cantidades reales
+    const indumentariasNoAptas = await Promise.all(
+      Object.values(indumentariasAgrupadas).map(async (item) => {
+        const indumentaria = await Indumentaria.findOne({
+          where: { codigoIndumentaria: item.codigoIndumentaria },
+          include: [
+            {
+              model: DetalleIndumentaria,
+              as: "DetalleIndumentarium",
+              include: [
+                { model: NombreIndumentaria, as: "NombreIndumentarium" },
+                { model: Color },
+                { model: Talle },
+                { model: Tela, as: "TelaIndumentarium" },
+                { model: CategoriaIndumentaria, as: "CategoriaIndumentarium" },
+                { model: EstadoIndumentaria, as: "EstadoIndumentarium" },
+                { model: PrecioIndumentaria, as: "PrecioIndumentarium" },
+                { model: UnidadMedida, as: "UnidadMedidum" },
+              ],
+            },
+          ],
+        });
+
+        if (indumentaria) {
+          const itemJson = indumentaria.toJSON();
+          
+          // Calcular la cantidad total de stock no apto sumando los movimientos
+          let cantidadTotal = 0;
+          for (const stockId of item.stockIds) {
+            const movimientos = await MovimientoStock.findAll({
+              where: { idStock: stockId }
+            });
+            
+            const cantidadStock = movimientos.reduce((total, mov) => {
+              return total + (mov.cantidad || 0);
+            }, 0);
+            
+            cantidadTotal += cantidadStock;
+          }
+          
+          // Agregar la cantidad no apta al DetalleIndumentarium
+          if (itemJson.DetalleIndumentarium) {
+            itemJson.DetalleIndumentarium.cantidadIndumentaria = cantidadTotal;
+          }
+          
+          // Agregar información del rack
+          itemJson.Stock = {
+            numeroRack: item.rackNumero,
+            idRack: item.idRack,
+            Rack: {
+              numeroRack: item.rackNumero,
+              idRack: item.idRack,
+              descripcion: item.estadoRack
+            }
+          };
+          
+          return itemJson;
+        }
+        return null;
+      })
+    );
+
+    // Filtrar nulos Y stock 0 (solo mostrar si tiene stock disponible > 0)
+    const indumentariasFiltradas = indumentariasNoAptas.filter(item => {
+      if (item === null) return false;
+      
+      const cantidadDisponible = item.DetalleIndumentarium?.cantidadIndumentaria || 0;
+      return cantidadDisponible > 0; // ⚠️ Solo mostrar si tiene stock disponible
+    });
+
+    // Log para depuración
+    console.log(`✅ Indumentarias No Aptas encontradas (con stock > 0): ${indumentariasFiltradas.length}`);
+    if (indumentariasFiltradas.length > 0) {
+      console.log('Ejemplo de datos:', JSON.stringify({
+        codigo: indumentariasFiltradas[0].codigoIndumentaria,
+        cantidad: indumentariasFiltradas[0].DetalleIndumentarium?.cantidadIndumentaria,
+        rack: indumentariasFiltradas[0].Stock
+      }, null, 2));
+    }
+
+    res.json(indumentariasFiltradas);
+  } catch (error) {
+    console.error("Error al obtener indumentarias no aptas:", error);
+    res.status(500).json({ error: "Error al obtener indumentarias no aptas", detalle: error.message });
   }
 });
 
@@ -340,29 +504,34 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Mover indumentaria a No Apta
+// Mover indumentaria a No Apta (con registro del rack original)
 router.post("/:id/no-apta", async (req, res) => {
   const { id } = req.params;
-  const { cantidad, motivo } = req.body;
+  const { cantidad, idMotivo, observaciones } = req.body;
 
-  console.log('Recibiendo solicitud para marcar como no apta:', {
+  console.log('📦 Recibiendo solicitud para marcar como no apta:', {
     id,
     cantidad,
-    motivo
+    idMotivo,
+    observaciones
   });
 
   // Validar datos de entrada
   if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
     return res.status(400).json({ 
-      error: "La cantidad debe ser un número mayor a 0",
-      detalles: { cantidad, tipo: typeof cantidad }
+      error: "La cantidad debe ser un número mayor a 0"
+    });
+  }
+
+  if (!idMotivo) {
+    return res.status(400).json({ 
+      error: "Debe seleccionar un motivo para marcar como No Apta"
     });
   }
 
   const t = await sequelize.transaction();
   try {
-    // 1. Obtener el stock actual y todos sus movimientos
-    // 1. Obtener el stock actual y todos sus movimientos
+    // 1. Obtener el stock actual y su rack original
     const stockActual = await Stock.findOne({
       where: { 
         codigoIndumentaria: id,
@@ -376,96 +545,100 @@ router.post("/:id/no-apta", async (req, res) => {
     });
 
     if (!stockActual) {
-      console.log('Stock no encontrado para:', id);
+      console.log('❌ Stock no encontrado para:', id);
       await t.rollback();
       return res.status(404).json({ error: "Stock no encontrado" });
     }
 
-    console.log('Stock encontrado:', {
+    // Guardar el rack original (para recuperarlo después)
+    const idRackOriginal = stockActual.idRack;
+    
+    console.log('✅ Stock encontrado:', {
       idStock: stockActual.idStock,
-      movimientos: stockActual.MovimientoStocks.map(m => ({
-        cantidad: m.cantidad,
-        fecha: m.fechaMovimiento,
-        obs: m.observaciones
-      }))
+      idRackOriginal,
+      movimientos: stockActual.MovimientoStocks.length
     });
 
-    // Calcular stock disponible sumando todos los movimientos
+    // Calcular stock disponible
     const stockDisponible = stockActual.MovimientoStocks.reduce((total, mov) => {
-      return total + (Number(mov.cantidad) || 0)
+      return total + (Number(mov.cantidad) || 0);
     }, 0);
     
-    console.log('Stock disponible calculado:', {
-      stockDisponible,
-      movimientos: stockActual.MovimientoStocks.map(m => ({
-        cantidad: m.cantidad,
-        fecha: m.fechaMovimiento
-      }))
-    });
-    
     if (stockDisponible < cantidad) {
-      console.log('Error: Stock insuficiente', { stockDisponible, cantidadSolicitada: cantidad });
+      console.log('❌ Stock insuficiente', { stockDisponible, cantidadSolicitada: cantidad });
       await t.rollback();
       return res.status(400).json({ 
         error: "No hay suficiente stock disponible",
-        detalles: { 
-          stockDisponible, 
-          cantidadSolicitada: cantidad,
-          codigoIndumentaria: id
-        }
+        detalles: { stockDisponible, cantidadSolicitada: cantidad }
       });
     }
-    
-    console.log('Stock disponible calculado:', stockDisponible);
-    
-    if (stockDisponible < cantidad) {
-      await t.rollback();
-      return res.status(400).json({ error: "No hay suficiente stock disponible" });
-    }
 
-    // 2. Crear nuevo registro de stock para No Apto si no existe
-    let stockNoApto = await Stock.findOne({
-      where: { 
+    // 2. Crear movimiento NEGATIVO en el rack original (salida)
+    const movSalidaId = `MOV-NOAPTA-OUT-${Date.now()}`;
+    await MovimientoStock.create({
+      idMovimientoStock: movSalidaId,
+      idStock: stockActual.idStock,
+      cantidad: -cantidad, // ⚠️ Negativo = salida del rack original
+      fechaMovimiento: new Date(),
+      observaciones: `Movido a No Apta: ${observaciones || 'Sin observaciones'}`
+    }, { transaction: t });
+
+    console.log('✅ Movimiento negativo creado en rack original:', idRackOriginal);
+
+    // 3. Buscar o crear stock en Rack 99 (Cuarentena)
+    let stockCuarentena = await Stock.findOne({
+      where: {
         codigoIndumentaria: id,
-        idRack: 99 // Rack No Apto
+        idRack: 99
       },
       transaction: t
     });
 
-    if (!stockNoApto) {
-      stockNoApto = await Stock.create({
-        idStock: `STK-NA-${Date.now()}`,
+    if (!stockCuarentena) {
+      // Crear registro de stock en cuarentena
+      const stockId = `STK-${id}-R99-${Date.now()}`;
+      stockCuarentena = await Stock.create({
+        idStock: stockId,
         codigoIndumentaria: id,
-        idRack: 99 // Rack No Apto
+        idRack: 99
       }, { transaction: t });
+      console.log('✅ Nuevo registro de stock creado en Rack 99');
     }
 
-    // 3. Registrar movimientos
-    const fecha = new Date();
-    
-    // Movimiento de salida del stock original
+    // 4. Crear movimiento POSITIVO en Rack 99 (entrada)
+    const movEntradaId = `MOV-NOAPTA-IN-${Date.now()}`;
     await MovimientoStock.create({
-      idMovimientoStock: `MOV-${Date.now()}-1`,
-      idStock: stockActual.idStock,
-      fechaMovimiento: fecha,
-      cantidad: -cantidad,
-      observaciones: `Movimiento a No Apto: ${motivo || 'Sin especificar'}`
+      idMovimientoStock: movEntradaId,
+      idStock: stockCuarentena.idStock,
+      cantidad: cantidad, // ⚠️ Positivo = entrada al rack de cuarentena
+      fechaMovimiento: new Date(),
+      observaciones: `Recibido de Rack ${idRackOriginal}: ${observaciones || 'Sin observaciones'}`
     }, { transaction: t });
 
-    // Movimiento de entrada al stock no apto
-    await MovimientoStock.create({
-      idMovimientoStock: `MOV-${Date.now()}-2`,
-      idStock: stockNoApto.idStock,
-      fechaMovimiento: fecha,
-      cantidad: cantidad,
-      observaciones: `Ingreso desde stock vendible: ${motivo || 'Sin especificar'}`
+    console.log('✅ Movimiento positivo creado en Rack 99 (Cuarentena)');
+
+    // 5. Registrar el fallo en stock_registro_fallo (GUARDAR RACK ORIGINAL)
+    await StockRegistroFallo.create({
+      idStock: stockCuarentena.idStock, // 🎯 Stock de cuarentena
+      idMotivo,
+      idRackOriginal, // 🎯 Aquí guardamos el rack original
+      observaciones: observaciones || 'Registrado para inspección/reparación',
+      fechaRegistro: new Date(),
+      estadoPostFallo: null, // Pendiente
+      fechaResolucion: null,
+      idUsuarioResolucion: null
     }, { transaction: t });
+
+    console.log('✅ Registro de fallo creado con rack original:', idRackOriginal);
 
     await t.commit();
-    res.json({ message: "Stock movido a No Apto correctamente" });
+    res.json({ 
+      message: "Stock movido a No Apto correctamente",
+      rackOriginal: idRackOriginal
+    });
   } catch (error) {
     await t.rollback();
-    console.error("Error al mover stock a No Apto:", error);
+    console.error("❌ Error al mover stock a No Apto:", error);
     res.status(500).json({ error: "Error al mover stock a No Apto", detalle: error.message });
   }
 });
@@ -553,6 +726,270 @@ router.put('/stock/:codigoIndumentaria', async (req, res) => {
     await t.rollback();
     console.error('Error al actualizar stock:', error);
     res.status(500).json({ error: 'Error al actualizar stock', detalle: error.message });
+  }
+});
+
+// Reingresar indumentaria a stock (después de reparación)
+router.post("/:id/reingreso", async (req, res) => {
+  const { id } = req.params;
+  const { cantidad, observaciones, idUsuario } = req.body;
+
+  console.log('✅ Recibiendo solicitud de reingreso:', {
+    id,
+    cantidad,
+    observaciones,
+    idUsuario
+  });
+
+  // Validar datos de entrada
+  if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
+    return res.status(400).json({ 
+      error: "La cantidad debe ser un número mayor a 0"
+    });
+  }
+
+  const t = await sequelize.transaction();
+  try {
+    // 1. Obtener el stock en Rack 99 (Cuarentena)
+    const stockNoApto = await Stock.findOne({
+      where: { 
+        codigoIndumentaria: id,
+        idRack: 99 // Rack de cuarentena
+      },
+      transaction: t
+    });
+
+    if (!stockNoApto) {
+      console.log('❌ Stock No Apto no encontrado para:', id);
+      await t.rollback();
+      return res.status(404).json({ error: "No se encontró stock en cuarentena para esta indumentaria" });
+    }
+
+    // 2. Buscar el registro de fallo más reciente (resuelto o no) para obtener el rack original
+    const registroFallo = await StockRegistroFallo.findOne({
+      where: {
+        idStock: stockNoApto.idStock
+      },
+      order: [['idRegistroFallo', 'DESC']], // El más reciente
+      transaction: t
+    });
+
+    if (!registroFallo) {
+      console.log('❌ No se encontró registro de fallo para esta indumentaria');
+      await t.rollback();
+      return res.status(404).json({ error: "No se encontró información del rack original para esta indumentaria" });
+    }
+
+    const idRackOriginal = registroFallo.idRackOriginal;
+    const idMotivoOriginal = registroFallo.idMotivo;
+    console.log('✅ Rack original recuperado:', idRackOriginal);
+
+    // 3. Verificar stock disponible en cuarentena
+    const movimientosCuarentena = await MovimientoStock.findAll({
+      where: { idStock: stockNoApto.idStock },
+      transaction: t
+    });
+
+    const stockDisponibleCuarentena = movimientosCuarentena.reduce((total, mov) => {
+      return total + (Number(mov.cantidad) || 0);
+    }, 0);
+
+    if (stockDisponibleCuarentena < cantidad) {
+      console.log('❌ Stock insuficiente en cuarentena', { 
+        stockDisponible: stockDisponibleCuarentena, 
+        cantidadSolicitada: cantidad 
+      });
+      await t.rollback();
+      return res.status(400).json({ 
+        error: "No hay suficiente stock en cuarentena",
+        detalles: { stockDisponible: stockDisponibleCuarentena, cantidadSolicitada: cantidad }
+      });
+    }
+
+    // 4. Crear movimiento NEGATIVO en Rack 99 (salida de cuarentena)
+    const movSalidaCuarentenaId = `MOV-REINGRESO-OUT-${Date.now()}`;
+    await MovimientoStock.create({
+      idMovimientoStock: movSalidaCuarentenaId,
+      idStock: stockNoApto.idStock,
+      cantidad: -cantidad, // ⚠️ Negativo = salida de cuarentena
+      fechaMovimiento: new Date(),
+      observaciones: `Reingresado a Rack ${idRackOriginal}: ${observaciones || 'Reparado'}`
+    }, { transaction: t });
+
+    console.log('✅ Movimiento negativo creado en Rack 99 (salida)');
+
+    // 5. Buscar o crear stock en rack original
+    let stockOriginal = await Stock.findOne({
+      where: {
+        codigoIndumentaria: id,
+        idRack: idRackOriginal
+      },
+      transaction: t
+    });
+
+    if (!stockOriginal) {
+      // Crear registro de stock en rack original
+      const stockId = `STK-${id}-R${idRackOriginal}-${Date.now()}`;
+      stockOriginal = await Stock.create({
+        idStock: stockId,
+        codigoIndumentaria: id,
+        idRack: idRackOriginal
+      }, { transaction: t });
+      console.log('✅ Nuevo registro de stock creado en Rack original:', idRackOriginal);
+    }
+
+    // 6. Crear movimiento POSITIVO en rack original (entrada)
+    const movEntradaOriginalId = `MOV-REINGRESO-IN-${Date.now()}`;
+    await MovimientoStock.create({
+      idMovimientoStock: movEntradaOriginalId,
+      idStock: stockOriginal.idStock,
+      cantidad: cantidad, // ⚠️ Positivo = entrada al rack original
+      fechaMovimiento: new Date(),
+      observaciones: `Regreso de cuarentena: ${observaciones || 'Reparado'}`
+    }, { transaction: t });
+
+    console.log('✅ Movimiento positivo creado en Rack original:', idRackOriginal);
+
+    // 7. CREAR NUEVO registro de fallo específico para REINGRESO
+    // No modificamos el registro anterior, creamos uno nuevo para trazabilidad
+    await StockRegistroFallo.create({
+      idStock: stockNoApto.idStock,
+      idMotivo: idMotivoOriginal,
+      idRackOriginal: idRackOriginal,
+      observaciones: `✅ REPARADO: ${cantidad} unidades arregladas y reingresadas al rack original ${idRackOriginal}. ${observaciones || ''}`,
+      fechaRegistro: new Date(),
+      estadoPostFallo: 1, // 1 = Apta (Reparado)
+      fechaResolucion: new Date(), // Ya está resuelto como reparado
+      idUsuarioResolucion: idUsuario || null
+    }, { transaction: t });
+
+    console.log('✅ Nuevo registro de fallo REPARADO creado');
+
+    await t.commit();
+    res.json({ 
+      message: `Indumentaria reparada y reingresada al rack original ${idRackOriginal}`,
+      rackDestino: idRackOriginal
+    });
+  } catch (error) {
+    await t.rollback();
+    console.error("❌ Error al reingresar stock:", error);
+    res.status(500).json({ error: "Error al reingresar stock", detalle: error.message });
+  }
+});
+
+// Marcar indumentaria como Scrap (Desecho permanente)
+router.post("/:id/scrap", async (req, res) => {
+  const { id } = req.params;
+  const { cantidad, observaciones, idUsuario } = req.body;
+
+  console.log('🗑️ Recibiendo solicitud de scrap:', {
+    id,
+    cantidad,
+    observaciones,
+    idUsuario
+  });
+
+  // Validar datos de entrada
+  if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
+    return res.status(400).json({ 
+      error: "La cantidad debe ser un número mayor a 0"
+    });
+  }
+
+  const t = await sequelize.transaction();
+  try {
+    // 1. Obtener el stock en Rack 99 (Cuarentena)
+    const stockNoApto = await Stock.findOne({
+      where: { 
+        codigoIndumentaria: id,
+        idRack: 99 // Rack de cuarentena
+      },
+      transaction: t
+    });
+
+    if (!stockNoApto) {
+      console.log('❌ Stock No Apto no encontrado para:', id);
+      await t.rollback();
+      return res.status(404).json({ error: "No se encontró stock en cuarentena para esta indumentaria" });
+    }
+
+    // 2. Verificar stock disponible en cuarentena
+    const movimientosCuarentena = await MovimientoStock.findAll({
+      where: { idStock: stockNoApto.idStock },
+      transaction: t
+    });
+
+    const stockDisponibleCuarentena = movimientosCuarentena.reduce((total, mov) => {
+      return total + (Number(mov.cantidad) || 0);
+    }, 0);
+
+    if (stockDisponibleCuarentena < cantidad) {
+      console.log('❌ Stock insuficiente en cuarentena para scrap', { 
+        stockDisponible: stockDisponibleCuarentena, 
+        cantidadSolicitada: cantidad 
+      });
+      await t.rollback();
+      return res.status(400).json({ 
+        error: "No hay suficiente stock en cuarentena",
+        detalles: { stockDisponible: stockDisponibleCuarentena, cantidadSolicitada: cantidad }
+      });
+    }
+
+    // 3. Buscar el registro de fallo original (puede estar resuelto o pendiente)
+    // Solo para obtener el idRackOriginal y el motivo
+    const registroFalloOriginal = await StockRegistroFallo.findOne({
+      where: {
+        idStock: stockNoApto.idStock
+      },
+      order: [['idRegistroFallo', 'DESC']],
+      transaction: t
+    });
+
+    let idMotivoScrap = registroFalloOriginal ? registroFalloOriginal.idMotivo : null;
+    let idRackOriginal = registroFalloOriginal ? registroFalloOriginal.idRackOriginal : null;
+
+    console.log('ℹ️ Registro original encontrado:', {
+      idRegistro: registroFalloOriginal?.idRegistroFallo,
+      idMotivo: idMotivoScrap,
+      idRackOriginal
+    });
+
+    // 4. Crear movimiento NEGATIVO (salida permanente por scrap)
+    const movScrapId = `MOV-SCRAP-${Date.now()}`;
+    await MovimientoStock.create({
+      idMovimientoStock: movScrapId,
+      idStock: stockNoApto.idStock,
+      fechaMovimiento: new Date(),
+      cantidad: -cantidad, // ⚠️ Negativo = salida permanente
+      observaciones: `SCRAP (Desecho permanente): ${observaciones || 'Sin motivo especificado'}`
+    }, { transaction: t });
+
+    console.log('✅ Movimiento de scrap registrado (salida permanente)');
+
+    // 5. CREAR NUEVO registro de fallo específico para SCRAP
+    // No modificamos el registro anterior, creamos uno nuevo para trazabilidad
+    await StockRegistroFallo.create({
+      idStock: stockNoApto.idStock,
+      idMotivo: idMotivoScrap || 1, // Usar motivo original o 1 por defecto
+      idRackOriginal: idRackOriginal || 99, // Usar rack original o 99
+      observaciones: `⚠️ SCRAP: ${cantidad} unidades desechadas permanentemente. ${observaciones || 'Sin motivo especificado'}`,
+      fechaRegistro: new Date(),
+      estadoPostFallo: null, // NULL para SCRAP (diferenciado por observaciones y fechaResolucion)
+      fechaResolucion: new Date(), // Ya está resuelto como SCRAP
+      idUsuarioResolucion: idUsuario || null
+    }, { transaction: t });
+
+    console.log('✅ Nuevo registro de fallo SCRAP creado');
+
+    await t.commit();
+    res.json({ 
+      message: `${cantidad} unidades marcadas como scrap (desechadas permanentemente)`,
+      estadoPostFallo: 'SCRAP'
+    });
+  } catch (error) {
+    await t.rollback();
+    console.error("❌ Error al marcar como scrap:", error);
+    res.status(500).json({ error: "Error al marcar como scrap", detalle: error.message });
   }
 });
 

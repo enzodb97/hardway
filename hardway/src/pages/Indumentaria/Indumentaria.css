@@ -286,6 +286,7 @@
 }
 
 .estado-badge {
+  text-align: center;
   padding: 4px 12px;
   border-radius: 16px;
   font-weight: 600;
@@ -967,3 +968,784 @@ ion-action-sheet * {
 /* Definición del selector de páginas ya está arriba */
 
 /* El action sheet mantendrá su posicionamiento por defecto de Ionic */
+
+/* ========================================
+   MODAL NO APTA - ESTILOS
+   ======================================== */
+
+/* Modal container */
+.modal-no-apta ion-content {
+  --background: #f8fafc !important;
+}
+
+/* Contenedor principal del modal */
+.modal-no-apta-container {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+/* Header con información del producto */
+.modal-no-apta-header {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #f59e0b;
+}
+
+.modal-no-apta-header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-no-apta-header-icon {
+  font-size: 1.5em;
+  color: #92400e;
+}
+
+.modal-no-apta-header-title {
+  margin: 0;
+  color: #92400e;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal-no-apta-header-description {
+  margin: 0;
+  color: #92400e;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Campos del formulario */
+.modal-no-apta-item {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.modal-no-apta-label {
+  color: #374151;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.modal-no-apta-label-required {
+  color: #ef4444;
+}
+
+.modal-no-apta-input {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.modal-no-apta-select {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.modal-no-apta-textarea {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-weight: 400;
+  color: #1e293b;
+}
+
+.modal-no-apta-label-optional {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.85em;
+}
+
+/* Nota informativa */
+.modal-no-apta-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid #3b82f6;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal-no-apta-info-icon {
+  color: #1e40af;
+  font-size: 1.5em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.modal-no-apta-info-text {
+  color: #1e40af;
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Footer del modal */
+.modal-no-apta-footer {
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid #e2e8f0;
+}
+
+.modal-no-apta-footer ion-toolbar {
+  --background: white;
+}
+
+.modal-no-apta-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.modal-no-apta-btn-cancel {
+  --border-radius: 12px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.modal-no-apta-btn-confirm {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  font-weight: 600;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modal-no-apta-btn-confirm:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(253, 180, 11, 0.4);
+}
+
+/* ========================================
+   MODAL REINGRESO - ESTILOS
+   ======================================== */
+
+/* Header con información del producto - Verde para éxito */
+.modal-reingreso-header {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #10b981;
+}
+
+.modal-reingreso-header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-reingreso-header-icon {
+  font-size: 1.5em;
+  color: #065f46;
+}
+
+.modal-reingreso-header-title {
+  margin: 0;
+  color: #065f46;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal-reingreso-header-description {
+  margin: 0;
+  color: #065f46;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Nota informativa para reingreso */
+.modal-reingreso-info {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid #10b981;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal-reingreso-info-icon {
+  color: #065f46;
+  font-size: 1.5em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.modal-reingreso-info-text {
+  color: #065f46;
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Botón confirmar para reingreso - Verde */
+.modal-reingreso-btn-confirm {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  font-weight: 600;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modal-reingreso-btn-confirm:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* ========================================
+   MODAL SCRAP - ESTILOS
+   ======================================== */
+
+/* Header con información del producto - Rojo para peligro */
+.modal-scrap-header {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #ef4444;
+}
+
+.modal-scrap-header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-scrap-header-icon {
+  font-size: 1.5em;
+  color: #991b1b;
+}
+
+.modal-scrap-header-title {
+  margin: 0;
+  color: #991b1b;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal-scrap-header-description {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Nota informativa para scrap - Advertencia */
+.modal-scrap-warning {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal-scrap-warning-icon {
+  color: #991b1b;
+  font-size: 1.5em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.modal-scrap-warning-text {
+  color: #991b1b;
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Botón confirmar para scrap - Rojo peligro */
+.modal-scrap-btn-confirm {
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  font-weight: 600;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modal-scrap-btn-confirm:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* ========================================
+   MODAL EXPORTAR PDF - ESTILOS PROFESIONALES
+   ======================================== */
+
+/* Modal principal */
+.modal-pdf-export {
+  --width: 90%;
+  --max-width: 600px;
+  --height: 650px;
+  --border-radius: 20px;
+  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-pdf-export::part(content) {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Header del modal */
+.modal-pdf-header-wrapper {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.modal-pdf-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --min-height: 60px;
+  position: relative;
+}
+
+.modal-pdf-toolbar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="pdf-dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.15"/></pattern></defs><rect width="100" height="100" fill="url(%23pdf-dots)"/></svg>');
+  pointer-events: none;
+}
+
+.modal-pdf-header-title {
+  font-weight: 700;
+  font-size: 1.2em;
+  position: relative;
+  z-index: 1;
+}
+
+.modal-pdf-header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-pdf-header-icon {
+  font-size: 1.4em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Contenido del modal */
+.modal-pdf-content {
+  --background: #f8fafc;
+}
+
+.modal-pdf-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Sección de introducción */
+.modal-pdf-intro {
+  text-align: center;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+.modal-pdf-intro-icon {
+  font-size: 3em;
+  margin-bottom: 12px;
+  animation: fadeInScale 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-pdf-title {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1e293b;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-pdf-description {
+  color: #64748b;
+  margin: 0;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+/* Formulario */
+.modal-pdf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Item de selección */
+.modal-pdf-item {
+  --background: white;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.modal-pdf-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+}
+
+.modal-pdf-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.modal-pdf-label-text {
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.modal-pdf-label-required {
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal-pdf-select {
+  width: 100%;
+  --padding-start: 0;
+  --padding-end: 0;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* Indicadores de información */
+.modal-pdf-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-pdf-indicator {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: white;
+  border-left: 4px solid;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: slideInRight 0.4s ease-out;
+  transition: all 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.modal-pdf-indicator:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.modal-pdf-indicator-icon {
+  font-size: 1.8em;
+  flex-shrink: 0;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.modal-pdf-indicator-content {
+  flex: 1;
+}
+
+.modal-pdf-indicator-title {
+  margin: 0 0 4px 0;
+  font-weight: 700;
+  font-size: 0.95em;
+  letter-spacing: 0.3px;
+}
+
+.modal-pdf-indicator-text {
+  margin: 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* Indicador de categoría específica - Azul */
+.modal-pdf-indicator-category {
+  border-left-color: #667eea;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+}
+
+.modal-pdf-indicator-category .modal-pdf-indicator-title {
+  color: #4c5fd7;
+}
+
+.modal-pdf-indicator-category .modal-pdf-indicator-text {
+  color: #5568d3;
+}
+
+/* Indicador de todas las categorías - Morado/Naranja */
+.modal-pdf-indicator-all {
+  border-left-color: #764ba2;
+  background: linear-gradient(135deg, #fdf4ff 0%, #f5e8ff 100%);
+}
+
+.modal-pdf-indicator-all .modal-pdf-indicator-title {
+  color: #6d3d94;
+}
+
+.modal-pdf-indicator-all .modal-pdf-indicator-text {
+  color: #7d4aa3;
+}
+
+/* Indicador de No Aptas - Rojo/Naranja advertencia */
+.modal-pdf-indicator-no-aptas {
+  border-left-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.modal-pdf-indicator-no-aptas .modal-pdf-indicator-title {
+  color: #dc2626;
+}
+
+.modal-pdf-indicator-no-aptas .modal-pdf-indicator-text {
+  color: #ef4444;
+}
+
+/* Indicador de búsqueda activa - Verde azulado */
+.modal-pdf-indicator-search {
+  border-left-color: #06b6d4;
+  background: linear-gradient(135deg, #f0fdff 0%, #e0f8ff 100%);
+}
+
+.modal-pdf-indicator-search .modal-pdf-indicator-title {
+  color: #0891b2;
+}
+
+.modal-pdf-indicator-search .modal-pdf-indicator-text {
+  color: #0e7490;
+}
+
+/* Footer del modal */
+.modal-pdf-footer {
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-top: 2px solid #e2e8f0;
+}
+
+.modal-pdf-footer-toolbar {
+  --background: white;
+  --min-height: 80px;
+}
+
+.modal-pdf-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.modal-pdf-btn-cancel {
+  flex: 1;
+  --border-radius: 12px;
+  --border-width: 2px;
+  --border-color: #cbd5e1;
+  --color: #64748b;
+  font-weight: 600;
+  height: 48px;
+  transition: all 0.3s ease;
+}
+
+.modal-pdf-btn-cancel:hover {
+  --border-color: #94a3b8;
+  --color: #475569;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modal-pdf-btn-generate {
+  flex: 2;
+  --border-radius: 12px;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  font-weight: 700;
+  height: 48px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-pdf-btn-generate::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.modal-pdf-btn-generate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+}
+
+.modal-pdf-btn-generate:hover::before {
+  left: 100%;
+}
+
+.modal-pdf-btn-generate:active {
+  transform: translateY(0);
+}
+
+.modal-pdf-btn-generate[disabled] {
+  --background: #cbd5e1;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* Estilos para el Action Sheet de categorías */
+ion-action-sheet.modal-pdf-action-sheet {
+  --max-width: 400px;
+  --max-height: 60vh;
+  align-items: center;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+ion-action-sheet.modal-pdf-action-sheet::part(backdrop) {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-wrapper {
+  max-height: 60vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20vh;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-container {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+}
+
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-group {
+  max-height: calc(60vh - 80px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Scroll suave para el action sheet */
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-group::-webkit-scrollbar {
+  width: 8px;
+}
+
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-group::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-group::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-group::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Botones del action sheet centrados */
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-button {
+  text-align: center !important;
+  justify-content: center !important;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-button-inner {
+  justify-content: center !important;
+  text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Título del action sheet */
+ion-action-sheet.modal-pdf-action-sheet .action-sheet-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e293b;
+  padding: 16px;
+}

@@ -16,6 +16,7 @@ import {
   IonIcon,
   IonToast,
 } from "@ionic/react";
+import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -32,8 +33,8 @@ import {
   ArcElement,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import "./Reportes.css";
 import "./ProductosMasPedidos.table.css";
+import "./AnalisisCancelaciones.css";
 
 Chart.register(
   CategoryScale,
@@ -57,6 +58,11 @@ const AnalisisCancelaciones: React.FC = () => {
   const [toastExcel, setToastExcel] = useState(false);
   const [toastPDF, setToastPDF] = useState(false);
   const fechaEmision = new Date().toLocaleString("es-AR");
+  const history = useHistory();
+
+  // Calcular estadísticas
+  const totalCancelaciones = data.reduce((sum, item) => sum + item.cantidad_de_pedidos, 0);
+  const motivoMasComun = data.length > 0 ? data[0].motivo : "N/A";
 
   useEffect(() => {
     axiosInstance.get("/api/reportes/cancelaciones-motivo").then((res) => {
@@ -228,39 +234,37 @@ const AnalisisCancelaciones: React.FC = () => {
         display: true,
         position: "bottom" as const,
         labels: {
-          color: "#444",
-          font: { size: 15, weight: "bold" as const },
+          color: "#ffffff",
+          font: { size: 14, weight: "bold" as const },
           padding: 18,
           boxWidth: 22,
         },
       },
       datalabels: {
         color: "#333",
-        backgroundColor: "rgba(255,255,255,0.85)",
+        backgroundColor: "rgba(255,255,255,0.95)",
         borderRadius: 6,
-        padding: 6,
-        font: { weight: "bold" as const, size: 15 },
+        padding: 8,
+        font: { weight: "bold" as const, size: 14 },
         formatter: (v: number, ctx: any) => v + "%",
         display: true,
         align: "center" as const,
         anchor: "center" as const,
         borderWidth: 1,
-        borderColor: "#eee",
-        shadowBlur: 4,
-        shadowColor: "#bbb",
+        borderColor: "#ddd",
       },
       title: {
         display: true,
         text: "Porcentaje de Cancelaciones por Motivo",
         font: { size: 18, weight: "bold" as const },
-        color: "#222",
+        color: "#ffffff",
         padding: { top: 10, bottom: 20 },
       },
       tooltip: {
-        backgroundColor: "#fff",
-        titleColor: "#222",
-        bodyColor: "#444",
-        borderColor: "#FFD580",
+        backgroundColor: "rgba(30, 30, 30, 0.95)",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        borderColor: "#ff6b6b",
         borderWidth: 2,
         callbacks: {
           label: function (context: any) {
@@ -274,48 +278,65 @@ const AnalisisCancelaciones: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage className="analisis-cancelaciones-page">
       <IonHeader>
-        <IonToolbar color="warning">
-          <IonTitle>Análisis de Cancelaciones</IonTitle>
+        <IonToolbar className="analisis-cancelaciones-toolbar">
+          <IonTitle>⚠️ Análisis de Cancelaciones</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className="analisis-cancelaciones-content">
         <IonGrid>
+          {/* Título y Estadísticas */}
           <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <h2 className="reporte-titulo">
-                Análisis de Cancelaciones de Pedidos
-              </h2>
-              <div className="reporte-fecha">
-                Fecha de emisión: {fechaEmision}
+            <IonCol size="12">
+              <div className="analisis-title-section">
+                <h1 className="analisis-main-title">Análisis de Cancelaciones de Pedidos</h1>
+                <div className="analisis-emission-date">
+                  Fecha de emisión: {fechaEmision}
+                </div>
+                
+                <div className="analisis-stats-row">
+                  <div className="analisis-stat-card">
+                    <div className="analisis-stat-icon">📊</div>
+                    <div className="analisis-stat-content">
+                      <div className="analisis-stat-number">{totalCancelaciones}</div>
+                      <div className="analisis-stat-label">Total Cancelaciones</div>
+                    </div>
+                  </div>
+                  
+                  <div className="analisis-stat-card">
+                    <div className="analisis-stat-icon">🔴</div>
+                    <div className="analisis-stat-content">
+                      <div className="analisis-stat-number">{data.length}</div>
+                      <div className="analisis-stat-label">Motivos Distintos</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </IonCol>
           </IonRow>
           <IonRow>
             <IonCol size="12">
-              <IonCard>
+              <IonCard className="analisis-table-card">
                 <IonCardContent>
-                  <IonGrid>
-                    <IonRow className="table-header">
-                      <IonCol className="celda-centrada">Motivo</IonCol>
-                      <IonCol className="celda-centrada">
-                        Cantidad de Pedidos
-                      </IonCol>
-                      <IonCol className="celda-centrada">
-                        % de Cancelaciones
-                      </IonCol>
+                  <IonGrid className="analisis-table-grid">
+                    {/* Header */}
+                    <IonRow className="analisis-table-header">
+                      <IonCol size="4" className="analisis-table-cell">Motivo</IonCol>
+                      <IonCol size="4" className="analisis-table-cell">Cantidad de Pedidos</IonCol>
+                      <IonCol size="4" className="analisis-table-cell">% de Cancelaciones</IonCol>
                     </IonRow>
+                    
+                    {/* Datos */}
                     {data.map((row, idx) => (
-                      <IonRow
-                        key={row.motivo + idx}
-                        className="reporte-tabla-fila"
-                      >
-                        <IonCol className="celda-centrada">{row.motivo}</IonCol>
-                        <IonCol className="celda-centrada">
+                      <IonRow key={row.motivo + idx} className="analisis-table-row">
+                        <IonCol size="4" className="analisis-table-cell">
+                          {row.motivo}
+                        </IonCol>
+                        <IonCol size="4" className="analisis-table-cell">
                           {row.cantidad_de_pedidos}
                         </IonCol>
-                        <IonCol className="celda-centrada">
+                        <IonCol size="4" className="analisis-table-cell analisis-percentage-high">
                           {row.porcentaje}%
                         </IonCol>
                       </IonRow>
@@ -327,16 +348,7 @@ const AnalisisCancelaciones: React.FC = () => {
           </IonRow>
           <IonRow>
             <IonCol size="12">
-              <div
-                style={{
-                  maxWidth: 600,
-                  margin: "0 auto",
-                  background: "rgba(255,255,255,0.97)",
-                  borderRadius: 18,
-                  boxShadow: "0 2px 16px 0 #ffd58055",
-                  padding: 12,
-                }}
-              >
+              <div className="analisis-chart-container">
                 <Pie
                   data={chartData}
                   options={chartOptions}
@@ -348,44 +360,53 @@ const AnalisisCancelaciones: React.FC = () => {
             </IonCol>
           </IonRow>
           <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <IonButton
-                color="primary"
-                size="small"
-                style={{ marginTop: 8, marginBottom: 16 }}
-                onClick={exportarPDF}
-              >
-                <IonIcon icon={documentText} slot="start" /> PDF
-              </IonButton>
-              <IonButton
-                color="success"
-                size="small"
-                style={{ marginTop: 8, marginBottom: 16, marginLeft: 8 }}
-                onClick={exportarExcel}
-              >
-                <IonIcon icon={downloadOutline} slot="start" /> Exportar Excel
-              </IonButton>
-              <IonToast
-                isOpen={toastExcel}
-                onDidDismiss={() => setToastExcel(false)}
-                message="¡Excel exportado exitosamente!"
-                duration={1800}
-                color="success"
-                icon={checkmarkCircle}
-                position="top"
-              />
-              <IonToast
-                isOpen={toastPDF}
-                onDidDismiss={() => setToastPDF(false)}
-                message="¡PDF exportado exitosamente!"
-                duration={1800}
-                color="success"
-                icon={checkmarkCircle}
-                position="top"
-              />
+            <IonCol size="12">
+              <div className="analisis-actions-container">
+                <IonButton
+                  className="analisis-btn-export"
+                  size="small"
+                  onClick={exportarExcel}
+                >
+                  <IonIcon icon={downloadOutline} slot="start" /> Exportar Excel
+                </IonButton>
+                <IonButton
+                  className="analisis-btn-pdf"
+                  size="small"
+                  onClick={exportarPDF}
+                >
+                  <IonIcon icon={documentText} slot="start" /> PDF
+                </IonButton>
+                <IonButton
+                  className="analisis-btn-back"
+                  size="small"
+                  fill="clear"
+                  onClick={() => history.push("/Reportes")}
+                >
+                  Volver
+                </IonButton>
+              </div>
             </IonCol>
           </IonRow>
         </IonGrid>
+        
+        <IonToast
+          isOpen={toastExcel}
+          onDidDismiss={() => setToastExcel(false)}
+          message="¡Excel exportado exitosamente!"
+          duration={1800}
+          cssClass="analisis-toast-success"
+          icon={checkmarkCircle}
+          position="top"
+        />
+        <IonToast
+          isOpen={toastPDF}
+          onDidDismiss={() => setToastPDF(false)}
+          message="¡PDF exportado exitosamente!"
+          duration={1800}
+          cssClass="analisis-toast-success"
+          icon={checkmarkCircle}
+          position="top"
+        />
       </IonContent>
     </IonPage>
   );
