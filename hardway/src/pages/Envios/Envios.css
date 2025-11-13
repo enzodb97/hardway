@@ -1866,3 +1866,103 @@
   color: #5d9cec;
   font-weight: 700;
 }
+
+/* Botones de exportación PDF */
+.envios-page .pdf-export-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.envios-page .pdf-export-buttons ion-button {
+  --border-radius: 12px;
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  --background: rgba(0, 0, 0, 0.7);
+  --color: #ffffff;
+  --border-width: 2px;
+  --border-style: solid;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.envios-page .pdf-export-buttons ion-button[color="primary"] {
+  --border-color: rgba(93, 156, 236, 0.6);
+  --background: linear-gradient(135deg, rgba(93, 156, 236, 0.2), rgba(93, 156, 236, 0.1));
+  --color: #5d9cec;
+}
+
+.envios-page .pdf-export-buttons ion-button[color="primary"]:hover:not([disabled]) {
+  --border-color: rgba(93, 156, 236, 0.8);
+  --background: linear-gradient(135deg, rgba(93, 156, 236, 0.3), rgba(93, 156, 236, 0.2));
+  --color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(93, 156, 236, 0.4);
+}
+
+.envios-page .pdf-export-buttons ion-button[color="secondary"] {
+  --border-color: rgba(253, 180, 11, 0.6);
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.2), rgba(253, 180, 11, 0.1));
+  --color: #fdb40b;
+}
+
+.envios-page .pdf-export-buttons ion-button[color="secondary"]:hover:not([disabled]) {
+  --border-color: rgba(253, 180, 11, 0.8);
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.3), rgba(253, 180, 11, 0.2));
+  --color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
+}
+
+.envios-page .pdf-export-buttons ion-button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  --border-color: rgba(255, 255, 255, 0.2);
+  --background: rgba(50, 50, 50, 0.5);
+  --color: rgba(255, 255, 255, 0.5);
+  transform: none;
+  box-shadow: none;
+}
+
+.envios-page .pdf-export-buttons ion-icon {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Animación de pulso para botones activos */
+@keyframes pdf-button-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(93, 156, 236, 0.4);
+  }
+}
+
+.envios-page .pdf-export-buttons ion-button:not([disabled]):active {
+  animation: pdf-button-pulse 0.6s ease-in-out;
+}
+
+/* Responsive para botones PDF */
+@media (max-width: 768px) {
+  .envios-page .pdf-export-buttons {
+    justify-content: center;
+    margin-top: 0.75rem;
+  }
+  
+  .envios-page .pdf-export-buttons ion-button {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    font-size: 0.85rem;
+    min-width: 130px;
+  }
+}

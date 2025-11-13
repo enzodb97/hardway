@@ -3,6 +3,8 @@ import {
   obtenerPedidosAbonados,
   despacharPedido,
   actualizarCodigoSeguimiento,
+  exportarPDFPendientesDespacho,
+  exportarPDFPendientesPorEmpresa,
   PedidoEnvio,
 } from "../../utils/enviosUtils";
 import { useAuth } from "../../context/AuthContext";
@@ -53,6 +55,7 @@ import {
   playSkipBackOutline,
   playSkipForwardOutline,
   createOutline,
+  documentTextOutline,
 } from "ionicons/icons";
 import "./Envios.css";
 
@@ -73,6 +76,8 @@ const Envios: React.FC = () => {
   const [filtroActivo, setFiltroActivo] = useState<string>('pendientes');
   const [modoEdicion, setModoEdicion] = useState(false);
   const [codigoOriginal, setCodigoOriginal] = useState("");
+  const [showToastPDF, setShowToastPDF] = useState(false);
+  const [toastPDFMsg, setToastPDFMsg] = useState("");
 
   // Paginación
   const [pagina, setPagina] = useState(1);
@@ -286,6 +291,28 @@ const Envios: React.FC = () => {
     setModoEdicion(false);
   };
 
+  const handleExportarPendientes = () => {
+    try {
+      exportarPDFPendientesDespacho(pedidos);
+      setToastPDFMsg("PDF de pedidos pendientes exportado correctamente");
+      setShowToastPDF(true);
+    } catch (error) {
+      setAlertMsg("Error al exportar PDF de pedidos pendientes");
+      setShowAlert(true);
+    }
+  };
+
+  const handleExportarPorEmpresa = () => {
+    try {
+      exportarPDFPendientesPorEmpresa(pedidos);
+      setToastPDFMsg("PDF de pedidos por empresa exportado correctamente");
+      setShowToastPDF(true);
+    } catch (error) {
+      setAlertMsg("Error al exportar PDF de pedidos por empresa");
+      setShowAlert(true);
+    }
+  };
+
   return (
     <IonPage className="envios-page">
       <IonHeader>
@@ -396,6 +423,34 @@ const Envios: React.FC = () => {
                     >
                       Despachados
                     </IonChip>
+                  </div>
+                </IonCol>
+              </IonRow>
+              
+              {/* Botones de exportación PDF */}
+              <IonRow>
+                <IonCol size="12">
+                  <div className="pdf-export-buttons">
+                    <IonButton
+                      fill="outline"
+                      size="small"
+                      color="primary"
+                      onClick={handleExportarPendientes}
+                      disabled={pedidos.filter(p => p.idEstado === 3).length === 0}
+                    >
+                      <IonIcon icon={documentTextOutline} slot="start" />
+                      Exportar Pendientes
+                    </IonButton>
+                    <IonButton
+                      fill="outline"
+                      size="small"
+                      color="secondary"
+                      onClick={handleExportarPorEmpresa}
+                      disabled={pedidos.filter(p => p.idEstado === 3).length === 0}
+                    >
+                      <IonIcon icon={documentTextOutline} slot="start" />
+                      Por Empresa
+                    </IonButton>
                   </div>
                 </IonCol>
               </IonRow>
@@ -768,6 +823,16 @@ const Envios: React.FC = () => {
           duration={3000}
           color="success"
           onDidDismiss={() => setShowToast(false)}
+          buttons={[{ text: "Cerrar", role: "cancel" }]}
+        />
+
+        {/* Toast para PDF */}
+        <IonToast
+          isOpen={showToastPDF}
+          message={toastPDFMsg}
+          duration={3000}
+          color="primary"
+          onDidDismiss={() => setShowToastPDF(false)}
           buttons={[{ text: "Cerrar", role: "cancel" }]}
         />
 
