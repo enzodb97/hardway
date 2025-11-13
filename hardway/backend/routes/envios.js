@@ -141,4 +141,52 @@ router.put("/despachar/:numeroPedido", verificarAccesoEnvios, async (req, res) =
   }
 });
 
+// Actualizar código de seguimiento de un pedido ya despachado
+router.put("/actualizar-codigo/:numeroPedido", verificarAccesoEnvios, async (req, res) => {
+  try {
+    const { codigoSeguimiento } = req.body;
+    const { numeroPedido } = req.params;
+    
+    if (!codigoSeguimiento) {
+      return res.status(400).json({ error: "El código de seguimiento es requerido" });
+    }
+    
+    // Verificar que el pedido esté despachado (idEstado = 4)
+    const pedido = await Pedido.findOne({
+      where: { numeroPedido, estaActivo: 1, idEstado: 4 }
+    });
+    
+    if (!pedido) {
+      return res.status(404).json({ error: "Pedido no encontrado o no está despachado" });
+    }
+    
+    // Actualizar solo el código de seguimiento
+    const [updated] = await Pedido.update(
+      { 
+        codigoSeguimiento, 
+        fechaModificacion: new Date() 
+      },
+      { 
+        where: { numeroPedido, estaActivo: 1 }
+      }
+    );
+    
+    if (updated === 0) {
+      return res.status(404).json({ error: "No se pudo actualizar el código de seguimiento" });
+    }
+    
+    console.log(`✏️ Código de seguimiento actualizado para pedido ${numeroPedido}: ${codigoSeguimiento}`);
+    
+    res.json({ 
+      success: true, 
+      message: "Código de seguimiento actualizado correctamente",
+      numeroPedido,
+      codigoSeguimiento
+    });
+  } catch (error) {
+    console.error("Error al actualizar código de seguimiento:", error);
+    res.status(500).json({ error: "Error al actualizar código de seguimiento" });
+  }
+});
+
 module.exports = router;

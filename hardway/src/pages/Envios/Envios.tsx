@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   obtenerPedidosAbonados,
   despacharPedido,
+  actualizarCodigoSeguimiento,
   PedidoEnvio,
 } from "../../utils/enviosUtils";
 import { useAuth } from "../../context/AuthContext";
@@ -51,6 +52,7 @@ import {
   playForwardOutline,
   playSkipBackOutline,
   playSkipForwardOutline,
+  createOutline,
 } from "ionicons/icons";
 import "./Envios.css";
 
@@ -69,6 +71,8 @@ const Envios: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("pendientes");
   const [filtroActivo, setFiltroActivo] = useState<string>('pendientes');
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [codigoOriginal, setCodigoOriginal] = useState("");
 
   // Paginación
   const [pagina, setPagina] = useState(1);
@@ -235,20 +239,51 @@ const Envios: React.FC = () => {
 
     try {
       setLoading(true);
-      await despacharPedido(pedidoSeleccionado.numeroPedido, codigoSeguimiento);
-      setToastMsg(
-        `Pedido #${pedidoSeleccionado.numeroPedido} despachado correctamente`
-      );
+      
+      if (modoEdicion) {
+        // Actualizar código existente
+        await actualizarCodigoSeguimiento(pedidoSeleccionado.numeroPedido, codigoSeguimiento);
+        setToastMsg(
+          `Código de seguimiento actualizado para pedido #${pedidoSeleccionado.numeroPedido}`
+        );
+      } else {
+        // Despachar pedido por primera vez
+        await despacharPedido(pedidoSeleccionado.numeroPedido, codigoSeguimiento);
+        setToastMsg(
+          `Pedido #${pedidoSeleccionado.numeroPedido} despachado correctamente`
+        );
+      }
+      
       setShowToast(true);
       setCodigoSeguimiento("");
       setPedidoSeleccionado(null);
+      setModoEdicion(false);
+      setCodigoOriginal("");
       await cargarPedidos(); // Recargar la lista
     } catch (error) {
-      setAlertMsg("Error al despachar el pedido. Intente nuevamente.");
+      setAlertMsg(
+        modoEdicion 
+          ? "Error al actualizar el código de seguimiento. Intente nuevamente."
+          : "Error al despachar el pedido. Intente nuevamente."
+      );
       setShowAlert(true);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditarCodigo = (pedido: PedidoEnvio) => {
+    setPedidoSeleccionado(pedido);
+    setCodigoSeguimiento(pedido.codigoSeguimiento || "");
+    setCodigoOriginal(pedido.codigoSeguimiento || "");
+    setModoEdicion(true);
+  };
+
+  const handleCancelarEdicion = () => {
+    setPedidoSeleccionado(null);
+    setCodigoSeguimiento("");
+    setCodigoOriginal("");
+    setModoEdicion(false);
   };
 
   return (
@@ -513,6 +548,15 @@ const Envios: React.FC = () => {
                                 {pedido.codigoSeguimiento}
                               </div>
                             </div>
+                            <IonButton
+                              fill="clear"
+                              size="small"
+                              color="primary"
+                              onClick={() => handleEditarCodigo(pedido)}
+                              title="Editar código de seguimiento"
+                            >
+                              <IonIcon icon={createOutline} />
+                            </IonButton>
                           </div>
                         </IonCol>
                       )}
@@ -636,14 +680,16 @@ const Envios: React.FC = () => {
         {/* Modal para código de seguimiento */}
         <IonModal
           isOpen={!!pedidoSeleccionado}
-          onDidDismiss={() => setPedidoSeleccionado(null)}
+          onDidDismiss={handleCancelarEdicion}
           className="envios-tracking-modal"
           backdropDismiss={true}
           showBackdrop={true}
         >
           <div className="envios-modal-content">
             <div className="envios-modal-header">
-              <h2>Código de Seguimiento</h2>
+              <h2>
+                {modoEdicion ? "Editar Código de Seguimiento" : "Código de Seguimiento"}
+              </h2>
               <p>Pedido #{pedidoSeleccionado?.numeroPedido}</p>
             </div>
 
@@ -657,19 +703,20 @@ const Envios: React.FC = () => {
                   value={codigoSeguimiento}
                   placeholder="Ej: LP123456789AR"
                   onIonInput={(e) => setCodigoSeguimiento(e.detail.value!)}
-                  disabled={!!pedidoSeleccionado?.codigoSeguimiento}
                   clearInput
                 />
               </IonItem>
 
-              {pedidoSeleccionado?.codigoSeguimiento && (
-                <div className="envios-tracking-display">
-                  <IonIcon icon={checkmarkCircleOutline} color="success" />
-                  <span>Este pedido ya fue despachado</span>
+              {modoEdicion && codigoOriginal && (
+                <div className="envios-info-message">
+                  <div className="envios-info-content" style={{ color: '#ffffff' }}>
+                    <IonIcon icon={timeOutline} />
+                    <span>Código anterior: <strong>{codigoOriginal}</strong></span>
+                  </div>
                 </div>
               )}
               
-              {!pedidoSeleccionado?.codigoSeguimiento && (
+              {!modoEdicion && (
                 <div className="envios-warning-message">
                   <div className="envios-warning-content">
                     <IonIcon icon={timeOutline} />
@@ -683,7 +730,7 @@ const Envios: React.FC = () => {
               <IonButton
                 expand="block"
                 onClick={handleDespachar}
-                disabled={!!pedidoSeleccionado?.codigoSeguimiento || loading}
+                disabled={loading || !codigoSeguimiento.trim()}
                 color="primary"
                 className="envios-modal-btn-primary"
               >
@@ -695,7 +742,7 @@ const Envios: React.FC = () => {
                 ) : (
                   <>
                     <IonIcon icon={checkmarkCircleOutline} className="envios-icon-margin" />
-                    Marcar como Despachado
+                    {modoEdicion ? "Actualizar Código" : "Marcar como Despachado"}
                   </>
                 )}
               </IonButton>
@@ -704,7 +751,7 @@ const Envios: React.FC = () => {
                 expand="block"
                 fill="outline"
                 color="danger"
-                onClick={() => setPedidoSeleccionado(null)}
+                onClick={handleCancelarEdicion}
                 className="envios-modal-btn-cancel"
               >
                 <IonIcon icon={closeOutline} className="envios-icon-margin" />

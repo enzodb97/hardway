@@ -1811,3 +1811,58 @@
 .envios-page .icon-margin-right {
   margin-right: 0.5rem;
 }
+
+/* Botón de editar código de seguimiento */
+.envios-page .tracking-info-container ion-button {
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+  --background-hover: rgba(93, 156, 236, 0.2);
+  --background-activated: rgba(93, 156, 236, 0.3);
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.envios-page .tracking-info-container ion-button ion-icon {
+  font-size: 1.3rem;
+  color: #5d9cec;
+}
+
+.envios-page .tracking-info-container ion-button:hover {
+  transform: scale(1.1);
+}
+
+/* Mensaje informativo en el modal */
+.envios-page .envios-info-message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(93, 156, 236, 0.15) 0%, rgba(93, 156, 236, 0.05) 100%);
+  border: 2px solid rgba(93, 156, 236, 0.4);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(93, 156, 236, 0.15);
+  color: #0cd851 !important;
+}
+
+.envios-page .envios-info-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+}
+.envios-page .envios-info-content span{
+  color: #ffffff;
+}
+
+.envios-page .envios-info-content ion-icon {
+  color: #5d9cec;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.envios-page .envios-info-content strong {
+  color: #5d9cec;
+  font-weight: 700;
+}

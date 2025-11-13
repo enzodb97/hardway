@@ -46,3 +46,13 @@ export const despacharPedido = async (
     codigoSeguimiento,
   });
 };
+
+// Actualiza el código de seguimiento de un pedido ya despachado
+export const actualizarCodigoSeguimiento = async (
+  numeroPedido: string,
+  codigoSeguimiento: string
+) => {
+  await axiosInstance.put(`/api/envios/actualizar-codigo/${numeroPedido}`, {
+    codigoSeguimiento,
+  });
+};
