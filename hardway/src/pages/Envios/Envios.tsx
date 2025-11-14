@@ -158,14 +158,7 @@ const Envios: React.FC = () => {
   const filtrarPedidos = () => {
     let pedidosFiltrados = [...pedidos];
 
-    console.log("🔍 Filtrando pedidos...");
-    console.log("📊 Total pedidos:", pedidos.length);
-    console.log("📋 Estados de pedidos:", pedidos.map(p => ({ 
-      pedido: p.numeroPedido, 
-      idEstado: p.idEstado, 
-      codigoSeguimiento: p.codigoSeguimiento 
-    })));
-    console.log("🎯 Filtro activo:", filtroEstado);
+    console.log("🔍 Filtrando pedidos - Total:", pedidos.length, "| Filtro:", filtroEstado);
 
     // Filtrar por término de búsqueda
     if (searchTerm.trim()) {
@@ -179,24 +172,21 @@ const Envios: React.FC = () => {
       );
     }
 
-    // Filtrar por estado
+    // Filtrar por estado (usando Number() para evitar problemas de tipo)
     if (filtroEstado === "pendientes") {
       // Pedidos con idEstado = 3 (Abonado, pendientes de despacho)
       pedidosFiltrados = pedidosFiltrados.filter(
-        (pedido) => pedido.idEstado === 3
+        (pedido) => Number(pedido.idEstado) === 3
       );
       console.log("✅ Pendientes filtrados:", pedidosFiltrados.length);
     } else if (filtroEstado === "despachados") {
       // Pedidos con idEstado = 4 (Despachado)
       pedidosFiltrados = pedidosFiltrados.filter(
-        (pedido) => pedido.idEstado === 4
+        (pedido) => Number(pedido.idEstado) === 4
       );
       console.log("✅ Despachados filtrados:", pedidosFiltrados.length);
-      console.log("📦 Pedidos despachados:", pedidosFiltrados.map(p => ({
-        pedido: p.numeroPedido,
-        codigo: p.codigoSeguimiento,
-        estado: p.idEstado
-      })));
+    } else {
+      console.log("🔵 Mostrando TODOS los pedidos");
     }
 
     setPedidosFiltrados(pedidosFiltrados);
@@ -350,7 +340,7 @@ const Envios: React.FC = () => {
                   >
                     <IonIcon icon={cubeOutline} className="stat-icon pending" />
                     <div className="stat-number">
-                      {pedidos.filter((p) => p.idEstado === 3).length}
+                      {pedidos.filter((p) => Number(p.idEstado) === 3).length}
                     </div>
                     <div className="stat-label">Pendientes</div>
                   </div>
@@ -365,7 +355,7 @@ const Envios: React.FC = () => {
                       className="stat-icon dispatched"
                     />
                     <div className="stat-number">
-                      {pedidos.filter((p) => p.idEstado === 4).length}
+                      {pedidos.filter((p) => Number(p.idEstado) === 4).length}
                     </div>
                     <div className="stat-label">Despachados</div>
                   </div>
@@ -436,7 +426,7 @@ const Envios: React.FC = () => {
                       size="small"
                       color="primary"
                       onClick={handleExportarPendientes}
-                      disabled={pedidos.filter(p => p.idEstado === 3).length === 0}
+                      disabled={pedidos.filter(p => Number(p.idEstado) === 3).length === 0}
                     >
                       <IonIcon icon={documentTextOutline} slot="start" />
                       Exportar Pendientes
@@ -446,7 +436,7 @@ const Envios: React.FC = () => {
                       size="small"
                       color="secondary"
                       onClick={handleExportarPorEmpresa}
-                      disabled={pedidos.filter(p => p.idEstado === 3).length === 0}
+                      disabled={pedidos.filter(p => Number(p.idEstado) === 3).length === 0}
                     >
                       <IonIcon icon={documentTextOutline} slot="start" />
                       Por Empresa
@@ -490,10 +480,10 @@ const Envios: React.FC = () => {
                         </div>
                       )}
                       <IonBadge
-                        color={pedido.codigoSeguimiento ? "success" : "warning"}
+                        color={Number(pedido.idEstado) === 4 ? "success" : "warning"}
                         className="status-badge"
                       >
-                        {pedido.codigoSeguimiento ? "Despachado" : "Pendiente"}
+                        {Number(pedido.idEstado) === 4 ? "Despachado" : "Pendiente"}
                       </IonBadge>{" "}
                       <div className="pedido-date">
                         <IonIcon icon={calendarOutline} />
@@ -617,7 +607,7 @@ const Envios: React.FC = () => {
                       )}
 
                       {/* Mostrar mensaje si está despachado pero sin código */}
-                      {pedido.idEstado === 4 && !pedido.codigoSeguimiento && (
+                      {Number(pedido.idEstado) === 4 && !pedido.codigoSeguimiento && (
                         <IonCol size="12">
                           <div className="warning-tracking-container">
                             <IonIcon icon={timeOutline} className="warning-icon" />
@@ -632,7 +622,7 @@ const Envios: React.FC = () => {
                       )}
 
                       {/* Solo mostrar botón si es estado 3 (Abonado/Pendiente) */}
-                      {pedido.idEstado === 3 && (
+                      {Number(pedido.idEstado) === 3 && (
                         <IonCol size="12">
                           <div className="action-container">
                             <IonButton

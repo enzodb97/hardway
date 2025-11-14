@@ -72,7 +72,7 @@ export const exportarPDFPendientesDespacho = (pedidos: PedidoEnvio[]) => {
   doc.addImage(logoBase64, "PNG", 10, 8, 15, 15);
   
   // Filtrar solo pedidos pendientes (estado 3)
-  const pedidosPendientes = pedidos.filter(pedido => pedido.idEstado === 3);
+  const pedidosPendientes = pedidos.filter(pedido => Number(pedido.idEstado) === 3);
   
   // Título y fecha
   doc.setFontSize(14);
@@ -122,7 +122,7 @@ export const exportarPDFPendientesPorEmpresa = (pedidos: PedidoEnvio[]) => {
   
   
   // Filtrar solo pedidos pendientes (estado 3)
-  const pedidosPendientes = pedidos.filter(pedido => pedido.idEstado === 3);
+  const pedidosPendientes = pedidos.filter(pedido => Number(pedido.idEstado) === 3);
   
   // Agrupar por empresa de envío
   const pedidosPorEmpresa = pedidosPendientes.reduce((acc, pedido) => {
