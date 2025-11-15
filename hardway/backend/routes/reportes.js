@@ -346,11 +346,14 @@ router.get("/tendencias-categorias", async (req, res) => {
 // Reporte: Porcentaje de cancelaciones por motivo
 router.get("/cancelaciones-motivo", async (req, res) => {
   try {
+    // Primero, verificar TODOS los estados de pedidos cancelados
+    // ✅ Consulta: Análisis de cancelaciones por motivo
+    // Incluye TODOS los pedidos con motivo de cancelación (sin filtro de estaActivo)
     const [result] = await sequelize.query(`
       WITH TotalCancelados AS (
         SELECT COUNT(*) AS total_general
         FROM pedido
-        WHERE idMotivoCancelacion IS NOT NULL AND estaActivo = 0
+        WHERE idMotivoCancelacion IS NOT NULL
       )
       SELECT
         mc.descripcion AS motivo,
@@ -358,10 +361,11 @@ router.get("/cancelaciones-motivo", async (req, res) => {
         ROUND((COUNT(p.numeroPedido) * 100.0 / (SELECT total_general FROM TotalCancelados)), 2) AS porcentaje
       FROM pedido p
       JOIN motivo_cancelacion mc ON p.idMotivoCancelacion = mc.idMotivo
-      WHERE p.idMotivoCancelacion IS NOT NULL AND p.estaActivo = 0
-      GROUP BY mc.descripcion
+      WHERE p.idMotivoCancelacion IS NOT NULL
+      GROUP BY mc.idMotivo, mc.descripcion
       ORDER BY porcentaje DESC;
     `);
+    
     res.json(result);
   } catch (error) {
     console.error("Error en cancelaciones-motivo:", error);
