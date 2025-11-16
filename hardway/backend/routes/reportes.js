@@ -375,4 +375,87 @@ router.get("/cancelaciones-motivo", async (req, res) => {
   }
 });
 
+// Reporte: Tendencias de empresas de envío
+router.get("/tendencias-empresas-envio", async (req, res) => {
+  try {
+    // Obtener filtro de tiempo (3, 6, 12 meses - por defecto 12)
+    const meses = parseInt(req.query.meses) || 12;
+    
+    const [result] = await sequelize.query(`
+      SELECT
+        T_ACTUAL.Mes,
+        T_ACTUAL.EmpresaEnvio,
+        T_ACTUAL.TotalPedidos,
+        
+        -- Utiliza el TotalPedidos de la tabla anterior (T_ANTERIOR).
+        -- Si no hay registro anterior (ej. primer mes), se usa COALESCE para poner 0.
+        COALESCE(T_ANTERIOR.TotalPedidos, 0) AS PedidosMesAnterior,
+        
+        -- CALCULA LA DIFERENCIA (Actual - Anterior)
+        T_ACTUAL.TotalPedidos - COALESCE(T_ANTERIOR.TotalPedidos, 0) AS Diferencia,
+        
+        -- CALCULA EL PORCENTAJE DE CRECIMIENTO INTERMENSUAL
+        CASE
+          -- El denominador debe ser PedidosMesAnterior y debe ser > 0 para evitar error
+          WHEN COALESCE(T_ANTERIOR.TotalPedidos, 0) > 0 THEN 
+            ROUND((
+              (T_ACTUAL.TotalPedidos - T_ANTERIOR.TotalPedidos) 
+              / T_ANTERIOR.TotalPedidos
+            ) * 100, 2)
+          ELSE 
+            NULL -- No se puede calcular la tendencia si el mes anterior fue 0
+        END AS PorcentajeCrecimiento
+
+      FROM (
+        -- TABLA A (T_ACTUAL): Conteo de pedidos por Mes y Empresa (ACTUAL)
+        SELECT
+          DATE_FORMAT(p.fechaPedido, '%Y-%m') AS Mes,
+          e.nombre AS EmpresaEnvio,
+          COUNT(p.numeroPedido) AS TotalPedidos
+        FROM 
+          pedido p
+        JOIN 
+          empresa_envio e ON p.idEmpresaEnvio = e.idEmpresaEnvio
+        WHERE
+          p.fechaPedido >= NOW() - INTERVAL ${meses} MONTH -- Filtro dinámico de meses
+          AND p.estaActivo = 1
+          AND p.idEstado != 6
+        GROUP BY 
+          Mes, EmpresaEnvio
+      ) AS T_ACTUAL
+      -- AUTOUNIÓN (SELF-JOIN)
+      LEFT JOIN (
+        -- TABLA B (T_ANTERIOR): Conteo de pedidos por Mes y Empresa (MES ANTERIOR)
+        SELECT
+          DATE_FORMAT(p.fechaPedido, '%Y-%m') AS MesAnterior,
+          e.nombre AS EmpresaEnvio,
+          COUNT(p.numeroPedido) AS TotalPedidos
+        FROM 
+          pedido p
+        JOIN 
+          empresa_envio e ON p.idEmpresaEnvio = e.idEmpresaEnvio
+        WHERE
+          -- Restringe el rango de fechas para no sobrecargar el JOIN
+          p.fechaPedido >= NOW() - INTERVAL ${meses + 1} MONTH 
+          AND p.estaActivo = 1
+          AND p.idEstado != 6
+        GROUP BY 
+          MesAnterior, EmpresaEnvio
+      ) AS T_ANTERIOR ON 
+        -- 1. Une por la MISMA EMPRESA
+        T_ACTUAL.EmpresaEnvio = T_ANTERIOR.EmpresaEnvio AND
+        -- 2. Une cuando el MES ANTERIOR sea exactamente 1 mes antes que el MES ACTUAL
+        DATE_FORMAT(DATE_SUB(STR_TO_DATE(CONCAT(T_ACTUAL.Mes, '-01'), '%Y-%m-%d'), INTERVAL 1 MONTH), '%Y-%m') = T_ANTERIOR.MesAnterior
+
+      ORDER BY T_ACTUAL.EmpresaEnvio, T_ACTUAL.Mes;
+    `);
+    
+    console.log(`📈 Tendencias empresas envío con crecimiento (${meses} meses): ${result.length} registros`);
+    res.json(result);
+  } catch (error) {
+    console.error("Error en tendencias-empresas-envio:", error);
+    res.status(500).json({ error: "Error al obtener tendencias de empresas de envío" });
+  }
+});
+
 module.exports = router;

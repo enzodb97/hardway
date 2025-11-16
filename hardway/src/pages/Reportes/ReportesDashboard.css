@@ -315,7 +315,34 @@
   box-shadow: 0 4px 12px rgba(244, 67, 54, 0.5);
 }
 
+.reporte-btn-ver-tendencias {
+  --color: #ffffff;
+  --border-color: #8b5cf6;
+}
+
+.reporte-btn-ver-tendencias:hover {
+  --color: #ffffff;
+  --background: rgba(139, 92, 246, 0.3);
+  --border-color: #a855f7;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+}
+
+.reporte-card-tendencias {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.85), rgba(99, 102, 241, 0.75));
+  border: 2px solid rgba(139, 92, 246, 0.8);
+  box-shadow: 0 8px 32px rgba(79, 70, 229, 0.5);
+}
+
+.reporte-card-tendencias .reporte-card-title {
+  color: #ffffff;
+}
+
+.reporte-card-tendencias ion-icon {
+  color: #ffffff;
+}
+
 .reporte-btn-ver-productos {
+  --color: #9c27b0;
   --border-color: #ab47bc;
 }
 

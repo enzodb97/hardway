@@ -1,0 +1,326 @@
+/* === TENDENCIAS EMPRESAS ENVIOS PAGE === */
+
+/* Página principal */
+.tendencias-empresas-page {
+  --ion-background-color: #0f1419;
+}
+
+/* Toolbar */
+.tendencias-empresas-toolbar {
+  --background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --color: #f8fafc;
+  --border-color: #334155;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Content */
+.tendencias-empresas-content {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --background: linear-gradient(135deg, #0f1419 0%, #1a202c 100%);
+}
+
+/* === SECCIÓN DE TÍTULO === */
+.tendencias-title-section {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.tendencias-main-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tendencias-emission-date {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+/* === FILTROS === */
+.tendencias-filter-section {
+  margin: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.tendencias-filter-segment {
+  --background: #1e293b;
+  --color: #e2e8f0;
+  --color-checked: #ffffff;
+  --background-checked: #4f46e5;
+  --border-radius: 12px;
+  --indicator-color: #4f46e5;
+  border: 1px solid #334155;
+  max-width: 400px;
+}
+
+/* === ESTADÍSTICAS === */
+.tendencias-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.tendencias-stat-card {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid #475569;
+  transition: all 0.3s ease;
+}
+
+.tendencias-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.tendencias-stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.tendencias-stat-content {
+  color: #f8fafc;
+}
+
+.tendencias-stat-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #4f46e5;
+  margin-bottom: 0.3rem;
+}
+
+.tendencias-stat-label {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === GRÁFICO === */
+.tendencias-chart-container {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border: 1px solid #475569;
+  height: 900px; /* Altura fija reducida */
+  position: relative;
+  overflow: hidden;
+}
+
+.tendencias-chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.tendencias-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+/* === TABLA === */
+.tendencias-table-card {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border: 1px solid #475569;
+  margin: 2rem 0;
+}
+
+.tendencias-table-grid {
+  padding: 0;
+}
+
+.tendencias-table-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --ion-grid-column-padding: 0;
+}
+
+.tendencias-table-header .tendencias-table-cell {
+  background: transparent;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tendencias-table-header .tendencias-table-cell:last-child {
+  border-right: none;
+}
+
+.tendencias-table-row {
+  --ion-grid-column-padding: 0;
+  border-bottom: 1px solid #475569;
+}
+
+.tendencias-table-row:hover {
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.tendencias-table-cell {
+  padding: 1rem;
+  text-align: center;
+  color: #e2e8f0;
+  border-right: 1px solid #475569;
+}
+
+.tendencias-table-cell:last-child {
+  border-right: none;
+}
+
+.tendencias-number-high {
+  font-weight: 600;
+  color: #4f46e5 !important;
+}
+
+.tendencias-positive {
+  color: #10b981 !important;
+  font-weight: 600;
+}
+
+.tendencias-negative {
+  color: #ef4444 !important;
+  font-weight: 600;
+}
+
+.tendencias-neutral {
+  color: #94a3b8 !important;
+  font-style: italic;
+}
+
+/* === ACCIONES === */
+.tendencias-actions-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.tendencias-btn-export {
+  --background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  --color: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.tendencias-btn-export:hover {
+  --box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+  transform: translateY(-2px);
+}
+
+.tendencias-btn-pdf {
+  --background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  --color: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.tendencias-btn-pdf:hover {
+  --box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+  transform: translateY(-2px);
+}
+
+.tendencias-btn-back {
+  --color: #94a3b8;
+  --border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.tendencias-btn-back:hover {
+  --color: #f8fafc;
+  --background: rgba(79, 70, 229, 0.1);
+}
+
+/* === TOASTS === */
+.tendencias-toast-success {
+  --background: #059669;
+  --color: #ffffff;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .tendencias-main-title {
+    font-size: 1.8rem;
+  }
+
+  .tendencias-stats-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .tendencias-stat-card {
+    padding: 1rem;
+  }
+
+  .tendencias-chart-container {
+    padding: 1rem;
+    height: 350px; /* Altura reducida para móviles */
+  }
+
+  .tendencias-actions-container {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+
+  .tendencias-table-cell {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tendencias-main-title {
+    font-size: 1.5rem;
+  }
+
+  .tendencias-filter-segment {
+    font-size: 0.8rem;
+  }
+
+  .tendencias-stat-number {
+    font-size: 1.5rem;
+  }
+
+  .tendencias-actions-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

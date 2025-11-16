@@ -18,7 +18,7 @@ import {
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
-import { people, cube, trendingUp, close } from "ionicons/icons";
+import { people, cube, trendingUp, close, send } from "ionicons/icons";
 import "./ReportesDashboard.css";
 
 const Reportes: React.FC = () => {
@@ -178,27 +178,27 @@ const Reportes: React.FC = () => {
 
               <IonRow>
                 <IonCol size="12" sizeMd="6" className="reporte-card-wrapper">
-                  <IonCard className="reporte-tarjeta reporte-card-cancelaciones">
+                  <IonCard className="reporte-tarjeta reporte-card-tendencias">
                     <IonCardHeader className="reporte-card-header">
                       <IonCardTitle className="reporte-card-title">
-                        <IonIcon icon={close} />
-                        Análisis de Cancelaciones
+                        <IonIcon icon={send} />
+                        Tendencias Empresas de Envío
                       </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent className="reporte-card-content">
                       <div className="reporte-info-text">
-                        Consulta el porcentaje de cancelaciones por motivo y
-                        detecta patrones para mejorar tu operación.
+                        Analiza la evolución y tendencias de uso de las diferentes
+                        empresas de envío a lo largo del tiempo.
                       </div>
                       <IonButton
-                        className="reporte-btn-ver reporte-btn-ver-cancelaciones"
+                        className="reporte-btn-ver reporte-btn-ver-tendencias"
                         fill="clear"
                         size="small"
                         onClick={() =>
-                          history.push("/reportes/analisis-cancelaciones")
+                          history.push("/reportes/tendencias-empresas-envio")
                         }
                       >
-                        Ver Reporte Completo →
+                        Ver Tendencias →
                       </IonButton>
                     </IonCardContent>
                   </IonCard>
@@ -234,6 +234,35 @@ const Reportes: React.FC = () => {
                         size="small"
                         onClick={() =>
                           history.push("/reportes/productos-mas-pedidos")
+                        }
+                      >
+                        Ver Reporte Completo →
+                      </IonButton>
+                    </IonCardContent>
+                  </IonCard>
+                </IonCol>
+              </IonRow>
+
+              <IonRow>
+                <IonCol size="12" sizeMd="6" className="reporte-card-wrapper">
+                  <IonCard className="reporte-tarjeta reporte-card-cancelaciones">
+                    <IonCardHeader className="reporte-card-header">
+                      <IonCardTitle className="reporte-card-title">
+                        <IonIcon icon={close} />
+                        Análisis de Cancelaciones
+                      </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent className="reporte-card-content">
+                      <div className="reporte-info-text">
+                        Consulta el porcentaje de cancelaciones por motivo y
+                        detecta patrones para mejorar tu operación.
+                      </div>
+                      <IonButton
+                        className="reporte-btn-ver reporte-btn-ver-cancelaciones"
+                        fill="clear"
+                        size="small"
+                        onClick={() =>
+                          history.push("/reportes/analisis-cancelaciones")
                         }
                       >
                         Ver Reporte Completo →

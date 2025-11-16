@@ -27,6 +27,7 @@ import ClientesMasPedidos from "./pages/Reportes/ClientesMasPedidos";
 import AnalisisCancelaciones from "./pages/Reportes/AnalisisCancelaciones";
 import StockActual from "./pages/Reportes/StockActual";
 import ProductosMasPedidos from "./pages/Reportes/ProductosMasPedidos";
+import TendenciasEmpresaEnvios from "./pages/Reportes/TendenciasEmpresaEnvios";
 import Picking from "./pages/Picking/Picking";
 import Envios from "./pages/Envios/Envios";
 import DebugAuth from "./pages/DebugAuth";
@@ -148,6 +149,12 @@ const AppRouter = () => {
             <RoleRoute
               path="/reportes/analisis-cancelaciones"
               component={AnalisisCancelaciones}
+              requiredRoles={["Administrador", "Gerente"]}
+              exact
+            />
+            <RoleRoute
+              path="/reportes/tendencias-empresas-envio"
+              component={TendenciasEmpresaEnvios}
               requiredRoles={["Administrador", "Gerente"]}
               exact
             />
