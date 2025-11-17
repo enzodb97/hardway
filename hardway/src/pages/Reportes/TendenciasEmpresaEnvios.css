@@ -269,6 +269,38 @@
   --background: rgba(79, 70, 229, 0.1);
 }
 
+/* === BOTÓN GRÁFICO === */
+.tendencias-btn-grafico-activo {
+  --background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  --color: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.tendencias-btn-grafico-activo:hover {
+  --box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+  transform: translateY(-2px);
+}
+
+.tendencias-btn-grafico-inactivo {
+  --background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  --color: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.tendencias-btn-grafico-inactivo:hover {
+  --background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  --box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+  transform: translateY(-2px);
+}
+
 /* === TOASTS === */
 .tendencias-toast-success {
   --background: #059669;
@@ -322,5 +354,11 @@
   .tendencias-actions-container {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .tendencias-btn-grafico-activo,
+  .tendencias-btn-grafico-inactivo {
+    font-size: 0.8rem;
+    text-align: center;
   }
 }

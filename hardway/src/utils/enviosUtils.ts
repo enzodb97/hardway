@@ -66,7 +66,7 @@ const logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOQAAADkCAMAAA
 export const exportarPDFPendientesDespacho = (pedidos: PedidoEnvio[]) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const title = "Reporte de Pedidos Pendientes de Despacho";
+  const title = "Listado de Pedidos Pendientes de Despacho";
   const textWidth = doc.getTextWidth(title);
   const x = (pageWidth - textWidth) / 2;
   doc.addImage(logoBase64, "PNG", 10, 8, 15, 15);
@@ -115,7 +115,7 @@ export const exportarPDFPendientesDespacho = (pedidos: PedidoEnvio[]) => {
 export const exportarPDFPendientesPorEmpresa = (pedidos: PedidoEnvio[]) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const title = "Reporte de Pedidos Pendientes por Empresa de Envío";
+  const title = "Listado de Pedidos Pendientes por Empresa de Envío";
   const textWidth = doc.getTextWidth(title);
   const x = (pageWidth - textWidth) / 2;
   doc.addImage(logoBase64, "PNG", 10, 8, 15, 15);
