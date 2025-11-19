@@ -92,7 +92,7 @@ export const exportarPDFPendientesDespacho = (pedidos: PedidoEnvio[]) => {
       pedido.direccion_envio.length > 30 ? pedido.direccion_envio.substring(0, 30) + "..." : pedido.direccion_envio,
       pedido.total_items.toString(),
       new Date(pedido.fechaPedido).toLocaleDateString("es-AR"),
-      pedido.nombreDespachador || "Sin asignar"
+      (pedido.nombreDespachador && pedido.nombreDespachador.trim()) || "Sin asignar"
     ]),
     startY: 40,
     styles: { fontSize: 8, halign: "center" },
@@ -182,7 +182,7 @@ export const exportarPDFPendientesPorEmpresa = (pedidos: PedidoEnvio[]) => {
       pedido.empresaEnvio || "Sin asignar",
       pedido.total_items.toString(),
       new Date(pedido.fechaPedido).toLocaleDateString("es-AR"),
-      pedido.nombreDespachador || "Sin asignar"
+      (pedido.nombreDespachador && pedido.nombreDespachador.trim()) || "Sin asignar"
     ]),
     startY: finalY + 20,
     styles: { fontSize: 8, halign: "center" },

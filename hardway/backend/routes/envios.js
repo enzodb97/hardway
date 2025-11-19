@@ -21,6 +21,37 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
       whereClause += ` AND ap.legajoPicker = '${legajoPicker}'`;
     }
     
+    // Debug: verificar cuántas asignaciones hay en total para pedidos en estado 3 o 4
+    const [asignacionesDebug] = await sequelize.query(`
+      SELECT 
+        COUNT(DISTINCT ap.numeroPedido) as totalPedidosConAsignacion,
+        COUNT(*) as totalAsignaciones,
+        COUNT(DISTINCT ap.legajoPicker) as totalPickersAsignados,
+        SUM(CASE WHEN ap.completado = 1 THEN 1 ELSE 0 END) as asignacionesCompletadas,
+        SUM(CASE WHEN ap.completado = 0 THEN 1 ELSE 0 END) as asignacionesPendientes
+      FROM asignacion_picking ap
+      JOIN pedido p ON ap.numeroPedido = p.numeroPedido
+      WHERE p.idEstado IN (3, 4) AND p.estaActivo = 1
+    `);
+    console.log('🔍 Debug de asignaciones:', asignacionesDebug[0]);
+    
+    // Verificar algunos ejemplos específicos
+    const [ejemplosAsignacion] = await sequelize.query(`
+      SELECT 
+        p.numeroPedido,
+        p.idEstado,
+        ap.legajoPicker,
+        ap.completado,
+        CONCAT(per.nombre, ' ', COALESCE(per.apellido, '')) as nombrePicker
+      FROM pedido p
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
+      LEFT JOIN persona per ON ep.idPersona = per.idPersona
+      WHERE p.idEstado IN (3, 4) AND p.estaActivo = 1
+      LIMIT 5
+    `);
+    console.log('📋 Ejemplos de asignaciones:', ejemplosAsignacion);
+    
     const [result] = await sequelize.query(`
       SELECT
         p.numeroPedido,
@@ -34,7 +65,7 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         p.idEmpresaEnvio,
         ee.nombre AS empresaEnvio,
         p.idEstado,
-        ap.legajoPicker AS despachadorAsignado,
+        MAX(ap.legajoPicker) AS despachadorAsignado,
         CONCAT(p_picker.nombre, ' ', COALESCE(p_picker.apellido, '')) AS nombreDespachador
       FROM pedido p
       JOIN cliente c ON p.idCliente = c.idCliente
@@ -43,18 +74,13 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
       JOIN ciudad ci ON d.idCiudad = ci.idCiudad
       JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
       LEFT JOIN empresa_envio ee ON p.idEmpresaEnvio = ee.idEmpresaEnvio
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
-        AND ap.idAsignacion = (
-          SELECT MAX(ap2.idAsignacion) 
-          FROM asignacion_picking ap2 
-          WHERE ap2.numeroPedido = ap.numeroPedido
-        )
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona p_picker ON ep.idPersona = p_picker.idPersona
       WHERE ${whereClause}
       GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, 
                p.codigoSeguimiento, p.idEmpresaEnvio, ee.nombre, p.idEstado, 
-               ap.legajoPicker, p_picker.nombre, p_picker.apellido
+               p_picker.nombre, p_picker.apellido
       ORDER BY p.fechaPedido DESC
     `);
     
@@ -65,6 +91,26 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
     }
     console.log(`   - Pendientes: ${result.filter(p => p.idEstado === 3).length}`);
     console.log(`   - Despachados: ${result.filter(p => p.idEstado === 4).length}`);
+    
+    // Debug: verificar despachadores
+    const conDespachador = result.filter(p => p.nombreDespachador);
+    const conLegajo = result.filter(p => p.despachadorAsignado);
+    console.log(`   - Con despachador asignado: ${conDespachador.length}`);
+    console.log(`   - Con legajo asignado: ${conLegajo.length}`);
+    
+    // Mostrar algunos ejemplos para diagnóstico
+    if (result.length > 0) {
+      const ejemplos = result.slice(0, 3);
+      console.log(`   - Ejemplos de pedidos:`);
+      ejemplos.forEach(p => {
+        console.log(`     * Pedido ${p.numeroPedido}: legajo="${p.despachadorAsignado}", nombre="${p.nombreDespachador}"`);
+      });
+    }
+    
+    if (conDespachador.length > 0) {
+      console.log(`   - Ejemplo con despachador: Pedido ${conDespachador[0].numeroPedido} -> Despachador: "${conDespachador[0].nombreDespachador}"`);
+    }
+    
     res.json(result);
   } catch (error) {
     console.error("Error al obtener pedidos para despacho:", error);

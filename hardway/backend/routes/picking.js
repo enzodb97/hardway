@@ -54,7 +54,7 @@ router.get("/tareas-admin", async (req, res) => {
         ap.idAsignacion, ap.numeroPedido, p.fechaPedido, p.idEstado, per.nombre, per.apellido,
         c.email, c.telefono, ap.fechaAsignacion, ap.observaciones,
         ap.legajoPicker, ap.completado, p_picker.nombre, p_picker.apellido
-      ORDER BY ap.fechaAsignacion ASC
+      ORDER BY ap.fechaAsignacion DESC
     `);
     
     res.json(results);
@@ -122,7 +122,7 @@ router.get("/tareas", verificarAccesoPicking, async (req, res) => {
       GROUP BY 
         ap.idAsignacion, ap.numeroPedido, p.fechaPedido, p.idEstado, per.nombre, per.apellido,
         c.email, c.telefono, ap.fechaAsignacion, ap.observaciones, ap.completado
-      ORDER BY ap.fechaAsignacion ASC
+      ORDER BY ap.fechaAsignacion DESC
     `, { replacements: [legajoPicker, legajoPicker] });
     
     res.json(results);

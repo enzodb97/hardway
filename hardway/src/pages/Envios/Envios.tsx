@@ -78,6 +78,7 @@ const Envios: React.FC = () => {
   const [codigoOriginal, setCodigoOriginal] = useState("");
   const [showToastPDF, setShowToastPDF] = useState(false);
   const [toastPDFMsg, setToastPDFMsg] = useState("");
+  const [errorValidacion, setErrorValidacion] = useState("");
 
   // Paginación
   const [pagina, setPagina] = useState(1);
@@ -218,19 +219,68 @@ const Envios: React.FC = () => {
     event.detail.complete();
   };
 
+  // Validar código de seguimiento
+  const validarCodigoSeguimiento = (codigo: string): { valido: boolean; mensaje: string } => {
+    // Limpiar espacios
+    const codigoLimpio = codigo.trim();
+
+    // Validar vacío
+    if (!codigoLimpio) {
+      return { valido: false, mensaje: "El código de seguimiento es obligatorio" };
+    }
+
+    // Validar longitud mínima (6 caracteres)
+    if (codigoLimpio.length < 6) {
+      return { valido: false, mensaje: "El código debe tener al menos 6 caracteres" };
+    }
+
+    // Validar longitud máxima (20 caracteres)
+    if (codigoLimpio.length > 20) {
+      return { valido: false, mensaje: "El código no puede superar los 20 caracteres" };
+    }
+
+    // Validar que sea alfanumérico (solo letras y números)
+    const alfanumericoRegex = /^[a-zA-Z0-9]+$/;
+    if (!alfanumericoRegex.test(codigoLimpio)) {
+      return { valido: false, mensaje: "El código solo puede contener letras y números" };
+    }
+
+    // Validar que contenga al menos un número
+    const tieneNumeroRegex = /\d/;
+    if (!tieneNumeroRegex.test(codigoLimpio)) {
+      return { valido: false, mensaje: "El código debe contener al menos un número" };
+    }
+
+    return { valido: true, mensaje: "" };
+  };
+
   const handleDespachar = async () => {
-    if (!pedidoSeleccionado || !codigoSeguimiento.trim()) {
-      setAlertMsg("Debe ingresar un código de seguimiento válido.");
+    if (!pedidoSeleccionado) {
+      setAlertMsg("No hay un pedido seleccionado.");
       setShowAlert(true);
       return;
     }
 
-    // Validar formato del código (opcional)
-    if (codigoSeguimiento.length < 6) {
-      setAlertMsg("El código de seguimiento debe tener al menos 6 caracteres.");
+    // Validar código de seguimiento
+    const validacion = validarCodigoSeguimiento(codigoSeguimiento);
+    if (!validacion.valido) {
+      setErrorValidacion(validacion.mensaje);
+      setAlertMsg(validacion.mensaje);
       setShowAlert(true);
       return;
     }
+
+    // Validar que el código sea diferente al anterior en modo edición
+    if (modoEdicion && codigoSeguimiento.trim() === codigoOriginal.trim()) {
+      const mensaje = "El nuevo código debe ser diferente al anterior";
+      setErrorValidacion(mensaje);
+      setAlertMsg(mensaje);
+      setShowAlert(true);
+      return;
+    }
+
+    // Limpiar error si la validación es exitosa
+    setErrorValidacion("");
 
     try {
       setLoading(true);
@@ -272,6 +322,7 @@ const Envios: React.FC = () => {
     setCodigoSeguimiento(pedido.codigoSeguimiento || "");
     setCodigoOriginal(pedido.codigoSeguimiento || "");
     setModoEdicion(true);
+    setErrorValidacion(""); // Limpiar errores previos
   };
 
   const handleCancelarEdicion = () => {
@@ -279,6 +330,7 @@ const Envios: React.FC = () => {
     setCodigoSeguimiento("");
     setCodigoOriginal("");
     setModoEdicion(false);
+    setErrorValidacion(""); // Limpiar errores
   };
 
   const handleExportarPendientes = () => {
@@ -422,7 +474,7 @@ const Envios: React.FC = () => {
                 <IonCol size="12">
                   <div className="pdf-export-buttons">
                     <IonButton
-                      fill="outline"
+                      fill="solid"
                       size="small"
                       color="primary"
                       onClick={handleExportarPendientes}
@@ -432,7 +484,7 @@ const Envios: React.FC = () => {
                       Exportar Pendientes
                     </IonButton>
                     <IonButton
-                      fill="outline"
+                      fill="solid"
                       size="small"
                       color="secondary"
                       onClick={handleExportarPorEmpresa}
@@ -474,9 +526,9 @@ const Envios: React.FC = () => {
                   <div className="pedido-header">
                     <div className="pedido-title">
                       <IonCardTitle>Pedido #{pedido.numeroPedido}</IonCardTitle>
-                      {hasRole("Administrador") && pedido.nombreDespachador && (
+                      {hasRole("Administrador") && pedido.nombreDespachador && pedido.nombreDespachador.trim() && (
                         <div className="despachador-badge">
-                          {pedido.nombreDespachador}
+                          {pedido.nombreDespachador.trim()}
                         </div>
                       )}
                       <IonBadge
@@ -566,7 +618,7 @@ const Envios: React.FC = () => {
                       )}
 
                       {/* Mostrar despachador asignado */}
-                      {pedido.nombreDespachador && (
+                      {pedido.nombreDespachador && pedido.nombreDespachador.trim() && (
                         <IonCol size="12">
                           <div className="despachador-info-container">
                             <IonIcon icon={cubeOutline} className="despachador-info-icon" />
@@ -575,7 +627,7 @@ const Envios: React.FC = () => {
                                 {hasRole("Administrador") ? "Despachador Asignado" : "Responsable"}
                               </div>
                               <div className="despachador-info-value">
-                                {pedido.nombreDespachador}
+                                {pedido.nombreDespachador.trim()}
                               </div>
                             </div>
                           </div>
@@ -632,6 +684,8 @@ const Envios: React.FC = () => {
                               onClick={() => {
                                 setPedidoSeleccionado(pedido);
                                 setCodigoSeguimiento("");
+                                setErrorValidacion(""); // Limpiar errores previos
+                                setModoEdicion(false); // Asegurar que no está en modo edición
                               }}
                             >
                               <IonIcon icon={carOutline} slot="start" />
@@ -747,13 +801,39 @@ const Envios: React.FC = () => {
                 <IonInput
                   value={codigoSeguimiento}
                   placeholder="Ej: LP123456789AR"
-                  onIonInput={(e) => setCodigoSeguimiento(e.detail.value!)}
+                  onIonInput={(e) => {
+                    const valor = e.detail.value!;
+                    setCodigoSeguimiento(valor);
+                    // Validar en tiempo real
+                    if (valor.trim()) {
+                      const validacion = validarCodigoSeguimiento(valor);
+                      setErrorValidacion(validacion.valido ? "" : validacion.mensaje);
+                    } else {
+                      setErrorValidacion("");
+                    }
+                  }}
+                  maxlength={20}
+                  minlength={6}
                   clearInput
+                  className={errorValidacion ? "ion-invalid ion-touched" : ""}
                 />
               </IonItem>
 
+              {/* Contador de caracteres */}
+              <div className="envios-char-counter">
+                {codigoSeguimiento.length}/20 caracteres
+              </div>
+
+              {/* Mensaje de error de validación */}
+              {errorValidacion && (
+                <div className="envios-error-message">
+                  <IonIcon icon={closeOutline} />
+                  <span>{errorValidacion}</span>
+                </div>
+              )}
+
               {modoEdicion && codigoOriginal && (
-                <div className="envios-info-message">
+                <div className="envios-info-message envios-info-message-adjusted">
                   <div className="envios-info-content" style={{ color: '#ffffff' }}>
                     <IonIcon icon={timeOutline} />
                     <span>Código anterior: <strong>{codigoOriginal}</strong></span>
@@ -761,8 +841,8 @@ const Envios: React.FC = () => {
                 </div>
               )}
               
-              {!modoEdicion && (
-                <div className="envios-warning-message">
+              {!modoEdicion && !errorValidacion && (
+                <div className="envios-warning-message envios-warning-message-adjusted">
                   <div className="envios-warning-content">
                     <IonIcon icon={timeOutline} />
                     <span>Ingrese el código para completar el despacho</span>
@@ -771,11 +851,11 @@ const Envios: React.FC = () => {
               )}
             </div>
 
-            <div className="envios-modal-actions" style={{ marginTop: '2rem' }}>
+            <div className="envios-modal-actions envios-modal-actions-adjusted">
               <IonButton
                 expand="block"
                 onClick={handleDespachar}
-                disabled={loading || !codigoSeguimiento.trim()}
+                disabled={loading || !codigoSeguimiento.trim() || !!errorValidacion}
                 color="primary"
                 className="envios-modal-btn-primary"
               >

@@ -966,6 +966,20 @@
   --background: transparent !important;
   --ion-font-family: "Roboto", "Helvetica Neue", sans-serif !important;
   font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  --width: 480px !important;
+  --height: auto !important;
+  --max-height: 90vh !important;
+  --min-height: auto !important;
+}
+
+/* Sobrescribir el height fijo del modal en tablets/desktop */
+@media only screen and (min-width: 768px) and (min-height: 768px) {
+  .envios-tracking-modal {
+    --width: 480px !important;
+    --height: auto !important;
+    --max-height: 85vh !important;
+    --min-height: auto !important;
+  }
 }
 
 .envios-tracking-modal::part(backdrop) {
@@ -1089,7 +1103,6 @@
 }
 
 .envios-modal-body {
-  margin-bottom: 5rem !important;
   padding-bottom: 2rem !important;
   flex: 1 !important;
   min-height: 0 !important;
@@ -1168,7 +1181,6 @@
   flex-direction: column !important;
   gap: 0.75rem !important;
   flex-shrink: 0 !important;
-  margin-top: 2rem !important;
 }
 
 .envios-modal-actions ion-button {
@@ -1312,14 +1324,14 @@
   margin: 1rem auto !important;
   max-width: 480px !important;
   width: calc(100% - 2rem) !important;
-  max-height: calc(100vh - 4rem) !important;
-  min-height: 550px !important;
+  max-height: 85vh !important;
+  min-height: auto !important;
   height: auto !important;
   margin-top: 3vh !important;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
               0 0 0 1px rgba(253, 180, 11, 0.3) !important;
   position: relative !important;
-  overflow: hidden !important;
+  overflow: auto !important;
   display: flex !important;
   flex-direction: column !important;
   font-family: "Roboto", "Helvetica Neue", sans-serif !important;
@@ -1677,7 +1689,8 @@
   .envios-page .modal-content,
   .envios-page .envios-modal-content {
     margin: 1rem;
-    margin-top: 10vh;
+    margin-top: 5vh;
+    min-height: auto !important;
   }
 }
 
@@ -1867,8 +1880,65 @@
   font-weight: 700;
 }
 
+/* Contador de caracteres */
+.envios-char-counter {
+  font-size: 0.75rem;
+  color: #fd0000 !important;
+  text-align: right;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+}
+
+/* Mensaje de error de validación */
+.envios-error-message {
+  color: #ff4961;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(255, 73, 97, 0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(255, 73, 97, 0.3);
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.envios-error-message ion-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  color: #ff4961;
+}
+
+.envios-error-message span {
+  line-height: 1.3;
+  color: #ff4961;
+  font-weight: 500;
+}
+
+/* Ajuste de espaciado del modal body */
+.envios-modal-body-adjusted {
+  margin-bottom: 0.75rem;
+}
+
+/* Ajuste de margen del mensaje de ayuda */
+.envios-page .envios-warning-message-adjusted {
+  margin-bottom: 0.75rem;
+}
+
+/* Ajuste de margen del mensaje de info */
+.envios-page .envios-info-message-adjusted {
+  margin-bottom: 0.75rem;
+}
+
+/* Ajuste de margen de las acciones del modal */
+.envios-page .envios-modal-actions-adjusted {
+  margin-top: 1.5rem;
+}
+
 /* Botones de exportación PDF */
-.envios-page .pdf-export-buttons {
+.pdf-export-buttons {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-start;
@@ -1876,8 +1946,7 @@
   flex-wrap: wrap;
 }
 
-.envios-page .pdf-export-buttons ion-button {
-  --border-radius: 12px;
+.pdf-export-buttons ion-button {
   --padding-start: 1.5rem;
   --padding-end: 1.5rem;
   --padding-top: 0.75rem;
@@ -1888,42 +1957,42 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  --background: rgba(0, 0, 0, 0.7);
-  --color: #ffffff;
-  --border-width: 2px;
-  --border-style: solid;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: transparent;
 }
 
-.envios-page .pdf-export-buttons ion-button[color="primary"] {
-  --border-color: rgba(93, 156, 236, 0.6);
-  --background: linear-gradient(135deg, rgba(93, 156, 236, 0.2), rgba(93, 156, 236, 0.1));
-  --color: #5d9cec;
+.pdf-export-buttons ion-button[color="primary"] {
+  --border-color: #5d9cec;
+  --background: linear-gradient(135deg, #5d9cec, #4a90e2);
+  --color: #ffffff;
+  --background-activated: linear-gradient(135deg, #4a90e2, #3a80d2);
+  --background-focused: linear-gradient(135deg, #6db0ff, #5d9cec);
+  --background-hover: linear-gradient(135deg, #6db0ff, #5d9cec);
+  box-shadow: 0 4px 16px rgba(93, 156, 236, 0.4);
 }
 
-.envios-page .pdf-export-buttons ion-button[color="primary"]:hover:not([disabled]) {
-  --border-color: rgba(93, 156, 236, 0.8);
-  --background: linear-gradient(135deg, rgba(93, 156, 236, 0.3), rgba(93, 156, 236, 0.2));
-  --color: #ffffff;
+.pdf-export-buttons ion-button[color="primary"]:hover:not([disabled]) {
+  --border-color: #6db0ff;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(93, 156, 236, 0.4);
+  box-shadow: 0 6px 20px rgba(93, 156, 236, 0.6);
 }
 
-.envios-page .pdf-export-buttons ion-button[color="secondary"] {
-  --border-color: rgba(253, 180, 11, 0.6);
-  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.2), rgba(253, 180, 11, 0.1));
-  --color: #fdb40b;
-}
-
-.envios-page .pdf-export-buttons ion-button[color="secondary"]:hover:not([disabled]) {
-  --border-color: rgba(253, 180, 11, 0.8);
-  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.3), rgba(253, 180, 11, 0.2));
+.pdf-export-buttons ion-button[color="secondary"] {
+  --border-color: #fdb40b;
+  --background: linear-gradient(135deg, #fdb40b, #ff9800);
   --color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.4);
+  --background-activated: linear-gradient(135deg, #ff9800, #f57c00);
+  --background-focused: linear-gradient(135deg, #ffc107, #fdb40b);
+  --background-hover: linear-gradient(135deg, #ffc107, #fdb40b);
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.4);
 }
 
-.envios-page .pdf-export-buttons ion-button[disabled] {
+.pdf-export-buttons ion-button[color="secondary"]:hover:not([disabled]) {
+  --border-color: #ffc107;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 180, 11, 0.6);
+}
+
+.pdf-export-buttons ion-button[disabled] {
   opacity: 0.4;
   cursor: not-allowed;
   --border-color: rgba(255, 255, 255, 0.2);
@@ -1933,7 +2002,7 @@
   box-shadow: none;
 }
 
-.envios-page .pdf-export-buttons ion-icon {
+.pdf-export-buttons ion-icon {
   margin-right: 0.5rem;
   font-size: 1.1rem;
 }

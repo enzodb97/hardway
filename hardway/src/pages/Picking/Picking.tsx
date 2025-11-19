@@ -382,7 +382,7 @@ const Picking: React.FC = () => {
                           <div className="task-header">
                             <div className="task-title">
                               <IonIcon icon={cubeOutline} />
-                              <span>Pedido {tarea.numeroPedido}</span>
+                              <span>{tarea.numeroPedido}</span>
                             </div>
                             {hasRole("Administrador") && tarea.pickerAsignado && (
                               <div className="picker-badge">
