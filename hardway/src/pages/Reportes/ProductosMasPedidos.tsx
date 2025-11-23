@@ -278,7 +278,7 @@ const ProductosMasPedidos: React.FC = () => {
       title: {
         display: true,
         text: [
-          `Tendencias Estratégicas por Categoría`,
+          `Tendencias por Categoría`,
           `Análisis de los últimos ${periodoAnalisis} meses`,
         ],
         font: { size: 18, family: "Montserrat, Arial, sans-serif", weight: 'bold' as const },
@@ -653,7 +653,7 @@ const ProductosMasPedidos: React.FC = () => {
             <IonCol size="12">
               <div className="productos-title-section">
                 <h1 className="productos-main-title">
-                  Análisis Estratégico de Tendencias por Categoría
+                  Análisis de Tendencias por Categoría
                 </h1>
                 <div className="productos-emission-date">
                   Fecha de emisión: {fechaEmision}

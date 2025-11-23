@@ -209,7 +209,7 @@ const Reportes: React.FC = () => {
                     <IonCardHeader className="reporte-card-header">
                       <IonCardTitle className="reporte-card-title">
                         <IonIcon icon={trendingUp} />
-                        Productos Más Pedidos
+                        Tendencias por Categoría
                       </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent className="reporte-card-content">

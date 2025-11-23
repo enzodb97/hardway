@@ -491,7 +491,7 @@ const Envios: React.FC = () => {
                       disabled={pedidos.filter(p => Number(p.idEstado) === 3).length === 0}
                     >
                       <IonIcon icon={documentTextOutline} slot="start" />
-                      Por Empresa
+                      Exportar Pendientes Por Empresa
                     </IonButton>
                   </div>
                 </IonCol>
