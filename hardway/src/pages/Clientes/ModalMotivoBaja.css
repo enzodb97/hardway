@@ -1,0 +1,298 @@
+.modal-motivo-baja {
+  --width: 90%;
+  --max-width: 600px;
+  --max-height: 80vh;
+}
+
+.modal-motivo-baja .modal-header {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+}
+
+.modal-motivo-baja .modal-header ion-toolbar {
+  --background: transparent;
+  --color: white;
+}
+
+.modal-motivo-baja .title-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.modal-motivo-baja .warning-icon {
+  font-size: 1.5rem;
+  color: #fbbf24;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.modal-motivo-baja .close-button {
+  --color: white;
+}
+
+.modal-motivo-baja .modal-content {
+  --background: #f8fafc;
+  padding: 1.5rem;
+}
+
+.cliente-info-card {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 4px solid #3b82f6;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.cliente-info-card .info-icon {
+  font-size: 2rem;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.cliente-info-card .info-text h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cliente-info-card .info-text p {
+  margin: 0.25rem 0;
+  font-size: 1.1rem;
+  color: #1e3a8a;
+}
+
+.cliente-info-card .info-text .subtitle {
+  font-size: 0.9rem;
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+.motivos-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.motivos-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.motivos-section h4::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #dc2626;
+  border-radius: 2px;
+}
+
+.motivos-list {
+  background: transparent;
+  padding: 0;
+}
+
+.motivo-item {
+  --background: #f9fafb;
+  --border-radius: 8px;
+  margin-bottom: 0.75rem;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.motivo-item:hover {
+  --background: #fef2f2;
+  border-color: #fecaca;
+  transform: translateX(4px);
+}
+
+.motivo-item ion-radio[aria-checked="true"] ~ .motivo-label {
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.motivo-label {
+  font-size: 0.95rem;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.observaciones-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.observaciones-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.observaciones-section h4::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #6366f1;
+  border-radius: 2px;
+}
+
+.observaciones-section .required {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.observaciones-textarea {
+  --background: #f9fafb;
+  --border-radius: 8px;
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  border: 2px solid #e5e7eb;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.2s ease;
+}
+
+.observaciones-textarea:focus-within {
+  border-color: #6366f1;
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+}
+
+.loading-container p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-left: 4px solid #dc2626;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.error-message ion-icon {
+  font-size: 1.5rem;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.error-message span {
+  color: #991b1b;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.modal-footer .cancel-btn {
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+}
+
+.modal-footer .confirm-btn {
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-footer .confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-motivo-baja {
+    --width: 95%;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+
+  .cliente-info-card {
+    padding: 0.875rem 1rem;
+  }
+
+  .motivos-section,
+  .observaciones-section {
+    padding: 1rem;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .modal-footer .cancel-btn,
+  .modal-footer .confirm-btn {
+    width: 100%;
+  }
+}

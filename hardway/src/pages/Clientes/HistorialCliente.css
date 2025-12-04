@@ -1,11 +1,11 @@
 /* ========================================
-   HISTORIAL DE CLIENTES - ESTILOS
+   HISTORIAL DE CLIENTES - ESTILOS DARK MODE
    ======================================== */
 
 /* Modal principal */
 .historial-modal {
   --border-radius: 16px;
-  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
 }
 
 .historial-modal ion-modal {
@@ -13,44 +13,109 @@
   --width: 95vw;
   --max-width: 800px;
   --border-radius: 16px;
+  --background: #020617;
 }
 
 /* Header del modal */
+.historial-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.historial-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .historial-header ion-toolbar {
-  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --background: rgba(15, 23, 42, 0.95);
   --color: white;
   --border-radius: 16px 16px 0 0;
+  backdrop-filter: blur(20px);
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+  position: relative;
+  z-index: 1;
+  padding: 8px 0;
 }
 
 .historial-title .title-content {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 1.1em;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 10px rgba(139, 92, 246, 0.5);
 }
 
 .historial-title .title-content ion-icon {
-  font-size: 1.2em;
+  font-size: 1.4em;
+  color: #a78bfa;
+  filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.6));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 .close-button {
   --color: white;
-  --background-hover: rgba(255, 255, 255, 0.1);
+  --background-hover: rgba(139, 92, 246, 0.2);
   --border-radius: 50%;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  --background: rgba(139, 92, 246, 0.3);
+  transform: rotate(90deg);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
 /* Contenido del modal */
 .historial-content {
-  --background: #f8fafc;
+  --background: #020617;
   --padding-start: 0;
   --padding-end: 0;
   --padding-top: 0;
   --padding-bottom: 0;
+  position: relative;
+}
+
+.historial-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Header del cliente */
 .cliente-header {
-  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(124, 58, 237, 0.3) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   color: white;
   padding: 20px;
   display: flex;
@@ -58,6 +123,7 @@
   gap: 16px;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .cliente-header::before {
@@ -67,7 +133,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.2), transparent 50%);
   pointer-events: none;
 }
 
@@ -75,19 +141,21 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(139, 92, 246, 0.5);
   position: relative;
   z-index: 1;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
 }
 
 .cliente-avatar ion-icon {
   font-size: 1.8em;
   color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .cliente-info {
@@ -100,26 +168,31 @@
   margin: 0 0 4px 0;
   font-size: 1.4em;
   font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 8px rgba(139, 92, 246, 0.5);
+  color: #f1f5f9;
 }
 
 .cliente-info p {
   margin: 0 0 8px 0;
-  opacity: 0.9;
+  opacity: 0.8;
   font-size: 0.9em;
+  color: #cbd5e1;
 }
 
 .estado-actual-chip {
-  --background: rgba(255, 255, 255, 0.2);
+  --background: rgba(139, 92, 246, 0.3);
   --color: white;
   font-weight: 500;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
 }
 
 /* Loading state */
 .loading-container {
   padding: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .skeleton-cards {
@@ -128,8 +201,10 @@
 
 .skeleton-card {
   margin-bottom: 12px;
-  --background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  backdrop-filter: blur(20px);
 }
 
 /* Empty state */
@@ -145,34 +220,38 @@
   margin-top: 0px !important;
   margin-bottom: 0px !important;
   border-radius: 0px !important;
+  position: relative;
+  z-index: 1;
 }
 
 .empty-icon {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
 }
 
 .empty-icon ion-icon {
   font-size: 2.5em;
-  color: #64748b;
+  color: #a78bfa;
 }
 
 .empty-state h3 {
   margin: 0 0 8px 0;
-  color: #334155;
+  color: #f1f5f9;
   font-size: 1.3em;
   font-weight: 600;
 }
 
 .empty-state p {
   margin: 0;
-  color: #64748b;
+  color: #94a3b8;
   line-height: 1.5;
 }
 
@@ -180,24 +259,42 @@
 .historial-container {
   padding: 20px;
   max-width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 /* Tarjeta de estadísticas */
 .estadisticas-card {
   margin-bottom: 24px;
-  --background: white;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 24px rgba(139, 92, 246, 0.3), 0 0 0 1px rgba(139, 92, 246, 0.3);
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.estadisticas-card ion-card-header {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 16px;
 }
 
 .stats-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #334155;
-  font-size: 1.1em;
-  font-weight: 600;
+  gap: 10px;
+  color: #ffffff;
+  font-size: 1.15em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(139, 92, 246, 0.5);
+}
+
+.stats-title ion-icon {
+  color: #c4b5fd;
+  font-size: 1.3em;
+  filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.6));
 }
 
 .stats-grid {
@@ -211,27 +308,35 @@
   text-align: center;
   padding: 12px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
 .stat-number {
   font-size: 2em;
   font-weight: 700;
-  color: #334155;
+  color: #f1f5f9;
   margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(139, 92, 246, 0.5);
 }
 
 .stat-number.success {
-  color: #059669;
+  color: #6ee7b7;
 }
 
 .stat-number.danger {
-  color: #dc2626;
+  color: #fca5a5;
 }
 
 .stat-label {
   font-size: 0.85em;
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 500;
 }
 
@@ -249,9 +354,13 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  color: #334155;
+  color: #f1f5f9;
   font-size: 1.2em;
   font-weight: 600;
+}
+
+.timeline-header h3 ion-icon {
+  color: #a78bfa;
 }
 
 .timeline {
@@ -267,8 +376,9 @@
 }
 
 .timeline-item.reciente .timeline-card {
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  background: rgba(15, 23, 42, 0.8) !important;
 }
 
 /* Timeline marker */
@@ -289,17 +399,19 @@
   justify-content: center;
   position: relative;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.5);
 }
 
 .marker-icon.success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
+  color: #064e3b;
+  box-shadow: 0 4px 20px rgba(110, 231, 183, 0.5);
 }
 
 .marker-icon.danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
+  background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+  color: #7f1d1d;
+  box-shadow: 0 4px 20px rgba(252, 165, 165, 0.5);
 }
 
 .marker-icon ion-icon {
@@ -309,9 +421,10 @@
 .timeline-line {
   width: 2px;
   flex: 1;
-  background: linear-gradient(to bottom, #e2e8f0 0%, #f1f5f9 100%);
+  background: linear-gradient(to bottom, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.1) 100%);
   margin-top: 8px;
   border-radius: 1px;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
 }
 
 /* Timeline content */
@@ -321,16 +434,19 @@
 }
 
 .timeline-card {
-  --background: white;
+  --background: rgba(15, 23, 42, 0.6);
   margin: 0;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
   transition: all 0.3s ease;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .timeline-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+  border-color: rgba(139, 92, 246, 0.4);
 }
 
 .timeline-header-content {
@@ -360,47 +476,50 @@
 
 .reciente-chip {
   font-size: 0.75em;
-  --background: rgba(59, 130, 246, 0.1);
-  --color: #3b82f6;
+  --background: rgba(139, 92, 246, 0.3);
+  --color: #c4b5fd;
   font-weight: 500;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: white;
 }
 
 .orden-numero {
-  background: #f1f5f9;
-  color: #64748b;
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 0.8em;
   font-weight: 600;
   min-width: fit-content;
+  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 /* Información de fecha */
 .fecha-info {
   margin-bottom: 12px;
   padding: 12px;
-  background: #f8fafc;
+  background: rgba(139, 92, 246, 0.1);
   border-radius: 8px;
-  border-left: 3px solid #e2e8f0;
+  border-left: 3px solid rgba(139, 92, 246, 0.5);
 }
 
 .fecha-principal {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #334155;
+  color: #e2e8f0;
   font-weight: 500;
   margin-bottom: 4px;
 }
 
 .fecha-principal ion-icon {
-  color: #64748b;
+  color: #a78bfa;
   font-size: 0.9em;
 }
 
 .fecha-relativa {
   font-size: 0.85em;
-  color: #64748b;
+  color: #94a3b8;
   margin-left: 20px;
 }
 
@@ -409,19 +528,73 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 0.9em;
   padding: 8px 12px;
-  background: #f1f5f9;
+  background: rgba(139, 92, 246, 0.15);
   border-radius: 6px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .usuario-info ion-icon {
   font-size: 0.9em;
+  color: #a78bfa;
 }
 
 .usuario-info strong {
-  color: #334155;
+  color: #e2e8f0;
+}
+
+/* Información del motivo de baja */
+.motivo-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #fbbf24;
+  font-size: 0.9em;
+  padding: 10px 12px;
+  background: rgba(251, 191, 36, 0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  margin-top: 8px;
+}
+
+.motivo-info ion-icon {
+  font-size: 1.1em;
+  color: #fbbf24;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.motivo-info strong {
+  color: #fcd34d;
+  font-weight: 600;
+}
+
+/* Observaciones */
+.observaciones-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 0.85em;
+  padding: 10px 12px;
+  background: rgba(100, 116, 139, 0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.observaciones-info ion-icon {
+  font-size: 1.1em;
+  color: #cbd5e1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.observaciones-info strong {
+  color: #e2e8f0;
 }
 
 /* Estados específicos */

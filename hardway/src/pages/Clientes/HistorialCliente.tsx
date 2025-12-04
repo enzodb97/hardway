@@ -32,7 +32,9 @@ import {
   trendingDown,
   calendar,
   analytics,
-  document
+  document,
+  alertCircle,
+  chatbubbleEllipses
 } from 'ionicons/icons';
 import { useClientes } from '../../context/ClientesContext';
 import './HistorialCliente.css';
@@ -52,6 +54,9 @@ interface HistorialItem {
   fechaCambio: string;
   idUsuarioModifico: number;
   usuarioModifico: string;
+  idMotivo?: number;
+  motivoDescripcion?: string;
+  observaciones?: string;
 }
 
 const HistorialCliente: React.FC<HistorialClienteProps> = ({
@@ -308,6 +313,22 @@ const HistorialCliente: React.FC<HistorialClienteProps> = ({
                               <div className="usuario-info">
                                 <IonIcon icon={person} />
                                 <span>Modificado por: <strong>{item.usuarioModifico}</strong></span>
+                              </div>
+                            )}
+                            
+                            {/* Mostrar motivo de baja si existe */}
+                            {item.idMotivo && item.motivoDescripcion && (
+                              <div className="motivo-info">
+                                <IonIcon icon={alertCircle} />
+                                <span>Motivo: <strong>{item.motivoDescripcion}</strong></span>
+                              </div>
+                            )}
+                            
+                            {/* Mostrar observaciones si existen */}
+                            {item.observaciones && (
+                              <div className="observaciones-info">
+                                <IonIcon icon={chatbubbleEllipses} />
+                                <span><strong>Observaciones:</strong> {item.observaciones}</span>
                               </div>
                             )}
                           </IonCardContent>

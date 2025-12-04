@@ -54,6 +54,7 @@ import crownIcon from "../../assets/icons/vip-crown.svg";
 import starIcon from "../../assets/icons/vip-star.svg";
 import { useClientes } from "../../context/ClientesContext";
 import HistorialCliente from "./HistorialCliente";
+import ModalMotivoBaja from "./ModalMotivoBaja";
 import "./Clientes.css";
 import { exportarClientesPDF } from "../../utils/clientesUtils";
 import axios from "axios";
@@ -83,9 +84,9 @@ const Clientes: React.FC = () => {
   const [alertMsg, setAlertMsg] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [clienteAEliminar, setClienteAEliminar] = useState<number | null>(null);
-  const [showConfirmBaja, setShowConfirmBaja] = useState(false);
+  const [showModalMotivoBaja, setShowModalMotivoBaja] = useState(false);
   const [showConfirmAlta, setShowConfirmAlta] = useState(false);
-  const [clienteADarBaja, setClienteADarBaja] = useState<number | null>(null);
+  const [clienteADarBaja, setClienteADarBaja] = useState<{id: number; nombre: string} | null>(null);
   const [clienteADarAlta, setClienteADarAlta] = useState<number | null>(null);
 
   // Estados para historial
@@ -190,15 +191,18 @@ const Clientes: React.FC = () => {
   };
 
   // Dar de baja cliente
-  const pedirConfirmacionBaja = (id: number) => {
-    setClienteADarBaja(id);
-    setShowConfirmBaja(true);
+  const pedirConfirmacionBaja = (cliente: any) => {
+    setClienteADarBaja({
+      id: cliente.id,
+      nombre: `${cliente.nombre} ${cliente.apellido}`
+    });
+    setShowModalMotivoBaja(true);
   };
 
-  const handleDarBaja = async () => {
+  const handleDarBaja = async (idMotivo: number, observaciones?: string) => {
     if (clienteADarBaja === null) return;
     try {
-      await darDeBajaCliente(clienteADarBaja);
+      await darDeBajaCliente(clienteADarBaja.id, idMotivo, observaciones);
       setAlertMsg("Cliente dado de baja correctamente");
       setShowAlert(true);
     } catch (error: any) {
@@ -206,7 +210,7 @@ const Clientes: React.FC = () => {
       setShowAlert(true);
     } finally {
       setClienteADarBaja(null);
-      setShowConfirmBaja(false);
+      setShowModalMotivoBaja(false);
     }
   };
 
@@ -421,7 +425,7 @@ const Clientes: React.FC = () => {
                   fill="clear"
                   size="small"
                   color="danger"
-                  onClick={() => pedirConfirmacionBaja(cliente.id)}
+                  onClick={() => pedirConfirmacionBaja(cliente)}
                   className="baja-action"
                 >
                   <IonIcon icon={closeCircle} slot="start" color="danger" />
@@ -509,7 +513,7 @@ const Clientes: React.FC = () => {
                 fill="clear"
                 size="small"
                 color="danger"
-                onClick={() => pedirConfirmacionBaja(cliente.id)}
+                onClick={() => pedirConfirmacionBaja(cliente)}
                 className="baja-action"
               >
                 <IonIcon icon={closeCircle} color="danger" />
@@ -787,26 +791,6 @@ const Clientes: React.FC = () => {
             ]}
           />
 
-          {/* Confirmación de dar de baja */}
-          <IonAlert
-            isOpen={showConfirmBaja}
-            onDidDismiss={() => setShowConfirmBaja(false)}
-            header="¿Dar de baja cliente?"
-            message="¿Estás seguro de que deseas dar de baja este cliente? Podrás reactivarlo más tarde."
-            buttons={[
-              {
-                text: "Cancelar",
-                role: "cancel",
-                handler: () => setShowConfirmBaja(false),
-              },
-              {
-                text: "Dar de Baja",
-                handler: handleDarBaja,
-                cssClass: "warning",
-              },
-            ]}
-          />
-
           {/* Confirmación de dar de alta */}
           <IonAlert
             isOpen={showConfirmAlta}
@@ -833,6 +817,20 @@ const Clientes: React.FC = () => {
             message={alertMsg}
             buttons={["Aceptar"]}
           />
+
+          {/* Modal de motivo de baja */}
+          {clienteADarBaja && (
+            <ModalMotivoBaja
+              isOpen={showModalMotivoBaja}
+              onDidDismiss={() => {
+                setShowModalMotivoBaja(false);
+                setClienteADarBaja(null);
+              }}
+              clienteId={clienteADarBaja.id}
+              clienteNombre={clienteADarBaja.nombre}
+              onConfirm={handleDarBaja}
+            />
+          )}
 
           {/* Modal de historial */}
           {clienteHistorial && (

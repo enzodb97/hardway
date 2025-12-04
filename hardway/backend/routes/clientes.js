@@ -100,6 +100,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Obtener motivos de baja
+router.get("/motivos-baja", async (req, res) => {
+  try {
+    const motivos = await sequelize.query(
+      'SELECT idMotivo, descripcion FROM motivo_baja_cliente ORDER BY idMotivo',
+      {
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+    res.json(motivos);
+  } catch (error) {
+    console.error("Error al obtener motivos de baja:", error);
+    res.status(500).json({ error: "Error al obtener motivos de baja" });
+  }
+});
+
 // Crear nuevo cliente
 router.post("/", async (req, res) => {
   const t = await sequelize.transaction();
@@ -253,12 +269,18 @@ router.put("/:id", async (req, res) => {
 // Dar de baja a un cliente (cambiar estaActivo a 0)
 router.put("/:id/baja", async (req, res) => {
   const { id } = req.params;
-  const { idUsuario = 1 } = req.body; // ID del usuario que realiza la acción
-  console.log(`🔄 Intentando dar de baja al cliente con ID: ${id}`);
+  const { idUsuario = 1, idMotivo, observaciones } = req.body; // ID del usuario, motivo y observaciones
+  console.log(`🔄 Intentando dar de baja al cliente con ID: ${id}, Motivo: ${idMotivo}`);
   
   const t = await sequelize.transaction();
   
   try {
+    // Validar que se proporcione un motivo
+    if (!idMotivo) {
+      await t.rollback();
+      return res.status(400).json({ error: "Debe seleccionar un motivo de baja" });
+    }
+    
     // Primero verificamos si el cliente existe
     const clienteExistente = await Cliente.findByPk(id);
     if (!clienteExistente) {
@@ -285,11 +307,11 @@ router.put("/:id/baja", async (req, res) => {
       { where: { idCliente: id }, transaction: t }
     );
     
-    // PASO 2: Registrar en el historial
+    // PASO 2: Registrar en el historial con motivo y observaciones
     await sequelize.query(
-      'INSERT INTO cliente_historial_estado (idCliente, idEstado, idUsuarioModifico, fechaCambio) VALUES (?, ?, ?, NOW())',
+      'INSERT INTO cliente_historial_estado (idCliente, idEstado, idUsuarioModifico, idMotivo, observaciones, fechaCambio) VALUES (?, ?, ?, ?, ?, NOW())',
       {
-        replacements: [id, 0, idUsuario],
+        replacements: [id, 0, idUsuario, idMotivo, observaciones || null],
         type: sequelize.QueryTypes.INSERT,
         transaction: t
       }
@@ -418,11 +440,14 @@ router.get("/:id/historial", async (req, res) => {
         e.descripcion AS estadoDescripcion,
         h.fechaCambio,
         h.idUsuarioModifico,
-        COALESCE(CONCAT(p.nombre, ' ', p.apellido), 'Sistema') AS usuarioModifico
+        COALESCE(u.nombreUsuario, 'Sistema') AS usuarioModifico,
+        h.idMotivo,
+        m.descripcion AS motivoDescripcion,
+        h.observaciones
       FROM cliente_historial_estado h
       INNER JOIN cliente_estados e ON h.idEstado = e.idEstado
       LEFT JOIN usuario u ON h.idUsuarioModifico = u.idUsuario
-      LEFT JOIN persona p ON u.idPersona = p.idPersona
+      LEFT JOIN motivo_baja_cliente m ON h.idMotivo = m.idMotivo
       WHERE h.idCliente = ?
       ORDER BY h.fechaCambio DESC`,
       {

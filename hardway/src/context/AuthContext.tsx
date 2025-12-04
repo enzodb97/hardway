@@ -67,75 +67,204 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
   };
 
+  // ✅ Expiración por inactividad (10 minutos)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const INACTIVITY_TIME = 10 * 60 * 1000; // 10 minutos en milisegundos
+    let inactivityTimer: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      // Limpiar timer anterior
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+
+      // Guardar timestamp de última actividad
+      localStorage.setItem('lastActivity', new Date().getTime().toString());
+
+      // Crear nuevo timer
+      inactivityTimer = setTimeout(() => {
+        console.log("⏱️ Sesión expirada por inactividad de 10 minutos");
+        logout();
+      }, INACTIVITY_TIME);
+    };
+
+    // Verificar si hay sesión expirada al cargar
+    const lastActivity = localStorage.getItem('lastActivity');
+    if (lastActivity) {
+      const timeSinceLastActivity = new Date().getTime() - parseInt(lastActivity);
+      if (timeSinceLastActivity > INACTIVITY_TIME) {
+        console.log("⏱️ Sesión expirada - última actividad hace más de 10 minutos");
+        logout();
+        return;
+      }
+    }
+
+    // Eventos que resetean el timer de inactividad
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+
+    // Iniciar timer
+    resetTimer();
+
+    // Agregar listeners
+    events.forEach(event => {
+      document.addEventListener(event, resetTimer, true);
+    });
+
+    // Cleanup
+    return () => {
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      events.forEach(event => {
+        document.removeEventListener(event, resetTimer, true);
+      });
+    };
+  }, [isAuthenticated]);
+
+  // ✅ NO limpiar en beforeunload - La sesión expira solo por inactividad o logout manual
+  useEffect(() => {
+    // Solo registrar el cierre para debugging
+    const handleBeforeUnload = () => {
+      console.log("ℹ️ Ventana cerrándose - La sesión expirará por inactividad de 10 minutos");
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   // Configurar interceptor de axios una sola vez al inicio
   useEffect(() => {
-    // Los interceptores ya están configurados en la instancia de axios
-    // Solo necesitamos manejar la validación de usuario al cargar la app
+    let isMounted = true; // Para evitar actualizaciones después del desmontaje
     
-    const authStatus = localStorage.getItem("isAuthenticated");
-    const storedUsername = localStorage.getItem("username");
-    let storedRol = localStorage.getItem("rol"); // deprecated - por compatibilidad
-    const storedRoles = localStorage.getItem("roles"); // ✅ NUEVO
-    const storedRolesIds = localStorage.getItem("rolesIds"); // ✅ NUEVO
-    const storedLegajoPicker = localStorage.getItem("legajoPicker");
+    // ⚠️ FAILSAFE: Forzar desactivación del loading después de 3 segundos máximo
+    const failsafeTimeout = setTimeout(() => {
+      console.warn("⚠️ FAILSAFE: Forzando loading = false después de 3 segundos");
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 3000);
     
-    // Normaliza el valor del rol para pickers al recargar (mantener por compatibilidad)
-    if (storedRol && storedRol.toLowerCase().includes("picker")) {
-      storedRol = "Picker";
-      localStorage.setItem("rol", "Picker");
-    }
-    
-    if (authStatus === "true" && storedUsername && (storedRoles || storedRol)) {
-      // Verifica con el backend si el usuario sigue siendo válido
-      axiosInstance
-        .get("/api/usuarios/validate", {
-          params: { username: storedUsername },
-        })
-        .then((res: any) => {
-          if (res.data.valid) {
-            setIsAuthenticated(true);
-            setRol(storedRol); // deprecated
-            setUsername(storedUsername);
-            setLegajoPicker(storedLegajoPicker);
+    const validateAuth = async () => {
+      console.log("🔍 AuthContext: Iniciando validación de autenticación...");
+      try {
+        const authStatus = localStorage.getItem("isAuthenticated");
+        const storedUsername = localStorage.getItem("username");
+        let storedRol = localStorage.getItem("rol"); // deprecated - por compatibilidad
+        const storedRoles = localStorage.getItem("roles"); // ✅ NUEVO
+        const storedRolesIds = localStorage.getItem("rolesIds"); // ✅ NUEVO
+        const storedLegajoPicker = localStorage.getItem("legajoPicker");
+        
+        console.log("📦 LocalStorage:", { authStatus, storedUsername, storedRol, storedRoles });
+        
+        // Normaliza el valor del rol para pickers al recargar (mantener por compatibilidad)
+        if (storedRol && storedRol.toLowerCase().includes("picker")) {
+          storedRol = "Picker";
+          localStorage.setItem("rol", "Picker");
+        }
+        
+        if (authStatus === "true" && storedUsername && (storedRoles || storedRol)) {
+          console.log("✅ Datos de sesión encontrados, validando con backend...");
+          // Verifica con el backend si el usuario sigue siendo válido
+          try {
+            const res = await axiosInstance.get("/api/usuarios/validate", {
+              params: { username: storedUsername },
+              timeout: 5000 // Timeout de 5 segundos
+            });
             
-            // ✅ Cargar roles del localStorage o del response
-            if (storedRoles) {
-              try {
-                setRoles(JSON.parse(storedRoles));
-              } catch {
+            console.log("📡 Respuesta del backend:", res.data);
+            
+            if (!isMounted) return;
+            
+            if (res.data.valid) {
+              console.log("✅ Usuario validado correctamente");
+              setIsAuthenticated(true);
+              setRol(storedRol); // deprecated
+              setUsername(storedUsername);
+              setLegajoPicker(storedLegajoPicker);
+              
+              // ✅ Cargar roles del localStorage o del response
+              if (storedRoles) {
+                try {
+                  setRoles(JSON.parse(storedRoles));
+                } catch {
+                  setRoles(res.data.roles || []);
+                }
+              } else {
                 setRoles(res.data.roles || []);
               }
-            } else {
-              setRoles(res.data.roles || []);
-            }
-            
-            if (storedRolesIds) {
-              try {
-                setRolesIds(JSON.parse(storedRolesIds));
-              } catch {
-                setRolesIds([]);
+              
+              if (storedRolesIds) {
+                try {
+                  setRolesIds(JSON.parse(storedRolesIds));
+                } catch {
+                  setRolesIds([]);
+                }
               }
+            } else {
+              console.warn("⚠️ Usuario no válido, limpiando sesión");
+              // Limpiar localStorage directamente
+              localStorage.clear();
+              setIsAuthenticated(false);
+              setRol(null);
+              setRoles([]);
+              setRolesIds([]);
+              setUsername(null);
+              setLegajoPicker(null);
             }
-          } else {
-            // Si no es válido, forzar logout
-            logout();
+          } catch (error) {
+            console.error("❌ AuthContext: Error en validación", error);
+            // Limpiar localStorage directamente
+            localStorage.clear();
+            setIsAuthenticated(false);
+            setRol(null);
+            setRoles([]);
+            setRolesIds([]);
+            setUsername(null);
+            setLegajoPicker(null);
           }
-          setLoading(false); // ✅ Finalizar carga
-        })
-        .catch((error) => {
-          console.error("AuthContext: Error en validación", error);
-          logout();
-          setLoading(false); // ✅ Finalizar carga incluso en error
-        });
-    } else {
-      setIsAuthenticated(false);
-      setRol(null);
-      setRoles([]);
-      setRolesIds([]);
-      setUsername(null);
-      localStorage.removeItem("legajoPicker");
-      setLoading(false); // ✅ Finalizar carga
-    }
+        } else {
+          console.log("ℹ️ No hay sesión guardada, iniciando limpio");
+          // No hay sesión guardada, limpiar todo
+          if (!isMounted) return;
+          setIsAuthenticated(false);
+          setRol(null);
+          setRoles([]);
+          setRolesIds([]);
+          setUsername(null);
+          localStorage.removeItem("legajoPicker");
+        }
+      } catch (error) {
+        console.error("❌ AuthContext: Error crítico en validación", error);
+        if (!isMounted) return;
+        // Limpiar localStorage directamente
+        localStorage.clear();
+        setIsAuthenticated(false);
+        setRol(null);
+        setRoles([]);
+        setRolesIds([]);
+        setUsername(null);
+        setLegajoPicker(null);
+      } finally {
+        // ✅ SIEMPRE finalizar carga, sin importar qué pase
+        console.log("🏁 AuthContext: Finalizando validación, loading = false");
+        clearTimeout(failsafeTimeout); // Cancelar el failsafe
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    validateAuth();
+    
+    return () => {
+      isMounted = false; // Cleanup para evitar memory leaks
+      clearTimeout(failsafeTimeout); // Limpiar timeout al desmontar
+    };
   }, []);
 
   const login = async (usernameInput: string, password: string) => {
@@ -184,13 +313,31 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.clear(); // Borra todo el localStorage
+    console.log("🚪 Cerrando sesión y limpiando todos los datos...");
+    
+    // Limpiar localStorage
+    localStorage.clear();
+    
+    // Limpiar sessionStorage
+    sessionStorage.clear();
+    
+    // Limpiar todas las cookies
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
+    // Limpiar estados
     setIsAuthenticated(false);
     setRol(null);
-    setRoles([]); // ✅ NUEVO
-    setRolesIds([]); // ✅ NUEVO
+    setRoles([]);
+    setRolesIds([]);
     setUsername(null);
     setLegajoPicker(null);
+    setError(null);
+    
+    console.log("✅ Sesión cerrada y datos eliminados completamente");
   };
 
   return (

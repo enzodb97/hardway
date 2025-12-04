@@ -21,14 +21,20 @@ export interface Cliente {
   estaActivo?: number; // 1 = activo, 0 = inactivo
 }
 
+export interface MotivoBaja {
+  idMotivo: number;
+  descripcion: string;
+}
+
 interface ClientesContextType {
   clientes: Cliente[];
   agregarCliente: (nuevoCliente: Omit<Cliente, "id">) => void;
   modificarCliente: (clienteActualizado: Cliente) => void;
   eliminarCliente: (id: number) => void;
-  darDeBajaCliente: (id: number) => void;
+  darDeBajaCliente: (id: number, idMotivo: number, observaciones?: string) => void;
   darDeAltaCliente: (id: number) => void;
   obtenerHistorialCliente: (id: number) => Promise<any>;
+  obtenerMotivosBaja: () => Promise<MotivoBaja[]>;
   recargarClientes: () => Promise<void>;
 }
 
@@ -40,6 +46,7 @@ const ClientesContext = createContext<ClientesContextType>({
   darDeBajaCliente: () => {},
   darDeAltaCliente: () => {},
   obtenerHistorialCliente: async () => [],
+  obtenerMotivosBaja: async () => [],
   recargarClientes: async () => {},
 });
 
@@ -122,10 +129,14 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const darDeBajaCliente = async (id: number) => {
+  const darDeBajaCliente = async (id: number, idMotivo: number, observaciones?: string) => {
     try {
-      console.log(`🔄 Dando de baja cliente ID: ${id}`);
-      const response = await axiosInstance.put(`/api/clientes/${id}/baja`, { idUsuario: 1 }); // Usuario temporal
+      console.log(`🔄 Dando de baja cliente ID: ${id}, Motivo: ${idMotivo}`);
+      const response = await axiosInstance.put(`/api/clientes/${id}/baja`, { 
+        idUsuario: 1, // Usuario temporal
+        idMotivo: idMotivo,
+        observaciones: observaciones 
+      });
       console.log('📝 Respuesta del servidor:', response.data);
       
       // Recargar todos los clientes desde el servidor para asegurar consistencia
@@ -180,6 +191,18 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
+  // Función para obtener los motivos de baja
+  const obtenerMotivosBaja = async () => {
+    try {
+      console.log('📋 Obteniendo motivos de baja...');
+      const response = await axiosInstance.get('/api/clientes/motivos-baja');
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener motivos de baja:", error);
+      throw error;
+    }
+  };
+
   // Función para recargar clientes manualmente
   const recargarClientes = async () => {
     try {
@@ -201,6 +224,7 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
         darDeBajaCliente,
         darDeAltaCliente,
         obtenerHistorialCliente,
+        obtenerMotivosBaja,
         recargarClientes,
       }}
     >

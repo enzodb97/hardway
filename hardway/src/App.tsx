@@ -41,12 +41,21 @@ setupIonicReact();
 const AppRouter = () => {
   const { isAuthenticated, showWelcome, setShowWelcome, username, loading } = useAuth();
 
-  // Mostrar loading mientras se valida la autenticación
-  if (loading) {
-    return <IonLoading isOpen={true} message="Cargando..." />;
-  }
+  console.log("🎯 AppRouter render:", { loading, isAuthenticated, username });
 
   return (
+    <>
+      {/* Loading overlay - se muestra/oculta según el estado */}
+      <IonLoading 
+        isOpen={loading} 
+        message="Cargando..."
+        onDidDismiss={() => console.log("🔓 IonLoading cerrado")}
+      />
+      
+      {/* Renderizar app solo cuando loading es false */}
+      {!loading && (
+        <>
+          {console.log("✅ Loading finalizado, renderizando aplicación")}
     <IonReactRouter>
       {isAuthenticated ? (
         <IonSplitPane contentId="main" when="md">
@@ -196,6 +205,9 @@ const AppRouter = () => {
         buttons={["Aceptar"]}
       />
     </IonReactRouter>
+        </>
+      )}
+    </>
   );
 };
 

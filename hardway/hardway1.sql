@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-12-2025 a las 04:45:47
+-- Tiempo de generación: 04-12-2025 a las 21:40:02
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -198,22 +198,6 @@ CREATE TABLE `asignacion_picking` (
 --
 
 INSERT INTO `asignacion_picking` (`idAsignacion`, `numeroPedido`, `legajoPicker`, `fechaAsignacion`, `fechaCompletado`, `fechaDespachado`, `observaciones`, `completado`, `despachado`) VALUES
-(29, 'PED-2025-112', 'LP005', '2025-06-18 06:35:53', '2025-06-18 20:14:32', NULL, 'Asignación desde panel gerente', 1, 0),
-(30, 'PED-2025-113', 'LP006', '2025-06-18 06:36:03', '2025-10-28 01:07:38', NULL, 'Tarea completada desde frontend', 1, 0),
-(31, 'PED-2025-112', 'LP005', '2025-06-18 20:14:32', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
-(32, 'PED-2025-407', 'LP006', '2025-06-19 05:26:00', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
-(35, 'PED-2025-521', 'LP005', '2025-06-20 02:20:08', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
-(36, 'PED-2025-747', 'LP006', '2025-07-01 23:48:21', NULL, NULL, 'Asignación desde panel gerente', 0, 0),
-(37, 'PED-2025-429', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(38, 'PED-2025-118', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(39, 'PED-2025-109', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(40, 'PED-2025-104', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(41, 'PED-2025-027', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(42, 'PED-2025-023', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(43, 'PED-2025-021', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(44, 'PED-2025-017', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(45, 'PED-2025-016', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
-(46, 'PED-2025-115', 'LP005', '2025-10-28 01:06:21', '2025-10-28 01:06:21', NULL, 'Asignación automática - sin historial previo', 1, 0),
 (47, 'PED-20251015-15', 'LP005', '2025-11-19 11:22:23', NULL, NULL, 'Asignación automática - Pendiente de picking', 0, 0),
 (48, 'PED-20251021-16', 'LP005', '2025-11-19 11:22:23', NULL, NULL, 'Asignación automática - Pendiente de picking', 0, 0),
 (49, 'PED-20251026-5', 'LP005', '2025-11-19 11:22:23', NULL, NULL, 'Asignación automática - Pendiente de picking', 0, 0),
@@ -521,8 +505,7 @@ INSERT INTO `asignacion_picking` (`idAsignacion`, `numeroPedido`, `legajoPicker`
 (354, 'PED-20241211-17', 'LP006', '2024-12-11 15:55:53', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (355, 'PED-20241212-24', 'LP006', '2024-12-12 09:26:53', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1),
 (356, 'PED-20241213-7', 'LP006', '2024-12-13 16:05:25', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(357, 'PED-20241215-10', 'LP006', '2024-12-15 10:41:50', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1);
-INSERT INTO `asignacion_picking` (`idAsignacion`, `numeroPedido`, `legajoPicker`, `fechaAsignacion`, `fechaCompletado`, `fechaDespachado`, `observaciones`, `completado`, `despachado`) VALUES
+(357, 'PED-20241215-10', 'LP006', '2024-12-15 10:41:50', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1),
 (358, 'PED-20241215-12', 'LP006', '2024-12-15 15:39:27', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (359, 'PED-20241216-8', 'LP005', '2024-12-16 14:13:28', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (360, 'PED-20241217-11', 'LP006', '2024-12-17 09:51:04', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1),
@@ -534,37 +517,10 @@ INSERT INTO `asignacion_picking` (`idAsignacion`, `numeroPedido`, `legajoPicker`
 (366, 'PED-20241227-0', 'LP006', '2024-12-27 14:59:27', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (367, 'PED-20241227-4', 'LP006', '2024-12-27 15:23:12', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (368, 'PED-20241228-1', 'LP005', '2024-12-28 11:39:27', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(369, 'PED-20241228-9', 'LP006', '2024-12-28 19:07:46', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1),
+(369, 'PED-20241228-9', 'LP006', '2024-12-28 19:07:46', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1);
+INSERT INTO `asignacion_picking` (`idAsignacion`, `numeroPedido`, `legajoPicker`, `fechaAsignacion`, `fechaCompletado`, `fechaDespachado`, `observaciones`, `completado`, `despachado`) VALUES
 (370, 'PED-20241230-14', 'LP006', '2024-12-30 18:20:10', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (371, 'PED-20241230-21', 'LP006', '2024-12-30 08:32:26', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1),
-(372, 'PED-2025-014', 'LP005', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(373, 'PED-2025-015', 'LP006', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(374, 'PED-2025-018', 'LP005', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(375, 'PED-2025-019', 'LP005', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(376, 'PED-2025-020', 'LP005', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(377, 'PED-2025-022', 'LP006', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(378, 'PED-2025-024', 'LP005', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(379, 'PED-2025-025', 'LP005', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(380, 'PED-2025-026', 'LP006', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(381, 'PED-2025-028', 'LP006', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1),
-(382, 'PED-2025-029', 'LP006', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(383, 'PED-2025-030', 'LP005', '2025-06-16 15:34:33', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(384, 'PED-2025-101', 'LP006', '2025-06-16 15:44:01', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(385, 'PED-2025-102', 'LP006', '2025-06-16 15:44:01', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(386, 'PED-2025-103', 'LP006', '2025-06-16 15:44:01', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(387, 'PED-2025-105', 'LP005', '2025-06-16 15:44:01', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(388, 'PED-2025-106', 'LP005', '2025-06-16 15:44:01', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(389, 'PED-2025-107', 'LP005', '2025-06-16 15:44:01', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(390, 'PED-2025-108', 'LP005', '2025-06-16 15:44:01', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(391, 'PED-2025-110', 'LP005', '2025-06-16 15:44:02', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(392, 'PED-2025-111', 'LP005', '2025-06-16 15:44:02', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(393, 'PED-2025-114', 'LP006', '2025-06-16 15:44:02', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(394, 'PED-2025-116', 'LP005', '2025-06-16 15:44:02', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(395, 'PED-2025-117', 'LP005', '2025-06-16 15:44:02', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(396, 'PED-2025-119', 'LP005', '2025-06-16 15:44:02', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(397, 'PED-2025-120', 'LP006', '2025-06-16 15:44:02', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(398, 'PED-2025-172', 'LP005', '2025-06-16 03:55:34', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
-(399, 'PED-2025-333', 'LP005', '2025-06-16 04:01:30', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (400, 'PED-20250102-12', 'LP005', '2025-01-02 09:18:15', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 4', 1, 1),
 (401, 'PED-20250102-22', 'LP006', '2025-01-02 09:16:06', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
 (402, 'PED-20250103-2', 'LP006', '2025-01-03 10:39:43', '2025-11-19 11:29:55', '2025-11-19 11:29:55', 'Asignación histórica - Pedido ya en estado 5', 1, 1),
@@ -831,7 +787,8 @@ INSERT INTO `barrio` (`idBarrio`, `nombreBarrio`, `idCiudad`) VALUES
 (7, 'Yerba Buena', 7),
 (8, 'Cerrillos', 8),
 (9, 'Barrio Roma', 9),
-(10, 'Villa Mitre', 10);
+(10, 'Villa Mitre', 10),
+(37, 'Calle Falsa 742', 62);
 
 -- --------------------------------------------------------
 
@@ -918,7 +875,8 @@ INSERT INTO `ciudad` (`idCiudad`, `nombreCiudad`, `codigoPostal`) VALUES
 (49, 'Olavarría', 'B7400'),
 (50, 'Cipolletti', 'R8324'),
 (51, 'La Banda', 'G4300'),
-(52, 'Río Grande', 'V9420');
+(52, 'Río Grande', 'V9420'),
+(62, 'Calle Falsa 742', '');
 
 -- --------------------------------------------------------
 
@@ -1019,7 +977,9 @@ CREATE TABLE `cliente_historial_estado` (
   `idCliente` int(11) NOT NULL,
   `idEstado` tinyint(1) NOT NULL,
   `fechaCambio` datetime NOT NULL DEFAULT current_timestamp(),
-  `idUsuarioModifico` int(11) NOT NULL
+  `idUsuarioModifico` int(11) NOT NULL,
+  `idMotivo` int(11) DEFAULT NULL COMMENT 'FK al motivo de baja. NULL si es un Alta',
+  `observaciones` varchar(255) DEFAULT NULL COMMENT 'Detalle adicional opcional'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -1147,39 +1107,6 @@ CREATE TABLE `detallepedido` (
 --
 
 INSERT INTO `detallepedido` (`idDetallePedido`, `numeroPedido`, `codigoIndumentaria`, `cantidad`, `descuentoItem`) VALUES
-('DP-015', 'PED-2025-014', 'IND001', 2, 0.00),
-('DP-016', 'PED-2025-015', 'IND002', 1, 0.00),
-('DP-017', 'PED-2025-016', 'IND006', 3, 0.00),
-('DP-018', 'PED-2025-017', 'IND008', 2, 0.00),
-('DP-019', 'PED-2025-018', 'IND010', 1, 0.00),
-('DP-020', 'PED-2025-019', 'IND003', 2, 0.00),
-('DP-021', 'PED-2025-020', 'IND004', 3, 0.00),
-('DP-022', 'PED-2025-021', 'IND005', 1, 0.00),
-('DP-023', 'PED-2025-022', 'IND007', 2, 0.00),
-('DP-024', 'PED-2025-023', 'IND009', 1, 0.00),
-('DP-025', 'PED-2025-024', 'IND001', 1, 0.00),
-('DP-026', 'PED-2025-025', 'IND002', 2, 0.00),
-('DP-027', 'PED-2025-026', 'IND003', 3, 0.00),
-('DP-028', 'PED-2025-027', 'IND004', 1, 0.00),
-('DP-029', 'PED-2025-028', 'IND005', 2, 0.00),
-('DP-030', 'PED-2025-029', 'IND006', 1, 0.00),
-('DP-031', 'PED-2025-030', 'IND007', 3, 0.00),
-('DP-101', 'PED-2025-101', 'IND001', 2, 0.00),
-('DP-103', 'PED-2025-103', 'IND003', 1, 0.00),
-('DP-104', 'PED-2025-104', 'IND004', 2, 0.00),
-('DP-105', 'PED-2025-105', 'IND005', 1, 0.00),
-('DP-106', 'PED-2025-106', 'IND006', 2, 0.00),
-('DP-107', 'PED-2025-107', 'IND007', 3, 0.00),
-('DP-108', 'PED-2025-108', 'IND008', 1, 0.00),
-('DP-109', 'PED-2025-109', 'IND009', 2, 0.00),
-('DP-110', 'PED-2025-110', 'IND010', 1, 0.00),
-('DP-113', 'PED-2025-113', 'IND003', 1, 0.00),
-('DP-114', 'PED-2025-114', 'IND004', 3, 0.00),
-('DP-115', 'PED-2025-115', 'IND005', 2, 0.00),
-('DP-116', 'PED-2025-116', 'IND006', 1, 0.00),
-('DP-117', 'PED-2025-117', 'IND007', 2, 0.00),
-('DP-118', 'PED-2025-118', 'IND008', 1, 0.00),
-('DP-119', 'PED-2025-119', 'IND009', 3, 0.00),
 ('DP-20240110-001', 'PED-20240110-001', 'IND007', 3, 0.00),
 ('DP-20240115-001', 'PED-20240115-001', 'IND004', 5, 0.00),
 ('DP-20240120-001', 'PED-20240120-001', 'IND005', 1, 0.00),
@@ -1972,8 +1899,7 @@ INSERT INTO `detallepedido` (`idDetallePedido`, `numeroPedido`, `codigoIndumenta
 ('DP-PED-20250329-17-0', 'PED-20250329-17', 'IND002', 1, 0.00),
 ('DP-PED-20250330-2-0', 'PED-20250330-2', 'IND008', 3, 0.00),
 ('DP-PED-20250330-2-1', 'PED-20250330-2', 'IND005', 5, 0.00),
-('DP-PED-20250330-22-0', 'PED-20250330-22', 'IND025', 1, 0.00);
-INSERT INTO `detallepedido` (`idDetallePedido`, `numeroPedido`, `codigoIndumentaria`, `cantidad`, `descuentoItem`) VALUES
+('DP-PED-20250330-22-0', 'PED-20250330-22', 'IND025', 1, 0.00),
 ('DP-PED-20250331-12-0', 'PED-20250331-12', 'IND025', 4, 0.00),
 ('DP-PED-20250331-12-1', 'PED-20250331-12', 'IND027', 1, 0.00),
 ('DP-PED-20250331-12-2', 'PED-20250331-12', 'IND036', 5, 0.00),
@@ -1997,7 +1923,8 @@ INSERT INTO `detallepedido` (`idDetallePedido`, `numeroPedido`, `codigoIndumenta
 ('DP-PED-20250410-8-0', 'PED-20250410-8', 'IND021', 3, 0.00),
 ('DP-PED-20250411-15-0', 'PED-20250411-15', 'IND031', 3, 0.00),
 ('DP-PED-20250411-15-1', 'PED-20250411-15', 'IND004', 1, 0.00),
-('DP-PED-20250411-5-0', 'PED-20250411-5', 'IND024', 5, 0.00),
+('DP-PED-20250411-5-0', 'PED-20250411-5', 'IND024', 5, 0.00);
+INSERT INTO `detallepedido` (`idDetallePedido`, `numeroPedido`, `codigoIndumentaria`, `cantidad`, `descuentoItem`) VALUES
 ('DP-PED-20250411-5-1', 'PED-20250411-5', 'IND015', 3, 0.00),
 ('DP-PED-20250412-14-0', 'PED-20250412-14', 'IND003', 4, 0.00),
 ('DP-PED-20250412-19-0', 'PED-20250412-19', 'IND022', 2, 0.00),
@@ -2317,24 +2244,7 @@ INSERT INTO `detallepedido` (`idDetallePedido`, `numeroPedido`, `codigoIndumenta
 ('DP-PED-20251027-23-0', 'PED-20251027-23', 'IND028', 4, 0.00),
 ('DP-PED-20251028-18-0', 'PED-20251028-18', 'IND017', 4, 0.00),
 ('DP-PED-20251028-18-1', 'PED-20251028-18', 'IND001', 2, 0.00),
-('DP-PED-20251029-14-0', 'PED-20251029-14', 'IND003', 4, 0.00),
-('DPED-043831', 'PED-2025-429', 'IND001', 1, 0.00),
-('DPED-192243', 'PED-2025-102', 'IND002', 2, 0.00),
-('DPED-222225', 'PED-2025-407', 'IND006', 2, 0.00),
-('DPED-282917', 'PED-2025-521', 'IND039', 2, 0.00),
-('DPED-368986', 'PED-2025-333', 'IND001', 2, 0.00),
-('DPED-379606', 'PED-2025-407', 'IND001', 2, 0.00),
-('DPED-472999', 'PED-2025-172', 'IND003', 6, 0.00),
-('DPED-476959', 'PED-2025-521', 'IND001', 2, 0.00),
-('DPED-483076', 'PED-2025-112', 'IND002', 2, 0.00),
-('DPED-497690', 'PED-2025-407', 'IND003', 2, 0.00),
-('DPED-532448', 'PED-2025-172', 'IND002', 4, 0.00),
-('DPED-618710', 'PED-2025-429', 'IND002', 1, 0.00),
-('DPED-635910', 'PED-2025-120', 'IND010', 10, 0.00),
-('DPED-691464', 'PED-2025-172', 'IND001', 2, 0.00),
-('DPED-825563', 'PED-2025-521', 'IND003', 2, 0.00),
-('DPED-911321', 'PED-2025-111', 'IND001', 1, 0.00),
-('DPED-961264', 'PED-2025-747', 'IND001', 3, 0.00);
+('DP-PED-20251029-14-0', 'PED-20251029-14', 'IND003', 4, 0.00);
 
 -- --------------------------------------------------------
 
@@ -2406,7 +2316,8 @@ INSERT INTO `domicilio` (`idDomicilio`, `calle`, `altura`, `piso`, `departamento
 (70, 'Perú', '15', '4', '4', 'Frente a la municipalidad', 2, 1),
 (71, 'Independencia', '800', '1', '1', 'Puerta verde', 3, 2),
 (72, 'Belgrano', '1100', '5', 'C', 'Cerca de la escalera', 4, 3),
-(73, 'Salta', '15', '20', '20', 'Último piso', 5, 1);
+(73, 'Salta', '15', '20', '20', 'Último piso', 5, 1),
+(74, 'Calle Falsa 742', '742', '742', '742', '', 37, 62);
 
 -- --------------------------------------------------------
 
@@ -2592,6 +2503,29 @@ INSERT INTO `indumentaria` (`codigoIndumentaria`, `idDetalle`) VALUES
 ('IND037', 39),
 ('IND038', 40),
 ('IND039', 41);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `motivo_baja_cliente`
+--
+
+CREATE TABLE `motivo_baja_cliente` (
+  `idMotivo` int(11) NOT NULL,
+  `descripcion` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `motivo_baja_cliente`
+--
+
+INSERT INTO `motivo_baja_cliente` (`idMotivo`, `descripcion`) VALUES
+(1, 'Cliente moroso'),
+(2, 'Cierre del negocio del cliente'),
+(3, 'Intento de microgestión'),
+(4, 'Comunicación deficiente'),
+(5, 'Exigencias poco razonables'),
+(6, 'Otro (Ver observaciones)');
 
 -- --------------------------------------------------------
 
@@ -3400,50 +3334,6 @@ INSERT INTO `pedido` (`numeroPedido`, `idCliente`, `idUsuarioCreo`, `idUsuarioMo
 ('PED-20241228-9', 6, 2, NULL, '2024-12-28 19:07:46', '2025-12-04 00:44:37', 'HD5328AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
 ('PED-20241230-14', 9, 6, NULL, '2024-12-30 18:20:10', '2025-11-22 18:40:51', 'HD6420AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
 ('PED-20241230-21', 6, 6, NULL, '2024-12-30 08:32:26', '2025-12-04 00:44:37', 'HD2505AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-014', 28, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD7572AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-015', 29, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD8643AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-016', 28, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD1501AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-017', 30, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD7573AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-018', 31, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD9891AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-019', 32, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD5367AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-020', 33, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD3115AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-021', 34, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD7474AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-022', 35, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD9028AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-023', 33, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD3719AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-024', 36, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD8508AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-025', 37, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD3390AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-026', 38, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD8423AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-027', 39, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD3948AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-028', 40, NULL, NULL, '2025-06-16 15:34:33', '2025-12-04 00:44:37', 'HD47954AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-029', 36, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD2198AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-030', 41, NULL, NULL, '2025-06-16 15:34:33', '2025-11-22 18:40:51', 'HD2470AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-101', 28, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD8505AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-102', 29, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD7121AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-103', 30, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD9088AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-104', 28, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD5081AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-105', 31, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD7313AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-106', 32, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD1977AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-107', 33, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD6141AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-108', 34, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD5461AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-109', 35, NULL, NULL, '2025-06-16 15:44:01', '2025-11-22 18:40:51', 'HD7884AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-110', 36, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD4944AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-111', 37, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD8791AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-112', 37, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD4041AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-113', 38, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD4549AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4);
-INSERT INTO `pedido` (`numeroPedido`, `idCliente`, `idUsuarioCreo`, `idUsuarioModifico`, `fechaPedido`, `fechaModificacion`, `codigoSeguimiento`, `descuentoOrden`, `idMotivoCancelacion`, `observacionCancelacion`, `fechaCancelacion`, `idUsuarioCancelo`, `idEstado`, `estaActivo`, `dummyUpdate`, `idEmpresaEnvio`) VALUES
-('PED-2025-114', 39, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD1127AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-115', 40, NULL, NULL, '2025-06-14 15:44:02', '2025-11-14 21:19:32', NULL, 0.00, 5, NULL, NULL, NULL, 6, 1, NULL, 2),
-('PED-2025-116', 41, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD5258AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-117', 1, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD9626AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
-('PED-2025-118', 2, NULL, NULL, '2025-06-16 15:44:02', '2025-11-14 21:19:32', NULL, 0.00, 1, NULL, NULL, NULL, 6, 1, NULL, 3),
-('PED-2025-119', 3, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD3914AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-120', 4, NULL, NULL, '2025-06-16 15:44:02', '2025-11-22 18:40:51', 'HD6484AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-172', 1, NULL, NULL, '2025-06-16 03:55:34', '2025-11-22 18:40:51', 'HD2541AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-333', 4, NULL, NULL, '2025-06-16 04:01:30', '2025-11-22 18:40:51', 'HD1256AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
-('PED-2025-407', 1, NULL, NULL, '2025-06-18 21:30:36', '2025-11-22 18:40:51', 'HD6654AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-429', 28, NULL, NULL, '2025-06-16 20:43:17', '2025-11-22 18:40:51', 'HD1507AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
-('PED-2025-521', 1, 2, 1, '2025-06-20 02:19:11', '2025-11-22 18:40:51', 'HD4572AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
-('PED-2025-747', 1, 1, 1, '2025-07-01 23:47:40', '2025-11-14 20:39:57', NULL, 0.00, 3, NULL, NULL, 1, 6, 0, NULL, 2),
 ('PED-20250102-12', 4, 1, NULL, '2025-01-02 09:18:15', '2025-12-04 00:44:37', 'HD8186AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
 ('PED-20250102-22', 8, 2, NULL, '2025-01-02 09:16:06', '2025-11-22 18:40:51', 'HD2795AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
 ('PED-20250103-2', 7, 2, NULL, '2025-01-03 10:39:43', '2025-11-22 18:40:51', 'HD8341AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
@@ -3474,7 +3364,8 @@ INSERT INTO `pedido` (`numeroPedido`, `idCliente`, `idUsuarioCreo`, `idUsuarioMo
 ('PED-20250205-16', 9, 2, NULL, '2025-02-05 17:19:22', '2025-11-22 18:40:51', 'HD7423AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
 ('PED-20250205-21', 3, 1, NULL, '2025-02-05 13:52:57', '2025-11-22 18:40:51', 'HD1317AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
 ('PED-20250206-1', 10, 5, NULL, '2025-02-06 16:11:41', '2025-11-14 21:19:32', NULL, 0.00, 3, NULL, NULL, NULL, 6, 1, NULL, 2),
-('PED-20250206-8', 4, 5, NULL, '2025-02-06 17:25:43', '2025-12-04 00:44:37', 'HD6781AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2),
+('PED-20250206-8', 4, 5, NULL, '2025-02-06 17:25:43', '2025-12-04 00:44:37', 'HD6781AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 2);
+INSERT INTO `pedido` (`numeroPedido`, `idCliente`, `idUsuarioCreo`, `idUsuarioModifico`, `fechaPedido`, `fechaModificacion`, `codigoSeguimiento`, `descuentoOrden`, `idMotivoCancelacion`, `observacionCancelacion`, `fechaCancelacion`, `idUsuarioCancelo`, `idEstado`, `estaActivo`, `dummyUpdate`, `idEmpresaEnvio`) VALUES
 ('PED-20250207-13', 2, 7, NULL, '2025-02-07 14:54:58', '2025-11-22 18:40:51', 'HD1317AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 1),
 ('PED-20250208-4', 7, 5, NULL, '2025-02-08 13:28:01', '2025-11-22 18:40:51', 'HD1634AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 4),
 ('PED-20250209-19', 7, 2, NULL, '2025-02-09 11:39:19', '2025-12-04 00:44:37', 'HD6419AR', 0.00, NULL, NULL, NULL, NULL, 5, 1, NULL, 3),
@@ -3716,7 +3607,7 @@ CREATE TABLE `persona` (
 --
 
 INSERT INTO `persona` (`idPersona`, `dni`, `tipoDocumento`, `nombre`, `apellido`, `direccion`, `idDomicilio`) VALUES
-(1, 12345678, 'DNI', 'Juan Pérez  ', '', 'Av. Santa Fe 1234', 1),
+(1, 12345678, 'DNI', 'Juan ', 'Perez', 'Av. Santa Fe 1234', 1),
 (2, 87654321, 'DNI', 'María', 'González', 'Calle Falsa 742', 2),
 (3, 23456789, 'DNI', 'Carlos', 'Lopez', '9 de Julio 500', 3),
 (4, 98765432, 'DNI', 'Laura', 'Fernandez', 'Mitre 1020', 4),
@@ -3725,7 +3616,7 @@ INSERT INTO `persona` (`idPersona`, `dni`, `tipoDocumento`, `nombre`, `apellido`
 (7, 56789012, 'DNI', 'Sofía', 'Gómez', 'Independencia 360', 7),
 (8, 67890123, 'DNI', 'Diego', 'Silva', 'Av. Salta 890', 8),
 (9, 78901234, 'DNI', 'Lucía', 'Vargas', 'Colon 123', 9),
-(10, 89012345, 'DNI', 'Pedro Molina ', '', 'Alsina 456', 10),
+(10, 89012345, 'DNI', 'Pedro', 'Molina', 'Alsina 456', 10),
 (34, 89100101, 'DNI', 'Martin', 'Gomez', NULL, 35),
 (35, 89100102, 'DNI', 'Sofia', 'Rodriguez', NULL, 36),
 (36, 89100103, 'DNI', 'Diego', 'Fernandez', NULL, 37),
@@ -4169,7 +4060,8 @@ ALTER TABLE `cliente_historial_estado`
   ADD PRIMARY KEY (`idHistorial`),
   ADD KEY `fk_historial_cliente` (`idCliente`),
   ADD KEY `fk_historial_estado` (`idEstado`),
-  ADD KEY `fk_historial_usuario` (`idUsuarioModifico`);
+  ADD KEY `fk_historial_usuario` (`idUsuarioModifico`),
+  ADD KEY `fk_historial_motivo` (`idMotivo`);
 
 --
 -- Indices de la tabla `color`
@@ -4266,6 +4158,12 @@ ALTER TABLE `gerentegeneral`
 ALTER TABLE `indumentaria`
   ADD PRIMARY KEY (`codigoIndumentaria`),
   ADD KEY `idDetalle` (`idDetalle`);
+
+--
+-- Indices de la tabla `motivo_baja_cliente`
+--
+ALTER TABLE `motivo_baja_cliente`
+  ADD PRIMARY KEY (`idMotivo`);
 
 --
 -- Indices de la tabla `motivo_cancelacion`
@@ -4403,7 +4301,7 @@ ALTER TABLE `asignacion_picking`
 -- AUTO_INCREMENT de la tabla `barrio`
 --
 ALTER TABLE `barrio`
-  MODIFY `idBarrio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `idBarrio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de la tabla `categoriaindumentaria`
@@ -4415,19 +4313,19 @@ ALTER TABLE `categoriaindumentaria`
 -- AUTO_INCREMENT de la tabla `ciudad`
 --
 ALTER TABLE `ciudad`
-  MODIFY `idCiudad` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `idCiudad` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `idCliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `idCliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT de la tabla `cliente_historial_estado`
 --
 ALTER TABLE `cliente_historial_estado`
-  MODIFY `idHistorial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `idHistorial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `color`
@@ -4445,7 +4343,7 @@ ALTER TABLE `detalleindumentaria`
 -- AUTO_INCREMENT de la tabla `domicilio`
 --
 ALTER TABLE `domicilio`
-  MODIFY `idDomicilio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `idDomicilio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
 
 --
 -- AUTO_INCREMENT de la tabla `empresa_envio`
@@ -4458,6 +4356,12 @@ ALTER TABLE `empresa_envio`
 --
 ALTER TABLE `estadoindumentaria`
   MODIFY `idEstado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `motivo_baja_cliente`
+--
+ALTER TABLE `motivo_baja_cliente`
+  MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `motivo_cancelacion`
@@ -4481,7 +4385,7 @@ ALTER TABLE `nombreindumentaria`
 -- AUTO_INCREMENT de la tabla `persona`
 --
 ALTER TABLE `persona`
-  MODIFY `idPersona` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
+  MODIFY `idPersona` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT de la tabla `precioindumentaria`
@@ -4563,6 +4467,7 @@ ALTER TABLE `cliente`
 ALTER TABLE `cliente_historial_estado`
   ADD CONSTRAINT `fk_historial_cliente` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idCliente`),
   ADD CONSTRAINT `fk_historial_estado` FOREIGN KEY (`idEstado`) REFERENCES `cliente_estados` (`idEstado`),
+  ADD CONSTRAINT `fk_historial_motivo` FOREIGN KEY (`idMotivo`) REFERENCES `motivo_baja_cliente` (`idMotivo`),
   ADD CONSTRAINT `fk_historial_usuario` FOREIGN KEY (`idUsuarioModifico`) REFERENCES `usuario` (`idUsuario`);
 
 --
