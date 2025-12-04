@@ -4,6 +4,7 @@ import {
   IonSplitPane,
   setupIonicReact,
   IonAlert,
+  IonLoading,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Route, Redirect } from "react-router-dom";
@@ -38,7 +39,12 @@ import "./theme/variables.css";
 setupIonicReact();
 
 const AppRouter = () => {
-  const { isAuthenticated, showWelcome, setShowWelcome, username } = useAuth();
+  const { isAuthenticated, showWelcome, setShowWelcome, username, loading } = useAuth();
+
+  // Mostrar loading mientras se valida la autenticación
+  if (loading) {
+    return <IonLoading isOpen={true} message="Cargando..." />;
+  }
 
   return (
     <IonReactRouter>

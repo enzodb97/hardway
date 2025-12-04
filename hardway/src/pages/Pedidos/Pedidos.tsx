@@ -469,50 +469,56 @@ const Pedidos: React.FC = () => {
                           <IonPopover
                             isOpen={showPickerDropdown === pedido.numeroPedido}
                             onDidDismiss={() => setShowPickerDropdown(null)}
+                            className="picker-selection-popover"
+                            showBackdrop={true}
+                            dismissOnSelect={true}
+                            side="bottom"
+                            alignment="center"
                           >
-                            <IonList>
-                              <IonItem lines="none" color="light">
-                                <IonLabel className="ion-text-center picker-label">
-                                  Pickers
-                                </IonLabel>
-                              </IonItem>
-                              {pickers.length === 0 && (
-                                <IonItem>
-                                  <IonLabel>
-                                    No hay pickers disponibles
-                                  </IonLabel>
-                                </IonItem>
-                              )}
-                              {pickers.map((picker, index) => (
-                                <IonItem
-                                  button
-                                  key={picker.id || index}
-                                  onClick={() => {
-                                    console.log(
-                                      "📌 Picker seleccionado:",
-                                      picker
-                                    );
-                                    setSelectedPicker(picker);
-                                    setShowConfirmAsignar(true);
-                                    setShowPickerDropdown(null);
-                                  }}
-                                >
-                                  <IonLabel>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {picker.nombre}
-                                    </div>
-                                    <div
-                                      style={{
-                                        fontSize: "0.8em",
-                                        color: "#666",
-                                      }}
-                                    >
-                                      Legajo: {picker.legajo}
-                                    </div>
-                                  </IonLabel>
-                                </IonItem>
-                              ))}
-                            </IonList>
+                            <div className="picker-modal-content">
+                              <div className="picker-modal-header">
+                                <h3 className="picker-modal-header-title">
+                                  Seleccionar Picker
+                                </h3>
+                              </div>
+                              <IonList className="picker-modal-list">
+                                {pickers.length === 0 && (
+                                  <IonItem lines="none" className="picker-modal-empty">
+                                    <IonLabel className="picker-modal-empty-label">
+                                      No hay pickers disponibles
+                                    </IonLabel>
+                                  </IonItem>
+                                )}
+                                {pickers.map((picker, index) => (
+                                  <IonItem
+                                    button
+                                    lines="none"
+                                    key={picker.id || index}
+                                    className="picker-modal-item"
+                                    onClick={() => {
+                                      console.log(
+                                        "📌 Picker seleccionado:",
+                                        picker
+                                      );
+                                      setSelectedPicker(picker);
+                                      setShowConfirmAsignar(true);
+                                      setShowPickerDropdown(null);
+                                    }}
+                                  >
+                                    <IonLabel className="picker-modal-item-label">
+                                      <div className="picker-modal-item-content">
+                                        <div className="picker-modal-item-name">
+                                          {picker.nombre}
+                                        </div>
+                                        <div className="picker-modal-item-legajo">
+                                          Legajo: {picker.legajo}
+                                        </div>
+                                      </div>
+                                    </IonLabel>
+                                  </IonItem>
+                                ))}
+                              </IonList>
+                            </div>
                           </IonPopover>
                         </div>
                       </IonCol>
@@ -605,7 +611,8 @@ const Pedidos: React.FC = () => {
           header="Advertencia"
           message={alertMsg}
           buttons={
-            alertMsg === "El pedido fue marcado como finalizado correctamente."
+            alertMsg === "El pedido fue marcado como finalizado correctamente." ||
+            alertMsg === "Picker asignado correctamente"
               ? [{ text: "Aceptar", handler: () => setShowAlert(false) }]
               : [
                   {

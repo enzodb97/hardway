@@ -1,6 +1,6 @@
 import { Route, Redirect } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { IonCard, IonCardContent, IonIcon, IonText } from "@ionic/react";
+import { IonCard, IonCardContent, IonIcon, IonText, IonLoading } from "@ionic/react";
 import { lockClosed, warning } from "ionicons/icons";
 import "./RoleRoute.css";
 
@@ -15,12 +15,17 @@ const RoleRoute: React.FC<RoleRouteProps> = ({
   requiredRoles,
   ...rest
 }) => {
-  const { isAuthenticated, roles, hasAnyRole } = useAuth(); // ✅ Usar roles y hasAnyRole
+  const { isAuthenticated, roles, hasAnyRole, loading } = useAuth(); // ✅ Usar roles, hasAnyRole y loading
 
   return (
     <Route
       {...rest}
       render={(props) => {
+        // ✅ Mostrar loading mientras se valida
+        if (loading) {
+          return <IonLoading isOpen={true} message="Verificando permisos..." />;
+        }
+
         // ✅ Verificar si el usuario tiene ALGUNO de los roles requeridos
         if (isAuthenticated && hasAnyRole(requiredRoles)) {
           return <Component {...props} />;

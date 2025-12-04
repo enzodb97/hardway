@@ -20,6 +20,7 @@ interface AuthContextType {
   showWelcome: boolean;
   setShowWelcome: (show: boolean) => void;
   legajoPicker: string | null;
+  loading: boolean; // ✅ Estado de carga durante validación
   // ✅ NUEVA función: Verificar si el usuario tiene un rol específico
   hasRole: (roleName: string) => boolean;
   // ✅ NUEVA función: Verificar si el usuario tiene alguno de los roles
@@ -38,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   showWelcome: false,
   setShowWelcome: () => {},
   legajoPicker: null,
+  loading: true, // ✅ Por defecto en carga
   hasRole: () => false, // ✅ Función por defecto
   hasAnyRole: () => false, // ✅ Función por defecto
 });
@@ -51,6 +53,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [username, setUsername] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [legajoPicker, setLegajoPicker] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true); // ✅ Estado de carga
 
   // ✅ NUEVA función: Verificar si el usuario tiene un rol específico
   const hasRole = (roleName: string): boolean => {
@@ -117,10 +120,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             // Si no es válido, forzar logout
             logout();
           }
+          setLoading(false); // ✅ Finalizar carga
         })
         .catch((error) => {
           console.error("AuthContext: Error en validación", error);
           logout();
+          setLoading(false); // ✅ Finalizar carga incluso en error
         });
     } else {
       setIsAuthenticated(false);
@@ -129,6 +134,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setRolesIds([]);
       setUsername(null);
       localStorage.removeItem("legajoPicker");
+      setLoading(false); // ✅ Finalizar carga
     }
   }, []);
 
@@ -201,6 +207,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         showWelcome,
         setShowWelcome,
         legajoPicker,
+        loading, // ✅ NUEVO
         hasRole, // ✅ NUEVO
         hasAnyRole, // ✅ NUEVO
       }}

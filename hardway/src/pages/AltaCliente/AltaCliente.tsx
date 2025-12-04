@@ -193,11 +193,11 @@ const AltaCliente: React.FC = () => {
               <span>ID Cliente: {formData.id}</span>
             </div>
           )}
-          {/* Sección: Datos Personales */}
+          {/* Sección: Datos Personales / Datos de la Empresa */}
           <div className="form-section">
             <h3 className="section-title">
-              <span className="section-icon">👤</span>
-              Datos Personales
+              <span className="section-icon">{formData.tipoDocumento === 'CUIT' ? '🏢' : '👤'}</span>
+              {formData.tipoDocumento === 'CUIT' ? 'Datos de la Empresa' : 'Datos Personales'}
             </h3>
             <div className="two-column-grid">
               <div className="form-column">
@@ -211,6 +211,7 @@ const AltaCliente: React.FC = () => {
                       setFormData({
                         ...formData,
                         tipoDocumento: e.detail.value,
+                        apellido: e.detail.value === 'CUIT' ? '' : formData.apellido, // Limpiar apellido si es CUIT
                       })
                     }
                   >
@@ -234,7 +235,11 @@ const AltaCliente: React.FC = () => {
                     placeholder={
                       esEdicion && !formData.numeroDocumento
                         ? "Dato obligatorio"
-                        : ""
+                        : formData.tipoDocumento === 'CUIT' 
+                        ? "Ej: 30712345678"
+                        : formData.tipoDocumento === 'CUIL'
+                        ? "Ej: 20123456789"
+                        : "Ej: 12345678"
                     }
                     className={
                       esEdicion && !formData.numeroDocumento
@@ -248,7 +253,7 @@ const AltaCliente: React.FC = () => {
               <div className="form-column">
                 <IonItem className="form-item">
                   <IonLabel position="floating">
-                    Nombre <span className="required">*</span>
+                    {formData.tipoDocumento === 'CUIT' ? 'Nombre de la Empresa' : 'Nombre'} <span className="required">*</span>
                   </IonLabel>
                   <IonInput
                     type="text"
@@ -258,7 +263,11 @@ const AltaCliente: React.FC = () => {
                       setFormData({ ...formData, nombre: e.detail.value! })
                     }
                     placeholder={
-                      esEdicion && !formData.nombre ? "Dato obligatorio." : ""
+                      esEdicion && !formData.nombre 
+                        ? "Dato obligatorio." 
+                        : formData.tipoDocumento === 'CUIT'
+                        ? "Ej: Distribuidora El Sol SA"
+                        : ""
                     }
                     className={
                       esEdicion && !formData.nombre ? "input-obligatorio" : ""
@@ -266,25 +275,27 @@ const AltaCliente: React.FC = () => {
                   />
                 </IonItem>
 
-                <IonItem className="form-item">
-                  <IonLabel position="floating">
-                    Apellido <span className="required">*</span>
-                  </IonLabel>
-                  <IonInput
-                    type="text"
-                    required
-                    value={formData.apellido}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, apellido: e.detail.value! })
-                    }
-                    placeholder={
-                      esEdicion && !formData.apellido ? "Dato obligatorio." : ""
-                    }
-                    className={
-                      esEdicion && !formData.apellido ? "input-obligatorio" : ""
-                    }
-                  />
-                </IonItem>
+                {formData.tipoDocumento !== 'CUIT' && (
+                  <IonItem className="form-item">
+                    <IonLabel position="floating">
+                      Apellido <span className="required">*</span>
+                    </IonLabel>
+                    <IonInput
+                      type="text"
+                      required
+                      value={formData.apellido}
+                      onIonChange={(e) =>
+                        setFormData({ ...formData, apellido: e.detail.value! })
+                      }
+                      placeholder={
+                        esEdicion && !formData.apellido ? "Dato obligatorio." : ""
+                      }
+                      className={
+                        esEdicion && !formData.apellido ? "input-obligatorio" : ""
+                      }
+                    />
+                  </IonItem>
+                )}
               </div>
             </div>
           </div>

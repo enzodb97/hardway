@@ -24,6 +24,7 @@ import {
 import "./Menu.css";
 import persona from "../assets/images/people.png";
 import { useAuth } from "../context/AuthContext";
+import { h } from "ionicons/dist/types/stencil-public-runtime";
 
 interface AppPage {
   url: string;
@@ -36,22 +37,44 @@ const Menu: React.FC = () => {
   const history = useHistory();
   const { logout, username, roles, hasAnyRole } = useAuth(); // ✅ Usar roles y hasAnyRole
 
-  const appPages: AppPage[] = [
-    /*{ title: "Inicio", url: "/Inicio", icon: homeOutline },*/
-    { title: "Reportes", url: "/Reportes", icon: bookmarkOutline },
-    { title: "Pedidos", url: "/pedidos", icon: bagHandleOutline },
-    { title: "Clientes", url: "/Clientes", icon: peopleOutline },
-    { title: "Usuarios", url: "/usuarios", icon: personOutline },
-    { title: "Indumentaria", url: "/indumentaria", icon: shirtOutline },
-  ];
+  // ✅ Construir menú dinámico según roles
+  const appPages: AppPage[] = [];
   
-  // ✅ Botón de gestión de Picking visible para usuarios con roles específicos
-  if (hasAnyRole(["Encargado de Picking", "Administrador", "Picker"])) {
+  // Dashboard - visible para todos
+  appPages.push({ title: "Inicio", url: "/dashboard", icon: homeOutline });
+  
+  // Reportes - solo Administrador y Gerente
+  if (hasAnyRole(["Administrador", "Gerente"])) {
+    appPages.push({ title: "Reportes", url: "/Reportes", icon: bookmarkOutline });
+  }
+  
+  // Pedidos - Administrador y Vendedor
+  if (hasAnyRole(["Administrador", "Vendedor"])) {
+    appPages.push({ title: "Pedidos", url: "/pedidos", icon: bagHandleOutline });
+  }
+  
+  // Clientes - Administrador y Vendedor
+  if (hasAnyRole(["Administrador", "Vendedor"])) {
+    appPages.push({ title: "Clientes", url: "/Clientes", icon: peopleOutline });
+  }
+  
+  // Usuarios - solo Administrador
+  if (hasAnyRole(["Administrador"])) {
+    appPages.push({ title: "Usuarios", url: "/usuarios", icon: personOutline });
+  }
+  
+  // Indumentaria - Administrador y Encargado de Stock
+  if (hasAnyRole(["Administrador", "Encargado de Stock"])) {
+    appPages.push({ title: "Indumentaria", url: "/indumentaria", icon: shirtOutline });
+  }
+  
+  // Picking - Administrador, Picker, Encargado de Picking
+  if (hasAnyRole(["Administrador", "Picker", "Encargado de Picking"])) {
     appPages.push({ title: "Picking", url: "/picking", icon: cubeOutline });
   }
   
-  // ✅ Botón de gestión de Envíos visible para usuarios con roles específicos
-  if (hasAnyRole(["Encargado de Logística", "Administrador", "Envios", "Picker"])) {
+  // Despachos - Administrador, Picker, Envios
+  if (hasAnyRole(["Administrador", "Picker", "Envios"])) {
     appPages.push({ title: "Despachos", url: "/envios", icon: carOutline });
   }
 

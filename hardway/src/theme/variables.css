@@ -5,7 +5,8 @@ http://ionicframework.com/docs/theming/ */
 /* Set variables for all modes */
 :root {
   /* Set the background of the entire app */
-  --ion-background-color: #f2eae1;
+  --ion-background-color: linear-gradient(135deg, #fffbe6 0%, #e2e4e6 100%),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="%23fdb40b" opacity="0.13"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
   --ion-color-custom-yellow: #fdb40b;
   --ion-color-custom-yellow-rgb: 253, 180, 11;
   --ion-color-custom-yellow-contrast: #2d3436;
@@ -23,28 +24,26 @@ http://ionicframework.com/docs/theming/ */
 /* Set text color of the entire app for Material Design only */
 :root.md {
   --ion-text-color: #0a0808;
-  --ion-toolbar-background: #fdfdfd !important;
 }
-/* Fondo de todos los contenedores*/
-/*ion-content {
-  background-color: #fdb40b !important;
-}*/
 
-/*.backgorund-content {
-  background-color: #ac1616 !important;
-}*/
-
-/*@media (prefers-color-scheme: dark) {
-  :root.md {
-    --ion-item-background: #e2dada;
+/* Animación Aurora para el menú */
+@keyframes aurora {
+  0% { 
+    background-position: 0% 50%;
   }
-}*/
-
-:clientes-page.ion-page {
-  background-color: #bb1a1a;
+  50% { 
+    background-position: 100% 50%;
+  }
+  100% { 
+    background-position: 0% 50%;
+  }
 }
 
 .custom-menu {
   --ion-color-primary: #feb514;
   --ion-color-primary-rgb: 253, 180, 11;
+  --background: linear-gradient(135deg, #fffbe6 0%, #e2e4e6 100%) padding-box,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="%23fdb40b" opacity="0.13"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>') center/cover repeat;
+  animation: aurora 8s linear infinite;
+  background-size: 400% 400%;
 }

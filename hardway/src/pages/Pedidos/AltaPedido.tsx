@@ -498,7 +498,7 @@ const AltaPedido: React.FC = () => {
                     Indumentaria del Pedido
                   </h3>
                   <p className="card-subtitle">
-                    Agrega las Indumentaira que incluirá este pedido
+                    Agrega las Indumentarias que incluirá este pedido
                   </p>
                 </div>
                 <div className="card-content">
@@ -509,14 +509,14 @@ const AltaPedido: React.FC = () => {
                     </div>
                     <div className="prendas-counter">
                       {prendasSeleccionadas.length}{" "}
-                      {prendasSeleccionadas.length === 1 ? "prenda" : "prendas"}
+                      {prendasSeleccionadas.length === 1 ? "indumentaria" : "indumentaria"}
                     </div>
                   </div>
 
                   {prendasSeleccionadas.length === 0 ? (
                     <div className="empty-state">
                       <IonIcon icon={shirtOutline} className="empty-icon" />
-                      <h4 className="empty-title">No hay prendas agregadas</h4>
+                      <h4 className="empty-title">No hay indumentarias agregadas</h4>
                       <p className="empty-description">
                         Haz clic en "Agregar Indumentria" para comenzar a
                         construir tu pedido

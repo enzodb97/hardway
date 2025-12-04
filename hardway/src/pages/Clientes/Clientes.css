@@ -75,7 +75,8 @@
 }
 /* Estructura principal */
 .clientes-page {
-  --ion-background-color: #f8f9fa;
+   --ion-background-color: linear-gradient(135deg, #fffbe6 0%, #e2e4e6 100%),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="%23fdb40b" opacity="0.13"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
 }
 
 .clientes-page .clientes-content {

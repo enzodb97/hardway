@@ -32,15 +32,28 @@ export function validarUnicidadCliente(
 export function validarCamposCliente(
   formData: Partial<Cliente>
 ): string | null {
-  if (formData.numeroDocumento && formData.numeroDocumento.trim().length < 3) {
-    return "El N° de Documento debe tener al menos 3 caracteres.";
+  // Validar tipo de documento y formato
+  if (formData.tipoDocumento === 'CUIL' || formData.tipoDocumento === 'CUIT') {
+    const errorCUILCUIT = validarCUILCUIT(
+      formData.numeroDocumento || '', 
+      formData.tipoDocumento
+    );
+    if (errorCUILCUIT) return errorCUILCUIT;
+  } else if (formData.numeroDocumento && formData.numeroDocumento.trim().length < 8) {
+    return "El N° de Documento debe tener al menos 8 caracteres.";
   }
+  
   if (!formData.nombre || formData.nombre.trim().length < 3) {
     return "El nombre es obligatorio y debe tener al menos 3 caracteres.";
   }
-  if (!formData.apellido || formData.apellido.trim().length < 3) {
-    return "El apellido es obligatorio y debe tener al menos 3 caracteres.";
+  
+  // El apellido solo es obligatorio si NO es CUIT (para empresas no se requiere apellido)
+  if (formData.tipoDocumento !== 'CUIT') {
+    if (!formData.apellido || formData.apellido.trim().length < 3) {
+      return "El apellido es obligatorio y debe tener al menos 3 caracteres.";
+    }
   }
+  
   if (!formData.localidad || formData.localidad.trim().length < 5) {
     return "El campo Localidad es obligatorio y debe tener al menos 5 caracteres.";
   }
@@ -57,6 +70,24 @@ export function validarCamposCliente(
 // Solo permite números en los campos
 export function soloNumeros(value: string, previous: string): string {
   return /^\d*$/.test(value) ? value : previous;
+}
+
+// Validar formato CUIL/CUIT: 11 dígitos numéricos (XX-XXXXXXXX-X)
+export function validarCUILCUIT(valor: string, tipo: string): string | null {
+  // Remover guiones si existen
+  const valorLimpio = valor.replace(/-/g, '');
+  
+  // Verificar que tenga exactamente 11 dígitos
+  if (valorLimpio.length !== 11) {
+    return `El ${tipo} debe tener exactamente 11 dígitos numéricos.`;
+  }
+  
+  // Verificar que solo contenga números
+  if (!/^\d{11}$/.test(valorLimpio)) {
+    return `El ${tipo} solo debe contener números.`;
+  }
+  
+  return null;
 }
 
 // Exportar listado de clientes a PDF

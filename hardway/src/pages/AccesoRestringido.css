@@ -1,0 +1,318 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Contenedor principal */
+.access-denied-content {
+  --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.access-denied-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Card principal */
+.access-denied-card {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.06);
+  background: white;
+  overflow: hidden;
+  animation: slideInUp 0.5s ease-out;
+}
+
+.access-denied-card-content {
+  padding: 48px 32px;
+  text-align: center;
+}
+
+/* Icono principal */
+.access-denied-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+  animation: bounceIn 0.6s ease-out;
+}
+
+.access-denied-icon-circle {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.3);
+  position: relative;
+}
+
+.access-denied-icon-circle::before {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border: 2px solid rgba(251, 191, 36, 0.2);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.access-denied-main-icon {
+  font-size: 56px;
+  color: #f59e0b;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Título */
+.access-denied-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.5px;
+}
+
+/* Descripción */
+.access-denied-description {
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  font-weight: 400;
+}
+
+/* Sección de roles */
+.access-denied-roles-info {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+  border: 1px solid #e2e8f0;
+}
+
+.access-denied-role-section {
+  margin-bottom: 20px;
+}
+
+.access-denied-role-section:last-child {
+  margin-bottom: 0;
+}
+
+.access-denied-role-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.access-denied-role-icon {
+  font-size: 20px;
+  color: #3b82f6;
+}
+
+.access-denied-role-icon.required {
+  color: #f59e0b;
+}
+
+.access-denied-role-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.access-denied-role-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.access-denied-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.badge-user {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.badge-required {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.badge-undefined {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+/* Divisor */
+.access-denied-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #cbd5e1 50%, transparent 100%);
+  margin: 20px 0;
+}
+
+/* Mensaje de ayuda */
+.access-denied-help {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.access-denied-help-text {
+  margin: 0;
+  font-size: 14px;
+  color: #1e40af;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Botón */
+.access-denied-button {
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --background-hover: linear-gradient(135deg, #ff9500 0%, #f59e0b 100%);
+  --border-radius: 12px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --box-shadow: 0 4px 12px rgba(253, 180, 11, 0.3);
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+}
+
+.access-denied-button:hover {
+  --box-shadow: 0 8px 20px rgba(253, 180, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+.access-denied-button:active {
+  transform: translateY(0);
+}
+
+/* Animaciones */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .access-denied-card-content {
+    padding: 32px 24px;
+  }
+
+  .access-denied-title {
+    font-size: 26px;
+  }
+
+  .access-denied-description {
+    font-size: 15px;
+  }
+
+  .access-denied-icon-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .access-denied-icon-circle::before {
+    width: 120px;
+    height: 120px;
+  }
+
+  .access-denied-main-icon {
+    font-size: 48px;
+  }
+
+  .access-denied-roles-info {
+    padding: 20px 16px;
+  }
+
+  .access-denied-badge {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .access-denied-container {
+    padding: 16px;
+  }
+
+  .access-denied-card-content {
+    padding: 24px 20px;
+  }
+
+  .access-denied-title {
+    font-size: 22px;
+  }
+
+  .access-denied-icon-circle {
+    width: 90px;
+    height: 90px;
+  }
+
+  .access-denied-main-icon {
+    font-size: 40px;
+  }
+}

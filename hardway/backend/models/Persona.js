@@ -9,7 +9,12 @@ const Persona = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    dni: DataTypes.INTEGER,
+    dni: DataTypes.STRING,
+    tipoDocumento: {
+      type: DataTypes.ENUM('DNI', 'CUIL', 'CUIT'),
+      allowNull: true,
+      defaultValue: 'DNI',
+    },
     nombre: DataTypes.STRING,
     apellido: DataTypes.STRING,
     direccion: DataTypes.STRING,

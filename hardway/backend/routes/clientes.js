@@ -4,6 +4,26 @@ const { Sequelize } = require('sequelize');
 const { sequelize } = require('../config/database');
 const { Cliente, Persona, Domicilio, Barrio, Ciudad, Pedido } = require('../models');
 
+// Función para validar formato CUIL/CUIT
+const validarCUILCUIT = (valor, tipo) => {
+  if (!valor) return null;
+  
+  // Remover guiones si existen
+  const valorLimpio = valor.replace(/-/g, '');
+  
+  // Verificar que tenga exactamente 11 dígitos
+  if (valorLimpio.length !== 11) {
+    return `El ${tipo} debe tener exactamente 11 dígitos numéricos.`;
+  }
+  
+  // Verificar que solo contenga números
+  if (!/^\d{11}$/.test(valorLimpio)) {
+    return `El ${tipo} solo debe contener números.`;
+  }
+  
+  return null;
+};
+
 // Obtener todos los clientes
 router.get("/", async (req, res) => {
   try {
@@ -21,7 +41,7 @@ router.get("/", async (req, res) => {
         : {},
       include: {
         model: Persona,
-        attributes: ["dni", "nombre", "apellido", "direccion"],
+        attributes: ["dni", "tipoDocumento", "nombre", "apellido", "direccion"],
         include: {
           model: Domicilio,
           attributes: [
@@ -51,7 +71,7 @@ router.get("/", async (req, res) => {
         id: c.idCliente,
         email: c.email || "",
         telefono: c.telefono || "",
-        tipoDocumento: "DNI", // Tipo de documento por defecto
+        tipoDocumento: c.Persona?.tipoDocumento || "DNI",
         numeroDocumento: String(c.Persona?.dni || ""), // Convertir a string
         nombre: (c.Persona?.nombre || "").trim(), // Eliminar espacios extra
         apellido: (c.Persona?.apellido || "").trim(),
@@ -84,6 +104,16 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const t = await sequelize.transaction();
   try {
+    // Validar formato CUIL/CUIT si corresponde
+    const tipoDocumento = req.body.tipoDocumento || 'DNI';
+    if (tipoDocumento === 'CUIL' || tipoDocumento === 'CUIT') {
+      const errorValidacion = validarCUILCUIT(req.body.numeroDocumento, tipoDocumento);
+      if (errorValidacion) {
+        await t.rollback();
+        return res.status(400).json({ error: errorValidacion });
+      }
+    }
+
     // Crear domicilio
     const domicilio = await Domicilio.create(
       {
@@ -102,6 +132,7 @@ router.post("/", async (req, res) => {
     const persona = await Persona.create(
       {
         dni: req.body.numeroDocumento,
+        tipoDocumento: req.body.tipoDocumento || 'DNI',
         nombre: req.body.nombre,
         apellido: req.body.apellido,
         direccion: req.body.domicilio,
@@ -127,6 +158,7 @@ router.post("/", async (req, res) => {
       id: cliente.idCliente,
       email: cliente.email,
       telefono: cliente.telefono,
+      tipoDocumento: persona.tipoDocumento || 'DNI',
       numeroDocumento: persona.dni,
       nombre: persona.nombre,
       apellido: persona.apellido,
@@ -147,6 +179,16 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const t = await sequelize.transaction();
   try {
+    // Validar formato CUIL/CUIT si corresponde
+    const tipoDocumento = req.body.tipoDocumento || 'DNI';
+    if (tipoDocumento === 'CUIL' || tipoDocumento === 'CUIT') {
+      const errorValidacion = validarCUILCUIT(req.body.numeroDocumento, tipoDocumento);
+      if (errorValidacion) {
+        await t.rollback();
+        return res.status(400).json({ error: errorValidacion });
+      }
+    }
+
     // 1. Buscar cliente y persona
     const cliente = await Cliente.findByPk(req.params.id, { transaction: t });
     if (!cliente) {
@@ -180,6 +222,7 @@ router.put("/:id", async (req, res) => {
     await Persona.update(
       {
         dni: req.body.numeroDocumento,
+        tipoDocumento: req.body.tipoDocumento || 'DNI',
         nombre: req.body.nombre,
         apellido: req.body.apellido,
         direccion: req.body.domicilio,
