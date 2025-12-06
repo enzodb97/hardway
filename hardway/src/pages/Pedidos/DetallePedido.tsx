@@ -216,7 +216,7 @@ const DetallePedido: React.FC = () => {
 
         {/* Información del Cliente */}
         {pedido && (
-          <div className="cliente-info-card">
+          <div className="cliente-info-cards">
             <h3>📋 Información del Cliente</h3>
             <div className="info-grid">
               <div className="info-item">

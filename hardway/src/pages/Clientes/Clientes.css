@@ -319,11 +319,18 @@
 
 .clientes-page .card-actions {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  justify-content: flex-end;
   border-top: 1px solid #eee;
   padding-top: 12px;
   margin-top: 16px;
+}
+
+.clientes-page .actions-row-primary,
+.clientes-page .actions-row-secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .clientes-page .edit-action,
@@ -640,6 +647,12 @@
 
   .clientes-page .card-actions {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .clientes-page .actions-row-primary,
+  .clientes-page .actions-row-secondary {
+    grid-template-columns: 1fr 1fr;
   }
 
   .clientes-page .client-list-item {

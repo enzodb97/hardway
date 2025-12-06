@@ -47,6 +47,7 @@ import {
   playForwardOutline,
   playSkipForwardOutline,
   arrowBack,
+  trash,
 } from "ionicons/icons";
 import { useState, useEffect } from "react";
 import { useClientesVip } from "../../utils/useClientesVip";
@@ -67,7 +68,7 @@ const Clientes: React.FC = () => {
     darDeAltaCliente,
     recargarClientes,
   } = useClientes();
-  const { vipIds } = useClientesVip();
+  const { vipIds, recargarClientesVip } = useClientesVip();
   const [busqueda, setBusqueda] = useState("");
   const [vistaGrid, setVistaGrid] = useState(true);
   const [filtroLocalidad, setFiltroLocalidad] = useState("");
@@ -165,7 +166,7 @@ const Clientes: React.FC = () => {
     if (clienteAEliminar === null) return;
     try {
       await eliminarCliente(clienteAEliminar);
-      setAlertMsg("Cliente dado de baja correctamente");
+      setAlertMsg("Cliente eliminado permanentemente de la base de datos");
       setShowAlert(true);
     } catch (error: any) {
       const backendMsg =
@@ -174,14 +175,14 @@ const Clientes: React.FC = () => {
       if (
         error.response &&
         error.response.status === 400 &&
-        backendMsg.includes("No se puede eliminar el cliente")
+        backendMsg.includes("tiene pedidos asociados")
       ) {
         setAlertMsg(
-          "No se puede dar de baja el cliente, tiene pedidos asociados."
+          "No se puede eliminar el cliente porque tiene pedidos asociados."
         );
         setShowAlert(true);
       } else {
-        setAlertMsg("Error al dar de baja el cliente.");
+        setAlertMsg(backendMsg || "Error al eliminar el cliente.");
         setShowAlert(true);
       }
     } finally {
@@ -307,6 +308,8 @@ const Clientes: React.FC = () => {
     try {
       await axios.put("/api/clientes/vip/vip-threshold", { monto });
       setMontoVip(monto);
+      // Recargar los clientes VIP para actualizar el estado
+      await recargarClientesVip();
       setAlertMsg("Monto VIP actualizado correctamente");
       setShowAlert(true);
       setShowModalMontoVip(false);
@@ -388,50 +391,67 @@ const Clientes: React.FC = () => {
             </div>
 
             <div className="card-actions">
-              <IonButton
-                fill="clear"
-                size="small"
-                color="primary"
-                routerLink={`/alta-cliente/${cliente.id}`}
-                className="edit-action"
-              >
-                <IonIcon icon={pencil} slot="start" color="primary" />
-                <span className="edit-label">Editar</span>
-              </IonButton>
-              <IonButton
-                fill="clear"
-                size="small"
-                color="medium"
-                onClick={() => mostrarHistorial(cliente)}
-                className="historial-action"
-              >
-                <IonIcon icon={time} slot="start" />
-                Historial
-              </IonButton>
-              {/* Mostrar botón de alta o baja según el estado del cliente */}
-              {cliente.estaActivo === 0 ? (
+              <div className="actions-row-primary">
                 <IonButton
-                  fill="clear"
+                  fill="solid"
                   size="small"
-                  color="success"
-                  onClick={() => pedirConfirmacionAlta(cliente.id)}
-                  className="alta-action"
+                  color="primary"
+                  routerLink={`/alta-cliente/${cliente.id}`}
+                  className="edit-action"
                 >
-                  <IonIcon icon={checkmarkCircle} slot="start" />
-                  Dar de Alta
+                  <IonIcon icon={pencil} slot="start" />
+                  Editar
                 </IonButton>
-              ) : (
                 <IonButton
-                  fill="clear"
+                  fill="outline"
+                  size="small"
+                  color="medium"
+                  onClick={() => mostrarHistorial(cliente)}
+                  className="historial-action"
+                >
+                  <IonIcon icon={time} slot="start" />
+                  Historial
+                </IonButton>
+              </div>
+              <div className="actions-row-secondary">
+                {/* Mostrar botón de alta o baja según el estado del cliente */}
+                {cliente.estaActivo === 0 ? (
+                  <IonButton
+                    fill="outline"
+                    size="small"
+                    color="success"
+                    onClick={() => pedirConfirmacionAlta(cliente.id)}
+                    className="alta-action"
+                    expand="block"
+                  >
+                    <IonIcon icon={checkmarkCircle} slot="start" />
+                    Dar de Alta
+                  </IonButton>
+                ) : (
+                  <IonButton
+                    fill="outline"
+                    size="small"
+                    color="warning"
+                    onClick={() => pedirConfirmacionBaja(cliente)}
+                    className="baja-action"
+                    expand="block"
+                  >
+                    <IonIcon icon={closeCircle} slot="start" />
+                    Dar de Baja
+                  </IonButton>
+                )}
+                <IonButton
+                  fill="outline"
                   size="small"
                   color="danger"
-                  onClick={() => pedirConfirmacionBaja(cliente)}
-                  className="baja-action"
+                  onClick={() => pedirConfirmacionEliminar(cliente.id)}
+                  className="delete-action"
+                  expand="block"
                 >
-                  <IonIcon icon={closeCircle} slot="start" color="danger" />
-                  <span className="baja-label">Dar de Baja</span>
+                  <IonIcon icon={trash} slot="start" />
+                  Eliminar
                 </IonButton>
-              )}
+              </div>
             </div>
           </IonCardContent>
         </IonCard>
@@ -497,6 +517,14 @@ const Clientes: React.FC = () => {
               onClick={() => mostrarHistorial(cliente)}
             >
               <IonIcon icon={time} />
+            </IonButton>
+            <IonButton
+              fill="clear"
+              size="small"
+              color="danger"
+              onClick={() => pedirConfirmacionEliminar(cliente.id)}
+            >
+              <IonIcon icon={trash} />
             </IonButton>
             {/* Mostrar botón de alta o baja según el estado del cliente */}
             {cliente.estaActivo === 0 ? (

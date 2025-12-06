@@ -226,7 +226,6 @@ const AltaCliente: React.FC = () => {
                     N° Documento <span className="required">*</span>
                   </IonLabel>
                   <IonInput
-                    required
                     type="number"
                     inputmode="numeric"
                     pattern="[0-9]*"
@@ -257,7 +256,6 @@ const AltaCliente: React.FC = () => {
                   </IonLabel>
                   <IonInput
                     type="text"
-                    required
                     value={formData.nombre}
                     onIonChange={(e) =>
                       setFormData({ ...formData, nombre: e.detail.value! })
@@ -282,7 +280,6 @@ const AltaCliente: React.FC = () => {
                     </IonLabel>
                     <IonInput
                       type="text"
-                      required
                       value={formData.apellido}
                       onIonChange={(e) =>
                         setFormData({ ...formData, apellido: e.detail.value! })
@@ -326,7 +323,6 @@ const AltaCliente: React.FC = () => {
                     Barrio <span className="required">*</span>
                   </IonLabel>
                   <IonInput
-                    required
                     value={formData.barrio}
                     onIonChange={(e) =>
                       setFormData({ ...formData, barrio: e.detail.value! })
@@ -422,7 +418,6 @@ const AltaCliente: React.FC = () => {
                     Teléfono <span className="required">*</span>
                   </IonLabel>
                   <IonInput
-                    required
                     type="number"
                     inputmode="numeric"
                     pattern="[0-9]*"

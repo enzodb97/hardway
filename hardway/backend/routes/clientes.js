@@ -426,6 +426,97 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Eliminar cliente físicamente (borrado permanente)
+router.delete("/:id/eliminar-permanente", async (req, res) => {
+  const { id } = req.params;
+  console.log(`🗑️ Intentando eliminar permanentemente al cliente con ID: ${id}`);
+  
+  const t = await sequelize.transaction();
+  
+  try {
+    // 1. Verificar que el cliente existe
+    const cliente = await Cliente.findByPk(id, { transaction: t });
+    if (!cliente) {
+      await t.rollback();
+      console.log(`❌ Cliente con ID ${id} no encontrado`);
+      return res.status(404).json({ error: "Cliente no encontrado" });
+    }
+    
+    console.log(`✅ Cliente encontrado: ${cliente.idCliente}, idPersona: ${cliente.idPersona}`);
+    
+    // 2. Verificar si el cliente tiene pedidos asociados
+    const pedidos = await Pedido.findAll({
+      where: { idCliente: id },
+      transaction: t
+    });
+    
+    if (pedidos.length > 0) {
+      await t.rollback();
+      console.log(`⚠️ Cliente ${id} tiene ${pedidos.length} pedidos asociados. No se puede eliminar.`);
+      return res.status(400).json({ 
+        error: "No se puede eliminar el cliente porque tiene pedidos asociados.",
+        cantidadPedidos: pedidos.length
+      });
+    }
+    
+    const idPersona = cliente.idPersona;
+    
+    // 3. Eliminar historial de estados del cliente
+    await sequelize.query(
+      'DELETE FROM cliente_historial_estado WHERE idCliente = ?',
+      {
+        replacements: [id],
+        type: sequelize.QueryTypes.DELETE,
+        transaction: t
+      }
+    );
+    console.log(`✅ Historial de estados eliminado para cliente ${id}`);
+    
+    // 4. Eliminar el cliente
+    await Cliente.destroy({
+      where: { idCliente: id },
+      transaction: t
+    });
+    console.log(`✅ Cliente ${id} eliminado`);
+    
+    // 5. Obtener el domicilio de la persona
+    const persona = await Persona.findByPk(idPersona, { transaction: t });
+    const idDomicilio = persona?.idDomicilio;
+    
+    // 6. Eliminar la persona
+    await Persona.destroy({
+      where: { idPersona: idPersona },
+      transaction: t
+    });
+    console.log(`✅ Persona ${idPersona} eliminada`);
+    
+    // 7. Eliminar el domicilio si existe
+    if (idDomicilio) {
+      await Domicilio.destroy({
+        where: { idDomicilio: idDomicilio },
+        transaction: t
+      });
+      console.log(`✅ Domicilio ${idDomicilio} eliminado`);
+    }
+    
+    await t.commit();
+    console.log(`✅ Cliente ${id} eliminado permanentemente de la base de datos`);
+    res.json({ 
+      success: true, 
+      message: "Cliente eliminado permanentemente",
+      idCliente: id 
+    });
+    
+  } catch (error) {
+    await t.rollback();
+    console.error("❌ Error al eliminar cliente permanentemente:", error);
+    res.status(500).json({ 
+      error: "Error al eliminar cliente", 
+      detalle: error.message 
+    });
+  }
+});
+
 // Obtener historial de cambios de estado de un cliente
 router.get("/:id/historial", async (req, res) => {
   const { id } = req.params;

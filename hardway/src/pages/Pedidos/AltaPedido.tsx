@@ -177,6 +177,11 @@ const AltaPedido: React.FC = () => {
             idEstado: res.data.idEstado?.toString() || "",
           });
 
+          // Cargar empresa de envío
+          if (res.data.idEmpresaEnvio) {
+            setEmpresaEnvioSeleccionada(res.data.idEmpresaEnvio.toString());
+          }
+
           // Guardar los datos del pedido para procesarlos cuando tengamos el catálogo
           if (res.data.DetallePedidos) {
             setDatosDelPedido(res.data.DetallePedidos);

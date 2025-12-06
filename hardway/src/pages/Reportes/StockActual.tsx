@@ -326,7 +326,7 @@ const StockActual: React.FC = () => {
                     <div className="stock-stat-icon">⚠️</div>
                     <div className="stock-stat-content">
                       <div className="stock-stat-number">{bajoStock.length}</div>
-                      <div className="stock-stat-label">Stock Bajo (≤30)</div>
+                      <div className="stock-stat-label">Stock Bajo (&lt;30)</div>
                     </div>
                   </div>
                 </div>

@@ -122,9 +122,12 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
 
   const eliminarCliente = async (id: number) => {
     try {
-      await axiosInstance.delete(`/api/clientes/${id}`);
-      await fetchClientes(); // Usar la función fetchClientes
+      console.log(`🗑️ Eliminando permanentemente cliente ID: ${id}`);
+      await axiosInstance.delete(`/api/clientes/${id}/eliminar-permanente`);
+      await fetchClientes(); // Recargar la lista de clientes
+      console.log(`✅ Cliente ${id} eliminado permanentemente`);
     } catch (error) {
+      console.error("Error al eliminar cliente:", error);
       throw error;
     }
   };
@@ -132,8 +135,13 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
   const darDeBajaCliente = async (id: number, idMotivo: number, observaciones?: string) => {
     try {
       console.log(`🔄 Dando de baja cliente ID: ${id}, Motivo: ${idMotivo}`);
+      
+      // Obtener el ID del usuario autenticado desde localStorage
+      const usuarioData = localStorage.getItem('usuario');
+      const idUsuario = usuarioData ? JSON.parse(usuarioData).idUsuario : 1;
+      
       const response = await axiosInstance.put(`/api/clientes/${id}/baja`, { 
-        idUsuario: 1, // Usuario temporal
+        idUsuario: idUsuario,
         idMotivo: idMotivo,
         observaciones: observaciones 
       });
@@ -159,7 +167,12 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
   const darDeAltaCliente = async (id: number) => {
     try {
       console.log(`🔄 Dando de alta cliente ID: ${id}`);
-      const response = await axiosInstance.put(`/api/clientes/${id}/alta`, { idUsuario: 1 }); // Usuario temporal
+      
+      // Obtener el ID del usuario autenticado desde localStorage
+      const usuarioData = localStorage.getItem('usuario');
+      const idUsuario = usuarioData ? JSON.parse(usuarioData).idUsuario : 1;
+      
+      const response = await axiosInstance.put(`/api/clientes/${id}/alta`, { idUsuario: idUsuario });
       console.log('📝 Respuesta del servidor:', response.data);
       
       // Recargar todos los clientes desde el servidor para asegurar consistencia

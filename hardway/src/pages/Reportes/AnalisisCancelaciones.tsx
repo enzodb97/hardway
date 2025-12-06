@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 import { downloadOutline } from "ionicons/icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   IonPage,
   IonHeader,
@@ -57,6 +57,8 @@ const AnalisisCancelaciones: React.FC = () => {
   const [data, setData] = useState<MotivoCancelacion[]>([]);
   const [toastExcel, setToastExcel] = useState(false);
   const [toastPDF, setToastPDF] = useState(false);
+  const [incluirGrafico, setIncluirGrafico] = useState(false);
+  const chartRef = useRef<any>(null);
   const fechaEmision = new Date().toLocaleString("es-AR");
   const history = useHistory();
 
@@ -154,6 +156,32 @@ const AnalisisCancelaciones: React.FC = () => {
     [30, 20, 15].forEach((w, i) => {
       sheet.getColumn(i + 1).width = w;
     });
+
+    // Exportar gráfico como imagen (si está incluido)
+    if (incluirGrafico && chartRef.current) {
+      const chart = chartRef.current;
+      const chartInstance = chart.chartInstance || chart;
+      if (chartInstance && chartInstance.toBase64Image) {
+        const imgBase64 = chartInstance.toBase64Image();
+        const base64Data = imgBase64.replace(/^data:image\/png;base64,/, "");
+        const binaryString = atob(base64Data);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const arrayBuffer = bytes.buffer;
+        const imageId = workbook.addImage({
+          buffer: arrayBuffer,
+          extension: "png",
+        });
+        sheet.addImage(imageId, {
+          tl: { col: 0, row: data.length + 3 },
+          ext: { width: 600, height: 400 },
+        });
+      }
+    }
+
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -195,6 +223,18 @@ const AnalisisCancelaciones: React.FC = () => {
       styles: { fontSize: 10, halign: "center" },
       headStyles: { fillColor: [254, 175, 0], halign: "center" },
     });
+
+    // Agregar gráfico debajo de la tabla si está incluido
+    if (incluirGrafico && chartRef.current) {
+      const chart = chartRef.current;
+      const chartInstance = chart.chartInstance || chart;
+      if (chartInstance && chartInstance.toBase64Image) {
+        const imgData = chartInstance.toBase64Image();
+        const finalY = (doc as any).lastAutoTable.finalY || 32;
+        doc.addImage(imgData, "PNG", 15, finalY + 10, 180, 100);
+      }
+    }
+
     doc.save("Analisis_cancelaciones.pdf");
     setToastPDF(true);
   };
@@ -350,6 +390,7 @@ const AnalisisCancelaciones: React.FC = () => {
             <IonCol size="12">
               <div className="analisis-chart-container">
                 <Pie
+                  ref={chartRef}
                   data={chartData}
                   options={chartOptions}
                   plugins={[ChartDataLabels]}
@@ -362,6 +403,14 @@ const AnalisisCancelaciones: React.FC = () => {
           <IonRow>
             <IonCol size="12">
               <div className="analisis-actions-container">
+                <IonButton
+                  className={incluirGrafico ? "analisis-btn-graph-active" : "analisis-btn-graph"}
+                  size="small"
+                  fill={incluirGrafico ? "solid" : "outline"}
+                  onClick={() => setIncluirGrafico(!incluirGrafico)}
+                >
+                  📊 {incluirGrafico ? "Gráfico Incluido" : "Incluir Gráfico"}
+                </IonButton>
                 <IonButton
                   className="analisis-btn-export"
                   size="small"

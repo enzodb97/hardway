@@ -278,7 +278,7 @@ ion-content h2 {
 }
 
 /* Estilos para el recuadro de información del cliente */
-.cliente-info-card {
+.cliente-info-cards {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -287,7 +287,7 @@ ion-content h2 {
   border-left: 4px solid #3b82f6;
 }
 
-.cliente-info-card h3 {
+.cliente-info-cards h3 {
   color: #1e40af;
   font-size: 18px;
   font-weight: 700;
@@ -381,13 +381,13 @@ ion-content h2 {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .cliente-info-card,
+  .cliente-info-cards,
   .envio-info-card {
     margin: 0 8px 16px 8px;
     padding: 16px;
   }
   
-  .cliente-info-card h3,
+  .cliente-info-cards h3,
   .envio-info-card h3 {
     font-size: 16px;
   }

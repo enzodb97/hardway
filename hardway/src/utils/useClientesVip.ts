@@ -6,15 +6,22 @@ export function useClientesVip() {
   const [clientesVip, setClientesVip] = useState<ClienteVip[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getAllClientesVip().then((data) => {
+  const recargarClientesVip = async () => {
+    setLoading(true);
+    try {
+      const data = await getAllClientesVip();
       setClientesVip(data);
+    } finally {
       setLoading(false);
-    });
+    }
+  };
+
+  useEffect(() => {
+    recargarClientesVip();
   }, []);
 
   // Devuelve un set para lookup rápido
   const vipIds = new Set(clientesVip.map((c) => c.idCliente));
 
-  return { clientesVip, vipIds, loading };
+  return { clientesVip, vipIds, loading, recargarClientesVip };
 }

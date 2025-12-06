@@ -359,7 +359,7 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
 
 // Editar pedido
 router.put("/:numeroPedido", async (req, res) => {
-  const { idCliente, idEstado, prendas } = req.body;
+  const { idCliente, idEstado, prendas, idEmpresaEnvio } = req.body;
   const { numeroPedido } = req.params;
   const t = await sequelize.transaction();
   try {
@@ -442,6 +442,7 @@ router.put("/:numeroPedido", async (req, res) => {
       `UPDATE pedido SET 
          idCliente = ?, 
          idEstado = ?, 
+         idEmpresaEnvio = ?,
          idUsuarioModifico = ?, 
          fechaModificacion = NOW() 
        WHERE numeroPedido = ?`,
@@ -449,6 +450,7 @@ router.put("/:numeroPedido", async (req, res) => {
         replacements: [
           idCliente,
           idEstado,
+          idEmpresaEnvio || null,
           req.usuarioAutenticado.idUsuario,
           numeroPedido,
         ],

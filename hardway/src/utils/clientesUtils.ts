@@ -32,36 +32,66 @@ export function validarUnicidadCliente(
 export function validarCamposCliente(
   formData: Partial<Cliente>
 ): string | null {
-  // Validar tipo de documento y formato
+  // 1. Validar número de documento (obligatorio)
+  if (!formData.numeroDocumento || formData.numeroDocumento.trim().length === 0) {
+    return "El N° de Documento es obligatorio.";
+  }
+  
+  // Validar formato según tipo de documento
   if (formData.tipoDocumento === 'CUIL' || formData.tipoDocumento === 'CUIT') {
     const errorCUILCUIT = validarCUILCUIT(
-      formData.numeroDocumento || '', 
+      formData.numeroDocumento, 
       formData.tipoDocumento
     );
     if (errorCUILCUIT) return errorCUILCUIT;
-  } else if (formData.numeroDocumento && formData.numeroDocumento.trim().length < 8) {
+  } else if (formData.numeroDocumento.trim().length < 8) {
     return "El N° de Documento debe tener al menos 8 caracteres.";
   }
   
-  if (!formData.nombre || formData.nombre.trim().length < 3) {
-    return "El nombre es obligatorio y debe tener al menos 3 caracteres.";
+  // 2. Validar nombre (obligatorio)
+  if (!formData.nombre || formData.nombre.trim().length === 0) {
+    return formData.tipoDocumento === 'CUIT' 
+      ? "El nombre de la empresa es obligatorio."
+      : "El nombre es obligatorio.";
+  }
+  if (formData.nombre.trim().length < 3) {
+    return formData.tipoDocumento === 'CUIT'
+      ? "El nombre de la empresa debe tener al menos 3 caracteres."
+      : "El nombre debe tener al menos 3 caracteres.";
   }
   
-  // El apellido solo es obligatorio si NO es CUIT (para empresas no se requiere apellido)
+  // 3. Validar apellido (obligatorio solo si NO es CUIT)
   if (formData.tipoDocumento !== 'CUIT') {
-    if (!formData.apellido || formData.apellido.trim().length < 3) {
-      return "El apellido es obligatorio y debe tener al menos 3 caracteres.";
+    if (!formData.apellido || formData.apellido.trim().length === 0) {
+      return "El apellido es obligatorio.";
+    }
+    if (formData.apellido.trim().length < 3) {
+      return "El apellido debe tener al menos 3 caracteres.";
     }
   }
   
-  if (!formData.localidad || formData.localidad.trim().length < 5) {
-    return "El campo Localidad es obligatorio y debe tener al menos 5 caracteres.";
+  // 4. Validar localidad (obligatorio)
+  if (!formData.localidad || formData.localidad.trim().length === 0) {
+    return "La localidad es obligatoria.";
   }
-  if (!formData.barrio || formData.barrio.trim().length < 3) {
-    return "El campo Barrio es obligatorio.";
+  if (formData.localidad.trim().length < 3) {
+    return "La localidad debe tener al menos 3 caracteres.";
   }
-  if (!formData.telefono || formData.telefono.trim().length < 7) {
-    return "El campo Teléfono es obligatorio y debe tener al menos 7 caracteres.";
+  
+  // 5. Validar barrio (obligatorio)
+  if (!formData.barrio || formData.barrio.trim().length === 0) {
+    return "El barrio es obligatorio.";
+  }
+  if (formData.barrio.trim().length < 3) {
+    return "El barrio debe tener al menos 3 caracteres.";
+  }
+  
+  // 6. Validar teléfono (obligatorio)
+  if (!formData.telefono || formData.telefono.trim().length === 0) {
+    return "El teléfono es obligatorio.";
+  }
+  if (formData.telefono.trim().length < 7) {
+    return "El teléfono debe tener al menos 7 caracteres.";
   }
 
   return null;
