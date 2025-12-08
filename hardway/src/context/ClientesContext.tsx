@@ -93,10 +93,12 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
 
   const agregarCliente = async (nuevoCliente: Omit<Cliente, "id">) => {
     try {
-      const response = await axiosInstance.post("/api/clientes", nuevoCliente);
-      setClientes((prev) => [...prev, response.data]);
+      await axiosInstance.post("/api/clientes", nuevoCliente);
+      // Recargar clientes desde el backend para obtener datos completos
+      await fetchClientes();
     } catch (error) {
       console.error("Error al agregar cliente:", error);
+      throw error;
     }
   };
 
@@ -106,13 +108,11 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
         `/api/clientes/${clienteActualizado.id}`,
         clienteActualizado
       );
-      setClientes((prev) =>
-        prev.map((cliente) =>
-          cliente.id === clienteActualizado.id ? clienteActualizado : cliente
-        )
-      );
+      // Recargar clientes desde el backend para obtener datos completos
+      await fetchClientes();
     } catch (error) {
       console.error("Error al modificar cliente:", error);
+      throw error;
     }
   };
 
@@ -137,8 +137,9 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
       console.log(`🔄 Dando de baja cliente ID: ${id}, Motivo: ${idMotivo}`);
       
       // Obtener el ID del usuario autenticado desde localStorage
-      const usuarioData = localStorage.getItem('usuario');
-      const idUsuario = usuarioData ? JSON.parse(usuarioData).idUsuario : 1;
+      const idUsuarioStr = localStorage.getItem('idUsuario');
+      const idUsuario = idUsuarioStr ? parseInt(idUsuarioStr) : 1;
+      console.log(`👤 Usuario que realiza la baja: ${idUsuario}`);
       
       const response = await axiosInstance.put(`/api/clientes/${id}/baja`, { 
         idUsuario: idUsuario,
@@ -169,8 +170,9 @@ export const ClientesProvider = ({ children }: { children: React.ReactNode }) =>
       console.log(`🔄 Dando de alta cliente ID: ${id}`);
       
       // Obtener el ID del usuario autenticado desde localStorage
-      const usuarioData = localStorage.getItem('usuario');
-      const idUsuario = usuarioData ? JSON.parse(usuarioData).idUsuario : 1;
+      const idUsuarioStr = localStorage.getItem('idUsuario');
+      const idUsuario = idUsuarioStr ? parseInt(idUsuarioStr) : 1;
+      console.log(`👤 Usuario que realiza el alta: ${idUsuario}`);
       
       const response = await axiosInstance.put(`/api/clientes/${id}/alta`, { idUsuario: idUsuario });
       console.log('📝 Respuesta del servidor:', response.data);

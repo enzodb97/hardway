@@ -281,6 +281,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       localStorage.setItem("roles", JSON.stringify(response.data.roles || [])); // ✅ NUEVO
       localStorage.setItem("rolesIds", JSON.stringify(response.data.rolesIds || [])); // ✅ NUEVO
       localStorage.setItem("username", response.data.nombreUsuario);
+      localStorage.setItem("idUsuario", response.data.id.toString()); // ✅ Guardar ID del usuario
       
       // Guarda el legajoPicker si existe
       if (response.data.legajoPicker) {

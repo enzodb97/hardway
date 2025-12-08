@@ -364,11 +364,16 @@ const AltaPedido: React.FC = () => {
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
+    
+    const nombreCompleto = `${c.nombre || ""} ${c.apellido || ""}`;
+    const nombreCompletoNormalizado = normalizar(nombreCompleto);
     const filtroNorm = normalizar(filtroCliente);
+    
     return (
       normalizar(c.nombre || "").includes(filtroNorm) ||
       normalizar(c.apellido || "").includes(filtroNorm) ||
-      (c.numeroDocumento && c.numeroDocumento.toString().includes(filtroNorm))
+      nombreCompletoNormalizado.includes(filtroNorm) ||
+      (c.numeroDocumento && c.numeroDocumento.toString().includes(filtroCliente))
     );
   });
 

@@ -87,6 +87,7 @@ const AltaCliente: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validar campos obligatorios
     const errorCampos = validarCamposCliente(formData);
     if (errorCampos) {
       setAlertMessage(errorCampos);
@@ -94,6 +95,7 @@ const AltaCliente: React.FC = () => {
       return;
     }
 
+    // Validar unicidad (tanto en creación como en edición)
     const errorUnicidad = validarUnicidadCliente(formData, clientes);
     if (errorUnicidad) {
       setAlertMessage(errorUnicidad);
@@ -152,12 +154,31 @@ const AltaCliente: React.FC = () => {
           telefono: formData.telefono ?? "",
           email: formData.email ?? "",
         });
-        setShowSuccess(true); // NUEVO
+        setShowSuccess(true);
       } else {
         await agregarCliente(clientePayload as Omit<Cliente, "id">);
-        setShowSuccess(true); // NUEVO
+        // Limpiar formulario después de registro exitoso
+        setFormData({
+          tipoDocumento: "DNI",
+          numeroDocumento: "",
+          nombre: "",
+          apellido: "",
+          domicilio: "",
+          calle: "",
+          altura: "",
+          piso: "",
+          numeroDepartamento: "",
+          observaciones: "",
+          localidad: "",
+          barrio: "",
+          cp: "",
+          telefono: "",
+          email: "",
+        });
+        setPreviousNumeroDocumento("");
+        setPreviousTelefono("");
+        setShowSuccess(true);
       }
-      // history.push("/Clientes"); // QUITA ESTA LÍNEA
     } catch (error: any) {
       setAlertMessage(
         error?.response?.data?.error ||
@@ -231,6 +252,7 @@ const AltaCliente: React.FC = () => {
                     pattern="[0-9]*"
                     value={formData.numeroDocumento}
                     onIonChange={handleNumeroDocumentoChange}
+                    onWheel={(e: any) => e.target.blur()}
                     placeholder={
                       esEdicion && !formData.numeroDocumento
                         ? "Dato obligatorio"
@@ -364,6 +386,7 @@ const AltaCliente: React.FC = () => {
                     onIonChange={(e) =>
                       setFormData({ ...formData, altura: e.detail.value! })
                     }
+                    onWheel={(e: any) => e.target.blur()}
                   />
                 </IonItem>
 
@@ -423,6 +446,7 @@ const AltaCliente: React.FC = () => {
                     pattern="[0-9]*"
                     value={formData.telefono}
                     onIonChange={handleTelefonoChange}
+                    onWheel={(e: any) => e.target.blur()}
                   />
                 </IonItem>
               </div>

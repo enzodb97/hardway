@@ -105,18 +105,32 @@ const Clientes: React.FC = () => {
   // Estado para el modal del monto VIP
   const [showModalMontoVip, setShowModalMontoVip] = useState(false);
 
+  // Función para normalizar texto (remover acentos)
+  const normalizarTexto = (texto: string): string => {
+    return texto
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+
   // Obtener localidades únicas para el filtro
   const localidadesUnicas = [
     ...new Set(clientes.map((c) => c.localidad).filter(Boolean)),
   ];
 
   const clientesFiltrados = clientes.filter((cliente) => {
+    const nombreCompleto = `${cliente.nombre || ""} ${cliente.apellido || ""}`;
+    const nombreCompletoNormalizado = normalizarTexto(nombreCompleto);
+    const nombreNormalizado = normalizarTexto(cliente.nombre || "");
+    const apellidoNormalizado = normalizarTexto(cliente.apellido || "");
+    const emailNormalizado = normalizarTexto(cliente.email || "");
+    const busquedaNormalizada = normalizarTexto(busqueda);
+    
     const cumpleBusqueda =
-      (cliente.nombre?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
-      (cliente.apellido?.toLowerCase() || "").includes(
-        busqueda.toLowerCase()
-      ) ||
-      (cliente.email?.toLowerCase() || "").includes(busqueda.toLowerCase()) ||
+      nombreNormalizado.includes(busquedaNormalizada) ||
+      apellidoNormalizado.includes(busquedaNormalizada) ||
+      nombreCompletoNormalizado.includes(busquedaNormalizada) ||
+      emailNormalizado.includes(busquedaNormalizada) ||
       (cliente.numeroDocumento || "").includes(busqueda) ||
       (cliente.telefono || "").includes(busqueda);
 

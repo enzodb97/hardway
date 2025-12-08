@@ -8,22 +8,30 @@ export function validarUnicidadCliente(
   clientes: Cliente[]
 ): string | null {
   const { numeroDocumento, email, telefono, id } = cliente;
-  if (numeroDocumento) {
+  
+  // Convertir a string para comparación consistente
+  const numeroDocumentoStr = String(numeroDocumento || '').trim();
+  const telefonoStr = String(telefono || '').trim();
+  const emailStr = String(email || '').trim().toLowerCase();
+  
+  if (numeroDocumentoStr) {
     const existeDNI = clientes.find(
-      (c) => c.numeroDocumento === numeroDocumento && c.id !== id
+      (c) => String(c.numeroDocumento || '').trim() === numeroDocumentoStr && c.id !== id
     );
     if (existeDNI)
-      return `Ya existe un cliente con el N° de Documento: ${numeroDocumento}`;
+      return `Ya existe un cliente con el N° de Documento: ${numeroDocumentoStr}`;
   }
-  if (email) {
-    const existeEmail = clientes.find((c) => c.email === email && c.id !== id);
-    if (existeEmail) return `Ya existe un cliente con el Email: ${email}`;
-  }
-  if (telefono) {
-    const existeTel = clientes.find(
-      (c) => c.telefono === telefono && c.id !== id
+  if (emailStr) {
+    const existeEmail = clientes.find(
+      (c) => String(c.email || '').trim().toLowerCase() === emailStr && c.id !== id
     );
-    if (existeTel) return `Ya existe un cliente con el Teléfono: ${telefono}`;
+    if (existeEmail) return `Ya existe un cliente con el Email: ${emailStr}`;
+  }
+  if (telefonoStr) {
+    const existeTel = clientes.find(
+      (c) => String(c.telefono || '').trim() === telefonoStr && c.id !== id
+    );
+    if (existeTel) return `Ya existe un cliente con el Teléfono: ${telefonoStr}`;
   }
   return null;
 }
@@ -33,28 +41,30 @@ export function validarCamposCliente(
   formData: Partial<Cliente>
 ): string | null {
   // 1. Validar número de documento (obligatorio)
-  if (!formData.numeroDocumento || formData.numeroDocumento.trim().length === 0) {
+  const numeroDocumentoStr = String(formData.numeroDocumento || '').trim();
+  if (!numeroDocumentoStr || numeroDocumentoStr.length === 0) {
     return "El N° de Documento es obligatorio.";
   }
   
   // Validar formato según tipo de documento
   if (formData.tipoDocumento === 'CUIL' || formData.tipoDocumento === 'CUIT') {
     const errorCUILCUIT = validarCUILCUIT(
-      formData.numeroDocumento, 
+      numeroDocumentoStr, 
       formData.tipoDocumento
     );
     if (errorCUILCUIT) return errorCUILCUIT;
-  } else if (formData.numeroDocumento.trim().length < 8) {
+  } else if (numeroDocumentoStr.length < 8) {
     return "El N° de Documento debe tener al menos 8 caracteres.";
   }
   
   // 2. Validar nombre (obligatorio)
-  if (!formData.nombre || formData.nombre.trim().length === 0) {
+  const nombreStr = String(formData.nombre || '').trim();
+  if (!nombreStr || nombreStr.length === 0) {
     return formData.tipoDocumento === 'CUIT' 
       ? "El nombre de la empresa es obligatorio."
       : "El nombre es obligatorio.";
   }
-  if (formData.nombre.trim().length < 3) {
+  if (nombreStr.length < 3) {
     return formData.tipoDocumento === 'CUIT'
       ? "El nombre de la empresa debe tener al menos 3 caracteres."
       : "El nombre debe tener al menos 3 caracteres.";
@@ -62,35 +72,39 @@ export function validarCamposCliente(
   
   // 3. Validar apellido (obligatorio solo si NO es CUIT)
   if (formData.tipoDocumento !== 'CUIT') {
-    if (!formData.apellido || formData.apellido.trim().length === 0) {
+    const apellidoStr = String(formData.apellido || '').trim();
+    if (!apellidoStr || apellidoStr.length === 0) {
       return "El apellido es obligatorio.";
     }
-    if (formData.apellido.trim().length < 3) {
+    if (apellidoStr.length < 3) {
       return "El apellido debe tener al menos 3 caracteres.";
     }
   }
   
   // 4. Validar localidad (obligatorio)
-  if (!formData.localidad || formData.localidad.trim().length === 0) {
+  const localidadStr = String(formData.localidad || '').trim();
+  if (!localidadStr || localidadStr.length === 0) {
     return "La localidad es obligatoria.";
   }
-  if (formData.localidad.trim().length < 3) {
+  if (localidadStr.length < 3) {
     return "La localidad debe tener al menos 3 caracteres.";
   }
   
   // 5. Validar barrio (obligatorio)
-  if (!formData.barrio || formData.barrio.trim().length === 0) {
+  const barrioStr = String(formData.barrio || '').trim();
+  if (!barrioStr || barrioStr.length === 0) {
     return "El barrio es obligatorio.";
   }
-  if (formData.barrio.trim().length < 3) {
+  if (barrioStr.length < 3) {
     return "El barrio debe tener al menos 3 caracteres.";
   }
   
   // 6. Validar teléfono (obligatorio)
-  if (!formData.telefono || formData.telefono.trim().length === 0) {
+  const telefonoStr = String(formData.telefono || '').trim();
+  if (!telefonoStr || telefonoStr.length === 0) {
     return "El teléfono es obligatorio.";
   }
-  if (formData.telefono.trim().length < 7) {
+  if (telefonoStr.length < 7) {
     return "El teléfono debe tener al menos 7 caracteres.";
   }
 
