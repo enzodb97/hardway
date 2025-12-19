@@ -69,7 +69,7 @@ const verificarAccesoPedidos = async (req, res, next) => {
 
     // Verificar si el usuario tiene rol de Administrador (1) o Vendedor (2)
     const tieneAcceso = usuario.roles?.some(rol => 
-      rol.idTipoRol === 1 || rol.idTipoRol === 2
+      rol.idTipoRol === 1 || rol.idTipoRol === 2  || rol.idTipoRol === 0 
     );
 
     if (!tieneAcceso) {

@@ -27,7 +27,7 @@
   width: 22px;
   height: 22px;
   margin-left: 0;
-  vertical-align: middle;
+  /*vertical-align: middle;*/
   filter: drop-shadow(0 1px 2px rgba(253, 180, 11, 0.3));
   display: block;
 }
@@ -44,7 +44,7 @@
   width: 18px;
   height: 18px;
   margin-left: 0;
-  vertical-align: middle;
+  /*vertical-align: middle;*/
   filter: drop-shadow(0 1px 2px rgba(253, 180, 11, 0.3));
   display: block;
 }

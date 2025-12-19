@@ -109,6 +109,7 @@ const AltaPedido: React.FC = () => {
         ...estadoInicial,
       });
       setPrendasSeleccionadas([]);
+      setEmpresaEnvioSeleccionada(""); // Limpiar empresa de envío
     }
     // eslint-disable-next-line
   }, [location.pathname, esEdicion]);
@@ -259,7 +260,7 @@ const AltaPedido: React.FC = () => {
         (p) => p.codigoIndumentaria === prenda.codigoIndumentaria
       )
     ) {
-      setAlertMsg("Ya has agregado esta prenda.");
+      setAlertMsg("Ya has agregado esta Indumentaria.");
       setShowAlert(true);
       return;
     }
@@ -281,6 +282,8 @@ const AltaPedido: React.FC = () => {
         cantidad,
       },
     ]);
+    // Limpiar la cantidad temporal de la prenda agregada
+    delete prenda._cantidadTemp;
     setShowIndumentariaModal(false);
     setFiltroIndumentaria("");
   };
@@ -480,7 +483,7 @@ const AltaPedido: React.FC = () => {
                   {/* Select de Empresa de Envío */}
                   <IonItem className="form-item empresa-envio-item">
                     <IonIcon icon={carOutline} slot="start" style={{ marginRight: '8px', color: '#fdb40b' }} />
-                    <IonLabel position="floating">Empresa de Envío *</IonLabel>
+                    <IonLabel position="floating">Empresa de Envío</IonLabel>
                     <IonSelect
                       value={empresaEnvioSeleccionada}
                       placeholder="Seleccione una empresa"
@@ -651,7 +654,11 @@ const AltaPedido: React.FC = () => {
                   <IonButton
                     className="button-secondary"
                     expand="block"
-                    onClick={() => setShowIndumentariaModal(true)}
+                    onClick={() => {
+                      // Limpiar cantidades temporales antes de abrir el modal
+                      indumentaria.forEach(prenda => delete prenda._cantidadTemp);
+                      setShowIndumentariaModal(true);
+                    }}
                   >
                     <IonIcon icon={add} slot="start" />
                     Agregar Indumentaria
@@ -796,7 +803,12 @@ const AltaPedido: React.FC = () => {
         {/* --- Modal de selección de indumentaria --- */}
         <IonModal
           isOpen={showIndumentariaModal}
-          onDidDismiss={() => setShowIndumentariaModal(false)}
+          onDidDismiss={() => {
+            setShowIndumentariaModal(false);
+            setFiltroIndumentaria("");
+            // Limpiar todas las cantidades temporales al cerrar el modal
+            indumentaria.forEach(prenda => delete prenda._cantidadTemp);
+          }}
           className="indumentaria-modal"
         >
           <IonHeader>
@@ -829,8 +841,7 @@ const AltaPedido: React.FC = () => {
                     className="indumentaria-item"
                   >
                     <IonLabel class="indumentaria-label">
-                      {`${prenda.nombre} - ${prenda.color} - ${prenda.talle} - ${prenda.nombreTela} - (Stock: ${prenda.cantidadIndumentaria}`}
-                      )
+                      {`${prenda.nombre} - ${prenda.color} - ${prenda.talle} - ${prenda.nombreTela} - (Stock: ${prenda.cantidadIndumentaria})`}
                     </IonLabel>
                     <IonInput
                       class="cantidad-input"

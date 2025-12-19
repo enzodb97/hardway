@@ -65,7 +65,7 @@ const Dashboard: React.FC = () => {
       icon: cartOutline,
       path: "/pedidos",
       color: "secondary",
-      roles: ["Administrador", "Vendedor"],
+      roles: ["Administrador", "Encargado de Pedidos"],
     },
     {
       title: "Indumentaria",
@@ -97,7 +97,7 @@ const Dashboard: React.FC = () => {
       icon: statsChartOutline,
       path: "/reportes",
       color: "danger",
-      roles: ["Administrador", "Gerente"],
+      roles: ["Administrador", "Gerente General"],
     },
     {
       title: "Usuarios",

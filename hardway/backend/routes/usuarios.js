@@ -197,10 +197,30 @@ router.post("/", async (req, res) => {
 
 // Eliminar usuario
 router.delete("/:id", async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    await Usuario.destroy({ where: { idUsuario: req.params.id } });
-    res.json({ success: true });
+    const idUsuario = req.params.id;
+
+    // 1. Primero eliminar las relaciones en usuario_tiporol
+    await sequelize.query(
+      'DELETE FROM usuario_tiporol WHERE idUsuario = :idUsuario',
+      {
+        replacements: { idUsuario },
+        type: sequelize.QueryTypes.DELETE,
+        transaction: t
+      }
+    );
+
+    // 2. Luego eliminar el usuario
+    await Usuario.destroy({ 
+      where: { idUsuario },
+      transaction: t
+    });
+
+    await t.commit();
+    res.json({ success: true, message: 'Usuario eliminado correctamente' });
   } catch (error) {
+    await t.rollback();
     console.error("Error al eliminar usuario:", error);
     res.status(400).json({ error: "No se pudo eliminar el usuario" });
   }

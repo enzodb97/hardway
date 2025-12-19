@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-12-2025 a las 21:40:02
+-- Tiempo de generación: 10-12-2025 a las 18:25:04
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -3878,7 +3878,7 @@ INSERT INTO `tiporol` (`idTipoRol`, `tipoRol`, `descripcionRol`) VALUES
 (1, 'Administrador', 'Acceso completo al sistema'),
 (2, 'Vendedor', 'Puede realizar ventas'),
 (3, 'Envios', 'Encargado de Envios'),
-(5, 'Gerente', 'Supervisa operaciones'),
+(5, 'Gerente General', 'Supervisa operaciones'),
 (6, 'Picker', 'Encargado de picking'),
 (7, 'Encargado de Stock', 'Gestiona stock');
 
@@ -3926,7 +3926,8 @@ INSERT INTO `usuario` (`idUsuario`, `idPersona`, `nombreUsuario`, `contrasena`) 
 (2, 9, 'mariag', '123'),
 (5, 5, 'anamtz', '123'),
 (6, 6, 'luisrd', '123'),
-(7, 7, 'sofiag', '123');
+(7, 7, 'sofiag', '123'),
+(17, NULL, 'gerenteg', 'gerente_123');
 
 -- --------------------------------------------------------
 
@@ -3945,10 +3946,12 @@ CREATE TABLE `usuario_tiporol` (
 
 INSERT INTO `usuario_tiporol` (`idUsuario`, `idTipoRol`) VALUES
 (1, 1),
+(2, 0),
 (2, 2),
 (5, 6),
 (6, 6),
-(7, 7);
+(7, 7),
+(17, 5);
 
 -- --------------------------------------------------------
 
@@ -4427,7 +4430,7 @@ ALTER TABLE `unidad_medida`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `idUsuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `idUsuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restricciones para tablas volcadas

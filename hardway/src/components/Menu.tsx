@@ -43,13 +43,13 @@ const Menu: React.FC = () => {
   // Dashboard - visible para todos
   appPages.push({ title: "Inicio", url: "/dashboard", icon: homeOutline });
   
-  // Reportes - solo Administrador y Gerente
-  if (hasAnyRole(["Administrador", "Gerente"])) {
+  // Reportes - solo Administrador y Gerente General
+  if (hasAnyRole(["Administrador", "Gerente General"])) {
     appPages.push({ title: "Reportes", url: "/Reportes", icon: bookmarkOutline });
   }
   
   // Pedidos - Administrador y Vendedor
-  if (hasAnyRole(["Administrador", "Vendedor"])) {
+  if (hasAnyRole(["Administrador", "Encargado de Pedidos"])) {
     appPages.push({ title: "Pedidos", url: "/pedidos", icon: bagHandleOutline });
   }
   

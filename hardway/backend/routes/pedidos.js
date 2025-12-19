@@ -18,7 +18,7 @@ const {
   PrecioIndumentaria,
   sequelize,
 } = require("../models");
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 
 // Aplicar middleware a todas las rutas de pedidos
 router.use(verificarAccesoPedidos);
@@ -153,12 +153,19 @@ router.post("/", async (req, res) => {
           },
           { transaction: t }
         );
-        // Descontar stock
-        const stock = await Stock.findOne({
-          where: { codigoIndumentaria: prenda.codigoIndumentaria },
+        // Descontar stock (excluir rack 99 - No Aptos)
+        const stocks = await Stock.findAll({
+          where: { 
+            codigoIndumentaria: prenda.codigoIndumentaria,
+            idRack: { [Op.ne]: 99 } // Excluir rack de No Aptos
+          },
+          order: [['idRack', 'ASC']], // Ordenar por rack para consistencia
           transaction: t,
         });
-        if (stock) {
+        
+        if (stocks && stocks.length > 0) {
+          // Descontar del primer stock disponible (excluyendo No Aptos)
+          const stock = stocks[0];
           await MovimientoStock.create(
             {
               idMovimientoStock:
@@ -170,6 +177,8 @@ router.post("/", async (req, res) => {
             },
             { transaction: t }
           );
+        } else {
+          console.warn(`⚠️ No se encontró stock disponible para ${prenda.codigoIndumentaria}`);
         }
       }
     }
@@ -379,11 +388,16 @@ router.put("/:numeroPedido", async (req, res) => {
       transaction: t,
     });
     for (const detalle of detallesAnteriores) {
-      const stock = await Stock.findOne({
-        where: { codigoIndumentaria: detalle.codigoIndumentaria },
+      const stocks = await Stock.findAll({
+        where: { 
+          codigoIndumentaria: detalle.codigoIndumentaria,
+          idRack: { [Op.ne]: 99 } // Excluir rack de No Aptos
+        },
+        order: [['idRack', 'ASC']], // Ordenar por rack para consistencia
         transaction: t,
       });
-      if (stock) {
+      if (stocks && stocks.length > 0) {
+        const stock = stocks[0];
         await MovimientoStock.create(
           {
             idMovimientoStock:
@@ -416,12 +430,17 @@ router.put("/:numeroPedido", async (req, res) => {
           },
           { transaction: t }
         );
-        // Descontar stock
-        const stock = await Stock.findOne({
-          where: { codigoIndumentaria: prenda.codigoIndumentaria },
+        // Descontar stock (excluir rack 99 - No Aptos)
+        const stocks = await Stock.findAll({
+          where: { 
+            codigoIndumentaria: prenda.codigoIndumentaria,
+            idRack: { [Op.ne]: 99 } // Excluir rack de No Aptos
+          },
+          order: [['idRack', 'ASC']], // Ordenar por rack para consistencia
           transaction: t,
         });
-        if (stock) {
+        if (stocks && stocks.length > 0) {
+          const stock = stocks[0];
           await MovimientoStock.create(
             {
               idMovimientoStock:
@@ -480,13 +499,18 @@ router.delete("/:numeroPedido", async (req, res) => {
       transaction: t,
     });
 
-    // 2. Devuelve el stock de cada prenda
+    // 2. Devuelve el stock de cada prenda (excluir rack 99 - No Aptos)
     for (const detalle of detalles) {
-      const stock = await Stock.findOne({
-        where: { codigoIndumentaria: detalle.codigoIndumentaria },
+      const stocks = await Stock.findAll({
+        where: { 
+          codigoIndumentaria: detalle.codigoIndumentaria,
+          idRack: { [Op.ne]: 99 } // Excluir rack de No Aptos
+        },
+        order: [['idRack', 'ASC']], // Ordenar por rack para consistencia
         transaction: t,
       });
-      if (stock) {
+      if (stocks && stocks.length > 0) {
+        const stock = stocks[0];
         await MovimientoStock.create(
           {
             idMovimientoStock:
@@ -580,14 +604,19 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
       transaction: t,
     });
 
-    // Para cada producto, crear movimiento de stock (devolución)
+    // Para cada producto, crear movimiento de stock (devolución) - Excluir rack 99 (No Aptos)
     for (const detalle of detalles) {
-      const stock = await Stock.findOne({
-        where: { codigoIndumentaria: detalle.codigoIndumentaria },
+      const stocks = await Stock.findAll({
+        where: { 
+          codigoIndumentaria: detalle.codigoIndumentaria,
+          idRack: { [Op.ne]: 99 } // Excluir rack de No Aptos
+        },
+        order: [['idRack', 'ASC']], // Ordenar por rack para consistencia
         transaction: t,
       });
 
-      if (stock) {
+      if (stocks && stocks.length > 0) {
+        const stock = stocks[0];
         const idMovimiento = `MOV-CANC-${Date.now()}-${Math.random()
           .toString(36)
           .substr(2, 5)}`;
@@ -602,6 +631,8 @@ router.put("/:numeroPedido/cancelar", async (req, res) => {
           },
           { transaction: t }
         );
+      } else {
+        console.warn(`⚠️ No se encontró stock disponible para devolver ${detalle.codigoIndumentaria}`);
       }
     }
 
