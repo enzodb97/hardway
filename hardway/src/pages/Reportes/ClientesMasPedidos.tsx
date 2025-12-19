@@ -311,16 +311,23 @@ const ClientesMasPedidos: React.FC = () => {
 
     // 1. Generar la tabla primero
     autoTable(doc, {
-      head: [["N° Cliente", "Nombre y Apellido", "Email", "Total Pedidos"]],
-      body: clientes.map((c) => [
+      head: [["N° Cliente", "Nombre y Apellido", "Email", "Total Pedidos", "Valor Total ($)"]],
+      body: top10Clientes.map((c) => [
         c.idCliente,
         `${c.nombre} ${c.apellido}`,
         c.email || "",
         c.total_pedidos,
+        `$${c.total_valor.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       ]),
       startY: 32,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [254, 175, 0] },
+      styles: { 
+        fontSize: 10,
+        halign: 'center' // Centrar contenido de todas las celdas
+      },
+      headStyles: { 
+        fillColor: [254, 175, 0],
+        halign: 'center' // Centrar títulos de columnas
+      },
     });
 
     // 2. Luego, si corresponde, agregar el gráfico debajo de la tabla
