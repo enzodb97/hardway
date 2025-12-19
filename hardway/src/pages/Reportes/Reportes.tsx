@@ -249,7 +249,7 @@ const Reportes: React.FC = () => {
                     <IonCardHeader className="reporte-card-header">
                       <IonCardTitle className="reporte-card-title">
                         <IonIcon icon={close} />
-                        Análisis de Cancelaciones
+                        Motivos de Cancelaciones
                       </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent className="reporte-card-content">

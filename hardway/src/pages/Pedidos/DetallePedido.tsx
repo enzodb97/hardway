@@ -426,13 +426,18 @@ const DetallePedido: React.FC = () => {
                     textAlign: "right",
                     fontWeight: "bold",
                     color: "goldenrod",
+                    textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
                   }}
                 >
                   👑 Cliente VIP 10% de descuento aplicado:
                 </IonCol>
                 <IonCol
                   size="2"
-                  style={{ fontWeight: "bold", color: "goldenrod" }}
+                  style={{ 
+                    fontWeight: "bold", 
+                    color: "goldenrod",
+                    textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
+                  }}
                 >
                   -{mostrarPrecio(pedido.descuentoOrden)}
                 </IonCol>

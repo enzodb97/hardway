@@ -83,14 +83,9 @@ const Indumentaria: React.FC = () => {
     // eslint-disable-next-line
   }, [page, busqueda, mostrarNoAptas]);
 
-  // Hook para refrescar automáticamente cuando se regresa a la página
+  // Hook para refrescar automáticamente cuando se ingresa a la página
   useIonViewWillEnter(() => {
-    // Verificar si se necesita refrescar basado en un flag en localStorage
-    const needsRefresh = localStorage.getItem('indumentaria_needs_refresh');
-    if (needsRefresh === 'true') {
-      cargarIndumentaria();
-      localStorage.removeItem('indumentaria_needs_refresh');
-    }
+    cargarIndumentaria();
   });
 
     const [showNoAptaAlert, setShowNoAptaAlert] = useState(false);

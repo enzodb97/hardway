@@ -114,9 +114,10 @@ const AltaPedido: React.FC = () => {
     // eslint-disable-next-line
   }, [location.pathname, esEdicion]);
 
-  // Cargar indumentaria
-  useEffect(() => {
-    axiosInstance.get("/api/indumentaria").then((res) => {
+  // Función para cargar indumentaria
+  const cargarIndumentaria = async () => {
+    try {
+      const res = await axiosInstance.get("/api/indumentaria");
       // Mapear datos anidados del backend a estructura plana
       const indumentariaMapeada = res.data.map((item: any) => ({
         codigoIndumentaria: item.codigoIndumentaria,
@@ -141,7 +142,14 @@ const AltaPedido: React.FC = () => {
         idIndumentaria: item.idDetalle,
       }));
       setIndumentaria(indumentariaMapeada);
-    });
+    } catch (error) {
+      console.error("Error al cargar indumentaria:", error);
+    }
+  };
+
+  // Cargar indumentaria al montar el componente
+  useEffect(() => {
+    cargarIndumentaria();
   }, []);
 
   // Cargar empresas de envío
@@ -351,6 +359,10 @@ const AltaPedido: React.FC = () => {
         // CREAR nuevo pedido
         await crearPedido(pedido);
       }
+      
+      // Recargar indumentaria para actualizar stock
+      await cargarIndumentaria();
+      
       setShowSuccess(true);
     } catch (error) {
       setAlertMsg("Error al guardar el pedido.");
@@ -654,7 +666,9 @@ const AltaPedido: React.FC = () => {
                   <IonButton
                     className="button-secondary"
                     expand="block"
-                    onClick={() => {
+                    onClick={async () => {
+                      // Recargar indumentaria antes de abrir el modal
+                      await cargarIndumentaria();
                       // Limpiar cantidades temporales antes de abrir el modal
                       indumentaria.forEach(prenda => delete prenda._cantidadTemp);
                       setShowIndumentariaModal(true);
@@ -678,11 +692,15 @@ const AltaPedido: React.FC = () => {
                   {totalPedido.toFixed(2)}
                 </div>
                 {esVip && (
-                  <div style={{ color: "goldenrod", fontWeight: 600 }}>
+                  <div style={{ 
+                    color: "goldenrod", 
+                    fontWeight: 600,
+                    textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
+                  }}>
                     <span role="img" aria-label="vip">
                       👑
                     </span>{" "}
-                    Cliente VIP: 10% de descuento aplicado
+                    Cliente VIP : 10% de descuento aplicado
                   </div>
                 )}
                 {descuento > 0 && (

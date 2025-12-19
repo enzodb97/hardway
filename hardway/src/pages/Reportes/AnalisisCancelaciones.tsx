@@ -90,7 +90,7 @@ const AnalisisCancelaciones: React.FC = () => {
       });
     } catch (e) {}
     sheet.mergeCells("B1:E1");
-    sheet.getCell("B1").value = "Análisis de Cancelaciones de Pedidos";
+    sheet.getCell("B1").value = "Motivos de Cancelaciones de Pedidos";
     sheet.getCell("B1").font = {
       bold: true,
       size: 16,
@@ -189,7 +189,7 @@ const AnalisisCancelaciones: React.FC = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Analisis_cancelaciones_${new Date()
+    a.download = `Motivos_cancelaciones_${new Date()
       .toISOString()
       .slice(0, 10)}.xlsx`;
     document.body.appendChild(a);
@@ -203,7 +203,7 @@ const AnalisisCancelaciones: React.FC = () => {
   const exportarPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const title = "Análisis de Cancelaciones de Pedidos";
+    const title = "Motivos de Cancelaciones de Pedidos";
     const textWidth = doc.getTextWidth(title);
     const x = (pageWidth - textWidth) / 2;
     const logoBase64 =
@@ -235,7 +235,7 @@ const AnalisisCancelaciones: React.FC = () => {
       }
     }
 
-    doc.save("Analisis_cancelaciones.pdf");
+    doc.save("Motivos_cancelaciones.pdf");
     setToastPDF(true);
   };
 
@@ -321,7 +321,7 @@ const AnalisisCancelaciones: React.FC = () => {
     <IonPage className="analisis-cancelaciones-page">
       <IonHeader>
         <IonToolbar className="analisis-cancelaciones-toolbar">
-          <IonTitle>⚠️ Análisis de Cancelaciones</IonTitle>
+          <IonTitle>⚠️ Motivos de Cancelaciones</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="analisis-cancelaciones-content">
@@ -330,7 +330,7 @@ const AnalisisCancelaciones: React.FC = () => {
           <IonRow>
             <IonCol size="12">
               <div className="analisis-title-section">
-                <h1 className="analisis-main-title">Análisis de Cancelaciones de Pedidos</h1>
+                <h1 className="analisis-main-title">Motivos de Cancelaciones</h1>
                 <div className="analisis-emission-date">
                   Fecha de emisión: {fechaEmision}
                 </div>
