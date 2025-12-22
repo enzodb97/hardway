@@ -11,37 +11,67 @@ import {
   IonCol,
   IonMenuButton,
   IonIcon,
+  useIonViewWillEnter,
 } from "@ionic/react";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 import { documentTextOutline } from "ionicons/icons";
 import "./DetallePedido.css";
 import zepelin from "../../assets/images/zepelin.png";
 import axiosInstance from "../../config/axios";
 import { exportarPDFDetallePedido } from "../../utils/pedidosUtils";
+import { obtenerHistorialModificaciones } from "../../utils/pedidosUtils";
 
 const DetallePedido: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
+  const location = useLocation();
   const [prendas, setPrendas] = useState<any[]>([]);
   const [pedido, setPedido] = useState<any>(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
+  const [historialModificaciones, setHistorialModificaciones] = useState<any[]>([]);
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
-  useEffect(() => {
-    const cargarPedido = async () => {
-      try {
-        const res = await axiosInstance.get(`/api/pedidos/${id}/detalle-plano`);
-        setPrendas(res.data.items || []);
-        setPedido(res.data.pedido);
-        
-        // Debug: verificar los datos del pedido
-        console.log("📦 Datos del pedido recibidos:", res.data.pedido);
-        console.log("🚚 Empresa de envío:", res.data.pedido?.empresaEnvio);
-        console.log("📋 Número de seguimiento:", res.data.pedido?.numeroSeguimiento);
-      } catch (error) {
-        console.error("Error al cargar pedido:", error);
+  // Función reutilizable para cargar el pedido
+  const cargarPedido = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/pedidos/${id}/detalle-plano`);
+      setPrendas(res.data.items || []);
+      setPedido(res.data.pedido);
+      
+      // Debug: verificar los datos del pedido
+      console.log("📦 Datos del pedido recibidos:", res.data.pedido);
+      console.log("🚚 Empresa de envío:", res.data.pedido?.empresaEnvio);
+      console.log("📋 Número de seguimiento:", res.data.pedido?.numeroSeguimiento);
+
+      // Cargar historial de modificaciones si el pedido existe
+      if (res.data.pedido?.numeroPedido) {
+        console.log("🔍 Cargando historial para pedido:", res.data.pedido.numeroPedido);
+        const historial = await obtenerHistorialModificaciones(res.data.pedido.numeroPedido);
+        console.log("📜 Historial recibido:", historial);
+        console.log("📊 Cantidad de registros:", historial.length);
+        setHistorialModificaciones(historial);
       }
-    };
+    } catch (error) {
+      console.error("Error al cargar pedido:", error);
+    }
+  };
+
+  // Cargar pedido cuando se entra a la vista (navegación Ionic)
+  useIonViewWillEnter(() => {
     cargarPedido();
+  });
+
+  // Cargar pedido cuando cambia la ubicación (redirecciones)
+  useEffect(() => {
+    if (location.pathname.includes(`/detalle-pedido/${id}`)) {
+      cargarPedido();
+    }
+  }, [location, id]);
+
+  // Cargar pedido al montar el componente (mantener para compatibilidad)
+  useEffect(() => {
+    cargarPedido();
+    // eslint-disable-next-line
   }, [id]);
 
   // Función para mostrar valores amigables
@@ -308,15 +338,134 @@ const DetallePedido: React.FC = () => {
           new Date(pedido.fechaModificacion).getTime() !==
             new Date(pedido.fechaPedido).getTime() && (
             <div className="modificacion-pedido-card">
-              <h3>Historial de Modificaciones</h3>
-              <p className="fecha-modificacion">
-                <strong>Última modificación:</strong>{" "}
-                {new Date(pedido.fechaModificacion).toLocaleString("es-AR")}
-              </p>
-              {pedido.usuarioModifico && (
-                <p className="fecha-modificacion">
-                  <strong>Modificado por:</strong> {pedido.usuarioModifico}
+              <h3>📜 Historial de Modificaciones</h3>
+              
+              {/* Información de última modificación */}
+              <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                <p className="fecha-modificacion" style={{ marginBottom: '8px' }}>
+                  <strong>Última modificación:</strong>{" "}
+                  {new Date(pedido.fechaModificacion).toLocaleString("es-AR")}
                 </p>
+                {pedido.usuarioModifico && (
+                  <p className="fecha-modificacion" style={{ marginBottom: '0' }}>
+                    <strong>Modificado por:</strong> {pedido.usuarioModifico}
+                  </p>
+                )}
+              </div>
+
+              {/* Historial detallado de cambios */}
+              {historialModificaciones.length > 0 && (
+                <div className="historial-detallado">
+                  <div 
+                    style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                      cursor: 'pointer',
+                      padding: '10px',
+                      backgroundColor: '#f1f5f9',
+                      borderRadius: '6px',
+                      border: '1px solid #e2e8f0'
+                    }}
+                    onClick={() => setMostrarHistorial(!mostrarHistorial)}
+                  >
+                    <h4 style={{ margin: '0', color: '#64748b', fontSize: '14px' }}>
+                      📋 Registro de Cambios ({historialModificaciones.length})
+                    </h4>
+                    <span style={{ fontSize: '18px', color: '#64748b' }}>
+                      {mostrarHistorial ? '▼' : '▶'}
+                    </span>
+                  </div>
+                  
+                  {mostrarHistorial && (
+                    <div>
+                      {historialModificaciones.map((item, index) => (
+                        <div 
+                          key={item.idHistorial} 
+                          className="historial-item"
+                          style={{
+                            padding: '16px',
+                            marginBottom: '12px',
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            borderLeft: '4px solid #fdb40b'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
+                            <div>
+                              <strong style={{ color: '#1e293b', fontSize: '14px' }}>
+                                {item.descripcion}
+                              </strong>
+                              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                                📅 {new Date(item.fechaModificacion).toLocaleString("es-AR")}
+                              </div>
+                            </div>
+                            <span 
+                              style={{ 
+                                fontSize: '11px', 
+                                padding: '4px 8px', 
+                                backgroundColor: '#e0f2fe', 
+                                color: '#0369a1',
+                                borderRadius: '4px',
+                                fontWeight: '600'
+                              }}
+                            >
+                              {item.tipoModificacion}
+                            </span>
+                          </div>
+                          
+                          {/* Motivo */}
+                          <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                            <strong style={{ color: '#475569' }}>Motivo:</strong>{" "}
+                            <span style={{ color: '#64748b' }}>
+                              {item.Motivo?.descripcion || 'No especificado'}
+                            </span>
+                          </div>
+
+                          {/* Usuario que modificó */}
+                          <div style={{ marginTop: '4px', fontSize: '13px' }}>
+                            <strong style={{ color: '#475569' }}>Modificado por:</strong>{" "}
+                            <span style={{ color: '#64748b' }}>
+                              {item.UsuarioModificador?.nombreUsuario || 'Usuario desconocido'}
+                            </span>
+                          </div>
+
+                          {/* Detalles del cambio según el tipo */}
+                          {item.tipoModificacion === 'Se modifico la cantidad de un producto' && (
+                            <div style={{ marginTop: '8px', fontSize: '13px', color: '#64748b' }}>
+                              <strong style={{ color: '#475569' }}>Cambio:</strong> {item.cantidadAnterior} → {item.cantidadNueva} unidades
+                            </div>
+                          )}
+
+                          {item.tipoModificacion === 'Envio' && (
+                            <div style={{ marginTop: '8px', fontSize: '13px', color: '#64748b' }}>
+                              <strong style={{ color: '#475569' }}>Cambio de envío:</strong> {item.valorAnterior} → {item.valorNuevo}
+                            </div>
+                          )}
+
+                          {/* Observaciones si existen */}
+                          {item.observaciones && (
+                            <div 
+                              style={{ 
+                                marginTop: '12px', 
+                                padding: '10px', 
+                                backgroundColor: '#fef3c7', 
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                color: '#92400e'
+                              }}
+                            >
+                              <strong>💬 Observaciones:</strong>
+                              <div style={{ marginTop: '4px' }}>{item.observaciones}</div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}
@@ -357,108 +506,102 @@ const DetallePedido: React.FC = () => {
           </div>
         )}
 
-        <IonGrid>
-          <IonRow className="table-header">
-            <IonCol size="2">
-              <strong>Nombre del producto</strong>
-            </IonCol>
-            <IonCol size="1">
-              <strong>Talle</strong>
-            </IonCol>
-            <IonCol size="1">
-              <strong>Color</strong>
-            </IonCol>
-            <IonCol size="2">
-              <strong>Precio Unitario</strong>
-            </IonCol>
-            <IonCol size="1">
-              <strong>Cantidad</strong>
-            </IonCol>
-            <IonCol size="2">
-              <strong>Subtotal</strong>
-            </IonCol>
-          </IonRow>
-          {prendas.map((prenda, idx) => (
-            <IonRow key={idx}>
-              <IonCol class="col" size="2">
-                {mostrar(prenda.nombre_producto)}
-              </IonCol>
-              <IonCol class="col" size="1">
-                {mostrar(prenda.talle)}
-              </IonCol>
-              <IonCol class="col" size="1">
-                {mostrar(prenda.color)}
-              </IonCol>
-              <IonCol class="col" size="2">
-                {mostrarPrecio(prenda.precio_unitario)}
-              </IonCol>
-              <IonCol class="col" size="1">
-                {mostrar(prenda.cantidad)}
-              </IonCol>
-              <IonCol class="col" size="2">
-                {mostrarPrecio(prenda.subtotal)}
-                {prenda.descuento_por_item &&
-                  Number(prenda.descuento_por_item) > 0 && (
-                    <div style={{ color: "teal", fontSize: 12 }}>
-                      -{mostrarPrecio(prenda.descuento_por_item)} desc.
-                    </div>
-                  )}
-              </IonCol>
-            </IonRow>
-          ))}
-          {/* Fila de subtotal */}
-          <IonRow className="table-total-row">
-            <IonCol size="9" style={{ textAlign: "right", fontWeight: "bold" }}>
-              Subtotal:
-            </IonCol>
-            <IonCol size="2" style={{ fontWeight: "bold" }}>
-              {mostrarPrecio(pedido?.subtotal)}
-            </IonCol>
-          </IonRow>
-          {/* Mostrar descuento global si corresponde */}
-          {pedido &&
-            pedido.descuentoOrden &&
-            Number(pedido.descuentoOrden) > 0 && (
-              <IonRow className="table-descuento-row">
-                <IonCol
-                  size="9"
-                  style={{
-                    textAlign: "right",
-                    fontWeight: "bold",
-                    color: "goldenrod",
-                    textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
-                  }}
-                >
-                  👑 Cliente VIP 10% de descuento aplicado:
-                </IonCol>
-                <IonCol
-                  size="2"
-                  style={{ 
-                    fontWeight: "bold", 
-                    color: "goldenrod",
-                    textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
-                  }}
-                >
-                  -{mostrarPrecio(pedido.descuentoOrden)}
-                </IonCol>
-              </IonRow>
+        <div className="productos-section">
+          <div className="productos-section-header">
+            <h3>Detalle de Productos</h3>
+          </div>
+
+          <table className="productos-tabla">
+            <thead className="productos-tabla-header">
+              <tr>
+                <th>Producto</th>
+                <th>Talle</th>
+                <th>Color</th>
+                <th>Precio Unit.</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody className="productos-tabla-body">
+              {prendas.map((prenda, idx) => (
+                <tr key={idx}>
+                  <td>
+                    <span className="producto-nombre">
+                      {mostrar(prenda.nombre_producto)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="producto-badge producto-badge-talle">
+                      {mostrar(prenda.talle)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="producto-badge producto-badge-color">
+                      {mostrar(prenda.color)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="producto-precio">
+                      {mostrarPrecio(prenda.precio_unitario)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="producto-cantidad">
+                      {mostrar(prenda.cantidad)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="producto-subtotal">
+                      {mostrarPrecio(prenda.subtotal)}
+                    </span>
+                    {prenda.descuento_por_item &&
+                      Number(prenda.descuento_por_item) > 0 && (
+                        <div className="producto-descuento">
+                          -{mostrarPrecio(prenda.descuento_por_item)}
+                        </div>
+                      )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="tabla-resumen">
+            {/* Subtotal */}
+            <div className="tabla-resumen-row tabla-resumen-row-subtotal">
+              <span className="tabla-resumen-label">Subtotal:</span>
+              <span className="tabla-resumen-valor">
+                {mostrarPrecio(pedido?.subtotal)}
+              </span>
+            </div>
+
+            {/* Descuento VIP */}
+            {pedido &&
+              pedido.descuentoOrden &&
+              Number(pedido.descuentoOrden) > 0 && (
+                <div className="tabla-resumen-row tabla-resumen-row-descuento">
+                  <span className="tabla-resumen-label">
+                    👑 Cliente VIP - 10% de descuento:
+                  </span>
+                  <span className="tabla-resumen-valor">
+                    -{mostrarPrecio(pedido.descuentoOrden)}
+                  </span>
+                </div>
+              )}
+
+            {/* Total */}
+            {pedido && (
+              <div className="tabla-resumen-row tabla-resumen-row-total">
+                <span className="tabla-resumen-label">💰 Total a pagar:</span>
+                <span className="tabla-resumen-valor">
+                  {mostrarPrecio(Number(pedido.total))}
+                </span>
+              </div>
             )}
-          {/* Mostrar total final */}
-          {pedido && (
-            <IonRow className="table-total-final-row">
-              <IonCol
-                size="9"
-                style={{ textAlign: "right", fontWeight: "bold" }}
-              >
-                Total a pagar:
-              </IonCol>
-              <IonCol size="2" style={{ fontWeight: "bold" }}>
-                {mostrarPrecio(Number(pedido.total))}
-              </IonCol>
-            </IonRow>
-          )}
-        </IonGrid>
-        <hr />
+          </div>
+        </div>
+
+        <div className="productos-separador"></div>
         <IonButton
           expand="block"
           onClick={() => history.goBack()}

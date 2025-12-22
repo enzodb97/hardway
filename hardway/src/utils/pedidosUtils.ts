@@ -234,6 +234,20 @@ export const cancelarPedidoConMotivo = async (
   });
 };
 
+// Obtener motivos de modificación
+export const obtenerMotivosModificacion = async (): Promise<
+  Array<{ idMotivo: number; descripcion: string }>
+> => {
+  const res = await axiosInstance.get("/api/pedidos/motivos-modificacion");
+  return res.data;
+};
+
+// Obtener historial de modificaciones de un pedido
+export const obtenerHistorialModificaciones = async (numeroPedido: string): Promise<any[]> => {
+  const res = await axiosInstance.get(`/api/pedidos/${numeroPedido}/historial`);
+  return res.data;
+};
+
 // Filtrar pedidos por texto (cliente, fecha, numeroPedido, DNI)
 export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
   if (!filtro) return pedidos;

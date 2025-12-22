@@ -1,5 +1,5 @@
 // src/pages/Pedidos/Pedidos.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
 import { obtenerIconoEstado } from "../../utils/pedidosUtils";
@@ -43,7 +43,7 @@ import {
   limpiarFiltrosEstado,
   obtenerNombreEstado,
 } from "../../utils/pedidosUtils";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import { pencil, trash, documentText, chevronDown, cash, close } from "ionicons/icons";
 import { IonPopover, IonList, IonModal } from "@ionic/react";
@@ -110,16 +110,33 @@ const Pedidos: React.FC = () => {
 
   const porPagina = 6;
   const history = useHistory();
+  const location = useLocation();
 
+  // Función para actualizar pedidos y resetear estados
+  const actualizarPedidos = async () => {
+    try {
+      const pedidosActualizados = await cargarPedidos();
+      setPedidos(pedidosActualizados);
+      // Resetear paginación al actualizar
+      setPagina(1);
+    } catch (error: any) {
+      console.error("Error al cargar pedidos:", error);
+      setAuthErrorMsg(error.message);
+      setShowAuthError(true);
+    }
+  };
+
+  // Actualizar cuando se entra a la vista (navegación Ionic)
   useIonViewWillEnter(() => {
-    cargarPedidos()
-      .then(setPedidos)
-      .catch((error) => {
-        console.error("Error al cargar pedidos:", error);
-        setAuthErrorMsg(error.message);
-        setShowAuthError(true);
-      });
+    actualizarPedidos();
   });
+
+  // Actualizar cuando cambia la ubicación (redirecciones)
+  useEffect(() => {
+    if (location.pathname === '/pedidos') {
+      actualizarPedidos();
+    }
+  }, [location]);
 
   const mostrarTodos = busqueda === " ";
 

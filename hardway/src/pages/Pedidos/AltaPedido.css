@@ -1329,3 +1329,355 @@ ion-modal ion-content::-webkit-scrollbar-thumb:hover {
 .native-input.sc-ion-input-md {
   padding-top: 15px !important;
 }
+
+/* ========================================
+   MODAL MOTIVO DE MODIFICACIÓN
+   ======================================== */
+
+/* Sobrescribir tamaño del modal para pantallas grandes */
+.motivo-modal {
+  --width: 600px;
+  --height: 670px;
+  --max-height: 90vh;
+}
+
+@media (max-width: 768px) {
+  .motivo-modal {
+    --width: 95%;
+    --height: 95%;
+    --max-height: 85vh;
+  }
+}
+
+.motivo-modal ion-toolbar {
+  --background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  --color: white;
+}
+
+.motivo-modal ion-title {
+  font-weight: 700;
+  font-size: 18px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.motivo-modal-content {
+  padding: 24px;
+  background-color: #f8fafc;
+}
+
+.motivo-modal-header {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid #fdb40b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.motivo-modal-header-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.motivo-modal-title {
+  margin: 0 0 12px 0;
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center !important;
+  gap: 10px;
+}
+
+.motivo-modal-title::before {
+  content: "⚠️";
+  font-size: 24px;
+}
+
+.motivo-modal-description {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.motivo-modal-form {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Nueva sección de formulario para radio buttons */
+.motivo-modal-form-section {
+  margin-bottom: 24px;
+}
+
+.motivo-modal-form-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.motivo-modal-form-label-text {
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+}
+
+/* Grupo de radio buttons */
+.motivo-modal-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.motivo-modal-radio-option {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.motivo-modal-radio-option::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.motivo-modal-radio-option:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateX(4px);
+}
+
+.motivo-modal-radio-option.selected {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border-color: #fdb40b;
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.15);
+}
+
+.motivo-modal-radio-option.selected::before {
+  transform: scaleY(1);
+}
+
+.motivo-modal-radio-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+
+.motivo-modal-radio-icon {
+  font-size: 24px;
+  color: #94a3b8;
+  transition: all 0.3s ease;
+}
+
+.motivo-modal-radio-option.selected .motivo-modal-radio-icon {
+  color: #fdb40b;
+  transform: scale(1.1);
+}
+
+.motivo-modal-radio-label {
+  flex: 1;
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
+  line-height: 1.5;
+  user-select: none;
+}
+
+.motivo-modal-radio-option.selected .motivo-modal-radio-label {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.motivo-modal-form-item {
+  --background: transparent;
+  --border-color: #e2e8f0;
+  --highlight-color-focused: #fdb40b;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.motivo-modal-form-item:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.motivo-modal-form-item.item-has-focus {
+  border-color: #fdb40b;
+  box-shadow: 0 0 0 3px rgba(253, 180, 11, 0.1);
+}
+
+.motivo-modal-form-item ion-label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+}
+
+.motivo-modal-select-placeholder {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.motivo-modal-textarea {
+  min-height: 100px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.motivo-modal-textarea::placeholder {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.motivo-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.motivo-modal-btn-cancel {
+  flex: 1;
+  --background: #64748b;
+  --background-hover: #475569;
+  --background-activated: #334155;
+  font-weight: 600;
+  height: 48px;
+  --border-radius: 8px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.motivo-modal-btn-save {
+  flex: 1;
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --background-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
+  --background-activated: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  font-weight: 700;
+  height: 48px;
+  --border-radius: 8px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.motivo-modal-btn-save:disabled {
+  --background: #cbd5e1;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.motivo-modal-required-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.motivo-modal-char-counter {
+  text-align: right;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Animación de entrada del modal */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motivo-modal-content > * {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.motivo-modal-header {
+  animation-delay: 0.1s;
+}
+
+.motivo-modal-form {
+  animation-delay: 0.2s;
+}
+
+.motivo-modal-actions {
+  animation-delay: 0.3s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .motivo-modal-content {
+    padding: 16px;
+  }
+  
+  .motivo-modal-header {
+    padding: 16px;
+  }
+  
+  .motivo-modal-title {
+    font-size: 18px;
+  }
+  
+  .motivo-modal-description {
+    font-size: 13px;
+  }
+  
+  .motivo-modal-form {
+    padding: 16px;
+  }
+
+  .motivo-modal-radio-option {
+    padding: 14px;
+  }
+
+  .motivo-modal-radio-label {
+    font-size: 13px;
+  }
+  
+  .motivo-modal-actions {
+    flex-direction: column;
+  }
+  
+  .motivo-modal-btn-cancel,
+  .motivo-modal-btn-save {
+    width: 100%;
+  }
+}

@@ -15,6 +15,8 @@ const MotivoNoApta = require('./MotivoNoApta');
 const StockRegistroFallo = require('./StockRegistroFallo');
 const EmpresaEnvio = require('./EmpresaEnvio'); // Nuevo modelo
 const AsignacionPicking = require('./AsignacionPicking'); // Nuevo modelo
+const MotivoModificacionPedido = require('./MotivoModificacionPedido');
+const HistorialModificacionPedido = require('./HistorialModificacionPedido');
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
 const {
   Color,
@@ -111,6 +113,7 @@ const Rack = sequelize.define(
 const setupAssociations = () => {
   // Relaciones básicas
   Cliente.belongsTo(Persona, { foreignKey: "idPersona" });
+  Usuario.belongsTo(Persona, { foreignKey: "idPersona" }); // ✅ Agregar relación Usuario -> Persona
   
   // ✅ NUEVA RELACIÓN N:M: Usuario ←→ TipoRol (a través de usuario_tiporol)
   Usuario.belongsToMany(TipoRol, {
@@ -211,6 +214,27 @@ const setupAssociations = () => {
   MovimientoStock.belongsTo(Stock, { foreignKey: "idStock" });
   Stock.hasMany(MovimientoStock, { foreignKey: "idStock" });
 
+  // Relaciones de HistorialModificacionPedido
+  HistorialModificacionPedido.belongsTo(Pedido, { foreignKey: "numeroPedido" });
+  HistorialModificacionPedido.belongsTo(Usuario, { 
+    foreignKey: "idUsuarioModifico",
+    as: "UsuarioModificador"
+  });
+  HistorialModificacionPedido.belongsTo(MotivoModificacionPedido, { 
+    foreignKey: "idMotivo",
+    as: "Motivo"
+  });
+  HistorialModificacionPedido.belongsTo(DetallePedido, { 
+    foreignKey: "idDetallePedido",
+    as: "DetallePedido"
+  });
+  HistorialModificacionPedido.belongsTo(Indumentaria, { 
+    foreignKey: "codigoIndumentaria",
+    as: "Indumentaria"
+  });
+  
+  Pedido.hasMany(HistorialModificacionPedido, { foreignKey: "numeroPedido" });
+
   console.log("⚙️  Configurando relaciones entre modelos...");
   console.log("✅ Relaciones de modelos configuradas correctamente");
 };
@@ -258,6 +282,10 @@ module.exports = {
   // Nuevos modelos para flujo unificado Picker/Despacho
   EmpresaEnvio,
   AsignacionPicking,
+  
+  // Modelos de auditoría de pedidos
+  MotivoModificacionPedido,
+  HistorialModificacionPedido,
   
   // Función para configurar relaciones
   setupAssociations,

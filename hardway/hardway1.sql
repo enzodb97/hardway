@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 10-12-2025 a las 18:25:04
+-- Tiempo de generación: 21-12-2025 a las 00:29:18
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -2455,6 +2455,29 @@ INSERT INTO `gerentegeneral` (`idGerente`, `legajo`, `idPersona`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `historial_modificacion_pedido`
+--
+
+CREATE TABLE `historial_modificacion_pedido` (
+  `idHistorial` int(11) NOT NULL,
+  `numeroPedido` varchar(50) NOT NULL,
+  `fechaModificacion` datetime NOT NULL DEFAULT current_timestamp(),
+  `idUsuarioModifico` int(11) NOT NULL,
+  `idMotivo` int(11) NOT NULL COMMENT 'Motivo de la modificación',
+  `observaciones` text DEFAULT NULL COMMENT 'Observaciones adicionales opcionales',
+  `tipoModificacion` enum('Envio','Se agrego un producto','Se elimino un producto','Se modifico la cantidad de un producto') NOT NULL,
+  `valorAnterior` varchar(255) DEFAULT NULL COMMENT 'Valor antes del cambio',
+  `valorNuevo` varchar(255) DEFAULT NULL COMMENT 'Valor después del cambio',
+  `descripcion` varchar(255) NOT NULL COMMENT 'Descripción del cambio realizado',
+  `idDetallePedido` varchar(50) DEFAULT NULL COMMENT 'ID del detalle afectado (si aplica)',
+  `codigoIndumentaria` varchar(50) DEFAULT NULL COMMENT 'Código de la indumentaria afectada',
+  `cantidadAnterior` int(11) DEFAULT NULL COMMENT 'Cantidad antes del cambio',
+  `cantidadNueva` int(11) DEFAULT NULL COMMENT 'Cantidad después del cambio'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `indumentaria`
 --
 
@@ -2549,6 +2572,28 @@ INSERT INTO `motivo_cancelacion` (`idMotivo`, `descripcion`) VALUES
 (4, 'Dirección de envío incorrecta'),
 (5, 'Pedido duplicado'),
 (6, 'Otro motivo (especificar en observaciones)');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `motivo_modificacion_pedido`
+--
+
+CREATE TABLE `motivo_modificacion_pedido` (
+  `idMotivo` int(11) NOT NULL,
+  `descripcion` varchar(100) NOT NULL,
+  `estaActivo` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `motivo_modificacion_pedido`
+--
+
+INSERT INTO `motivo_modificacion_pedido` (`idMotivo`, `descripcion`, `estaActivo`) VALUES
+(1, 'El cliente solicitó un cambio', 1),
+(2, 'Error de datos a la hora del registro', 1),
+(3, 'Corrección administrativa', 1),
+(4, 'Cambio de disponibilidad de stock', 1);
 
 -- --------------------------------------------------------
 
@@ -4156,6 +4201,19 @@ ALTER TABLE `gerentegeneral`
   ADD KEY `idPersona` (`idPersona`);
 
 --
+-- Indices de la tabla `historial_modificacion_pedido`
+--
+ALTER TABLE `historial_modificacion_pedido`
+  ADD PRIMARY KEY (`idHistorial`),
+  ADD KEY `idx_numeroPedido` (`numeroPedido`),
+  ADD KEY `idx_fechaModificacion` (`fechaModificacion`),
+  ADD KEY `idx_usuarioModifico` (`idUsuarioModifico`),
+  ADD KEY `idx_motivo` (`idMotivo`),
+  ADD KEY `idx_tipoModificacion` (`tipoModificacion`),
+  ADD KEY `fk_histmod_detalle` (`idDetallePedido`),
+  ADD KEY `fk_histmod_indumentaria` (`codigoIndumentaria`);
+
+--
 -- Indices de la tabla `indumentaria`
 --
 ALTER TABLE `indumentaria`
@@ -4172,6 +4230,12 @@ ALTER TABLE `motivo_baja_cliente`
 -- Indices de la tabla `motivo_cancelacion`
 --
 ALTER TABLE `motivo_cancelacion`
+  ADD PRIMARY KEY (`idMotivo`);
+
+--
+-- Indices de la tabla `motivo_modificacion_pedido`
+--
+ALTER TABLE `motivo_modificacion_pedido`
   ADD PRIMARY KEY (`idMotivo`);
 
 --
@@ -4361,6 +4425,12 @@ ALTER TABLE `estadoindumentaria`
   MODIFY `idEstado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
+-- AUTO_INCREMENT de la tabla `historial_modificacion_pedido`
+--
+ALTER TABLE `historial_modificacion_pedido`
+  MODIFY `idHistorial` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `motivo_baja_cliente`
 --
 ALTER TABLE `motivo_baja_cliente`
@@ -4371,6 +4441,12 @@ ALTER TABLE `motivo_baja_cliente`
 --
 ALTER TABLE `motivo_cancelacion`
   MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `motivo_modificacion_pedido`
+--
+ALTER TABLE `motivo_modificacion_pedido`
+  MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `motivo_no_apta`
@@ -4523,6 +4599,16 @@ ALTER TABLE `encargadopicker`
 --
 ALTER TABLE `gerentegeneral`
   ADD CONSTRAINT `gerentegeneral_ibfk_1` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`);
+
+--
+-- Filtros para la tabla `historial_modificacion_pedido`
+--
+ALTER TABLE `historial_modificacion_pedido`
+  ADD CONSTRAINT `fk_histmod_detalle` FOREIGN KEY (`idDetallePedido`) REFERENCES `detallepedido` (`idDetallePedido`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_histmod_indumentaria` FOREIGN KEY (`codigoIndumentaria`) REFERENCES `indumentaria` (`codigoIndumentaria`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_histmod_motivo` FOREIGN KEY (`idMotivo`) REFERENCES `motivo_modificacion_pedido` (`idMotivo`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_histmod_pedido` FOREIGN KEY (`numeroPedido`) REFERENCES `pedido` (`numeroPedido`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_histmod_usuario` FOREIGN KEY (`idUsuarioModifico`) REFERENCES `usuario` (`idUsuario`) ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `indumentaria`

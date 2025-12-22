@@ -17,10 +17,39 @@ const {
   Talle,
   PrecioIndumentaria,
   sequelize,
+  MotivoModificacionPedido,
+  HistorialModificacionPedido,
+  Usuario,
+  EmpresaEnvio,
 } = require("../models");
 const { Sequelize, Op } = require("sequelize");
 
-// Aplicar middleware a todas las rutas de pedidos
+// =====================================================
+// RUTAS PÚBLICAS (antes del middleware de autenticación)
+// =====================================================
+
+// Obtener motivos de modificación activos
+router.get("/motivos-modificacion", async (req, res) => {
+  try {
+    const motivos = await MotivoModificacionPedido.findAll({
+      where: { estaActivo: 1 },
+      order: [['idMotivo', 'ASC']]
+    });
+    res.json(motivos);
+  } catch (error) {
+    console.error("Error al obtener motivos de modificación:", error);
+    res.status(500).json({ 
+      error: "Error al obtener motivos de modificación", 
+      detalle: error.message 
+    });
+  }
+});
+
+// =====================================================
+// APLICAR MIDDLEWARE A LAS DEMÁS RUTAS
+// =====================================================
+
+// Aplicar middleware a todas las rutas de pedidos (excepto las de arriba)
 router.use(verificarAccesoPedidos);
 
 // Obtener todos los pedidos con prendas
@@ -367,8 +396,9 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
 });
 
 // Editar pedido
+// Editar pedido (devuelve stock antiguo, descuenta nuevo stock)
 router.put("/:numeroPedido", async (req, res) => {
-  const { idCliente, idEstado, prendas, idEmpresaEnvio } = req.body;
+  const { idCliente, idEstado, prendas, idEmpresaEnvio, idMotivo, observaciones } = req.body;
   const { numeroPedido } = req.params;
   const t = await sequelize.transaction();
   try {
@@ -382,11 +412,121 @@ router.put("/:numeroPedido", async (req, res) => {
       return res.status(404).json({ error: "Pedido no encontrado" });
     }
 
-    // 2. Recupera detalles anteriores y devuelve stock
+    // Validar que se haya proporcionado un motivo de modificación
+    if (!idMotivo) {
+      await t.rollback();
+      return res.status(400).json({ 
+        error: "Debe proporcionar un motivo de modificación" 
+      });
+    }
+
+    // Guardar valores anteriores para el historial
+    const empresaEnvioAnterior = pedido.idEmpresaEnvio;
+
+    // 2. Recupera detalles anteriores
     const detallesAnteriores = await DetallePedido.findAll({
       where: { numeroPedido },
       transaction: t,
     });
+
+    // 2.1. REGISTRAR HISTORIAL ANTES DE ELIMINAR (para que los IDs existan)
+    const idUsuario = req.usuarioAutenticado.idUsuario;
+    
+    // Detectar cambio de empresa de envío
+    if (empresaEnvioAnterior !== idEmpresaEnvio) {
+      // Buscar nombres de las empresas
+      let nombreEmpresaAnterior = 'Sin empresa';
+      let nombreEmpresaNueva = 'Sin empresa';
+      
+      if (empresaEnvioAnterior) {
+        const empresaAnt = await EmpresaEnvio.findByPk(empresaEnvioAnterior, { transaction: t });
+        nombreEmpresaAnterior = empresaAnt ? empresaAnt.nombre : `ID: ${empresaEnvioAnterior}`;
+      }
+      
+      if (idEmpresaEnvio) {
+        const empresaNueva = await EmpresaEnvio.findByPk(idEmpresaEnvio, { transaction: t });
+        nombreEmpresaNueva = empresaNueva ? empresaNueva.nombre : `ID: ${idEmpresaEnvio}`;
+      }
+      
+      await HistorialModificacionPedido.create({
+        numeroPedido,
+        fechaModificacion: new Date(),
+        idUsuarioModifico: idUsuario,
+        idMotivo,
+        observaciones,
+        tipoModificacion: 'Envio',
+        valorAnterior: nombreEmpresaAnterior,
+        valorNuevo: nombreEmpresaNueva,
+        descripcion: `Cambio de empresa de envío de "${nombreEmpresaAnterior}" a "${nombreEmpresaNueva}"`
+      }, { transaction: t });
+    }
+
+    // Crear un mapa de los detalles anteriores para comparación
+    const mapaAnteriores = new Map();
+    detallesAnteriores.forEach(det => {
+      mapaAnteriores.set(det.codigoIndumentaria, {
+        cantidad: det.cantidad,
+        idDetallePedido: det.idDetallePedido
+      });
+    });
+
+    // Detectar cambios en los ítems
+    if (prendas && Array.isArray(prendas)) {
+      for (const prenda of prendas) {
+        const anterior = mapaAnteriores.get(prenda.codigoIndumentaria);
+        
+        if (!anterior) {
+          // Ítem agregado
+          await HistorialModificacionPedido.create({
+            numeroPedido,
+            fechaModificacion: new Date(),
+            idUsuarioModifico: idUsuario,
+            idMotivo,
+            observaciones,
+            tipoModificacion: 'Se agrego un producto',
+            codigoIndumentaria: prenda.codigoIndumentaria,
+            cantidadNueva: prenda.cantidad,
+            descripcion: `Se agregó ${prenda.cantidad} unidad(es) del producto ${prenda.codigoIndumentaria}`
+          }, { transaction: t });
+        } else if (anterior.cantidad !== prenda.cantidad) {
+          // Cambio de cantidad
+          await HistorialModificacionPedido.create({
+            numeroPedido,
+            fechaModificacion: new Date(),
+            idUsuarioModifico: idUsuario,
+            idMotivo,
+            observaciones,
+            tipoModificacion: 'Se modifico la cantidad de un producto',
+            codigoIndumentaria: prenda.codigoIndumentaria,
+            idDetallePedido: anterior.idDetallePedido,
+            cantidadAnterior: anterior.cantidad,
+            cantidadNueva: prenda.cantidad,
+            descripcion: `Cantidad modificada de ${anterior.cantidad} a ${prenda.cantidad} del producto ${prenda.codigoIndumentaria}`
+          }, { transaction: t });
+        }
+        
+        // Marcar como procesado
+        mapaAnteriores.delete(prenda.codigoIndumentaria);
+      }
+    }
+
+    // Ítems eliminados (los que quedaron en el mapa)
+    for (const [codigoIndumentaria, datos] of mapaAnteriores) {
+      await HistorialModificacionPedido.create({
+        numeroPedido,
+        fechaModificacion: new Date(),
+        idUsuarioModifico: idUsuario,
+        idMotivo,
+        observaciones,
+        tipoModificacion: 'Se elimino un producto',
+        codigoIndumentaria: codigoIndumentaria,
+        idDetallePedido: datos.idDetallePedido,
+        cantidadAnterior: datos.cantidad,
+        descripcion: `Se eliminó ${datos.cantidad} unidad(es) del producto ${codigoIndumentaria}`
+      }, { transaction: t });
+    }
+
+    // 3. Devuelve stock de los detalles anteriores
     for (const detalle of detallesAnteriores) {
       const stocks = await Stock.findAll({
         where: { 
@@ -759,6 +899,36 @@ router.post("/:numeroPedido/asignar-picker", async (req, res) => {
   } catch (error) {
     console.error("Error al asignar picker:", error);
     res.status(500).json({ error: "Error al asignar picker" });
+  }
+});
+
+// Obtener historial de modificaciones de un pedido
+router.get("/:numeroPedido/historial", async (req, res) => {
+  const { numeroPedido } = req.params;
+  try {
+    const historial = await HistorialModificacionPedido.findAll({
+      where: { numeroPedido },
+      include: [
+        {
+          model: Usuario,
+          as: "UsuarioModificador",
+          attributes: ['nombreUsuario']
+        },
+        {
+          model: MotivoModificacionPedido,
+          as: "Motivo",
+          attributes: ['descripcion']
+        }
+      ],
+      order: [['fechaModificacion', 'DESC']]
+    });
+    res.json(historial);
+  } catch (error) {
+    console.error("Error al obtener historial de modificaciones:", error);
+    res.status(500).json({ 
+      error: "Error al obtener historial de modificaciones", 
+      detalle: error.message 
+    });
   }
 });
 

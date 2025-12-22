@@ -627,3 +627,318 @@ ion-content h2 {
     font-size: 13px;
   }
 }
+
+/* ========================================
+   ESTILOS PARA TABLA DE PRODUCTOS
+   ======================================== */
+
+.productos-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.productos-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 3px solid #fdb40b;
+}
+
+.productos-section-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.productos-section-header h3::before {
+  content: "🛍️";
+  font-size: 24px;
+}
+
+.productos-tabla {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 20px;
+}
+
+.productos-tabla-header {
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  color: white;
+}
+
+.productos-tabla-header th {
+  padding: 14px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  border: none;
+}
+
+.productos-tabla-header th:first-child {
+  border-top-left-radius: 8px;
+  text-align: left;
+  padding-left: 20px;
+}
+
+.productos-tabla-header th:last-child {
+  border-top-right-radius: 8px;
+  text-align: right;
+  padding-right: 20px;
+}
+
+.productos-tabla-body tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.productos-tabla-body tr:hover {
+  background-color: #fef3c7;
+  transform: translateX(4px);
+  box-shadow: -4px 0 0 #fdb40b;
+}
+
+.productos-tabla-body tr:last-child {
+  border-bottom: none;
+}
+
+.productos-tabla-body td {
+  padding: 16px;
+  color: #374151;
+  font-size: 14px;
+  text-align: center;
+}
+
+.productos-tabla-body td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: #1e293b;
+  padding-left: 20px;
+}
+
+.productos-tabla-body td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: #0f172a;
+  padding-right: 20px;
+}
+
+.producto-nombre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.producto-nombre::before {
+  content: "▪";
+  color: #fdb40b;
+  font-size: 18px;
+}
+
+.producto-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.producto-badge-talle {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.producto-badge-color {
+  background-color: #fce7f3;
+  color: #9f1239;
+}
+
+.producto-precio {
+  font-family: "Monaco", "Menlo", monospace;
+  color: #059669;
+  font-weight: 600;
+}
+
+.producto-cantidad {
+  background-color: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  color: #0f172a;
+  display: inline-block;
+}
+
+.producto-subtotal {
+  font-family: "Monaco", "Menlo", monospace;
+  font-size: 15px;
+}
+
+.producto-descuento {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #059669;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.producto-descuento::before {
+  content: "🏷️";
+  font-size: 14px;
+}
+
+/* Filas de totales */
+.tabla-resumen {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e2e8f0;
+}
+
+.tabla-resumen-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.tabla-resumen-row:hover {
+  background-color: #f8fafc;
+}
+
+.tabla-resumen-row-subtotal {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+.tabla-resumen-row-descuento {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fbbf24;
+}
+
+.tabla-resumen-row-total {
+  background: linear-gradient(135deg, #fdb40b 0%, #ff9500 100%);
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.3);
+}
+
+.tabla-resumen-label {
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabla-resumen-valor {
+  font-family: "Monaco", "Menlo", monospace;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.tabla-resumen-row-total .tabla-resumen-label,
+.tabla-resumen-row-total .tabla-resumen-valor {
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.tabla-resumen-row-descuento .tabla-resumen-label {
+  color: #92400e;
+  font-weight: 700;
+}
+
+.tabla-resumen-row-descuento .tabla-resumen-valor {
+  color: #78350f;
+}
+
+/* Separador decorativo */
+.productos-separador {
+  height: 2px;
+  background: linear-gradient(to right, transparent, #fdb40b, transparent);
+  margin: 24px 0;
+}
+
+/* Responsive para tabla de productos */
+@media (max-width: 768px) {
+  .productos-section {
+    padding: 16px;
+    margin: 16px 8px;
+    border-radius: 8px;
+  }
+  
+  .productos-section-header h3 {
+    font-size: 18px;
+  }
+  
+  .productos-tabla {
+    font-size: 12px;
+  }
+  
+  .productos-tabla-header th {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+  
+  .productos-tabla-body td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  
+  .productos-tabla-header th:first-child,
+  .productos-tabla-body td:first-child {
+    padding-left: 12px;
+  }
+  
+  .productos-tabla-header th:last-child,
+  .productos-tabla-body td:last-child {
+    padding-right: 12px;
+  }
+  
+  .producto-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  
+  .producto-cantidad {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .tabla-resumen-row {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .tabla-resumen-label {
+    font-size: 13px;
+  }
+  
+  .tabla-resumen-valor {
+    font-size: 14px;
+  }
+  
+  .tabla-resumen-row-total {
+    font-size: 16px;
+    padding: 14px 12px;
+  }
+}

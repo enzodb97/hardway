@@ -17,6 +17,8 @@ import {
   IonIcon,
   IonSelect,
   IonSelectOption,
+  IonTextarea,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import {
   person,
@@ -28,9 +30,12 @@ import {
   checkmark,
   save,
   carOutline,
+  close,
+  radioButtonOn,
+  radioButtonOff,
 } from "ionicons/icons";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { crearPedido, editarPedido } from "../../utils/pedidosUtils";
+import { crearPedido, editarPedido, obtenerMotivosModificacion } from "../../utils/pedidosUtils";
 import { useClientesVip } from "../../utils/useClientesVip";
 import axiosInstance from "../../config/axios";
 import "./AltaPedido.css";
@@ -88,6 +93,13 @@ const AltaPedido: React.FC = () => {
   // --- Empresas de Envío ---
   const [empresasEnvio, setEmpresasEnvio] = useState<{ idEmpresaEnvio: number; nombre: string }[]>([]);
   const [empresaEnvioSeleccionada, setEmpresaEnvioSeleccionada] = useState<string>("");
+
+  // --- Motivo de Modificación (solo para edición) ---
+  const [showMotivoModal, setShowMotivoModal] = useState(false);
+  const [motivosModificacion, setMotivosModificacion] = useState<Array<{ idMotivo: number; descripcion: string }>>([]);
+  const [motivoSeleccionado, setMotivoSeleccionado] = useState<string>("");
+  const [observaciones, setObservaciones] = useState<string>("");
+  const [datosPendientesEdicion, setDatosPendientesEdicion] = useState<any>(null);
 
   // Calcular total y descuento si corresponde (después de los estados)
   const esVip = form.idCliente && vipIds.has(Number(form.idCliente));
@@ -167,57 +179,99 @@ const AltaPedido: React.FC = () => {
     cargarEmpresasEnvio();
   }, []);
 
-  // Almacenar datos de pedido para procesamiento posterior
-  const [datosDelPedido, setDatosDelPedido] = useState<any>(null);
-
-  // Cargar datos si es edición
+  // Cargar motivos de modificación (solo si es edición)
   useEffect(() => {
-    if (esEdicion && id) {
-      const cargarPedido = async () => {
+    if (esEdicion) {
+      const cargarMotivos = async () => {
         try {
-          const res = await axiosInstance.get(`/api/pedidos/${id}`);
-          setForm({
-            idCliente: res.data.idCliente?.toString() || "",
-            clienteNombre: res.data.Cliente?.Persona
-              ? `${res.data.Cliente.Persona.nombre} ${
-                  res.data.Cliente.Persona.apellido ?? ""
-                }`.trim()
-              : "",
-            idEstado: res.data.idEstado?.toString() || "",
-          });
-
-          // Cargar empresa de envío
-          if (res.data.idEmpresaEnvio) {
-            setEmpresaEnvioSeleccionada(res.data.idEmpresaEnvio.toString());
-          }
-
-          // Guardar los datos del pedido para procesarlos cuando tengamos el catálogo
-          if (res.data.DetallePedidos) {
-            setDatosDelPedido(res.data.DetallePedidos);
-          }
-        } catch (error: any) {
-          console.error("Error al cargar el pedido:", error);
-          if (error.response?.status === 401) {
-            setAlertMsg(
-              "Error de autenticación. Por favor, inicie sesión nuevamente."
-            );
-          } else if (error.response?.status === 404) {
-            setAlertMsg("Pedido no encontrado.");
-          } else if (error.response?.data?.error) {
-            setAlertMsg(`Error: ${error.response.data.error}`);
-          } else {
-            setAlertMsg("Error al cargar el pedido.");
-          }
-          setShowAlert(true);
+          const motivos = await obtenerMotivosModificacion();
+          console.log("🔍 Motivos de modificación cargados:", motivos);
+          setMotivosModificacion(motivos);
+        } catch (error) {
+          console.error("❌ Error al cargar motivos de modificación:", error);
         }
       };
-      cargarPedido();
+      cargarMotivos();
     }
+  }, [esEdicion]);
+
+  // Almacenar datos de pedido para procesamiento posterior
+  const [datosDelPedido, setDatosDelPedido] = useState<any>(null);
+  const [prendasCargadasDesdeServidor, setPrendasCargadasDesdeServidor] = useState(false);
+
+  // Función para cargar datos del pedido (reutilizable)
+  const cargarDatosPedido = async () => {
+    if (!esEdicion || !id) return;
+    
+    try {
+      const res = await axiosInstance.get(`/api/pedidos/${id}`);
+      setForm({
+        idCliente: res.data.idCliente?.toString() || "",
+        clienteNombre: res.data.Cliente?.Persona
+          ? `${res.data.Cliente.Persona.nombre} ${
+              res.data.Cliente.Persona.apellido ?? ""
+            }`.trim()
+          : "",
+        idEstado: res.data.idEstado?.toString() || "",
+      });
+
+      // Cargar empresa de envío
+      if (res.data.idEmpresaEnvio) {
+        setEmpresaEnvioSeleccionada(res.data.idEmpresaEnvio.toString());
+      }
+
+      // Guardar los datos del pedido para procesarlos cuando tengamos el catálogo
+      if (res.data.DetallePedidos) {
+        setDatosDelPedido(res.data.DetallePedidos);
+        // Resetear la bandera para permitir que se carguen las prendas
+        setPrendasCargadasDesdeServidor(false);
+      }
+    } catch (error: any) {
+      console.error("Error al cargar el pedido:", error);
+      if (error.response?.status === 401) {
+        setAlertMsg(
+          "Error de autenticación. Por favor, inicie sesión nuevamente."
+        );
+      } else if (error.response?.status === 404) {
+        setAlertMsg("Pedido no encontrado.");
+      } else if (error.response?.data?.error) {
+        setAlertMsg(`Error: ${error.response.data.error}`);
+      } else {
+        setAlertMsg("Error al cargar el pedido.");
+      }
+      setShowAlert(true);
+    }
+  };
+
+  // Cargar datos cuando se entra a la vista (navegación Ionic)
+  useIonViewWillEnter(() => {
+    if (esEdicion && id) {
+      cargarDatosPedido();
+      cargarIndumentaria();
+    }
+  });
+
+  // Cargar datos cuando cambia la ubicación (redirecciones)
+  useEffect(() => {
+    if (esEdicion && id && location.pathname.includes(`/alta-pedido/${id}`)) {
+      cargarDatosPedido();
+    }
+  }, [location, esEdicion, id]);
+
+  // Cargar datos si es edición (mantener para compatibilidad)
+  useEffect(() => {
+    if (esEdicion && id) {
+      cargarDatosPedido();
+    }
+    // eslint-disable-next-line
   }, [id, esEdicion]);
 
   // Procesar las prendas cuando tengamos tanto los datos del pedido como el catálogo de indumentaria
+  // SOLO la primera vez que se cargan los datos del servidor
   useEffect(() => {
-    if (datosDelPedido && indumentaria.length > 0) {
+    // Solo ejecutar si tenemos datos del pedido, catálogo de indumentaria, 
+    // y NO hemos cargado las prendas desde el servidor todavía
+    if (datosDelPedido && indumentaria.length > 0 && !prendasCargadasDesdeServidor) {
       const prendasDelPedido = datosDelPedido.map((detalle: any) => {
         // Buscamos en el catálogo la información completa de esta indumentaria
         const indumentariaEnCatalogo = indumentaria.find(
@@ -258,7 +312,10 @@ const AltaPedido: React.FC = () => {
       });
 
       setPrendasSeleccionadas(prendasDelPedido);
+      // Marcar que ya hemos cargado las prendas desde el servidor
+      setPrendasCargadasDesdeServidor(true);
     }
+    // eslint-disable-next-line
   }, [datosDelPedido, indumentaria]);
 
   // --- Lógica de prendas ---
@@ -332,40 +389,87 @@ const AltaPedido: React.FC = () => {
       return;
     }
 
-    try {
-      const pedido = {
-        idCliente: Number(form.idCliente),
-        idEstado: 1,
-        prendas: prendasSeleccionadas.map(
-          ({ codigoIndumentaria, cantidad }) => ({
-            codigoIndumentaria,
-            cantidad,
-          })
-        ),
-        total: totalConDescuento,
-        descuento: descuento,
-        esVip: esVip,
-        idEmpresaEnvio: Number(empresaEnvioSeleccionada), // Agregar empresa de envío
-      };
+    const pedido = {
+      idCliente: Number(form.idCliente),
+      idEstado: 1,
+      prendas: prendasSeleccionadas.map(
+        ({ codigoIndumentaria, cantidad }) => ({
+          codigoIndumentaria,
+          cantidad,
+        })
+      ),
+      total: totalConDescuento,
+      descuento: descuento,
+      esVip: esVip,
+      idEmpresaEnvio: Number(empresaEnvioSeleccionada),
+    };
 
-      console.log("📦 Datos del pedido a enviar:", pedido);
-      console.log("🚚 Empresa seleccionada:", empresaEnvioSeleccionada);
-      console.log("🚚 Empresa convertida a número:", Number(empresaEnvioSeleccionada));
-
-      if (esEdicion && id) {
-        // EDITAR pedido existente
-        await editarPedido(id, pedido);
-      } else {
-        // CREAR nuevo pedido
-        await crearPedido(pedido);
+    // Si es edición, mostrar modal de motivo antes de guardar
+    if (esEdicion && id) {
+      setDatosPendientesEdicion(pedido);
+      
+      // Cargar motivos antes de abrir el modal (por si no se cargaron antes)
+      try {
+        const motivos = await obtenerMotivosModificacion();
+        console.log("🔍 Motivos antes de abrir modal:", motivos);
+        console.log("📊 Cantidad de motivos:", motivos.length);
+        setMotivosModificacion(motivos);
+      } catch (error) {
+        console.error("❌ Error al cargar motivos:", error);
+        setAlertMsg("Error al cargar los motivos de modificación");
+        setShowAlert(true);
+        return;
       }
       
-      // Recargar indumentaria para actualizar stock
+      setShowMotivoModal(true);
+    } else {
+      // Si es creación, guardar directamente
+      await procesarCreacionPedido(pedido);
+    }
+  };
+
+  // Función para procesar la creación del pedido
+  const procesarCreacionPedido = async (pedido: any) => {
+    try {
+      await crearPedido(pedido);
       await cargarIndumentaria();
+      setShowSuccess(true);
+    } catch (error) {
+      setAlertMsg("Error al crear el pedido.");
+      setShowAlert(true);
+    }
+  };
+
+  // Función para procesar la edición del pedido (después de seleccionar motivo)
+  const procesarEdicionPedido = async () => {
+    if (!motivoSeleccionado) {
+      setAlertMsg("Debe seleccionar un motivo de modificación");
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      const datosConMotivo = {
+        ...datosPendientesEdicion,
+        idMotivo: Number(motivoSeleccionado),
+        observaciones: observaciones || null,
+      };
+
+      console.log("📝 Guardando edición con motivo:", datosConMotivo);
+      
+      await editarPedido(id!, datosConMotivo);
+      await cargarIndumentaria();
+      
+      // Limpiar estados del modal
+      setShowMotivoModal(false);
+      setMotivoSeleccionado("");
+      setObservaciones("");
+      setDatosPendientesEdicion(null);
       
       setShowSuccess(true);
     } catch (error) {
-      setAlertMsg("Error al guardar el pedido.");
+      console.error("Error al editar el pedido:", error);
+      setAlertMsg("Error al editar el pedido.");
       setShowAlert(true);
     }
   };
@@ -903,6 +1007,118 @@ const AltaPedido: React.FC = () => {
             >
               Cerrar
             </IonButton>
+          </IonContent>
+        </IonModal>
+
+        {/* --- Modal de motivo de modificación (solo en edición) --- */}
+        <IonModal
+          isOpen={showMotivoModal}
+          onDidDismiss={() => {
+            setShowMotivoModal(false);
+            setMotivoSeleccionado("");
+            setObservaciones("");
+          }}
+          className="motivo-modal"
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Motivo de Modificación</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            <div className="motivo-modal-content">
+              {/* Header del modal */}
+              <div className="motivo-modal-header">
+                <h3 className="motivo-modal-title">
+                  Modificación de Pedido
+                </h3>
+                <p className="motivo-modal-description">
+                  Para continuar con la modificación del pedido, debe seleccionar el motivo que justifica este cambio.
+                  Esta información quedará registrada en el historial del pedido.
+                </p>
+              </div>
+
+              {/* Formulario */}
+              <div className="motivo-modal-form">
+                <div className="motivo-modal-form-section">
+                  <div className="motivo-modal-form-label">
+                    <span className="motivo-modal-form-label-text">Motivo de Modificación</span>
+                    <span className="motivo-modal-required-badge">Requerido</span>
+                  </div>
+                  
+                  <div className="motivo-modal-radio-group">
+                    {motivosModificacion.map((motivo) => (
+                      <div
+                        key={motivo.idMotivo}
+                        className={`motivo-modal-radio-option ${
+                          motivoSeleccionado === motivo.idMotivo.toString()
+                            ? 'selected'
+                            : ''
+                        }`}
+                        onClick={() => setMotivoSeleccionado(motivo.idMotivo.toString())}
+                      >
+                        <div className="motivo-modal-radio-indicator">
+                          <IonIcon
+                            icon={
+                              motivoSeleccionado === motivo.idMotivo.toString()
+                                ? radioButtonOn
+                                : radioButtonOff
+                            }
+                            className="motivo-modal-radio-icon"
+                          />
+                        </div>
+                        <div className="motivo-modal-radio-label">
+                          {motivo.descripcion}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <IonItem className="motivo-modal-form-item" lines="none">
+                  <IonLabel position="floating">
+                    Observaciones (opcional)
+                  </IonLabel>
+                  <IonTextarea
+                    value={observaciones}
+                    onIonChange={(e) => setObservaciones(e.detail.value!)}
+                    placeholder="Agregue detalles adicionales sobre la modificación..."
+                    rows={4}
+                    maxlength={500}
+                    className="motivo-modal-textarea"
+                  />
+                </IonItem>
+                {observaciones && (
+                  <div className="motivo-modal-char-counter">
+                    {observaciones.length}/500 caracteres
+                  </div>
+                )}
+              </div>
+
+              {/* Botones de acción */}
+              <div className="motivo-modal-actions">
+                <IonButton
+                  className="motivo-modal-btn-cancel"
+                  onClick={() => {
+                    setShowMotivoModal(false);
+                    setMotivoSeleccionado("");
+                    setObservaciones("");
+                    setDatosPendientesEdicion(null);
+                  }}
+                >
+                  <IonIcon icon={close} slot="start" />
+                  Cancelar
+                </IonButton>
+                <IonButton
+                  className="motivo-modal-btn-save"
+                  onClick={procesarEdicionPedido}
+                  disabled={!motivoSeleccionado}
+                >
+                  <IonIcon icon={save} slot="start" />
+                  Guardar Cambios
+                </IonButton>
+              </div>
+            </div>
           </IonContent>
         </IonModal>
       </IonContent>
