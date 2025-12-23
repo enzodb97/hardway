@@ -1051,9 +1051,200 @@ ion-modal {
 }
 
 .indumentaria-modal {
-  --width: 90vw;
-  --max-width: 800px;
-  --height: 80vh;
+  --width: 90vh;
+  --max-width: 900px;
+  --height: 85vh;
+  --max-height: 900px;
+}
+
+/* Estructura mejorada para items con presentación */
+.indumentaria-item {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  overflow: visible;
+  padding: 16px !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+  --inner-padding-end: 0 !important;
+  display: block !important;
+}
+
+.indumentaria-item:hover {
+  border-color: #fdb40b;
+  box-shadow: 0 4px 16px rgba(253, 180, 11, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Grid para organizar el contenido del item */
+.indumentaria-item-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.indumentaria-item-content {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  min-width: 0;
+  align-items: center;
+  height:80px;
+}
+
+.indumentaria-item-actions {
+  display: flex;
+ justify-content: center;
+}
+
+/* Información del producto */
+.indumentaria-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 67px;
+}
+
+.producto-info-row {
+  line-height: 1.4;
+}
+
+.producto-nombre {
+  font-size: 1em;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.producto-stock-total {
+  font-size: 0.9em;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.producto-stock-pedido {
+  font-size: 0.9em;
+  color: #fd2f0b;
+  font-weight: 600;
+  background-color: #fef3e2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 3px solid #fdb40b;
+}
+
+/* Selectores y controles en grid */
+.indumentaria-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+  min-width: 470px;
+}
+
+@media (max-width: 768px) {
+  .indumentaria-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Grupo de presentación */
+.presentacion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.presentacion-label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+/* Grupo de cantidad */
+.cantidad-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Caja de información de unidades - Compacta */
+.unidades-info-box {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #e8f4f8 0%, #dbeafe 100%);
+  border-radius: 8px;
+  border-left: 4px solid #0066cc;
+  font-size: 0.9em;
+  color: #0066cc;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unidades-info-icon {
+  font-size: 1.2em;
+}
+
+/* Ajustes para IonSelect dentro del modal */
+.indumentaria-modal ion-select {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  min-height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-size: 0.95em;
+}
+
+/* Ajustes para IonInput de cantidad */
+.indumentaria-modal .cantidad-input {
+  width: 100%;
+  min-height: 42px;
+}
+
+.indumentaria-modal .cantidad-input ion-input {
+  --color: #1f2937;
+  --background: #f9fafb;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1em;
+}
+
+/* Botón agregar - Ancho completo */
+.indumentaria-modal ion-button {
+  --border-radius: 10px;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  height: 44px;
+  font-weight: 600;
+  width: 80%;
+  margin: 0;
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+  .indumentaria-modal {
+    --width: 100vw;
+    --max-width: 100vw;
+    --height: 100vh;
+    --border-radius: 0;
+  }
+  
+  .indumentaria-modal ion-button {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
 /* Modal headers */
@@ -1095,6 +1286,8 @@ ion-modal ion-item:hover {
 /* Lista de indumentaria */
 .indumentaria-list {
   background: transparent;
+  padding: 0;
+  margin: 0;
 }
 
 .indumentaria-item {
@@ -1113,16 +1306,25 @@ ion-modal ion-item:hover {
 }
 
 .indumentaria-label {
-  width: 60% !important;
+  width: 100% !important;
   font-size: 1em !important;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.5;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.indumentaria-label small {
+  display: block;
+  font-size: 0.85em;
+  color: #6b7280;
   font-weight: 500;
-  color: #374151;
-  line-height: 1.4;
-  padding: 8px 0;
+  margin-top: 2px;
 }
 
 .cantidad-input {
-  width: 120px;
+  width: 100%;
   text-align: center;
   font-weight: 600;
 }

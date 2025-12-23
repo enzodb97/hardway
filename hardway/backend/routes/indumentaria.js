@@ -17,6 +17,8 @@ const {
   Rack,
   MotivoNoApta,
   StockRegistroFallo,
+  PresentacionProducto,
+  ConfiguracionPresentacion,
   sequelize
 } = require('../models');
 
@@ -990,6 +992,252 @@ router.post("/:id/scrap", async (req, res) => {
     await t.rollback();
     console.error("❌ Error al marcar como scrap:", error);
     res.status(500).json({ error: "Error al marcar como scrap", detalle: error.message });
+  }
+});
+
+// ==========================================
+// ENDPOINTS DE CONFIGURACIÓN DE PRESENTACIONES
+// ==========================================
+
+// Obtener configuración de presentaciones de una indumentaria
+router.get("/:codigoIndumentaria/presentaciones", async (req, res) => {
+  try {
+    const { codigoIndumentaria } = req.params;
+
+    // Verificar que la indumentaria existe
+    const indumentaria = await Indumentaria.findByPk(codigoIndumentaria);
+    if (!indumentaria) {
+      return res.status(404).json({ error: "Indumentaria no encontrada" });
+    }
+
+    const configuraciones = await ConfiguracionPresentacion.findAll({
+      where: { codigoIndumentaria },
+      include: [
+        {
+          model: PresentacionProducto,
+          as: 'Presentacion',
+          attributes: ['idPresentacion', 'nombrePresentacion', 'descripcion']
+        }
+      ],
+      order: [['idPresentacion', 'ASC']]
+    });
+
+    // Formatear respuesta para incluir nombrePresentacion en el nivel superior
+    const configuracionesFormateadas = configuraciones.map(config => {
+      const configJson = config.toJSON();
+      return {
+        idConfiguracion: configJson.idConfiguracion,
+        codigoIndumentaria: configJson.codigoIndumentaria,
+        idPresentacion: configJson.idPresentacion,
+        cantidadUnidades: configJson.cantidadUnidades,
+        precioBase: configJson.precioBase,
+        estaActivo: configJson.estaActivo,
+        nombrePresentacion: configJson.Presentacion?.nombrePresentacion || null
+      };
+    });
+
+    res.json(configuracionesFormateadas);
+  } catch (error) {
+    console.error("Error al obtener configuración de presentaciones:", error);
+    res.status(500).json({ 
+      error: "Error al obtener configuración de presentaciones", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Crear nueva configuración de presentación
+router.post("/:codigoIndumentaria/presentaciones", async (req, res) => {
+  const { codigoIndumentaria } = req.params;
+  const { idPresentacion, cantidadUnidades, precioBase } = req.body;
+
+  const t = await sequelize.transaction();
+  try {
+    // Validaciones
+    if (!idPresentacion || !cantidadUnidades || cantidadUnidades <= 0) {
+      await t.rollback();
+      return res.status(400).json({ 
+        error: "Datos incompletos o inválidos",
+        detalle: "Se requiere idPresentacion y cantidadUnidades mayor a 0"
+      });
+    }
+
+    // Verificar que la indumentaria existe
+    const indumentaria = await Indumentaria.findByPk(codigoIndumentaria, { transaction: t });
+    if (!indumentaria) {
+      await t.rollback();
+      return res.status(404).json({ error: "Indumentaria no encontrada" });
+    }
+
+    // Verificar que la presentación existe
+    const presentacion = await PresentacionProducto.findByPk(idPresentacion, { transaction: t });
+    if (!presentacion) {
+      await t.rollback();
+      return res.status(404).json({ error: "Presentación no encontrada" });
+    }
+
+    // Verificar que no existe ya una configuración activa para esta presentación
+    const existente = await ConfiguracionPresentacion.findOne({
+      where: { 
+        codigoIndumentaria,
+        idPresentacion,
+        estaActivo: 1
+      },
+      transaction: t
+    });
+
+    if (existente) {
+      await t.rollback();
+      return res.status(400).json({ 
+        error: "Ya existe una configuración activa para esta presentación" 
+      });
+    }
+
+    // Crear nueva configuración
+    const nuevaConfiguracion = await ConfiguracionPresentacion.create({
+      codigoIndumentaria,
+      idPresentacion,
+      cantidadUnidades,
+      precioBase: precioBase || null,
+      estaActivo: 1
+    }, { transaction: t });
+
+    await t.commit();
+
+    // Obtener la configuración completa con el nombre de la presentación
+    const configuracionCompleta = await ConfiguracionPresentacion.findByPk(
+      nuevaConfiguracion.idConfiguracion,
+      {
+        include: [
+          {
+            model: PresentacionProducto,
+            as: 'Presentacion',
+            attributes: ['idPresentacion', 'nombrePresentacion', 'descripcion']
+          }
+        ]
+      }
+    );
+
+    const configJson = configuracionCompleta.toJSON();
+    const respuesta = {
+      idConfiguracion: configJson.idConfiguracion,
+      codigoIndumentaria: configJson.codigoIndumentaria,
+      idPresentacion: configJson.idPresentacion,
+      cantidadUnidades: configJson.cantidadUnidades,
+      precioBase: configJson.precioBase,
+      estaActivo: configJson.estaActivo,
+      nombrePresentacion: configJson.Presentacion?.nombrePresentacion || null
+    };
+
+    res.status(201).json({
+      message: "Configuración de presentación creada correctamente",
+      configuracion: respuesta
+    });
+  } catch (error) {
+    await t.rollback();
+    console.error("Error al crear configuración de presentación:", error);
+    res.status(500).json({ 
+      error: "Error al crear configuración de presentación", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Actualizar configuración de presentación
+router.put("/presentaciones/:idConfiguracion", async (req, res) => {
+  const { idConfiguracion } = req.params;
+  const { cantidadUnidades, precioBase, estaActivo } = req.body;
+
+  const t = await sequelize.transaction();
+  try {
+    const configuracion = await ConfiguracionPresentacion.findByPk(idConfiguracion, { transaction: t });
+    
+    if (!configuracion) {
+      await t.rollback();
+      return res.status(404).json({ error: "Configuración no encontrada" });
+    }
+
+    // Actualizar campos
+    const datosActualizados = {};
+    if (cantidadUnidades !== undefined && cantidadUnidades > 0) {
+      datosActualizados.cantidadUnidades = cantidadUnidades;
+    }
+    if (precioBase !== undefined) {
+      datosActualizados.precioBase = precioBase;
+    }
+    if (estaActivo !== undefined) {
+      datosActualizados.estaActivo = estaActivo ? 1 : 0;
+    }
+
+    await configuracion.update(datosActualizados, { transaction: t });
+    await t.commit();
+
+    // Obtener la configuración actualizada con el nombre de la presentación
+    const configuracionActualizada = await ConfiguracionPresentacion.findByPk(
+      idConfiguracion,
+      {
+        include: [
+          {
+            model: PresentacionProducto,
+            as: 'Presentacion',
+            attributes: ['idPresentacion', 'nombrePresentacion', 'descripcion']
+          }
+        ]
+      }
+    );
+
+    const configJson = configuracionActualizada.toJSON();
+    const respuesta = {
+      idConfiguracion: configJson.idConfiguracion,
+      codigoIndumentaria: configJson.codigoIndumentaria,
+      idPresentacion: configJson.idPresentacion,
+      cantidadUnidades: configJson.cantidadUnidades,
+      precioBase: configJson.precioBase,
+      estaActivo: configJson.estaActivo,
+      nombrePresentacion: configJson.Presentacion?.nombrePresentacion || null
+    };
+
+    res.json({
+      message: "Configuración actualizada correctamente",
+      configuracion: respuesta
+    });
+  } catch (error) {
+    await t.rollback();
+    console.error("Error al actualizar configuración:", error);
+    res.status(500).json({ 
+      error: "Error al actualizar configuración", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Eliminar configuración de presentación
+router.delete("/presentaciones/:idConfiguracion", async (req, res) => {
+  const { idConfiguracion } = req.params;
+
+  const t = await sequelize.transaction();
+  try {
+    const configuracion = await ConfiguracionPresentacion.findByPk(idConfiguracion, { transaction: t });
+    
+    if (!configuracion) {
+      await t.rollback();
+      return res.status(404).json({ error: "Configuración no encontrada" });
+    }
+
+    await configuracion.destroy({ transaction: t });
+    await t.commit();
+
+    res.json({ 
+      message: "Configuración eliminada correctamente",
+      idConfiguracion 
+    });
+  } catch (error) {
+    await t.rollback();
+    console.error("Error al eliminar configuración:", error);
+    res.status(500).json({ 
+      error: "Error al eliminar configuración", 
+      detalle: error.message 
+    });
   }
 });
 

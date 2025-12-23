@@ -80,6 +80,8 @@ export type PickingProducto = {
   categoria: string;
   color: string;
   talle: string;
+  nombrePresentacion?: string;
+  cantidadPresentaciones?: number;
 };
 
 export const exportarPedidoPDF = (pedido: {
@@ -97,18 +99,19 @@ export const exportarPedidoPDF = (pedido: {
   doc.text(title, x, 18);
 
   autoTable(doc, {
-    head: [["ID", "Nombre", "Cantidad", "Rack", "Categoría", "Color", "Talle"]],
+    head: [["ID", "Nombre", "Presentación", "Cantidad", "Rack", "Categoría", "Color", "Talle"]],
     body: pedido.productos.map((prod) => [
       prod.id,
       prod.nombre,
-      prod.cantidad,
+      prod.nombrePresentacion || "Unidad",
+      prod.cantidadPresentaciones || prod.cantidad,
       prod.rack,
       prod.categoria,
       prod.color,
       prod.talle,
     ]),
     startY: 28,
-    styles: { fontSize: 11, halign: "center" },
+    styles: { fontSize: 10, halign: "center" },
     headStyles: { fillColor: [254, 175, 0], halign: "center" },
   });
   doc.save(`Pedido_${pedido.id}_Hardway.pdf`);

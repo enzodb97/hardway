@@ -68,6 +68,22 @@ const Picking: React.FC = () => {
   const [page, setPage] = useState(1);
   const [showPageDropdown, setShowPageDropdown] = useState(false);
 
+  // Función para mapear idPresentacion a nombrePresentacion
+  const obtenerNombrePresentacion = (idPresentacion: number | null | undefined): string => {
+    if (!idPresentacion) return "Unidad";
+    
+    switch (idPresentacion) {
+      case 1:
+        return "Unidad";
+      case 2:
+        return "Caja Cerrada";
+      case 3:
+        return "Pack";
+      default:
+        return "Unidad";
+    }
+  };
+
   const cargarTareas = async () => {
     setLoading(true);
     try {
@@ -149,6 +165,13 @@ const Picking: React.FC = () => {
           "Rack del primer item:",
           response.pedido.DetallePedidos[0].Indumentarium?.Stock?.Rack
         );
+        console.log("🔍 DIAGNÓSTICO DE PRESENTACIÓN:");
+        console.log("  - nombrePresentacion directo:", response.pedido.DetallePedidos[0].nombrePresentacion);
+        console.log("  - PedidoIndumentarium:", response.pedido.DetallePedidos[0].PedidoIndumentarium);
+        console.log("  - idPresentacion:", response.pedido.DetallePedidos[0].idPresentacion);
+        console.log("  - cantidadPresentaciones:", response.pedido.DetallePedidos[0].cantidadPresentaciones);
+        console.log("  - unidadesTotales:", response.pedido.DetallePedidos[0].unidadesTotales);
+        console.log("  - Detalle completo:", JSON.stringify(response.pedido.DetallePedidos[0], null, 2));
       }
 
       // Transformamos los datos para tener un formato compatible con el componente
@@ -176,6 +199,9 @@ const Picking: React.FC = () => {
               categoria: categoria.categoria || "Sin categoría",
               color: color.color || "N/A",
               talle: talle.talle || "N/A",
+              nombrePresentacion: obtenerNombrePresentacion(detalle.idPresentacion),
+              cantidadPresentaciones: detalle.cantidadPresentaciones,
+              unidadesTotales: detalle.unidadesTotales,
             };
           }
         );
@@ -423,6 +449,8 @@ const Picking: React.FC = () => {
                                       categoria: categoria.categoria || "Sin categoría",
                                       color: color.color || "N/A",
                                       talle: talle.talle || "N/A",
+                                      nombrePresentacion: obtenerNombrePresentacion(detalle.idPresentacion),
+                                      cantidadPresentaciones: detalle.cantidadPresentaciones,
                                     };
                                   });
                                   exportarPedidoPDF({
@@ -607,6 +635,20 @@ const Picking: React.FC = () => {
                     <div className="picking-item-card" key={idx}>
                       <div className="item-header">
                         <h4 className="item-name">{item.nombre_producto ?? "-"}</h4>
+                        {item.nombrePresentacion && (
+                          <div style={{ 
+                            fontSize: '0.85em', 
+                            marginTop: '4px',
+                            padding: '4px 8px',
+                            backgroundColor: '#e8f4f8',
+                            borderRadius: '4px',
+                            color: '#0066cc',
+                            fontWeight: 'bold',
+                            display: 'inline-block'
+                          }}>
+                            📦 {item.nombrePresentacion}
+                          </div>
+                        )}
                         <span className="item-reference">
                           {item.referencia || item.codigoIndumentaria || "-"}
                         </span>
@@ -618,7 +660,18 @@ const Picking: React.FC = () => {
                             <IonIcon icon={cubeOutline} />
                             <div className="detail-content">
                               <span className="detail-label">Cantidad</span>
-                              <span className="detail-value">{item.cantidad ?? "-"}</span>
+                              <span className="detail-value">
+                                {item.cantidadPresentaciones ?? item.cantidad ?? "-"}
+                              </span>
+                              {item.cantidadPresentaciones && item.unidadesTotales && (
+                                <div style={{ 
+                                  fontSize: '0.75em', 
+                                  marginTop: '4px',
+                                  color: '#ffffffff'
+                                }}>
+                                  ({item.cantidadPresentaciones} {item.nombrePresentacion}(s) × {item.unidadesTotales / item.cantidadPresentaciones} u. = {item.unidadesTotales} u. totales)
+                                </div>
+                              )}
                             </div>
                           </div>
                           

@@ -104,7 +104,35 @@ const verificarAccesoPedidos = async (req, res, next) => {
 
 // Middleware genérico de autenticación
 const verificarAutenticacion = async (req, res, next) => {
-  const nombreUsuario = req.headers.nombreusuario;
+  let nombreUsuario = req.headers.nombreusuario;
+  
+  // Si no hay nombreUsuario en headers, intentar extraerlo del token Bearer
+  if (!nombreUsuario) {
+    const authorization = req.headers.authorization;
+    
+    if (authorization && authorization.startsWith('Bearer ')) {
+      const token = authorization.split(' ')[1];
+      
+      // Para tokens temporales del formato "temp-token-{idUsuario}"
+      if (token.startsWith('temp-token-')) {
+        const idUsuario = token.replace('temp-token-', '');
+        
+        try {
+          // Buscar el usuario por ID
+          const usuarioToken = await Usuario.findOne({
+            where: { idUsuario: parseInt(idUsuario) },
+            attributes: ['idUsuario', 'nombreUsuario']
+          });
+          
+          if (usuarioToken) {
+            nombreUsuario = usuarioToken.nombreUsuario;
+          }
+        } catch (error) {
+          console.error('Error extrayendo usuario del token:', error);
+        }
+      }
+    }
+  }
 
   if (!nombreUsuario) {
     return res.status(401).json({

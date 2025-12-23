@@ -31,6 +31,45 @@ const DetallePedido: React.FC = () => {
   const [historialModificaciones, setHistorialModificaciones] = useState<any[]>([]);
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
+  // Calcular descuentos por presentación
+  const calcularDescuentosPresentacion = () => {
+    let descuentoPacks = 0;
+    let descuentoCajasCerradas = 0;
+    let subtotalOriginal = 0;
+
+    prendas.forEach((prenda) => {
+      const precioUnitario = Number(prenda.precio_unitario) || 0;
+      const cantidad = Number(prenda.cantidad) || 0;
+      const subtotalPrendaOriginal = precioUnitario * cantidad;
+      
+      // Acumular subtotal original (sin descuentos de presentación)
+      subtotalOriginal += subtotalPrendaOriginal;
+      
+      // Aplicar descuentos según idPresentacion
+      // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
+      const idPres = prenda.idPresentacion || 1;
+      
+      if (idPres === 3) {
+        // Pack: 5% de descuento
+        const descuento = subtotalPrendaOriginal * 0.05;
+        descuentoPacks += descuento;
+      } else if (idPres === 2) {
+        // Caja Cerrada: 10% de descuento
+        const descuento = subtotalPrendaOriginal * 0.10;
+        descuentoCajasCerradas += descuento;
+      }
+    });
+
+    return { 
+      descuentoPacks, 
+      descuentoCajasCerradas, 
+      subtotalOriginal,
+      totalConDescuentosPresentacion: subtotalOriginal - descuentoPacks - descuentoCajasCerradas
+    };
+  };
+
+  const { descuentoPacks, descuentoCajasCerradas, subtotalOriginal, totalConDescuentosPresentacion } = calcularDescuentosPresentacion();
+
   // Función reutilizable para cargar el pedido
   const cargarPedido = async () => {
     try {
@@ -87,6 +126,69 @@ const DetallePedido: React.FC = () => {
       style: "currency",
       currency: "ARS",
     });
+  };
+
+  // Función para obtener colores para el badge según el nombre del color
+  const obtenerEstilosColor = (nombreColor: string) => {
+    if (!nombreColor || nombreColor === "-") {
+      return { backgroundColor: "#f3f4f6", color: "#6b7280" };
+    }
+
+    const colorLower = nombreColor.toLowerCase().trim();
+    
+    // Mapeo de colores en español a valores CSS
+    const coloresMap: { [key: string]: { bg: string; text: string } } = {
+      // Básicos
+      rojo: { bg: "#dc2626", text: "#ffffff" },
+      azul: { bg: "#2563eb", text: "#ffffff" },
+      verde: { bg: "#16a34a", text: "#ffffff" },
+      amarillo: { bg: "#eab308", text: "#000000" },
+      naranja: { bg: "#ea580c", text: "#ffffff" },
+      violeta: { bg: "#7c3aed", text: "#ffffff" },
+      morado: { bg: "#9333ea", text: "#ffffff" },
+      rosa: { bg: "#ec4899", text: "#ffffff" },
+      
+      // Tonos
+      negro: { bg: "#1f2937", text: "#ffffff" },
+      blanco: { bg: "#f9fafb", text: "#1f2937" },
+      gris: { bg: "#6b7280", text: "#ffffff" },
+      beige: { bg: "#d4b896", text: "#000000" },
+      marron: { bg: "#92400e", text: "#ffffff" },
+      marrón: { bg: "#92400e", text: "#ffffff" },
+      
+      // Tonalidades específicas
+      "rojo oscuro": { bg: "#991b1b", text: "#ffffff" },
+      "azul oscuro": { bg: "#1e40af", text: "#ffffff" },
+      "verde oscuro": { bg: "#15803d", text: "#ffffff" },
+      "azul claro": { bg: "#60a5fa", text: "#000000" },
+      "verde claro": { bg: "#4ade80", text: "#000000" },
+      celeste: { bg: "#38bdf8", text: "#000000" },
+      turquesa: { bg: "#14b8a6", text: "#ffffff" },
+      
+      // Metálicos
+      dorado: { bg: "#fbbf24", text: "#000000" },
+      plateado: { bg: "#d1d5db", text: "#1f2937" },
+      
+      // Otros
+      bordo: { bg: "#881337", text: "#ffffff" },
+      borravino: { bg: "#881337", text: "#ffffff" },
+      fucsia: { bg: "#db2777", text: "#ffffff" },
+      coral: { bg: "#fb7185", text: "#ffffff" },
+      salmón: { bg: "#fb923c", text: "#ffffff" },
+      salmon: { bg: "#fb923c", text: "#ffffff" },
+      crema: { bg: "#fef3c7", text: "#92400e" },
+      ocre: { bg: "#d97706", text: "#ffffff" },
+    };
+
+    // Buscar coincidencia exacta o parcial
+    for (const [key, value] of Object.entries(coloresMap)) {
+      if (colorLower.includes(key)) {
+        return { backgroundColor: value.bg, color: value.text };
+      }
+    }
+
+    // Color por defecto si no se encuentra
+    return { backgroundColor: "#e5e7eb", color: "#374151" };
   };
 
   // Función para generar PDF
@@ -523,63 +625,131 @@ const DetallePedido: React.FC = () => {
               </tr>
             </thead>
             <tbody className="productos-tabla-body">
-              {prendas.map((prenda, idx) => (
-                <tr key={idx}>
-                  <td>
-                    <span className="producto-nombre">
-                      {mostrar(prenda.nombre_producto)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="producto-badge producto-badge-talle">
-                      {mostrar(prenda.talle)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="producto-badge producto-badge-color">
-                      {mostrar(prenda.color)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="producto-precio">
-                      {mostrarPrecio(prenda.precio_unitario)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="producto-cantidad">
-                      {mostrar(prenda.cantidad)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="producto-subtotal">
-                      {mostrarPrecio(prenda.subtotal)}
-                    </span>
-                    {prenda.descuento_por_item &&
-                      Number(prenda.descuento_por_item) > 0 && (
-                        <div className="producto-descuento">
-                          -{mostrarPrecio(prenda.descuento_por_item)}
+              {prendas.map((prenda, idx) => {
+                // Calcular precio por presentación (sin descuento)
+                const precioOriginal = Number(prenda.precio_unitario) || 0;
+                const cantidad = Number(prenda.cantidad) || 0;
+                const cantidadPresentaciones = Number(prenda.cantidadPresentaciones) || cantidad;
+                const unidadesTotales = Number(prenda.unidadesTotales) || cantidad;
+                
+                // Precio por presentación = precio unitario × (unidades por presentación)
+                const unidadesPorPresentacion = cantidadPresentaciones > 0 
+                  ? unidadesTotales / cantidadPresentaciones 
+                  : 1;
+                const precioPorPresentacion = precioOriginal * unidadesPorPresentacion;
+                
+                return (
+                  <tr key={idx}>
+                    <td>
+                      <span className="producto-nombre">
+                        {mostrar(prenda.nombre_producto)}
+                      </span>
+                      {prenda.nombrePresentacion && (
+                        <div style={{ 
+                          fontSize: '0.85em', 
+                          marginTop: '4px',
+                          padding: '4px 8px',
+                          backgroundColor: '#e8f4f8',
+                          borderRadius: '4px',
+                          color: '#0066cc',
+                          fontWeight: 'bold',
+                          display: 'inline-block'
+                        }}>
+                          📦 {prenda.nombrePresentacion}
                         </div>
                       )}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      <span className="producto-badge producto-badge-talle">
+                        {mostrar(prenda.talle)}
+                      </span>
+                    </td>
+                    <td>
+                      <span 
+                        className="producto-badge producto-badge-color"
+                        style={obtenerEstilosColor(prenda.color)}
+                      >
+                        {mostrar(prenda.color)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="producto-precio">
+                        {mostrarPrecio(precioPorPresentacion)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="producto-cantidad">
+                        {mostrar(prenda.cantidadPresentaciones || prenda.cantidad)}
+                      </span>
+                      {prenda.cantidadPresentaciones && prenda.unidadesTotales && (
+                        <div style={{ 
+                          fontSize: '0.8em', 
+                          marginTop: '4px',
+                          color: '#666'
+                        }}>
+                          ({prenda.cantidadPresentaciones} {prenda.nombrePresentacion}(s) × {prenda.unidadesTotales / prenda.cantidadPresentaciones} u. = {prenda.unidadesTotales} u. totales)
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <span className="producto-subtotal">
+                        {mostrarPrecio(precioPorPresentacion * (prenda.cantidadPresentaciones || prenda.cantidad))}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
           <div className="tabla-resumen">
-            {/* Subtotal */}
+            {/* Subtotal original */}
             <div className="tabla-resumen-row tabla-resumen-row-subtotal">
               <span className="tabla-resumen-label">Subtotal:</span>
               <span className="tabla-resumen-valor">
-                {mostrarPrecio(pedido?.subtotal)}
+                {mostrarPrecio(subtotalOriginal || pedido?.subtotal)}
               </span>
             </div>
+
+            {/* Descuentos por presentación */}
+            {descuentoPacks > 0 && (
+              <div className="tabla-resumen-row" style={{ color: '#2196F3', fontSize: '0.95em' }}>
+                <span className="tabla-resumen-label">
+                  📦 Descuento por Packs (5%):
+                </span>
+                <span className="tabla-resumen-valor">
+                  -{mostrarPrecio(descuentoPacks)}
+                </span>
+              </div>
+            )}
+            {descuentoCajasCerradas > 0 && (
+              <div className="tabla-resumen-row" style={{ color: '#4CAF50', fontSize: '0.95em' }}>
+                <span className="tabla-resumen-label">
+                  📦 Descuento por Cajas Cerradas (10%):
+                </span>
+                <span className="tabla-resumen-valor">
+                  -{mostrarPrecio(descuentoCajasCerradas)}
+                </span>
+              </div>
+            )}
+
+            {/* Total con descuentos de presentación */}
+            {(descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
+              <div className="tabla-resumen-row" style={{ marginTop: '4px' }}>
+                <span className="tabla-resumen-label">
+                  <strong>Total con descuentos de presentación:</strong>
+                </span>
+                <span className="tabla-resumen-valor">
+                  {mostrarPrecio(totalConDescuentosPresentacion)}
+                </span>
+              </div>
+            )}
 
             {/* Descuento VIP */}
             {pedido &&
               pedido.descuentoOrden &&
               Number(pedido.descuentoOrden) > 0 && (
-                <div className="tabla-resumen-row tabla-resumen-row-descuento">
+                <div className="tabla-resumen-row tabla-resumen-row-descuento" style={{ marginTop: '8px' }}>
                   <span className="tabla-resumen-label">
                     👑 Cliente VIP - 10% de descuento:
                   </span>
@@ -591,7 +761,7 @@ const DetallePedido: React.FC = () => {
 
             {/* Total */}
             {pedido && (
-              <div className="tabla-resumen-row tabla-resumen-row-total">
+              <div className="tabla-resumen-row tabla-resumen-row-total" style={{ marginTop: '8px', fontSize: '1.1em' }}>
                 <span className="tabla-resumen-label">💰 Total a pagar:</span>
                 <span className="tabla-resumen-valor">
                   {mostrarPrecio(Number(pedido.total))}

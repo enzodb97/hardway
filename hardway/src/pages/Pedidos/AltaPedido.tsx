@@ -19,6 +19,7 @@ import {
   IonSelectOption,
   IonTextarea,
   useIonViewWillEnter,
+  useIonViewDidLeave,
 } from "@ionic/react";
 import {
   person,
@@ -35,9 +36,14 @@ import {
   radioButtonOff,
 } from "ionicons/icons";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { crearPedido, editarPedido, obtenerMotivosModificacion } from "../../utils/pedidosUtils";
+import {
+  crearPedido,
+  editarPedido,
+  obtenerMotivosModificacion,
+} from "../../utils/pedidosUtils";
 import { useClientesVip } from "../../utils/useClientesVip";
 import axiosInstance from "../../config/axios";
+import { obtenerConfiguracionesPorProducto } from "../../services/presentacionesService";
 import "./AltaPedido.css";
 import zepelin from "../../assets/images/zepelin.png";
 import { useClientes, Cliente } from "../../context/ClientesContext";
@@ -76,6 +82,10 @@ const AltaPedido: React.FC = () => {
       talle: string;
       nombreTela: string;
       cantidad: number;
+      idPresentacion?: number;
+      cantidadPresentaciones?: number;
+      unidadesTotales?: number;
+      nombrePresentacion?: string;
     }[]
   >([]);
   const [showAlert, setShowAlert] = useState(false);
@@ -90,27 +100,71 @@ const AltaPedido: React.FC = () => {
   const [showIndumentariaModal, setShowIndumentariaModal] = useState(false);
   const [filtroIndumentaria, setFiltroIndumentaria] = useState("");
 
+  // --- Presentaciones ---
+  const [configuracionesPorProducto, setConfiguracionesPorProducto] = useState<
+    Map<string, any[]>
+  >(new Map());
+  const [presentacionSeleccionada, setPresentacionSeleccionada] = useState<
+    Map<string, number>
+  >(new Map());
+  const [cantidadPresentaciones, setCantidadPresentaciones] = useState<
+    Map<string, number>
+  >(new Map());
+
   // --- Empresas de Envío ---
-  const [empresasEnvio, setEmpresasEnvio] = useState<{ idEmpresaEnvio: number; nombre: string }[]>([]);
-  const [empresaEnvioSeleccionada, setEmpresaEnvioSeleccionada] = useState<string>("");
+  const [empresasEnvio, setEmpresasEnvio] = useState<
+    { idEmpresaEnvio: number; nombre: string }[]
+  >([]);
+  const [empresaEnvioSeleccionada, setEmpresaEnvioSeleccionada] =
+    useState<string>("");
 
   // --- Motivo de Modificación (solo para edición) ---
   const [showMotivoModal, setShowMotivoModal] = useState(false);
-  const [motivosModificacion, setMotivosModificacion] = useState<Array<{ idMotivo: number; descripcion: string }>>([]);
+  const [motivosModificacion, setMotivosModificacion] = useState<
+    Array<{ idMotivo: number; descripcion: string }>
+  >([]);
   const [motivoSeleccionado, setMotivoSeleccionado] = useState<string>("");
   const [observaciones, setObservaciones] = useState<string>("");
-  const [datosPendientesEdicion, setDatosPendientesEdicion] = useState<any>(null);
+  const [datosPendientesEdicion, setDatosPendientesEdicion] =
+    useState<any>(null);
 
   // Calcular total y descuento si corresponde (después de los estados)
   const esVip = form.idCliente && vipIds.has(Number(form.idCliente));
+  
+  // Calcular totales y descuentos por presentación
+  let totalSinDescuentos = 0;
+  let descuentoPacks = 0;
+  let descuentoCajasCerradas = 0;
+  
   const totalPedido = prendasSeleccionadas.reduce((acc, prenda) => {
     // Buscar precio de la prenda en el catálogo
     const prendaCat = indumentaria.find(
       (i) => i.codigoIndumentaria === prenda.codigoIndumentaria
     );
-    const precio = prendaCat ? prendaCat.precio : 0;
+    const precioOriginal = prendaCat ? prendaCat.precio : 0;
+    const subtotalOriginal = precioOriginal * prenda.cantidad;
+    totalSinDescuentos += subtotalOriginal;
+    
+    let precio = precioOriginal;
+    
+    // Aplicar descuentos por tipo de presentación
+    // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
+    const idPres = prenda.idPresentacion || 1;
+    if (idPres === 3) {
+      // Pack: 5% de descuento
+      const descuento = subtotalOriginal * 0.05;
+      descuentoPacks += descuento;
+      precio = precio * 0.95;
+    } else if (idPres === 2) {
+      // Caja Cerrada: 10% de descuento
+      const descuento = subtotalOriginal * 0.10;
+      descuentoCajasCerradas += descuento;
+      precio = precio * 0.90;
+    }
+    
     return acc + precio * prenda.cantidad;
   }, 0);
+  
   const descuento = esVip ? totalPedido * 0.1 : 0;
   const totalConDescuento = totalPedido - descuento;
 
@@ -122,6 +176,12 @@ const AltaPedido: React.FC = () => {
       });
       setPrendasSeleccionadas([]);
       setEmpresaEnvioSeleccionada(""); // Limpiar empresa de envío
+      setConfiguracionesPorProducto(new Map());
+      setPresentacionSeleccionada(new Map());
+      setCantidadPresentaciones(new Map());
+      // Limpiar estados de carga de pedidos para evitar que se procesen datos antiguos
+      setDatosDelPedido(null);
+      setPrendasCargadasDesdeServidor(false);
     }
     // eslint-disable-next-line
   }, [location.pathname, esEdicion]);
@@ -159,6 +219,36 @@ const AltaPedido: React.FC = () => {
     }
   };
 
+  // Cargar configuraciones de presentación para un producto
+  const cargarConfiguracionesProducto = async (codigoIndumentaria: string) => {
+    try {
+      const configuraciones = await obtenerConfiguracionesPorProducto(
+        codigoIndumentaria
+      );
+      setConfiguracionesPorProducto((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(codigoIndumentaria, configuraciones);
+        return newMap;
+      });
+
+      // Establecer presentación por defecto (Unidad = 1)
+      if (configuraciones.length > 0) {
+        setPresentacionSeleccionada((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(codigoIndumentaria, 1);
+          return newMap;
+        });
+        setCantidadPresentaciones((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(codigoIndumentaria, 1);
+          return newMap;
+        });
+      }
+    } catch (error) {
+      console.error("Error al cargar configuraciones de presentación:", error);
+    }
+  };
+
   // Cargar indumentaria al montar el componente
   useEffect(() => {
     cargarIndumentaria();
@@ -168,7 +258,9 @@ const AltaPedido: React.FC = () => {
   useEffect(() => {
     const cargarEmpresasEnvio = async () => {
       try {
-        const resEmpresas = await axiosInstance.get("/api/auxiliares/empresas-envio");
+        const resEmpresas = await axiosInstance.get(
+          "/api/auxiliares/empresas-envio"
+        );
         setEmpresasEnvio(resEmpresas.data);
       } catch (error) {
         console.error("Error al cargar empresas de envío:", error);
@@ -197,12 +289,13 @@ const AltaPedido: React.FC = () => {
 
   // Almacenar datos de pedido para procesamiento posterior
   const [datosDelPedido, setDatosDelPedido] = useState<any>(null);
-  const [prendasCargadasDesdeServidor, setPrendasCargadasDesdeServidor] = useState(false);
+  const [prendasCargadasDesdeServidor, setPrendasCargadasDesdeServidor] =
+    useState(false);
 
   // Función para cargar datos del pedido (reutilizable)
   const cargarDatosPedido = async () => {
     if (!esEdicion || !id) return;
-    
+
     try {
       const res = await axiosInstance.get(`/api/pedidos/${id}`);
       setForm({
@@ -248,6 +341,36 @@ const AltaPedido: React.FC = () => {
     if (esEdicion && id) {
       cargarDatosPedido();
       cargarIndumentaria();
+    } else {
+      // Limpiar completamente el formulario cuando NO es edición
+      setForm({
+        ...estadoInicial,
+      });
+      setPrendasSeleccionadas([]);
+      setEmpresaEnvioSeleccionada("");
+      setConfiguracionesPorProducto(new Map());
+      setPresentacionSeleccionada(new Map());
+      setCantidadPresentaciones(new Map());
+      setFiltroCliente("");
+      setFiltroIndumentaria("");
+      // Limpiar estados de carga de pedidos
+      setDatosDelPedido(null);
+      setPrendasCargadasDesdeServidor(false);
+      cargarIndumentaria();
+    }
+  });
+
+  // Limpiar cuando se SALE de la vista (crítico para Ionic)
+  useIonViewDidLeave(() => {
+    if (!esEdicion) {
+      setPrendasSeleccionadas([]);
+      setForm({...estadoInicial});
+      setEmpresaEnvioSeleccionada("");
+      setConfiguracionesPorProducto(new Map());
+      setPresentacionSeleccionada(new Map());
+      setCantidadPresentaciones(new Map());
+      setDatosDelPedido(null);
+      setPrendasCargadasDesdeServidor(false);
     }
   });
 
@@ -269,14 +392,23 @@ const AltaPedido: React.FC = () => {
   // Procesar las prendas cuando tengamos tanto los datos del pedido como el catálogo de indumentaria
   // SOLO la primera vez que se cargan los datos del servidor
   useEffect(() => {
-    // Solo ejecutar si tenemos datos del pedido, catálogo de indumentaria, 
+    // Solo ejecutar si tenemos datos del pedido, catálogo de indumentaria,
     // y NO hemos cargado las prendas desde el servidor todavía
-    if (datosDelPedido && indumentaria.length > 0 && !prendasCargadasDesdeServidor) {
+    // Y ADEMÁS estamos en modo edición
+    if (
+      esEdicion &&
+      datosDelPedido &&
+      indumentaria.length > 0 &&
+      !prendasCargadasDesdeServidor
+    ) {
       const prendasDelPedido = datosDelPedido.map((detalle: any) => {
         // Buscamos en el catálogo la información completa de esta indumentaria
         const indumentariaEnCatalogo = indumentaria.find(
           (item) => item.codigoIndumentaria === detalle.codigoIndumentaria
         );
+
+        // Obtener nombre de presentación si existe (usando el alias "Presentacion")
+        const nombrePresentacion = detalle.Presentacion?.nombrePresentacion || "Unidad";
 
         // Si la encontramos en el catálogo, usamos los datos más completos
         if (indumentariaEnCatalogo) {
@@ -286,7 +418,12 @@ const AltaPedido: React.FC = () => {
             color: indumentariaEnCatalogo.color || "Sin color",
             talle: indumentariaEnCatalogo.talle || "Sin talle",
             nombreTela: indumentariaEnCatalogo.nombreTela || "Sin tela",
-            cantidad: detalle.cantidad,
+            cantidad: detalle.unidadesTotales || detalle.cantidad,
+            // Datos de presentación
+            idPresentacion: detalle.idPresentacion || 1,
+            cantidadPresentaciones: detalle.cantidadPresentaciones || detalle.cantidad,
+            unidadesTotales: detalle.unidadesTotales || detalle.cantidad,
+            nombrePresentacion: nombrePresentacion,
           };
         } else {
           // Si no está en el catálogo, usamos los datos del detalle
@@ -306,7 +443,12 @@ const AltaPedido: React.FC = () => {
             nombreTela:
               detalle.Indumentarium?.DetalleIndumentarium?.TelaIndumentarium
                 ?.tipoTela || "Sin tela",
-            cantidad: detalle.cantidad,
+            cantidad: detalle.unidadesTotales || detalle.cantidad,
+            // Datos de presentación
+            idPresentacion: detalle.idPresentacion || 1,
+            cantidadPresentaciones: detalle.cantidadPresentaciones || detalle.cantidad,
+            unidadesTotales: detalle.unidadesTotales || detalle.cantidad,
+            nombrePresentacion: nombrePresentacion,
           };
         }
       });
@@ -316,26 +458,60 @@ const AltaPedido: React.FC = () => {
       setPrendasCargadasDesdeServidor(true);
     }
     // eslint-disable-next-line
-  }, [datosDelPedido, indumentaria]);
+  }, [datosDelPedido, indumentaria, esEdicion, prendasCargadasDesdeServidor]);
 
   // --- Lógica de prendas ---
-  const agregarPrenda = (prenda: any, cantidad: number) => {
-    if (
-      prendasSeleccionadas.some(
-        (p) => p.codigoIndumentaria === prenda.codigoIndumentaria
-      )
-    ) {
-      setAlertMsg("Ya has agregado esta Indumentaria.");
-      setShowAlert(true);
-      return;
+  const agregarPrenda = (
+    prenda: any,
+    cantidad: number,
+    presentacion?: {
+      idPresentacion: number;
+      cantidadPresentaciones: number;
+      unidadesTotales: number;
+      nombrePresentacion: string;
     }
-    if (cantidad > prenda.cantidadIndumentaria) {
+  ) => {
+    // Validar si ya existe la combinación de indumentaria + presentación
+    const idPresentacionActual = presentacion?.idPresentacion || 1;
+    const yaExiste = prendasSeleccionadas.some(
+      (p) => 
+        p.codigoIndumentaria === prenda.codigoIndumentaria &&
+        (p.idPresentacion || 1) === idPresentacionActual
+    );
+
+    if (yaExiste) {
+      const nombrePres = presentacion?.nombrePresentacion || "Unidad";
       setAlertMsg(
-        `Stock insuficiente. Stock disponible: ${prenda.cantidadIndumentaria}`
+        `Ya has agregado esta indumentaria con presentación "${nombrePres}". ` +
+        `Puedes modificar la cantidad en la lista de prendas o eliminarla.`
       );
       setShowAlert(true);
       return;
     }
+
+    // Calcular unidades totales ya agregadas de esta indumentaria (todas las presentaciones)
+    const unidadesYaAgregadas = prendasSeleccionadas
+      .filter(p => p.codigoIndumentaria === prenda.codigoIndumentaria)
+      .reduce((total, p) => total + (p.unidadesTotales || p.cantidad), 0);
+
+    // La cantidad a verificar depende si hay presentación o no
+    const cantidadAVerificar = presentacion
+      ? presentacion.unidadesTotales
+      : cantidad;
+
+    // Validar stock total (lo ya agregado + lo nuevo)
+    const totalUnidades = unidadesYaAgregadas + cantidadAVerificar;
+
+    if (totalUnidades > prenda.cantidadIndumentaria) {
+      setAlertMsg(
+        `Stock insuficiente. Ya tienes ${unidadesYaAgregadas} unidades agregadas en otras presentaciones. ` +
+        `Intentas agregar ${cantidadAVerificar} más pero solo hay ${prenda.cantidadIndumentaria} disponibles en total. ` +
+        `Puedes agregar máximo ${prenda.cantidadIndumentaria - unidadesYaAgregadas} unidades adicionales.`
+      );
+      setShowAlert(true);
+      return;
+    }
+
     setPrendasSeleccionadas((prev) => [
       ...prev,
       {
@@ -344,7 +520,12 @@ const AltaPedido: React.FC = () => {
         color: prenda.color || "Sin color",
         talle: prenda.talle || "Sin talle",
         nombreTela: prenda.nombreTela || "Sin tela",
-        cantidad,
+        cantidad: presentacion ? presentacion.unidadesTotales : cantidad,
+        idPresentacion: presentacion?.idPresentacion || 1,
+        cantidadPresentaciones:
+          presentacion?.cantidadPresentaciones || cantidad,
+        unidadesTotales: presentacion?.unidadesTotales || cantidad,
+        nombrePresentacion: presentacion?.nombrePresentacion || "Unidad",
       },
     ]);
     // Limpiar la cantidad temporal de la prenda agregada
@@ -353,9 +534,12 @@ const AltaPedido: React.FC = () => {
     setFiltroIndumentaria("");
   };
 
-  const eliminarPrenda = (codigoIndumentaria: string) => {
+  const eliminarPrenda = (codigoIndumentaria: string, idPresentacion?: number) => {
     setPrendasSeleccionadas((prev) =>
-      prev.filter((p) => p.codigoIndumentaria !== codigoIndumentaria)
+      prev.filter((p) => 
+        !(p.codigoIndumentaria === codigoIndumentaria && 
+          (p.idPresentacion || 1) === (idPresentacion || 1))
+      )
     );
   };
 
@@ -382,6 +566,46 @@ const AltaPedido: React.FC = () => {
       return;
     }
 
+    // Validación final de stock: verificar que ninguna indumentaria exceda el stock disponible
+    const erroresStock: string[] = [];
+    
+    // Agrupar prendas por código de indumentaria para validar stock total
+    const prendasPorCodigo = prendasSeleccionadas.reduce((acc, prenda) => {
+      const codigo = prenda.codigoIndumentaria;
+      if (!acc[codigo]) {
+        acc[codigo] = [];
+      }
+      acc[codigo].push(prenda);
+      return acc;
+    }, {} as Record<string, typeof prendasSeleccionadas>);
+
+    // Validar cada indumentaria
+    for (const [codigoIndumentaria, prendas] of Object.entries(prendasPorCodigo)) {
+      const totalUnidades = prendas.reduce(
+        (total, p) => total + (p.unidadesTotales || p.cantidad), 
+        0
+      );
+      
+      const prendaCatalogo = indumentaria.find(
+        i => i.codigoIndumentaria === codigoIndumentaria
+      );
+      
+      if (prendaCatalogo && totalUnidades > prendaCatalogo.cantidadIndumentaria) {
+        erroresStock.push(
+          `${prendaCatalogo.nombre}: intentas pedir ${totalUnidades} unidades pero solo hay ${prendaCatalogo.cantidadIndumentaria} disponibles`
+        );
+      }
+    }
+
+    if (erroresStock.length > 0) {
+      setAlertMsg(
+        "Stock insuficiente para los siguientes productos:\n\n" + 
+        erroresStock.join("\n")
+      );
+      setShowAlert(true);
+      return;
+    }
+
     // Validar que se haya seleccionado una empresa de envío
     if (!empresaEnvioSeleccionada) {
       setAlertMsg("Debe seleccionar una empresa de envío");
@@ -392,12 +616,14 @@ const AltaPedido: React.FC = () => {
     const pedido = {
       idCliente: Number(form.idCliente),
       idEstado: 1,
-      prendas: prendasSeleccionadas.map(
-        ({ codigoIndumentaria, cantidad }) => ({
-          codigoIndumentaria,
-          cantidad,
-        })
-      ),
+      prendas: prendasSeleccionadas.map((prenda) => ({
+        codigoIndumentaria: prenda.codigoIndumentaria,
+        cantidad: prenda.cantidad,
+        idPresentacion: prenda.idPresentacion || 1,
+        cantidadPresentaciones:
+          prenda.cantidadPresentaciones || prenda.cantidad,
+        unidadesTotales: prenda.unidadesTotales || prenda.cantidad,
+      })),
       total: totalConDescuento,
       descuento: descuento,
       esVip: esVip,
@@ -407,7 +633,7 @@ const AltaPedido: React.FC = () => {
     // Si es edición, mostrar modal de motivo antes de guardar
     if (esEdicion && id) {
       setDatosPendientesEdicion(pedido);
-      
+
       // Cargar motivos antes de abrir el modal (por si no se cargaron antes)
       try {
         const motivos = await obtenerMotivosModificacion();
@@ -420,7 +646,7 @@ const AltaPedido: React.FC = () => {
         setShowAlert(true);
         return;
       }
-      
+
       setShowMotivoModal(true);
     } else {
       // Si es creación, guardar directamente
@@ -456,16 +682,16 @@ const AltaPedido: React.FC = () => {
       };
 
       console.log("📝 Guardando edición con motivo:", datosConMotivo);
-      
+
       await editarPedido(id!, datosConMotivo);
       await cargarIndumentaria();
-      
+
       // Limpiar estados del modal
       setShowMotivoModal(false);
       setMotivoSeleccionado("");
       setObservaciones("");
       setDatosPendientesEdicion(null);
-      
+
       setShowSuccess(true);
     } catch (error) {
       console.error("Error al editar el pedido:", error);
@@ -483,16 +709,17 @@ const AltaPedido: React.FC = () => {
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
-    
+
     const nombreCompleto = `${c.nombre || ""} ${c.apellido || ""}`;
     const nombreCompletoNormalizado = normalizar(nombreCompleto);
     const filtroNorm = normalizar(filtroCliente);
-    
+
     return (
       normalizar(c.nombre || "").includes(filtroNorm) ||
       normalizar(c.apellido || "").includes(filtroNorm) ||
       nombreCompletoNormalizado.includes(filtroNorm) ||
-      (c.numeroDocumento && c.numeroDocumento.toString().includes(filtroCliente))
+      (c.numeroDocumento &&
+        c.numeroDocumento.toString().includes(filtroCliente))
     );
   });
 
@@ -598,17 +825,23 @@ const AltaPedido: React.FC = () => {
 
                   {/* Select de Empresa de Envío */}
                   <IonItem className="form-item empresa-envio-item">
-                    <IonIcon icon={carOutline} slot="start" style={{ marginRight: '8px', color: '#fdb40b' }} />
+                    <IonIcon
+                      icon={carOutline}
+                      slot="start"
+                      style={{ marginRight: "8px", color: "#fdb40b" }}
+                    />
                     <IonLabel position="floating">Empresa de Envío</IonLabel>
                     <IonSelect
                       value={empresaEnvioSeleccionada}
                       placeholder="Seleccione una empresa"
-                      onIonChange={(e: CustomEvent) => setEmpresaEnvioSeleccionada(e.detail.value!)}
+                      onIonChange={(e: CustomEvent) =>
+                        setEmpresaEnvioSeleccionada(e.detail.value!)
+                      }
                       interface="popover"
                     >
                       {empresasEnvio.map((empresa) => (
-                        <IonSelectOption 
-                          key={empresa.idEmpresaEnvio} 
+                        <IonSelectOption
+                          key={empresa.idEmpresaEnvio}
                           value={empresa.idEmpresaEnvio.toString()}
                         >
                           {empresa.nombre}
@@ -638,30 +871,35 @@ const AltaPedido: React.FC = () => {
                     </div>
                     <div className="prendas-counter">
                       {prendasSeleccionadas.length}{" "}
-                      {prendasSeleccionadas.length === 1 ? "indumentaria" : "indumentaria"}
+                      {prendasSeleccionadas.length === 1
+                        ? "indumentaria"
+                        : "indumentaria"}
                     </div>
                   </div>
 
                   {prendasSeleccionadas.length === 0 ? (
                     <div className="empty-state">
                       <IonIcon icon={shirtOutline} className="empty-icon" />
-                      <h4 className="empty-title">No hay indumentarias agregadas</h4>
+                      <h4 className="empty-title">
+                        No hay indumentarias agregadas
+                      </h4>
                       <p className="empty-description">
                         Haz clic en "Agregar Indumentria" para comenzar a
                         construir tu pedido
                       </p>
                     </div>
                   ) : (
-                    <div className="prendas-list">
-                      {prendasSeleccionadas.map((prenda) => (
+                    <div className="prendas-list" key={`prendas-${prendasSeleccionadas.length}-${Date.now()}`}>
+                      {prendasSeleccionadas.map((prenda, index) => (
                         <div
-                          key={prenda.codigoIndumentaria}
+                          key={`${prenda.codigoIndumentaria}-${prenda.idPresentacion || 1}-${index}`}
                           className="prenda-card"
                         >
                           <button
+                            type="button"
                             className="remove-button"
                             onClick={() =>
-                              eliminarPrenda(prenda.codigoIndumentaria)
+                              eliminarPrenda(prenda.codigoIndumentaria, prenda.idPresentacion)
                             }
                             title="Quitar prenda"
                           >
@@ -687,36 +925,83 @@ const AltaPedido: React.FC = () => {
                             <div className="prenda-detail">
                               <strong>Tela:</strong> {prenda.nombreTela}
                             </div>
+                            <div
+                              className="prenda-detail"
+                              style={{
+                                backgroundColor: "#e8f4f8",
+                                padding: "8px",
+                                borderRadius: "6px",
+                                marginTop: "8px",
+                              }}
+                            >
+                              <strong>📦 Presentación:</strong>{" "}
+                              {prenda.nombrePresentacion || "Unidad"}
+                              <div
+                                style={{
+                                  fontSize: "0.9em",
+                                  marginTop: "4px",
+                                  color: "#0066cc",
+                                }}
+                              >
+                                {prenda.cantidadPresentaciones || prenda.cantidad}{" "}
+                                {prenda.nombrePresentacion || "Unidad"}(s) ×{" "}
+                                {prenda.unidadesTotales! /
+                                  (prenda.cantidadPresentaciones || prenda.cantidad)}{" "}
+                                unidades = {prenda.unidadesTotales || prenda.cantidad} unidades
+                                totales
+                              </div>
+                            </div>
                           </div>
 
                           <div className="prenda-quantity">
-                            <span className="quantity-label">Cantidad:</span>
+                            <span className="quantity-label">
+                              {prenda.nombrePresentacion &&
+                              prenda.nombrePresentacion !== "Unidad"
+                                ? `Cantidad (${prenda.nombrePresentacion}s):`
+                                : "Cantidad:"}
+                            </span>
                             <div className="quantity-value">
                               <button
                                 type="button"
                                 className="quantity-btn"
                                 onClick={() => {
                                   setPrendasSeleccionadas((prev) =>
-                                    prev.map((p) =>
-                                      p.codigoIndumentaria ===
-                                      prenda.codigoIndumentaria
-                                        ? {
-                                            ...p,
-                                            cantidad:
-                                              p.cantidad > 1
-                                                ? p.cantidad - 1
-                                                : 1,
-                                          }
-                                        : p
-                                    )
+                                    prev.map((p) => {
+                                      if (
+                                        p.codigoIndumentaria ===
+                                          prenda.codigoIndumentaria &&
+                                        (p.idPresentacion || 1) ===
+                                          (prenda.idPresentacion || 1)
+                                      ) {
+                                        const nuevaCantidad =
+                                          p.cantidadPresentaciones! > 1
+                                            ? p.cantidadPresentaciones! - 1
+                                            : 1;
+                                        const unidadesPorPres =
+                                          p.unidadesTotales! /
+                                          p.cantidadPresentaciones!;
+                                        return {
+                                          ...p,
+                                          cantidadPresentaciones: nuevaCantidad,
+                                          unidadesTotales:
+                                            nuevaCantidad * unidadesPorPres,
+                                          cantidad:
+                                            nuevaCantidad * unidadesPorPres,
+                                        };
+                                      }
+                                      return p;
+                                    })
                                   );
                                 }}
-                                disabled={prenda.cantidad <= 1}
+                                disabled={
+                                  (prenda.cantidadPresentaciones || 1) <= 1
+                                }
                               >
                                 −
                               </button>
                               <span style={{ margin: "0 8px" }}>
-                                {prenda.cantidad}
+                                {prenda.cantidadPresentaciones ||
+                                  prenda.cantidad}
                               </span>
                               <button
                                 type="button"
@@ -731,32 +1016,73 @@ const AltaPedido: React.FC = () => {
                                   const maxStock = prendaCat
                                     ? prendaCat.cantidadIndumentaria
                                     : 1;
+
+                                  // Calcular unidades ya agregadas en OTRAS presentaciones
+                                  const unidadesOtrasPresentaciones =
+                                    prendasSeleccionadas
+                                      .filter(
+                                        (p) =>
+                                          p.codigoIndumentaria ===
+                                            prenda.codigoIndumentaria &&
+                                          (p.idPresentacion || 1) !==
+                                            (prenda.idPresentacion || 1)
+                                      )
+                                      .reduce(
+                                        (total, p) =>
+                                          total +
+                                          (p.unidadesTotales || p.cantidad),
+                                        0
+                                      );
+
                                   setPrendasSeleccionadas((prev) =>
-                                    prev.map((p) =>
-                                      p.codigoIndumentaria ===
-                                      prenda.codigoIndumentaria
-                                        ? {
-                                            ...p,
-                                            cantidad:
-                                              p.cantidad < maxStock
-                                                ? p.cantidad + 1
-                                                : maxStock,
-                                          }
-                                        : p
-                                    )
+                                    prev.map((p) => {
+                                      if (
+                                        p.codigoIndumentaria ===
+                                          prenda.codigoIndumentaria &&
+                                        (p.idPresentacion || 1) ===
+                                          (prenda.idPresentacion || 1)
+                                      ) {
+                                        const unidadesPorPres =
+                                          p.unidadesTotales! /
+                                          p.cantidadPresentaciones!;
+                                        const nuevaCantidad =
+                                          p.cantidadPresentaciones! + 1;
+                                        const nuevasUnidadesTotales =
+                                          nuevaCantidad * unidadesPorPres;
+
+                                        // Validar stock total considerando otras presentaciones
+                                        const totalConOtrasPresentaciones =
+                                          nuevasUnidadesTotales +
+                                          unidadesOtrasPresentaciones;
+
+                                        if (
+                                          totalConOtrasPresentaciones > maxStock
+                                        ) {
+                                          const disponible =
+                                            maxStock - unidadesOtrasPresentaciones;
+                                          const maxPresentaciones = Math.floor(
+                                            disponible / unidadesPorPres
+                                          );
+                                          setAlertMsg(
+                                            `Stock insuficiente. Ya tienes ${unidadesOtrasPresentaciones} unidades en otras presentaciones. ` +
+                                              `Máximo ${maxPresentaciones} ${p.nombrePresentacion}(s) adicionales (${disponible} unidades disponibles).`
+                                          );
+                                          setShowAlert(true);
+                                          return p;
+                                        }
+
+                                        return {
+                                          ...p,
+                                          cantidadPresentaciones: nuevaCantidad,
+                                          unidadesTotales:
+                                            nuevasUnidadesTotales,
+                                          cantidad: nuevasUnidadesTotales,
+                                        };
+                                      }
+                                      return p;
+                                    })
                                   );
                                 }}
-                                disabled={(() => {
-                                  const prendaCat = indumentaria.find(
-                                    (i) =>
-                                      i.codigoIndumentaria ===
-                                      prenda.codigoIndumentaria
-                                  );
-                                  const maxStock = prendaCat
-                                    ? prendaCat.cantidadIndumentaria
-                                    : 1;
-                                  return prenda.cantidad >= maxStock;
-                                })()}
                               >
                                 +
                               </button>
@@ -774,7 +1100,9 @@ const AltaPedido: React.FC = () => {
                       // Recargar indumentaria antes de abrir el modal
                       await cargarIndumentaria();
                       // Limpiar cantidades temporales antes de abrir el modal
-                      indumentaria.forEach(prenda => delete prenda._cantidadTemp);
+                      indumentaria.forEach(
+                        (prenda) => delete prenda._cantidadTemp
+                      );
                       setShowIndumentariaModal(true);
                     }}
                   >
@@ -792,15 +1120,39 @@ const AltaPedido: React.FC = () => {
                 style={{ marginBottom: 16, marginTop: 8 }}
               >
                 <div>
-                  <strong>Total sin descuento:</strong> $
-                  {totalPedido.toFixed(2)}
+                  <strong>Subtotal:</strong> $
+                  {totalSinDescuentos.toFixed(2)}
                 </div>
+                
+                {/* Descuentos por presentación */}
+                {descuentoPacks > 0 && (
+                  <div style={{ color: "#2196F3", fontSize: "0.95em" }}>
+                    📦 Descuento por Packs (5%): -${descuentoPacks.toFixed(2)}
+                  </div>
+                )}
+                {descuentoCajasCerradas > 0 && (
+                  <div style={{ color: "#4CAF50", fontSize: "0.95em" }}>
+                    📦 Descuento por Cajas Cerradas (10%): -${descuentoCajasCerradas.toFixed(2)}
+                  </div>
+                )}
+                
+                {(descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
+                  <div style={{ marginTop: "4px" }}>
+                    <strong>Total con descuentos de presentación:</strong> $
+                    {totalPedido.toFixed(2)}
+                  </div>
+                )}
+                
                 {esVip && (
-                  <div style={{ 
-                    color: "goldenrod", 
-                    fontWeight: 600,
-                    textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
-                  }}>
+                  <div
+                    style={{
+                      color: "goldenrod",
+                      fontWeight: 600,
+                      textShadow:
+                        "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+                      marginTop: "8px",
+                    }}
+                  >
                     <span role="img" aria-label="vip">
                       👑
                     </span>{" "}
@@ -809,10 +1161,10 @@ const AltaPedido: React.FC = () => {
                 )}
                 {descuento > 0 && (
                   <div>
-                    <strong>Descuento:</strong> -${descuento.toFixed(2)}
+                    <strong>Descuento VIP:</strong> -${descuento.toFixed(2)}
                   </div>
                 )}
-                <div>
+                <div style={{ marginTop: "8px", fontSize: "1.1em" }}>
                   <strong>Total a pagar:</strong> $
                   {totalConDescuento.toFixed(2)}
                 </div>
@@ -856,7 +1208,16 @@ const AltaPedido: React.FC = () => {
             {
               text: "Aceptar",
               handler: () => {
+                // Limpiar TODO antes de navegar
                 setShowSuccess(false);
+                setPrendasSeleccionadas([]);
+                setForm({...estadoInicial});
+                setEmpresaEnvioSeleccionada("");
+                setConfiguracionesPorProducto(new Map());
+                setPresentacionSeleccionada(new Map());
+                setCantidadPresentaciones(new Map());
+                setDatosDelPedido(null);
+                setPrendasCargadasDesdeServidor(false);
                 history.push("/pedidos");
               },
             },
@@ -929,7 +1290,7 @@ const AltaPedido: React.FC = () => {
             setShowIndumentariaModal(false);
             setFiltroIndumentaria("");
             // Limpiar todas las cantidades temporales al cerrar el modal
-            indumentaria.forEach(prenda => delete prenda._cantidadTemp);
+            indumentaria.forEach((prenda) => delete prenda._cantidadTemp);
           }}
           className="indumentaria-modal"
         >
@@ -957,48 +1318,209 @@ const AltaPedido: React.FC = () => {
                       i.codigoIndumentaria.toLowerCase().includes(filtro))
                   );
                 })
-                .map((prenda) => (
-                  <IonItem
-                    key={prenda.codigoIndumentaria}
-                    className="indumentaria-item"
-                  >
-                    <IonLabel class="indumentaria-label">
-                      {`${prenda.nombre} - ${prenda.color} - ${prenda.talle} - ${prenda.nombreTela} - (Stock: ${prenda.cantidadIndumentaria})`}
-                    </IonLabel>
-                    <IonInput
-                      class="cantidad-input"
-                      type="number"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      placeholder="Cantidad"
-                      min={1}
-                      value={prenda._cantidadTemp || ""}
-                      onIonInput={(e: any) => {
-                        // Solo permitir números, sin +, -, e, .
-                        let valor = e.target.value.replace(/[^0-9]/g, "");
-                        if (valor === "") valor = "1";
-                        let cantidad = Number(valor);
-                        if (cantidad > prenda.cantidadIndumentaria) {
-                          setAlertMsg(
-                            `Stock del producto insuficiente, el stock actual es: ${prenda.cantidadIndumentaria}`
-                          );
-                          setShowAlert(true);
-                          cantidad = prenda.cantidadIndumentaria;
-                        }
-                        prenda._cantidadTemp = cantidad;
-                        // Forzar el valor limpio en el input
-                        e.target.value = cantidad;
-                      }}
-                    />
-                    <IonButton
-                      onClick={() =>
-                        agregarPrenda(prenda, prenda._cantidadTemp || 1)
-                      }
+                .map((prenda) => {
+                  const configuraciones =
+                    configuracionesPorProducto.get(prenda.codigoIndumentaria) ||
+                    [];
+                  const presentacionActual =
+                    presentacionSeleccionada.get(prenda.codigoIndumentaria) ||
+                    1;
+                  const cantidadPres =
+                    cantidadPresentaciones.get(prenda.codigoIndumentaria) || 1;
+
+                  // Buscar configuración seleccionada
+                  const configActual = configuraciones.find(
+                    (c) => c.idPresentacion === presentacionActual
+                  );
+                  const unidadesPorPresentacion =
+                    configActual?.cantidadUnidades || 1;
+                  const totalUnidades = cantidadPres * unidadesPorPresentacion;
+
+                  // Calcular unidades ya agregadas al pedido actual
+                  const unidadesYaAgregadas = prendasSeleccionadas
+                    .filter(p => p.codigoIndumentaria === prenda.codigoIndumentaria)
+                    .reduce((total, p) => total + (p.unidadesTotales || p.cantidad), 0);
+                  
+                  // Stock disponible = stock real - unidades ya en el pedido
+                  const stockDisponible = prenda.cantidadIndumentaria - unidadesYaAgregadas;
+                  const maxPresentaciones = Math.floor(stockDisponible / unidadesPorPresentacion);
+
+                  return (
+                    <IonItem
+                      key={prenda.codigoIndumentaria}
+                      className="indumentaria-item"
                     >
-                      Agregar
-                    </IonButton>
-                  </IonItem>
-                ))}
+                      <div className="indumentaria-item-grid">
+                        <div className="indumentaria-item-content">
+                          {/* Información del producto */}
+                          <div className="indumentaria-product-info">
+                            <div className="producto-info-row producto-nombre">
+                              {`${prenda.nombre} - ${prenda.color} - ${prenda.talle} - ${prenda.nombreTela}`}
+                            </div>
+                            <div className="producto-info-row producto-stock-total">
+                              Stock total: {prenda.cantidadIndumentaria} unidades
+                            </div>
+                          </div>
+
+                          {/* Controles: Presentación y Cantidad */}
+                          <div className="indumentaria-controls">
+                            {/* Selector de presentación */}
+                            {configuraciones.length > 0 && (
+                              <div className="presentacion-group">
+                                <IonLabel className="presentacion-label">
+                                  Presentación:
+                                </IonLabel>
+                                <IonSelect
+                                  value={presentacionActual}
+                                  onIonChange={(e) => {
+                                    const newValue = Number(e.detail.value);
+                                    setPresentacionSeleccionada((prev) => {
+                                      const newMap = new Map(prev);
+                                      newMap.set(
+                                        prenda.codigoIndumentaria,
+                                        newValue
+                                      );
+                                      return newMap;
+                                    });
+                                  }}
+                                  interface="popover"
+                                >
+                                  {configuraciones.map((config) => (
+                                    <IonSelectOption
+                                      key={config.idPresentacion}
+                                      value={config.idPresentacion}
+                                    >
+                                      {config.Presentacion.nombrePresentacion} (
+                                      {config.cantidadUnidades} unidad
+                                      {config.cantidadUnidades !== 1
+                                        ? "es"
+                                        : ""}
+                                      )
+                                    </IonSelectOption>
+                                  ))}
+                                </IonSelect>
+                              </div>
+                            )}
+
+                            {/* Input de cantidad */}
+                            <div className="cantidad-group">
+                              <IonLabel className="presentacion-label">
+                                Cantidad de{" "}
+                                {configActual?.Presentacion
+                                  .nombrePresentacion || "Unidades"}
+                                :
+                              </IonLabel>
+                              <IonInput
+                                className="cantidad-input"
+                                type="number"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="1"
+                                min={1}
+                                value={cantidadPres}
+                                onIonInput={(e: any) => {
+                                  let valor = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                  );
+                                  if (valor === "") valor = "1";
+                                  let cantidad = Number(valor);
+
+                                  const unidadesNecesarias =
+                                    cantidad * unidadesPorPresentacion;
+                                  
+                                  // Validar contra stock disponible (considerando lo ya agregado al pedido)
+                                  if (unidadesNecesarias > stockDisponible) {
+                                    const nombrePres = configActual?.Presentacion.nombrePresentacion || "Unidad";
+                                    setAlertMsg(
+                                      `Stock insuficiente. Ya tienes ${unidadesYaAgregadas} unidades en el pedido. ` +
+                                      `Stock disponible: ${stockDisponible} unidades. ` +
+                                      `Máximo: ${maxPresentaciones} ${nombrePres}(s).`
+                                    );
+                                    setShowAlert(true);
+                                    cantidad = maxPresentaciones > 0 ? maxPresentaciones : 1;
+                                  }
+
+                                  setCantidadPresentaciones((prev) => {
+                                    const newMap = new Map(prev);
+                                    newMap.set(
+                                      prenda.codigoIndumentaria,
+                                      cantidad
+                                    );
+                                    return newMap;
+                                  });
+                                  e.target.value = cantidad;
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                            {unidadesYaAgregadas > 0 && (
+                              <div className="producto-info-row producto-stock-pedido">
+                                Ya en pedido: {unidadesYaAgregadas} unidades | Disponible: {stockDisponible} unidades
+                              </div>
+                            )}
+                          {/* Mostrar total de unidades */}
+                          {unidadesPorPresentacion > 1 && (
+                            <div className="unidades-info-box">
+                              <span className="unidades-info-icon">📦</span>
+                              <span>
+                                {cantidadPres}{" "}
+                                {configActual?.Presentacion.nombrePresentacion}
+                                (s) × {unidadesPorPresentacion} unidades ={" "}
+                                {totalUnidades} unidades totales
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Botón Agregar */}
+                        <div className="indumentaria-item-actions">
+                          <IonButton
+                            onClick={async () => {
+                              // Cargar configuraciones si no están cargadas
+                              if (configuraciones.length === 0) {
+                                await cargarConfiguracionesProducto(
+                                  prenda.codigoIndumentaria
+                                );
+                              }
+
+                              const presentacionInfo = configActual
+                                ? {
+                                    idPresentacion: presentacionActual,
+                                    cantidadPresentaciones: cantidadPres,
+                                    unidadesTotales: totalUnidades,
+                                    nombrePresentacion:
+                                      configActual.Presentacion
+                                        .nombrePresentacion,
+                                  }
+                                : undefined;
+
+                              agregarPrenda(
+                                prenda,
+                                cantidadPres,
+                                presentacionInfo
+                              );
+                            }}
+                            onMouseEnter={() => {
+                              // Pre-cargar configuraciones al pasar el mouse
+                              if (configuraciones.length === 0) {
+                                cargarConfiguracionesProducto(
+                                  prenda.codigoIndumentaria
+                                );
+                              }
+                            }}
+                          >
+                            <IonIcon icon={add} slot="start" />
+                            Agregar
+                          </IonButton>
+                        </div>
+                      </div>
+                    </IonItem>
+                  );
+                })}
             </IonList>
             <IonButton
               expand="block"
@@ -1029,12 +1551,11 @@ const AltaPedido: React.FC = () => {
             <div className="motivo-modal-content">
               {/* Header del modal */}
               <div className="motivo-modal-header">
-                <h3 className="motivo-modal-title">
-                  Modificación de Pedido
-                </h3>
+                <h3 className="motivo-modal-title">Modificación de Pedido</h3>
                 <p className="motivo-modal-description">
-                  Para continuar con la modificación del pedido, debe seleccionar el motivo que justifica este cambio.
-                  Esta información quedará registrada en el historial del pedido.
+                  Para continuar con la modificación del pedido, debe
+                  seleccionar el motivo que justifica este cambio. Esta
+                  información quedará registrada en el historial del pedido.
                 </p>
               </div>
 
@@ -1042,20 +1563,26 @@ const AltaPedido: React.FC = () => {
               <div className="motivo-modal-form">
                 <div className="motivo-modal-form-section">
                   <div className="motivo-modal-form-label">
-                    <span className="motivo-modal-form-label-text">Motivo de Modificación</span>
-                    <span className="motivo-modal-required-badge">Requerido</span>
+                    <span className="motivo-modal-form-label-text">
+                      Motivo de Modificación
+                    </span>
+                    <span className="motivo-modal-required-badge">
+                      Requerido
+                    </span>
                   </div>
-                  
+
                   <div className="motivo-modal-radio-group">
                     {motivosModificacion.map((motivo) => (
                       <div
                         key={motivo.idMotivo}
                         className={`motivo-modal-radio-option ${
                           motivoSeleccionado === motivo.idMotivo.toString()
-                            ? 'selected'
-                            : ''
+                            ? "selected"
+                            : ""
                         }`}
-                        onClick={() => setMotivoSeleccionado(motivo.idMotivo.toString())}
+                        onClick={() =>
+                          setMotivoSeleccionado(motivo.idMotivo.toString())
+                        }
                       >
                         <div className="motivo-modal-radio-indicator">
                           <IonIcon

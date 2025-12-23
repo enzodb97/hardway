@@ -539,6 +539,22 @@ export const exportarPDF = (
 
 // Exportar PDF de detalle de pedido para cliente
 export const exportarPDFDetallePedido = async (numeroPedido: string) => {
+  // Función para mapear idPresentacion a nombrePresentacion
+  const obtenerNombrePresentacion = (idPresentacion: number | null | undefined): string => {
+    if (!idPresentacion) return "Unidad";
+    
+    switch (idPresentacion) {
+      case 1:
+        return "Unidad";
+      case 2:
+        return "Caja Cerrada";
+      case 3:
+        return "Pack";
+      default:
+        return "Unidad";
+    }
+  };
+
   try {
     // Obtener información completa del pedido
     const res = await axiosInstance.get(`/api/pedidos/${numeroPedido}/detalle-plano`);
@@ -654,27 +670,33 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
 
     // Tabla de productos
     yPos += 4;
-    const tableData = prendas.map((prenda: any) => [
-      prenda.nombre_producto || "-",
-      prenda.talle || "-",
-      prenda.color || "-",
-      prenda.precio_unitario
-        ? `$${Number(prenda.precio_unitario).toLocaleString("es-AR", {
-            minimumFractionDigits: 2,
-          })}`
-        : "-",
-      prenda.cantidad || "-",
-      prenda.subtotal
-        ? `$${Number(prenda.subtotal).toLocaleString("es-AR", {
-            minimumFractionDigits: 2,
-          })}`
-        : "-",
-    ]);
+    const tableData = prendas.map((prenda: any) => {
+      // El precio_unitario del backend ya viene SIN descuentos
+      const precioUnitarioSinDescuento = prenda.precio_unitario;
+      const unidadesPorPresentacion = prenda.unidadesTotales / prenda.cantidadPresentaciones;
+      const precioPorPresentacion = precioUnitarioSinDescuento * unidadesPorPresentacion;
+      const subtotalSinDescuento = precioPorPresentacion * prenda.cantidadPresentaciones;
+
+      return [
+        prenda.nombre_producto || "-",
+        prenda.nombrePresentacion || obtenerNombrePresentacion(prenda.idPresentacion) || "Unidad",
+        prenda.talle || "-",
+        prenda.color || "-",
+        `$${Number(precioPorPresentacion).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        prenda.cantidadPresentaciones || prenda.cantidad || "-",
+        `$${Number(subtotalSinDescuento).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+      ];
+    });
 
     autoTable(doc, {
       head: [
         [
           "Producto",
+          "Presentación",
           "Talle",
           "Color",
           "Precio Unit.",
@@ -696,21 +718,22 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
         fontStyle: "bold",
       },
       columnStyles: {
-        0: { cellWidth: 50, halign: "left" }, // Producto
-        1: { cellWidth: 20, halign: "center" }, // Talle
-        2: { cellWidth: 25, halign: "center" }, // Color
-        3: { cellWidth: 28, halign: "right" }, // Precio Unit.
-        4: { cellWidth: 18, halign: "center" }, // Cant.
-        5: { cellWidth: 28, halign: "right" }, // Subtotal
+        0: { cellWidth: 45, halign: "left" }, // Producto
+        1: { cellWidth: 28, halign: "center" }, // Presentación
+        2: { cellWidth: 18, halign: "center" }, // Talle
+        3: { cellWidth: 22, halign: "center" }, // Color
+        4: { cellWidth: 26, halign: "right" }, // Precio Unit.
+        5: { cellWidth: 16, halign: "center" }, // Cant.
+        6: { cellWidth: 26, halign: "right" }, // Subtotal
       },
       didParseCell: function(data) {
         // Aplicar alineación específica según la columna para asegurar que se respete en header y body
         const columnIndex = data.column.index;
         if (columnIndex === 0) {
           data.cell.styles.halign = 'left';
-        } else if (columnIndex === 1 || columnIndex === 2 || columnIndex === 4) {
+        } else if (columnIndex === 1 || columnIndex === 2 || columnIndex === 3 || columnIndex === 5) {
           data.cell.styles.halign = 'center';
-        } else if (columnIndex === 3 || columnIndex === 5) {
+        } else if (columnIndex === 4 || columnIndex === 6) {
           data.cell.styles.halign = 'right';
         }
       },
@@ -718,15 +741,54 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
 
     // Obtener posición final de la tabla
     const finalY = (doc as any).lastAutoTable.finalY + 10;
-    // La columna Subtotal termina en: margen izquierdo (14) + ancho de todas las columnas (169)
-    const subtotalColumnEnd = 14 + 50 + 20 + 25 + 28 + 18 + 28; // = 183
+    // La columna Subtotal termina en: margen izquierdo (14) + ancho de todas las columnas
+    const subtotalColumnEnd = 14 + 45 + 28 + 18 + 22 + 26 + 16 + 26; // = 181
+
+    // Calcular descuentos de presentación y subtotal sin descuentos
+    let descuentoCajaCerrada = 0;
+    let descuentoPack = 0;
+    let subtotalSinDescuentos = 0;
+    
+    console.log('=== Calculando descuentos de presentación ===');
+    prendas.forEach((prenda: any) => {
+      // descuento_por_item es un valor absoluto en pesos, no un porcentaje
+      const descuentoItem = Number(prenda.descuento_por_item) || 0;
+      
+      console.log('Prenda:', {
+        nombre: prenda.nombre_producto,
+        idPresentacion: prenda.idPresentacion,
+        descuento_por_item: prenda.descuento_por_item,
+        descuentoItem: descuentoItem
+      });
+      
+      // Calcular subtotal sin descuentos de esta prenda
+      const precioUnitarioSinDescuento = prenda.precio_unitario;
+      const unidadesPorPresentacion = prenda.unidadesTotales / prenda.cantidadPresentaciones;
+      const precioPorPresentacion = precioUnitarioSinDescuento * unidadesPorPresentacion;
+      const subtotalPrenda = precioPorPresentacion * prenda.cantidadPresentaciones;
+      
+      subtotalSinDescuentos += subtotalPrenda;
+      
+      if (prenda.idPresentacion === 2) { // Caja Cerrada
+        descuentoCajaCerrada += descuentoItem;
+        console.log('Agregando a descuento Caja Cerrada:', descuentoItem);
+      } else if (prenda.idPresentacion === 3) { // Pack
+        descuentoPack += descuentoItem;
+        console.log('Agregando a descuento Pack:', descuentoItem);
+      }
+    });
+    
+    console.log('Totales descuentos:', {
+      descuentoCajaCerrada,
+      descuentoPack
+    });
 
     // Subtotal - alineado con la columna Subtotal de la tabla
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text("Subtotal:", 14, finalY);
     doc.text(
-      `$${Number(pedido.subtotal || 0).toLocaleString("es-AR", {
+      `$${Number(subtotalSinDescuentos).toLocaleString("es-AR", {
         minimumFractionDigits: 2,
       })}`,
       subtotalColumnEnd,
@@ -734,19 +796,71 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
       { align: "right" }
     );
 
-    // Descuento VIP (si aplica)
     let currentY = finalY;
+
+    // Descuento por Caja Cerrada (si aplica)
+    if (descuentoCajaCerrada > 0) {
+      currentY += 6;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text("Descuento por Caja Cerrada (10%):", 14, currentY);
+      doc.text(
+        `-$${Number(descuentoCajaCerrada).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        subtotalColumnEnd,
+        currentY,
+        { align: "right" }
+      );
+    }
+
+    // Descuento por Pack (si aplica)
+    if (descuentoPack > 0) {
+      currentY += 6;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text("Descuento por Pack (5%):", 14, currentY);
+      doc.text(
+        `-$${Number(descuentoPack).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        subtotalColumnEnd,
+        currentY,
+        { align: "right" }
+      );
+    }
+
+    // Total con descuentos de presentación (si hay descuentos)
+    if (descuentoCajaCerrada > 0 || descuentoPack > 0) {
+      currentY += 6;
+      const totalConDescuentosPresentacion = subtotalSinDescuentos - descuentoCajaCerrada - descuentoPack;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Total con descuentos de presentación:", 14, currentY);
+      doc.text(
+        `$${Number(totalConDescuentosPresentacion).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        subtotalColumnEnd,
+        currentY,
+        { align: "right" }
+      );
+    }
+
+    // Descuento VIP (si aplica)
     if (pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0) {
       currentY += 6;
       doc.setTextColor(218, 165, 32); // Color dorado
-      doc.text("Descuento VIP (10%):", 14, currentY);
+      doc.setLineWidth(0.05); // Grosor del contorno
+      doc.text("Descuento VIP (10%):", 14, currentY, { renderingMode: "fillThenStroke" });
+      doc.setLineWidth(0.05); // Grosor del contorno
       doc.text(
         `-$${Number(pedido.descuentoOrden).toLocaleString("es-AR", {
           minimumFractionDigits: 2,
         })}`,
         subtotalColumnEnd,
         currentY,
-        { align: "right" }
+        { align: "right", renderingMode: "fillThenStroke" }
       );
       doc.setTextColor(0, 0, 0); // Volver a negro
     }

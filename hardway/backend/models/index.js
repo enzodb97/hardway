@@ -17,6 +17,8 @@ const EmpresaEnvio = require('./EmpresaEnvio'); // Nuevo modelo
 const AsignacionPicking = require('./AsignacionPicking'); // Nuevo modelo
 const MotivoModificacionPedido = require('./MotivoModificacionPedido');
 const HistorialModificacionPedido = require('./HistorialModificacionPedido');
+const PresentacionProducto = require('./PresentacionProducto'); // Modelo para presentaciones
+const ConfiguracionPresentacion = require('./ConfiguracionPresentacion'); // Modelo para configuración
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
 const {
   Color,
@@ -150,6 +152,26 @@ const setupAssociations = () => {
   DetallePedido.belongsTo(Indumentaria, { 
     foreignKey: "codigoIndumentaria", 
     as: "Indumentarium" 
+  });
+  DetallePedido.belongsTo(PresentacionProducto, { 
+    foreignKey: "idPresentacion",
+    as: "Presentacion"
+  });
+
+  // Relaciones de ConfiguracionPresentacion
+  ConfiguracionPresentacion.belongsTo(Indumentaria, { 
+    foreignKey: "codigoIndumentaria",
+    as: "Indumentaria"
+  });
+  ConfiguracionPresentacion.belongsTo(PresentacionProducto, { 
+    foreignKey: "idPresentacion",
+    as: "Presentacion"
+  });
+
+  // Relación inversa: una Indumentaria puede tener múltiples configuraciones
+  Indumentaria.hasMany(ConfiguracionPresentacion, { 
+    foreignKey: "codigoIndumentaria",
+    as: "ConfiguracionesPresentacion"
   });
 
   // Relaciones many-to-many Pedido-Indumentaria
@@ -286,6 +308,10 @@ module.exports = {
   // Modelos de auditoría de pedidos
   MotivoModificacionPedido,
   HistorialModificacionPedido,
+  
+  // Modelos de presentaciones de producto
+  PresentacionProducto,
+  ConfiguracionPresentacion,
   
   // Función para configurar relaciones
   setupAssociations,

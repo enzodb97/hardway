@@ -99,6 +99,22 @@ export interface Rack {
   descripcion?: string;
 }
 
+export interface Presentacion {
+  idPresentacion: number;
+  nombrePresentacion: string;
+  descripcion?: string;
+}
+
+export interface ConfiguracionPresentacion {
+  idConfiguracion: number;
+  codigoIndumentaria: string;
+  idPresentacion: number;
+  cantidadUnidades: number;
+  precioBase: number | null;
+  estaActivo: boolean;
+  nombrePresentacion?: string;
+}
+
 export interface MotivoNoApta {
   idMotivo: number;
   descripcion: string;
@@ -708,5 +724,89 @@ export const marcarComoScrap = async (
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.error || 'Error al marcar como scrap');
+  }
+};
+
+// ============= PRESENTACIONES =============
+
+// Obtener presentaciones disponibles
+export const obtenerPresentaciones = async (): Promise<Presentacion[]> => {
+  try {
+    const response = await axiosInstance.get('/api/auxiliares/presentaciones');
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al obtener presentaciones');
+  }
+};
+
+// Obtener configuración de presentaciones de una indumentaria
+export const obtenerConfiguracionPresentaciones = async (
+  codigoIndumentaria: string
+): Promise<ConfiguracionPresentacion[]> => {
+  try {
+    const response = await axiosInstance.get(
+      `/api/indumentaria/${codigoIndumentaria}/presentaciones`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al obtener configuración de presentaciones');
+  }
+};
+
+// Guardar configuración de presentaciones
+export const guardarConfiguracionPresentacion = async (
+  codigoIndumentaria: string,
+  idPresentacion: number,
+  cantidadUnidades: number,
+  precioBase: number | null = null
+): Promise<any> => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/indumentaria/${codigoIndumentaria}/presentaciones`,
+      {
+        idPresentacion,
+        cantidadUnidades,
+        precioBase
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al guardar configuración de presentación');
+  }
+};
+
+// Actualizar configuración de presentación
+export const actualizarConfiguracionPresentacion = async (
+  idConfiguracion: number,
+  cantidadUnidades: number,
+  precioBase: number | null = null,
+  estaActivo: boolean = true
+): Promise<any> => {
+  try {
+    const response = await axiosInstance.put(
+      `/api/indumentaria/presentaciones/${idConfiguracion}`,
+      {
+        cantidadUnidades,
+        precioBase,
+        estaActivo
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al actualizar configuración de presentación');
+  }
+};
+
+// Eliminar configuración de presentación
+export const eliminarConfiguracionPresentacion = async (
+  idConfiguracion: number
+): Promise<any> => {
+  try {
+    const response = await axiosInstance.delete(
+      `/api/indumentaria/presentaciones/${idConfiguracion}`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || 'Error al eliminar configuración de presentación');
   }
 };

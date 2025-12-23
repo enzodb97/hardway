@@ -34,6 +34,7 @@ const pickingRoutes = require("./routes/picking");
 const enviosRoutes = require("./routes/envios");
 const ubicacionRoutes = require("./routes/ubicacion");
 const clientesVipRoutes = require("./routes/clientesVip");
+const presentacionesRoutes = require("./routes/presentaciones");
 
 // Usar rutas
 
@@ -50,6 +51,7 @@ app.use("/api", ubicacionRoutes);
 app.use("/api/reportes", reportesRoutes);
 app.use("/api/picking", pickingRoutes);
 app.use("/api/envios", enviosRoutes);
+app.use("/api/presentaciones", presentacionesRoutes);
 
 // Endpoint de prueba
 app.get("/api/health", (req, res) => {

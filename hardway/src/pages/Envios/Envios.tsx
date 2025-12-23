@@ -591,7 +591,7 @@ const Envios: React.FC = () => {
                         </div>
                       </IonCol>
 
-                      <IonCol size="12">
+                      {/*<IonCol size="12">
                         <div className="info-item">
                           <IonIcon icon={layersOutline} className="info-icon" />
                           <div>
@@ -601,7 +601,7 @@ const Envios: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                      </IonCol>
+                      </IonCol>*/}
 
                       {pedido.empresaEnvio && (
                         <IonCol size="12">

@@ -12,6 +12,7 @@ const {
   UnidadMedida, // Nuevo modelo
   TipoRol,
   MotivoCancelacion,
+  PresentacionProducto, // Nuevo modelo para presentaciones
   sequelize,
 } = require("../models");
 const { Ciudad, Barrio } = require("../models/Ubicacion");
@@ -478,6 +479,19 @@ router.put("/detalle-indumentaria/:id/precio", async (req, res) => {
   } catch (error) {
     console.error("Error al actualizar precio del detalle:", error);
     res.status(500).json({ error: "Error al actualizar precio del detalle" });
+  }
+});
+
+// Rutas para Presentaciones de Productos
+router.get("/presentaciones", async (req, res) => {
+  try {
+    const presentaciones = await PresentacionProducto.findAll({
+      order: [['idPresentacion', 'ASC']]
+    });
+    res.json(presentaciones);
+  } catch (error) {
+    console.error("Error al obtener presentaciones:", error);
+    res.status(500).json({ error: "Error al obtener presentaciones" });
   }
 });
 

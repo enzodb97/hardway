@@ -21,6 +21,7 @@ const {
   HistorialModificacionPedido,
   Usuario,
   EmpresaEnvio,
+  PresentacionProducto,
 } = require("../models");
 const { Sequelize, Op } = require("sequelize");
 
@@ -124,7 +125,7 @@ router.post("/", async (req, res) => {
       "0"
     )}`;
 
-    // Calcular el total del pedido (precio * cantidad de cada prenda)
+    // Calcular el total del pedido (precio * cantidad de cada prenda con descuentos de presentación)
     let totalPedido = 0;
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
@@ -137,7 +138,22 @@ router.post("/", async (req, res) => {
           { replacements: [prenda.codigoIndumentaria] }
         );
         const precio = precioRow[0]?.precio || 0;
-        totalPedido += precio * prenda.cantidad;
+        const subtotalOriginal = precio * prenda.cantidad;
+        
+        // Aplicar descuentos por presentación
+        // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
+        let precioConDescuento = precio;
+        const idPres = prenda.idPresentacion || 1;
+        
+        if (idPres === 3) {
+          // Pack: 5% de descuento
+          precioConDescuento = precio * 0.95;
+        } else if (idPres === 2) {
+          // Caja Cerrada: 10% de descuento
+          precioConDescuento = precio * 0.90;
+        }
+        
+        totalPedido += precioConDescuento * prenda.cantidad;
       }
     }
 
@@ -172,13 +188,40 @@ router.post("/", async (req, res) => {
     // Crea los detalles del pedido y descuenta stock
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
+        // Obtener precio unitario
+        const [precioRow] = await sequelize.query(
+          `SELECT pr.precio FROM indumentaria i
+            JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+            JOIN precioindumentaria pr ON di.idPrecio = pr.idPrecio
+            WHERE i.codigoIndumentaria = ? LIMIT 1`,
+          { replacements: [prenda.codigoIndumentaria] }
+        );
+        const precioUnitario = precioRow[0]?.precio || 0;
+        const subtotalOriginal = precioUnitario * prenda.cantidad;
+        
+        // Calcular descuento por presentación
+        // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
+        let descuentoItem = 0;
+        const idPres = prenda.idPresentacion || 1;
+        
+        if (idPres === 3) {
+          // Pack: 5% de descuento
+          descuentoItem = subtotalOriginal * 0.05;
+        } else if (idPres === 2) {
+          // Caja Cerrada: 10% de descuento
+          descuentoItem = subtotalOriginal * 0.10;
+        }
+        
         await DetallePedido.create(
           {
             idDetallePedido: "DPED-" + Math.random().toString().slice(2, 8),
             numeroPedido,
             codigoIndumentaria: prenda.codigoIndumentaria,
             cantidad: prenda.cantidad,
-            descuentoItem: 0, // Por ahora, sin descuento por ítem
+            descuentoItem: descuentoItem,
+            idPresentacion: prenda.idPresentacion || 1,
+            cantidadPresentaciones: prenda.cantidadPresentaciones || prenda.cantidad,
+            unidadesTotales: prenda.unidadesTotales || prenda.cantidad,
           },
           { transaction: t }
         );
@@ -259,6 +302,11 @@ router.get("/:numeroPedido", async (req, res) => {
                 },
               ],
             },
+            {
+              model: PresentacionProducto,
+              as: "Presentacion",
+              attributes: ['idPresentacion', 'nombrePresentacion', 'descripcion'],
+            },
           ],
         },
       ],
@@ -338,7 +386,11 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
         pr.precio AS precio_unitario,
         dp.cantidad,
         dp.descuentoItem AS descuento_por_item,
-        (pr.precio * dp.cantidad - IFNULL(dp.descuentoItem,0)) AS subtotal
+        (pr.precio * dp.cantidad - IFNULL(dp.descuentoItem,0)) AS subtotal,
+        dp.idPresentacion,
+        dp.cantidadPresentaciones,
+        dp.unidadesTotales,
+        pp.nombrePresentacion
       FROM
         detallepedido dp
       JOIN
@@ -353,6 +405,8 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
         talle ta ON di.idTalle = ta.idTalle
       JOIN
         color co ON di.idColor = co.idColor
+      LEFT JOIN
+        presentacion_producto pp ON dp.idPresentacion = pp.idPresentacion
       WHERE
         dp.numeroPedido = ?
       `,
@@ -567,6 +621,9 @@ router.put("/:numeroPedido", async (req, res) => {
             numeroPedido,
             codigoIndumentaria: prenda.codigoIndumentaria,
             cantidad: prenda.cantidad,
+            idPresentacion: prenda.idPresentacion || 1,
+            cantidadPresentaciones: prenda.cantidadPresentaciones || prenda.cantidad,
+            unidadesTotales: prenda.unidadesTotales || prenda.cantidad,
           },
           { transaction: t }
         );

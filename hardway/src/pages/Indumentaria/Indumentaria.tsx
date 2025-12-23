@@ -24,7 +24,7 @@ import {
   useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward, cubeOutline, checkmarkCircle, warningOutline, close } from "ionicons/icons";
+import { pencil, trash, add, search, shirt, document, playBack, playForward, chevronBack, chevronForward, cubeOutline, checkmarkCircle, warningOutline, close, settingsOutline } from "ionicons/icons";
 import axiosInstance from "../../config/axios";
 import {
   obtenerIndumentariaPaginada,
@@ -39,6 +39,13 @@ import {
   Rack,
   obtenerCategoriasDisponibles,
   filtrarPrendasPorCategoria,
+  Presentacion,
+  ConfiguracionPresentacion,
+  obtenerPresentaciones,
+  obtenerConfiguracionPresentaciones,
+  guardarConfiguracionPresentacion,
+  actualizarConfiguracionPresentacion,
+  eliminarConfiguracionPresentacion,
 } from "../../utils/indumentariaUtils";
 import "./Indumentaria.css";
 
@@ -59,6 +66,21 @@ const Indumentaria: React.FC = () => {
   const [categoriasDisponibles, setCategoriasDisponibles] = useState<string[]>([]);
   const [showPDFModal, setShowPDFModal] = useState(false);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('Todas');
+
+  // Estados para configuración de presentaciones
+  const [showPresentacionesModal, setShowPresentacionesModal] = useState(false);
+  const [presentacionesDisponibles, setPresentacionesDisponibles] = useState<Presentacion[]>([]);
+  const [configuracionPresentaciones, setConfiguracionPresentaciones] = useState<ConfiguracionPresentacion[]>([]);
+  const [nuevaPresentacion, setNuevaPresentacion] = useState({
+    idPresentacion: 0,
+    cantidadUnidades: 1,
+    precioBase: null as number | null
+  });
+  const [editandoPresentacionId, setEditandoPresentacionId] = useState<number | null>(null);
+  const [presentacionEditada, setPresentacionEditada] = useState<{
+    cantidadUnidades: number;
+    precioBase: number | null;
+  }>({ cantidadUnidades: 1, precioBase: null });
 
   const cargarIndumentaria = async () => {
     setLoading(true);
@@ -321,6 +343,163 @@ const Indumentaria: React.FC = () => {
     setShowPDFModal(true);
   };
 
+  // Función para abrir modal de configuración de presentaciones
+  const handleConfigurarPresentaciones = async (codigoIndumentaria: string) => {
+    try {
+      setSelectedItem(codigoIndumentaria);
+      setLoading(true);
+      
+      // Cargar presentaciones disponibles y configuración actual
+      const [presentaciones, configuracion] = await Promise.all([
+        obtenerPresentaciones(),
+        obtenerConfiguracionPresentaciones(codigoIndumentaria)
+      ]);
+      
+      setPresentacionesDisponibles(presentaciones);
+      setConfiguracionPresentaciones(configuracion);
+      setShowPresentacionesModal(true);
+    } catch (error: any) {
+      setAlertMsg(error.message || 'Error al cargar configuración de presentaciones');
+      setShowAlert(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para agregar una nueva presentación
+  const handleAgregarPresentacion = async () => {
+    if (!selectedItem || !nuevaPresentacion.idPresentacion || nuevaPresentacion.cantidadUnidades <= 0) {
+      setAlertMsg('Por favor complete todos los campos requeridos');
+      setShowAlert(true);
+      return;
+    }
+
+    // Verificar que no esté ya configurada
+    const yaExiste = configuracionPresentaciones.some(
+      c => c.idPresentacion === nuevaPresentacion.idPresentacion && c.estaActivo
+    );
+    
+    if (yaExiste) {
+      setAlertMsg('Esta presentación ya está configurada para esta indumentaria');
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      await guardarConfiguracionPresentacion(
+        selectedItem,
+        nuevaPresentacion.idPresentacion,
+        nuevaPresentacion.cantidadUnidades,
+        nuevaPresentacion.precioBase
+      );
+      
+      // Recargar configuración
+      const configuracion = await obtenerConfiguracionPresentaciones(selectedItem);
+      setConfiguracionPresentaciones(configuracion);
+      
+      // Limpiar formulario
+      setNuevaPresentacion({
+        idPresentacion: 0,
+        cantidadUnidades: 1,
+        precioBase: null
+      });
+      
+      setAlertMsg('Presentación agregada correctamente');
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg(error.message || 'Error al agregar presentación');
+      setShowAlert(true);
+    }
+  };
+
+  // Función para actualizar una presentación
+  const handleActualizarPresentacion = async (config: ConfiguracionPresentacion) => {
+    try {
+      await actualizarConfiguracionPresentacion(
+        config.idConfiguracion,
+        config.cantidadUnidades,
+        config.precioBase,
+        config.estaActivo
+      );
+      
+      setAlertMsg('Presentación actualizada correctamente');
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg(error.message || 'Error al actualizar presentación');
+      setShowAlert(true);
+    }
+  };
+
+  // Función para eliminar una presentación
+  const handleEliminarPresentacion = async (idConfiguracion: number) => {
+    if (!window.confirm('¿Está seguro de eliminar esta configuración de presentación?')) {
+      return;
+    }
+
+    try {
+      await eliminarConfiguracionPresentacion(idConfiguracion);
+      
+      // Recargar configuración
+      if (selectedItem) {
+        const configuracion = await obtenerConfiguracionPresentaciones(selectedItem);
+        setConfiguracionPresentaciones(configuracion);
+      }
+      
+      setAlertMsg('Presentación eliminada correctamente');
+      setShowAlert(true);
+    } catch (error: any) {
+      setAlertMsg(error.message || 'Error al eliminar presentación');
+      setShowAlert(true);
+    }
+  };
+
+  // Función para iniciar edición de una presentación
+  const handleIniciarEdicion = (config: ConfiguracionPresentacion) => {
+    setEditandoPresentacionId(config.idConfiguracion);
+    setPresentacionEditada({
+      cantidadUnidades: config.cantidadUnidades,
+      precioBase: config.precioBase
+    });
+  };
+
+  // Función para cancelar edición
+  const handleCancelarEdicion = () => {
+    setEditandoPresentacionId(null);
+    setPresentacionEditada({ cantidadUnidades: 1, precioBase: null });
+  };
+
+  // Función para guardar edición de una presentación
+  const handleGuardarEdicion = async (config: ConfiguracionPresentacion) => {
+    if (presentacionEditada.cantidadUnidades <= 0) {
+      setAlertMsg('La cantidad debe ser mayor a 0');
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      const configActualizada = {
+        ...config,
+        cantidadUnidades: presentacionEditada.cantidadUnidades,
+        precioBase: presentacionEditada.precioBase
+      };
+      
+      await handleActualizarPresentacion(configActualizada);
+      
+      // Recargar configuración
+      if (selectedItem) {
+        const configuracion = await obtenerConfiguracionPresentaciones(selectedItem);
+        setConfiguracionPresentaciones(configuracion);
+      }
+      
+      setEditandoPresentacionId(null);
+      setPresentacionEditada({ cantidadUnidades: 1, precioBase: null });
+    } catch (error: any) {
+      console.error('Error al guardar edición:', error);
+      setAlertMsg(error.message || 'Error al guardar cambios');
+      setShowAlert(true);
+    }
+  };
+
   // Función para generar PDF con filtros
   const generarPDF = async () => {
     try {
@@ -561,7 +740,12 @@ const Indumentaria: React.FC = () => {
                   <span className="rack-badge">#{item.Stock?.numeroRack || 'N/A'}</span>
                 </IonCol>
                 <IonCol size="2">
-                  <div className="actions-container">
+                  <div className="actions-container" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr', 
+                    gap: '4px',
+                    width: '100%'
+                  }}>
                     {mostrarNoAptas ? (
                       <>
                         <IonButton
@@ -598,6 +782,15 @@ const Indumentaria: React.FC = () => {
                           }
                         >
                           <IonIcon icon={pencil} />
+                        </IonButton>
+                        <IonButton
+                          fill="solid"
+                          color="tertiary"
+                          size="small"
+                          onClick={() => handleConfigurarPresentaciones(item.codigoIndumentaria)}
+                          title="Configurar Presentaciones"
+                        >
+                          <IonIcon icon={settingsOutline} />
                         </IonButton>
                         <IonButton
                           fill="solid"
@@ -1426,6 +1619,331 @@ const Indumentaria: React.FC = () => {
               >
                 <IonIcon icon={document} slot="start" />
                 {loading ? 'Generando...' : 'Generar PDF'}
+              </IonButton>
+            </div>
+          </IonToolbar>
+        </IonFooter>
+      </IonModal>
+
+      {/* Modal para configurar presentaciones */}
+      <IonModal 
+        isOpen={showPresentacionesModal} 
+        onDidDismiss={() => {
+          setShowPresentacionesModal(false);
+          setSelectedItem(null);
+          setConfiguracionPresentaciones([]);
+          setNuevaPresentacion({
+            idPresentacion: 0,
+            cantidadUnidades: 1,
+            precioBase: null
+          });
+        }}
+        className="modal-no-apta"
+      >
+        <IonHeader>
+          <IonToolbar color="tertiary">
+            <IonTitle>
+              <IonIcon icon={settingsOutline} style={{ marginRight: '8px' }} />
+              Configurar Presentaciones
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        
+        <IonContent className="ion-padding">
+          <div className="modal-no-apta-container">
+            {/* Header con info del producto */}
+            <div className="modal-reingreso-header">
+              <div className="modal-reingreso-header-content">
+                <IonIcon icon={shirt} className="modal-reingreso-header-icon" />
+                <h3 className="modal-reingreso-header-title">
+                  Indumentaria: <span style={{ 
+                    fontFamily: '"Monaco", "Menlo", monospace',
+                    background: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    marginLeft: '8px'
+                  }}>{selectedItem || 'N/A'}</span>
+                </h3>
+              </div>
+              <p className="modal-reingreso-header-description">
+                Configure cómo se venderá esta indumentaria (por unidad, pack, caja cerrada)
+              </p>
+            </div>
+
+            {/* Lista de configuraciones actuales */}
+            <div style={{ marginBottom: '24px' }}>
+              <h4 style={{ marginBottom: '12px', color: '#334155', fontWeight: 'bold' }}>
+                Presentaciones Configuradas
+              </h4>
+              
+              {configuracionPresentaciones.length === 0 ? (
+                <div style={{ 
+                  padding: '16px', 
+                  background: '#f1f5f9', 
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  color: '#64748b'
+                }}>
+                  No hay presentaciones configuradas. Agregue al menos una.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {configuracionPresentaciones.map((config) => (
+                    <div 
+                      key={config.idConfiguracion}
+                      style={{
+                        padding: '12px',
+                        background: config.estaActivo ? '#f0fdf4' : '#fee2e2',
+                        border: config.estaActivo ? '1px solid #86efac' : '1px solid #fecaca',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 'bold', color: '#334155', marginBottom: '4px' }}>
+                            {config.nombrePresentacion || `Presentación ${config.idPresentacion}`}
+                          </div>
+                          
+                          {editandoPresentacionId === config.idConfiguracion ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                              <div>
+                                <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>
+                                  Cantidad de unidades:
+                                </label>
+                                <IonInput
+                                  type="number"
+                                  min={1}
+                                  value={presentacionEditada.cantidadUnidades}
+                                  onIonChange={(e) => setPresentacionEditada({
+                                    ...presentacionEditada,
+                                    cantidadUnidades: Number(e.detail.value)
+                                  })}
+                                  style={{
+                                    '--background': 'white',
+                                    '--padding-start': '8px',
+                                    '--padding-end': '8px',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '4px',
+                                    fontSize: '0.875rem'
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>
+                                  Precio base (opcional):
+                                </label>
+                                <IonInput
+                                  type="number"
+                                  min={0}
+                                  step="0.01"
+                                  value={presentacionEditada.precioBase || ''}
+                                  onIonChange={(e) => setPresentacionEditada({
+                                    ...presentacionEditada,
+                                    precioBase: e.detail.value ? Number(e.detail.value) : null
+                                  })}
+                                  placeholder="Auto"
+                                  style={{
+                                    '--background': 'white',
+                                    '--padding-start': '8px',
+                                    '--padding-end': '8px',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '4px',
+                                    fontSize: '0.875rem'
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                              <span>Cantidad: <strong>{config.cantidadUnidades}</strong> unidades</span>
+                              {config.precioBase && (
+                                <span style={{ marginLeft: '12px' }}>
+                                  Precio: <strong>${config.precioBase}</strong>
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+                        {editandoPresentacionId === config.idConfiguracion ? (
+                          <>
+                            <IonButton
+                              size="small"
+                              fill="outline"
+                              color="medium"
+                              onClick={handleCancelarEdicion}
+                            >
+                              Cancelar
+                            </IonButton>
+                            <IonButton
+                              size="small"
+                              fill="solid"
+                              color="success"
+                              onClick={() => handleGuardarEdicion(config)}
+                            >
+                              <IonIcon icon={checkmarkCircle} slot="start" />
+                              Guardar
+                            </IonButton>
+                          </>
+                        ) : (
+                          <>
+                            <IonButton
+                              size="small"
+                              fill="outline"
+                              color="primary"
+                              onClick={() => handleIniciarEdicion(config)}
+                            >
+                              <IonIcon icon={pencil} slot="start" />
+                              Editar
+                            </IonButton>
+                            <IonButton
+                              size="small"
+                              fill="outline"
+                              color={config.estaActivo ? 'warning' : 'success'}
+                              onClick={async () => {
+                                const newConfig = { ...config, estaActivo: !config.estaActivo };
+                                await handleActualizarPresentacion(newConfig);
+                                // Recargar configuración
+                                if (selectedItem) {
+                                  const configuracion = await obtenerConfiguracionPresentaciones(selectedItem);
+                                  setConfiguracionPresentaciones(configuracion);
+                                }
+                              }}
+                            >
+                              {config.estaActivo ? 'DESACTIVAR' : 'ACTIVAR'}
+                            </IonButton>
+                            <IonButton
+                              size="small"
+                              fill="solid"
+                              color="danger"
+                              onClick={() => handleEliminarPresentacion(config.idConfiguracion)}
+                            >
+                              <IonIcon icon={trash} />
+                            </IonButton>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Formulario para agregar nueva presentación */}
+            <div style={{ 
+              padding: '16px', 
+              background: '#f8fafc', 
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h4 style={{ marginBottom: '12px', color: '#334155', fontWeight: 'bold' }}>
+                Agregar Nueva Presentación
+              </h4>
+
+              <IonItem lines="none" className="modal-no-apta-item">
+                <IonLabel position="stacked" className="modal-no-apta-label">
+                  Tipo de Presentación <span className="modal-no-apta-label-required">*</span>
+                </IonLabel>
+                <IonSelect
+                  placeholder="Seleccione una presentación"
+                  value={nuevaPresentacion.idPresentacion}
+                  onIonChange={(e) => setNuevaPresentacion({
+                    ...nuevaPresentacion,
+                    idPresentacion: Number(e.detail.value)
+                  })}
+                  interface="popover"
+                  className="modal-no-apta-select"
+                >
+                  {presentacionesDisponibles.map((pres) => (
+                    <IonSelectOption key={pres.idPresentacion} value={pres.idPresentacion}>
+                      {pres.nombrePresentacion}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+
+              <IonItem lines="none" className="modal-no-apta-item">
+                <IonLabel position="stacked" className="modal-no-apta-label">
+                  Cantidad de Unidades <span className="modal-no-apta-label-required">*</span>
+                </IonLabel>
+                <IonInput
+                  type="number"
+                  placeholder="Ej: 5 para pack de 5"
+                  min={1}
+                  value={nuevaPresentacion.cantidadUnidades}
+                  onIonChange={(e) => setNuevaPresentacion({
+                    ...nuevaPresentacion,
+                    cantidadUnidades: Number(e.detail.value)
+                  })}
+                  className="modal-no-apta-input"
+                />
+              </IonItem>
+
+              <IonItem lines="none" className="modal-no-apta-item">
+                <IonLabel position="stacked" className="modal-no-apta-label">
+                  Precio Base <span className="modal-no-apta-label-optional">(opcional)</span>
+                </IonLabel>
+                <IonInput
+                  type="number"
+                  placeholder="Dejar vacío para calcular automáticamente"
+                  min={0}
+                  step="0.01"
+                  value={nuevaPresentacion.precioBase || ''}
+                  onIonChange={(e) => setNuevaPresentacion({
+                    ...nuevaPresentacion,
+                    precioBase: e.detail.value ? Number(e.detail.value) : null
+                  })}
+                  className="modal-no-apta-input"
+                />
+              </IonItem>
+
+              <IonButton
+                expand="block"
+                color="tertiary"
+                onClick={handleAgregarPresentacion}
+                style={{ marginTop: '12px' }}
+              >
+                <IonIcon icon={add} slot="start" />
+                Agregar Presentación
+              </IonButton>
+            </div>
+
+            {/* Nota informativa */}
+            <div className="modal-reingreso-info" style={{ marginTop: '16px' }}>
+              <IonIcon icon={checkmarkCircle} className="modal-reingreso-info-icon" />
+              <IonText className="modal-reingreso-info-text">
+                <strong>💡 Consejo:</strong> Configure las diferentes formas en que se puede vender esta indumentaria. 
+                Por ejemplo, por unidad individual, en packs de 5 o en cajas cerradas de 20 unidades.
+              </IonText>
+            </div>
+          </div>
+        </IonContent>
+        
+        <IonFooter className="modal-no-apta-footer">
+          <IonToolbar>
+            <div className="modal-no-apta-buttons">
+              <IonButton 
+                expand="block"
+                fill="solid"
+                color="medium"
+                onClick={() => {
+                  setShowPresentacionesModal(false);
+                  setSelectedItem(null);
+                  setConfiguracionPresentaciones([]);
+                  setNuevaPresentacion({
+                    idPresentacion: 0,
+                    cantidadUnidades: 1,
+                    precioBase: null
+                  });
+                }}
+              >
+                <IonIcon icon={checkmarkCircle} slot="start" />
+                Cerrar
               </IonButton>
             </div>
           </IonToolbar>
