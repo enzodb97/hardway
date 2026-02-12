@@ -27,6 +27,16 @@ import {
 } from "../../utils/clientesUtils";
 import axiosInstance from "../../config/axios";
 
+// Función para capitalizar la primera letra de cada palabra
+const capitalizar = (texto: string): string => {
+  if (!texto) return texto;
+  return texto
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 const AltaCliente: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const { clientes, agregarCliente, modificarCliente } = useClientes();
@@ -280,7 +290,7 @@ const AltaCliente: React.FC = () => {
                     type="text"
                     value={formData.nombre}
                     onIonChange={(e) =>
-                      setFormData({ ...formData, nombre: e.detail.value! })
+                      setFormData({ ...formData, nombre: capitalizar(e.detail.value!) })
                     }
                     placeholder={
                       esEdicion && !formData.nombre 
@@ -304,7 +314,7 @@ const AltaCliente: React.FC = () => {
                       type="text"
                       value={formData.apellido}
                       onIonChange={(e) =>
-                        setFormData({ ...formData, apellido: e.detail.value! })
+                        setFormData({ ...formData, apellido: capitalizar(e.detail.value!) })
                       }
                       placeholder={
                         esEdicion && !formData.apellido ? "Dato obligatorio." : ""
@@ -335,7 +345,7 @@ const AltaCliente: React.FC = () => {
                   <IonInput
                     value={formData.localidad}
                     onIonChange={(e) =>
-                      setFormData({ ...formData, localidad: e.detail.value! })
+                      setFormData({ ...formData, localidad: capitalizar(e.detail.value!) })
                     }
                   />
                 </IonItem>
@@ -347,7 +357,7 @@ const AltaCliente: React.FC = () => {
                   <IonInput
                     value={formData.barrio}
                     onIonChange={(e) =>
-                      setFormData({ ...formData, barrio: e.detail.value! })
+                      setFormData({ ...formData, barrio: capitalizar(e.detail.value!) })
                     }
                   />
                 </IonItem>
@@ -357,7 +367,7 @@ const AltaCliente: React.FC = () => {
                   <IonInput
                     value={formData.calle}
                     onIonChange={(e) =>
-                      setFormData({ ...formData, calle: e.detail.value! })
+                      setFormData({ ...formData, calle: capitalizar(e.detail.value!) })
                     }
                   />
                 </IonItem>
@@ -369,7 +379,7 @@ const AltaCliente: React.FC = () => {
                   <IonInput
                     value={formData.domicilio}
                     onIonChange={(e) =>
-                      setFormData({ ...formData, domicilio: e.detail.value! })
+                      setFormData({ ...formData, domicilio: capitalizar(e.detail.value!) })
                     }
                   />
                 </IonItem>
@@ -509,11 +519,15 @@ const AltaCliente: React.FC = () => {
       />
       <IonAlert
         isOpen={showSuccess}
+        onDidDismiss={() => setShowSuccess(false)}
         message="Actualizacion de cliente exitoso"
         buttons={[
           {
             text: "Aceptar",
-            handler: () => history.push("/Clientes"),
+            handler: () => {
+              setShowSuccess(false);
+              history.push("/Clientes");
+            },
           },
         ]}
       />

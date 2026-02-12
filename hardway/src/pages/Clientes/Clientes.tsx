@@ -70,7 +70,7 @@ const Clientes: React.FC = () => {
   } = useClientes();
   const { vipIds, recargarClientesVip } = useClientesVip();
   const [busqueda, setBusqueda] = useState("");
-  const [vistaGrid, setVistaGrid] = useState(true);
+  const [vistaGrid, setVistaGrid] = useState(false);
   const [filtroLocalidad, setFiltroLocalidad] = useState("");
   const [filtroDocumento, setFiltroDocumento] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -135,7 +135,7 @@ const Clientes: React.FC = () => {
       (cliente.telefono || "").includes(busqueda);
 
     const cumpleLocalidad =
-      !filtroLocalidad || cliente.localidad === filtroLocalidad;
+      !filtroLocalidad || cliente.localidad?.toLowerCase() === filtroLocalidad.toLowerCase();
     const cumpleDocumento =
       !filtroDocumento || cliente.tipoDocumento === filtroDocumento;
     const cumpleVip = !soloVip || vipIds.has(cliente.id);
@@ -255,6 +255,7 @@ const Clientes: React.FC = () => {
     setBusqueda("");
     setFiltroLocalidad("");
     setFiltroDocumento("");
+    setSoloVip(false);
   };
 
   // Mostrar historial de cliente
@@ -665,7 +666,7 @@ const Clientes: React.FC = () => {
               </IonSelect>
             </IonItem>
 
-            <IonItem className="filter-item">
+            <IonItem className="filter-item filter-item-vip">
               <IonLabel>Solo VIP</IonLabel>
               <IonToggle
                 checked={soloVip}

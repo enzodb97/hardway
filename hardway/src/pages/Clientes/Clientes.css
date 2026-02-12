@@ -158,9 +158,20 @@
   --padding-start: 12px;
   --padding-end: 12px;
   --min-height: 44px;
+  --border-width: 0;
+  --border-style: none;
   flex: 1;
   min-width: 200px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clientes-page .filter-item-vip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background: white;
 }
 
 .clientes-page .filter-actions {
