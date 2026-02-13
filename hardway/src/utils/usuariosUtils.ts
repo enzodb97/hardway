@@ -16,8 +16,18 @@ export function validarCamposUsuario(usuario: Partial<Usuario>): string | null {
   if (!usuario.username || usuario.username.trim().length < 3) {
     return "El nombre de usuario debe tener al menos 3 caracteres.";
   }
+  
+  // Validar que no contenga espacios
+  if (/\s/.test(usuario.username)) {
+    return "El nombre de usuario no puede contener espacios en blanco.";
+  }
+  
+  // Validar que no contenga números
+  if (/\d/.test(usuario.username)) {
+    return "El nombre de usuario no puede contener números.";
+  }
   // ✅ Validar que tenga al menos un rol
-  if (!usuario.rol && (!usuario.rolesIds || usuario.rolesIds.length === 0)) {
+  if (!usuario.rolesIds || usuario.rolesIds.length === 0) {
     return "Debe asignar al menos un rol al usuario.";
   }
   

@@ -431,7 +431,6 @@ const Envios: React.FC = () => {
         <IonCard className="filters-card">
           <IonCardContent>
             <IonGrid>
-              <IonRow>
                 <IonCol size="12" sizeMd="8">
                   <IonSearchbar
                     value={searchTerm}
@@ -441,33 +440,6 @@ const Envios: React.FC = () => {
                     className="custom-searchbar"
                   />
                 </IonCol>
-                <IonCol size="12" sizeMd="4">
-                  <div className="filter-chips">
-                    <IonChip
-                      color={filtroEstado === "todos" ? "primary" : "light"}
-                      onClick={() => setFiltroEstado("todos")}
-                    >
-                      Todos
-                    </IonChip>
-                    <IonChip
-                      color={
-                        filtroEstado === "pendientes" ? "warning" : "light"
-                      }
-                      onClick={() => setFiltroEstado("pendientes")}
-                    >
-                      Pendientes
-                    </IonChip>
-                    <IonChip
-                      color={
-                        filtroEstado === "despachados" ? "success" : "light"
-                      }
-                      onClick={() => setFiltroEstado("despachados")}
-                    >
-                      Despachados
-                    </IonChip>
-                  </div>
-                </IonCol>
-              </IonRow>
               
               {/* Botones de exportación PDF */}
               <IonRow>

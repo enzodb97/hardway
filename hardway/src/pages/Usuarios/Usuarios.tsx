@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   cargarUsuarios,
   crearUsuario,
@@ -44,6 +44,8 @@ import {
   searchOutline,
   chevronBackOutline,
   chevronForwardOutline,
+  eyeOutline,
+  eyeOffOutline,
 } from 'ionicons/icons';
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
@@ -57,8 +59,9 @@ const Usuarios: React.FC = () => {
   const [nuevoUsuario, setNuevoUsuario] = useState<Omit<Usuario, "id">>({
     username: "",
     password: "",
-    rol: "vendedor", // @deprecated - mantener por compatibilidad
-    roles: [], // ✅ NUEVO: Array de IDs de roles seleccionados
+    rol: "", // @deprecated - mantener por compatibilidad
+    roles: [], // ✅ NUEVO: Array de nombres de roles
+    rolesIds: [], // ✅ Array de IDs de roles seleccionados
   });
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
@@ -75,6 +78,31 @@ const Usuarios: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const usersPerPage = 3;
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarPasswordModal, setMostrarPasswordModal] = useState(false);
+
+  // Validar si el formulario de nuevo usuario es válido
+  const esFormularioValido = useMemo(() => {
+    const username = nuevoUsuario.username?.trim() || "";
+    const password = nuevoUsuario.password?.trim() || "";
+    const rolesIds = nuevoUsuario.rolesIds || [];
+
+    // Validar nombre de usuario
+    if (username.length < 3) return false;
+    if (/\s/.test(username)) return false; // No espacios
+    if (/\d/.test(username)) return false; // No números
+
+    // Validar contraseña
+    if (password.length < 8) return false;
+    if (!/\d/.test(password)) return false; // Al menos 1 número
+    if (!/[a-zA-Z]/.test(password)) return false; // Al menos 1 letra
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return false; // Al menos 1 carácter especial
+
+    // Validar que tenga al menos un rol
+    if (rolesIds.length === 0) return false;
+
+    return true;
+  }, [nuevoUsuario]);
 
   // Filtrar usuarios por búsqueda
   const filteredUsers = usuarios.filter(user => 
@@ -201,7 +229,8 @@ const Usuarios: React.FC = () => {
       await crearUsuario(nuevoUsuario);
       setAlertMsg("Usuario creado correctamente");
       setShowAlert(true);
-      setNuevoUsuario({ username: "", password: "", rol: "vendedor", roles: [], rolesIds: [] }); // ✅ Resetear también roles
+      setNuevoUsuario({ username: "", password: "", rol: "", roles: [], rolesIds: [] }); // ✅ Resetear también roles
+      setMostrarPassword(false); // Resetear visibilidad de contraseña
       cargarUsuarios().then(setUsuarios);
     } catch {
       setAlertMsg("Error al crear usuario");
@@ -332,7 +361,7 @@ const Usuarios: React.FC = () => {
                   <IonIcon icon={lockClosedOutline} slot="start" color="medium" />
                   <IonLabel position="floating">Contraseña</IonLabel>
                   <IonInput
-                    type="password"
+                    type={mostrarPassword ? "text" : "password"}
                     value={nuevoUsuario.password}
                     onIonChange={(e) =>
                       setNuevoUsuario({
@@ -343,6 +372,17 @@ const Usuarios: React.FC = () => {
                     required
                     clearInput
                   />
+                  <IonButton
+                    slot="end"
+                    fill="clear"
+                    onClick={() => setMostrarPassword(!mostrarPassword)}
+                  >
+                    <IonIcon
+                      slot="icon-only"
+                      icon={mostrarPassword ? eyeOffOutline : eyeOutline}
+                      color="medium"
+                    />
+                  </IonButton>
                 </IonItem>
                 <div className="password-requirements">
                   <IonText color="medium">
@@ -387,6 +427,7 @@ const Usuarios: React.FC = () => {
                   type="submit"
                   className="usuarios-btn"
                   strong={true}
+                  disabled={!esFormularioValido}
                 >
                   <IonIcon icon={personAddOutline} slot="start" />
                   Crear Usuario
@@ -642,7 +683,7 @@ const Usuarios: React.FC = () => {
             inputs={[
               {
                 name: "password",
-                type: "password",
+                type: mostrarPasswordModal ? "text" : "password",
                 placeholder: "Nueva contraseña",
                 value: nuevaPassword,
                 attributes: { minLength: 8 },
@@ -650,17 +691,26 @@ const Usuarios: React.FC = () => {
             ]}
             buttons={[
               {
+                text: mostrarPasswordModal ? "Ocultar" : "Mostrar",
+                handler: () => {
+                  setMostrarPasswordModal(!mostrarPasswordModal);
+                  return false; // No cerrar el alert
+                },
+              },
+              {
                 text: "Cancelar",
                 role: "cancel",
                 handler: () => {
                   setShowPasswordAlert(false);
                   setNuevaPassword("");
+                  setMostrarPasswordModal(false);
                 },
               },
               {
                 text: "Guardar",
                 handler: (data) => {
                   handleGuardarPassword(data.password);
+                  setMostrarPasswordModal(false);
                 },
               },
             ]}
