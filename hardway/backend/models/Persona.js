@@ -24,7 +24,7 @@ const Persona = sequelize.define(
     },
   },
   {
-    tableName: "Persona",
+    tableName: "persona", // ✅ Minúscula para coincidir con la BD
     timestamps: false,
   }
 );

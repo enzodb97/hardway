@@ -910,10 +910,13 @@ router.get("/:numeroPedido/picker-asignado", async (req, res) => {
   const { numeroPedido } = req.params;
   try {
     const [result] = await sequelize.query(
-      `SELECT ep.legajo, CONCAT(pe.nombre, ' ', pe.apellido) AS nombre
+      `SELECT 
+         ep.legajo, 
+         COALESCE(u.nombreUsuario, CONCAT(pe.nombre, ' ', pe.apellido)) AS nombre
        FROM asignacion_picking ap
        JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
        JOIN persona pe ON ep.idPersona = pe.idPersona
+       LEFT JOIN usuario u ON u.idPersona = pe.idPersona
        WHERE ap.numeroPedido = :numeroPedido
        ORDER BY ap.fechaAsignacion DESC
        LIMIT 1`,

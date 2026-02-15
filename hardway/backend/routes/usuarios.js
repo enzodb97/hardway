@@ -1,6 +1,65 @@
 const express = require('express');
 const router = express.Router();
 const { Usuario, TipoRol, sequelize, EncargadoPicker, Persona } = require('../models'); // ✅ Agregados EncargadoPicker y Persona
+const { Domicilio } = require('../models/Ubicacion'); // ✅ Importar Domicilio
+
+// ✅ NUEVO: Función para obtener o crear domicilio genérico
+async function obtenerDomicilioGenerico() {
+  try {
+    // Buscar si existe un domicilio genérico marcado como tal
+    let domicilioGenerico = await Domicilio.findOne({
+      where: { 
+        calle: 'PENDIENTE',
+        altura: 'S/N'
+      }
+    });
+
+    // Si no existe, crear uno
+    if (!domicilioGenerico) {
+      console.log('📍 Creando domicilio genérico...');
+      domicilioGenerico = await Domicilio.create({
+        calle: 'PENDIENTE',
+        altura: 'S/N',
+        piso: null,
+        departamento: null,
+        observaciones: 'Domicilio genérico para usuarios sin datos personales completos',
+        idBarrio: 1, // Usar barrio por defecto (debe existir en BD)
+        idCiudad: 1  // Usar ciudad por defecto (debe existir en BD)
+      });
+      console.log(`✅ Domicilio genérico creado con ID: ${domicilioGenerico.idDomicilio}`);
+    }
+
+    return domicilioGenerico.idDomicilio;
+  } catch (error) {
+    console.error('Error al obtener/crear domicilio genérico:', error);
+    throw new Error('No se pudo obtener domicilio genérico');
+  }
+}
+
+// ✅ NUEVO: Función para crear persona genérica para usuario
+async function crearPersonaGenerica(nombreUsuario) {
+  try {
+    const idDomicilio = await obtenerDomicilioGenerico();
+    
+    // Generar DNI temporal único basado en timestamp
+    const dniTemporal = 90000000 + Math.floor(Math.random() * 9999999);
+    
+    const persona = await Persona.create({
+      dni: dniTemporal,
+      tipoDocumento: 'DNI',
+      nombre: nombreUsuario.toUpperCase(),
+      apellido: 'PENDIENTE',
+      direccion: null,
+      idDomicilio: idDomicilio
+    });
+
+    console.log(`✅ Persona genérica creada: ID=${persona.idPersona}, DNI=${dniTemporal}`);
+    return persona.idPersona;
+  } catch (error) {
+    console.error('Error al crear persona genérica:', error);
+    throw new Error('No se pudo crear persona genérica');
+  }
+}
 
 // ✅ NUEVO: Función para generar legajo único de picker
 async function generarLegajoPicker() {
@@ -137,6 +196,8 @@ router.get("/", async (req, res) => {
 // Crear usuario
 router.post("/", async (req, res) => {
   const { username, password, roles } = req.body; // ✅ Ahora recibe array: roles: [2, 8]
+  const t = await sequelize.transaction();
+  
   try {
     // Validar contraseña
     const errorPassword = validarPassword(password);
@@ -151,26 +212,40 @@ router.post("/", async (req, res) => {
 
     // Verificar que todos los roles existen
     const rolesDB = await TipoRol.findAll({
-      where: { idTipoRol: roles }
+      where: { idTipoRol: roles },
+      transaction: t
     });
 
     if (rolesDB.length !== roles.length) {
+      await t.rollback();
       return res.status(400).json({ error: "Uno o más roles no son válidos" });
     }
 
-    // Crear usuario
+    // ✅ NUEVO: Si el usuario tiene rol Picker (ID=6), crear persona genérica
+    const ID_ROL_PICKER = 6;
+    const tieneRolPicker = roles.includes(ID_ROL_PICKER);
+    let idPersonaAsignada = null;
+
+    if (tieneRolPicker) {
+      console.log(`🔧 Usuario ${username} tiene rol Picker, creando persona genérica...`);
+      idPersonaAsignada = await crearPersonaGenerica(username);
+    }
+
+    // Crear usuario con idPersona si corresponde
     const nuevoUsuario = await Usuario.create({
       nombreUsuario: username,
       contrasena: password,
-    });
+      idPersona: idPersonaAsignada // NULL si no es picker, o ID de persona si lo es
+    }, { transaction: t });
 
     // Asignar roles mediante la tabla intermedia usuario_tiporol
-    await nuevoUsuario.setRoles(roles); // Sequelize maneja el INSERT en usuario_tiporol
+    await nuevoUsuario.setRoles(roles, { transaction: t }); // Sequelize maneja el INSERT en usuario_tiporol
 
     // ✅ NUEVO: Gestionar alta de picker si corresponde
     let resultadoPicker = { accion: 'NINGUNA' };
     if (nuevoUsuario.idPersona) {
       resultadoPicker = await gestionarRolPicker(nuevoUsuario, roles);
+      console.log(`✅ Resultado gestión picker:`, resultadoPicker);
     }
 
     // Obtener usuario con roles para responder
@@ -180,9 +255,12 @@ router.post("/", async (req, res) => {
         as: "roles",
         attributes: ["idTipoRol", "tipoRol"],
         through: { attributes: [] }
-      }
+      },
+      transaction: t
     });
 
+    await t.commit();
+    
     res.json({ 
       id: usuarioConRoles.idUsuario, 
       username: usuarioConRoles.nombreUsuario, 
@@ -190,8 +268,9 @@ router.post("/", async (req, res) => {
       picker: resultadoPicker.accion === 'ALTA' ? { legajo: resultadoPicker.legajo } : null
     });
   } catch (error) {
+    await t.rollback();
     console.error("Error al crear usuario:", error);
-    res.status(400).json({ error: "No se pudo crear el usuario" });
+    res.status(400).json({ error: error.message || "No se pudo crear el usuario" });
   }
 });
 

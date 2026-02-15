@@ -35,7 +35,7 @@ router.get("/tareas-admin", async (req, res) => {
         ap.observaciones,
         ap.legajoPicker,
         ap.completado,
-        CONCAT(p_picker.nombre, ' ', COALESCE(p_picker.apellido, '')) AS pickerAsignado,
+        COALESCE(u_picker.nombreUsuario, CONCAT(p_picker.nombre, ' ', COALESCE(p_picker.apellido, ''))) AS pickerAsignado,
         COUNT(dp.idDetallePedido) AS totalItems
       FROM asignacion_picking ap
       JOIN pedido p ON ap.numeroPedido = p.numeroPedido
@@ -44,6 +44,7 @@ router.get("/tareas-admin", async (req, res) => {
       LEFT JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona p_picker ON ep.idPersona = p_picker.idPersona
+      LEFT JOIN usuario u_picker ON u_picker.idPersona = p_picker.idPersona
       WHERE p.estaActivo = 1
         AND ap.idAsignacion = (
           SELECT MAX(ap2.idAsignacion) 
@@ -53,7 +54,7 @@ router.get("/tareas-admin", async (req, res) => {
       GROUP BY 
         ap.idAsignacion, ap.numeroPedido, p.fechaPedido, p.idEstado, per.nombre, per.apellido,
         c.email, c.telefono, ap.fechaAsignacion, ap.observaciones,
-        ap.legajoPicker, ap.completado, p_picker.nombre, p_picker.apellido
+        ap.legajoPicker, ap.completado, u_picker.nombreUsuario, p_picker.nombre, p_picker.apellido
       ORDER BY ap.fechaAsignacion DESC
     `);
     
@@ -73,11 +74,12 @@ router.get("/pickers", async (req, res) => {
       SELECT 
         ep.legajo as id,
         ep.legajo,
-        CONCAT(p.nombre, ' ', COALESCE(p.apellido, '')) AS nombre,
-        CONCAT(p.nombre, ' ', COALESCE(p.apellido, '')) AS nombreCompleto
+        COALESCE(u.nombreUsuario, CONCAT(p.nombre, ' ', COALESCE(p.apellido, ''))) AS nombre,
+        COALESCE(u.nombreUsuario, CONCAT(p.nombre, ' ', COALESCE(p.apellido, ''))) AS nombreCompleto
       FROM encargadopicker ep
       JOIN persona p ON ep.idPersona = p.idPersona
-      ORDER BY p.nombre
+      LEFT JOIN usuario u ON u.idPersona = p.idPersona
+      ORDER BY COALESCE(u.nombreUsuario, p.nombre)
     `);
     
     res.json(results);

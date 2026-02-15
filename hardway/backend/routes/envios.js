@@ -42,11 +42,12 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         p.idEstado,
         ap.legajoPicker,
         ap.completado,
-        CONCAT(per.nombre, ' ', COALESCE(per.apellido, '')) as nombrePicker
+        COALESCE(u.nombreUsuario, CONCAT(per.nombre, ' ', COALESCE(per.apellido, ''))) as nombrePicker
       FROM pedido p
       LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona per ON ep.idPersona = per.idPersona
+      LEFT JOIN usuario u ON u.idPersona = per.idPersona
       WHERE p.idEstado IN (3, 4) AND p.estaActivo = 1
       LIMIT 5
     `);
@@ -66,7 +67,7 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         ee.nombre AS empresaEnvio,
         p.idEstado,
         MAX(ap.legajoPicker) AS despachadorAsignado,
-        CONCAT(p_picker.nombre, ' ', COALESCE(p_picker.apellido, '')) AS nombreDespachador
+        COALESCE(u_picker.nombreUsuario, CONCAT(p_picker.nombre, ' ', COALESCE(p_picker.apellido, ''))) AS nombreDespachador
       FROM pedido p
       JOIN cliente c ON p.idCliente = c.idCliente
       JOIN persona pe ON c.idPersona = pe.idPersona
@@ -77,10 +78,11 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
       LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona p_picker ON ep.idPersona = p_picker.idPersona
+      LEFT JOIN usuario u_picker ON u_picker.idPersona = p_picker.idPersona
       WHERE ${whereClause}
       GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, 
                p.codigoSeguimiento, p.idEmpresaEnvio, ee.nombre, p.idEstado, 
-               p_picker.nombre, p_picker.apellido
+               u_picker.nombreUsuario, p_picker.nombre, p_picker.apellido
       ORDER BY p.fechaPedido DESC
     `);
     

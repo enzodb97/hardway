@@ -96,9 +96,33 @@ const Picking: React.FC = () => {
       console.log("📊 Estados de las tareas:", data.map((t: any) => ({ pedido: t.numeroPedido, idEstado: t.idEstado, completado: t.completado })));
       setTareas(data);
       setTareasFiltradas(data); // Inicialmente mostrar todas las tareas
-    } catch (err) {
-      setAlertMsg("Error al cargar tareas");
+      
+      // Si es picker y no tiene tareas, mostrar mensaje informativo
+      if (data.length === 0 && hasRole("Picker")) {
+        setAlertMsg("Todavía no tiene ningún pedido asignado");
+        setShowAlert(true);
+      }
+    } catch (err: any) {
+      console.error("Error al cargar tareas:", err);
+      
+      // Diferenciar entre diferentes tipos de error
+      if (err.response?.data?.codigo === "PICKER_NOT_CONFIGURED") {
+        // Usuario Picker sin configuración completa
+        setAlertMsg(err.response.data.mensaje || "Todavía no tiene ningún pedido asignado");
+      } else if (hasRole("Picker") && (err.response?.status === 404 || err.response?.data?.message?.includes("sin tareas"))) {
+        // Picker válido sin tareas asignadas
+        setAlertMsg("Todavía no tiene ningún pedido asignado");
+      } else if (err.response?.status === 403 || err.response?.status === 401) {
+        // Error de autenticación o autorización
+        setAlertMsg("No tiene permisos para acceder a esta sección. Contacte al administrador.");
+      } else {
+        // Error general del servidor
+        setAlertMsg("Error al cargar tareas. Por favor, intente nuevamente.");
+      }
+      
       setShowAlert(true);
+      setTareas([]);
+      setTareasFiltradas([]);
     }
     setLoading(false);
   };

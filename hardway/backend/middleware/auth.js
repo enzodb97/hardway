@@ -293,6 +293,38 @@ const verificarAccesoPicking = async (req, res, next) => {
   // Para usuarios no administradores, exigir legajo de picker
   if (!legajoPicker) {
     console.log('❌ No se pudo obtener legajo del picker y el usuario no es administrador');
+    
+    // Verificar si el usuario tiene el rol de Picker pero no está configurado correctamente
+    try {
+      const usuario = await Usuario.findOne({
+        where: { nombreUsuario },
+        include: [{
+          model: TipoRol,
+          as: 'roles',
+          attributes: ["idTipoRol", "tipoRol"],
+          through: { attributes: [] }
+        }]
+      });
+      
+      const esPicker = usuario?.roles?.some(rol => 
+        rol.tipoRol === 'Picker' || rol.tipoRol === 'Encargado de Picking'
+      );
+      
+      if (esPicker) {
+        console.log('⚠️ Usuario tiene rol Picker pero no está configurado en EncargadoPicker');
+        console.log('💡 SOLUCIÓN: Este usuario debería haberse creado con persona y legajo automáticamente.');
+        console.log('💡 Si es un usuario antiguo, ejecute el script: backend/fix-usuario-jorge.sql');
+        return res.status(403).json({
+          error: "Usuario Picker no configurado correctamente. Contacte al administrador para completar su registro.",
+          codigo: "PICKER_NOT_CONFIGURED",
+          mensaje: "Todavía no tiene ningún pedido asignado",
+          ayuda: "Este usuario necesita tener un registro en la tabla encargadopicker con un legajo asignado."
+        });
+      }
+    } catch (error) {
+      console.error('Error verificando roles del usuario:', error);
+    }
+    
     return res.status(401).json({
       error: "Acceso denegado: legajo de picker requerido",
       codigo: "NO_PICKER_ID",
