@@ -53,6 +53,14 @@ export function validarCamposCliente(
       formData.tipoDocumento
     );
     if (errorCUILCUIT) return errorCUILCUIT;
+  } else if (formData.tipoDocumento === 'DNI') {
+    // Validar que el DNI tenga exactamente 7 u 8 dígitos
+    if (numeroDocumentoStr.length < 7) {
+      return "El DNI debe tener al menos 7 dígitos.";
+    }
+    if (numeroDocumentoStr.length > 8) {
+      return "El DNI no puede superar los 8 dígitos.";
+    }
   } else if (numeroDocumentoStr.length < 8) {
     return "El N° de Documento debe tener al menos 8 caracteres.";
   }

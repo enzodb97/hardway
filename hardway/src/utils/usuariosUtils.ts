@@ -7,6 +7,30 @@ export interface Usuario {
   rol: string; // @deprecated - mantener por compatibilidad
   roles?: string[]; // ✅ NUEVO: Array de nombres de roles
   rolesIds?: number[]; // ✅ NUEVO: Array de IDs de roles
+  estaActivo?: boolean; // ✅ NUEVO: Indica si el usuario está activo o inactivo
+  idMotivoInactivacion?: number; // ✅ NUEVO: ID del motivo de inactivación
+  fechaInactivacion?: string; // ✅ NUEVO: Fecha de inactivación
+  observacionInactivacion?: string; // ✅ NUEVO: Observaciones de inactivación
+}
+
+export interface MotivoInactivacion {
+  idMotivo: number;
+  descripcion: string;
+}
+
+export interface PedidoActivo {
+  numeroPedido: string;
+  fechaPedido: string;
+  idEstado: number;
+  nombreEstado: string;
+  idCliente: number;
+  nombreCliente: string;
+}
+
+export interface UsuarioPorRol {
+  id: number;
+  username: string;
+  roles: string;
 }
 
 export const rolesDisponibles = ["admin", "vendedor", "consulta"];
@@ -73,8 +97,11 @@ export function validarUnicidadUsuario(
 }
 
 // Obtener usuarios
-export const cargarUsuarios = async (): Promise<Usuario[]> => {
-  const res = await axiosInstance.get("/api/usuarios");
+export const cargarUsuarios = async (soloInactivos: boolean = false): Promise<Usuario[]> => {
+  const url = soloInactivos 
+    ? "/api/usuarios?soloInactivos=true"  // Solo usuarios inactivos
+    : "/api/usuarios";                     // Solo usuarios activos (por defecto)
+  const res = await axiosInstance.get(url);
   return res.data;
 };
 
@@ -126,3 +153,95 @@ export async function cambiarPassword(id: number, password: string) {
   
   await axiosInstance.put(`/api/usuarios/${id}/password`, { password: passwordTrimmed });
 }
+
+// ========== NUEVAS FUNCIONES PARA SISTEMA DE USUARIOS INACTIVOS ==========
+
+// Obtener motivos de inactivación
+export const obtenerMotivosInactivacion = async (): Promise<MotivoInactivacion[]> => {
+  const res = await axiosInstance.get('/api/usuarios/motivos-inactivacion');
+  return res.data;
+};
+
+// Obtener pedidos activos de un usuario
+export const obtenerPedidosActivos = async (idUsuario: number): Promise<{ count: number; pedidos: PedidoActivo[] }> => {
+  const res = await axiosInstance.get(`/api/usuarios/${idUsuario}/pedidos-activos`, {
+    timeout: 15000 // 15 segundos para queries complejas
+  });
+  const data = res.data;
+  // Validar que pedidos sea un array
+  if (!data || !Array.isArray(data.pedidos)) {
+    console.error('Formato de respuesta inválido:', data);
+    return { count: 0, pedidos: [] };
+  }
+  return { count: data.count || data.pedidos.length, pedidos: data.pedidos };
+};
+
+// Obtener roles de un usuario
+export const obtenerRolesUsuario = async (idUsuario: number): Promise<{ rolesIds: number[]; rolesNombres: string[] }> => {
+  const res = await axiosInstance.get(`/api/usuarios/${idUsuario}/roles`);
+  const data = res.data;
+  // Validar formato de respuesta
+  if (!data || !Array.isArray(data.rolesIds) || !Array.isArray(data.rolesNombres)) {
+    console.error('Formato de respuesta inválido para roles:', data);
+    return { rolesIds: [], rolesNombres: [] };
+  }
+  return { rolesIds: data.rolesIds, rolesNombres: data.rolesNombres };
+};
+
+// Obtener usuarios que tienen ciertos roles (para reasignación)
+export const obtenerUsuariosPorRoles = async (rolesIds: number[], excluirId?: number): Promise<UsuarioPorRol[]> => {
+  const params = new URLSearchParams();
+  params.append('rolesIds', rolesIds.join(','));
+  if (excluirId) {
+    params.append('excluirId', excluirId.toString());
+  }
+  const res = await axiosInstance.get(`/api/usuarios/por-roles?${params.toString()}`);
+  const data = res.data;
+  // Validar que la respuesta sea un array
+  if (!Array.isArray(data)) {
+    console.error('Formato de respuesta inválido para usuarios por roles:', data);
+    return [];
+  }
+  return data;
+};
+
+// Inactivar usuario directamente (sin pedidos activos)
+export const inactivarUsuarioDirecto = async (
+  idUsuario: number, 
+  idMotivoInactivacion: number, 
+  observacionInactivacion?: string
+) => {
+  return await axiosInstance.patch(`/api/usuarios/${idUsuario}/inactivar`, {
+    idMotivoInactivacion,
+    observacionInactivacion
+  });
+};
+
+// Reasignar pedidos activos e inactivar usuario
+export const reasignarYInactivar = async (
+  idUsuarioOrigen: number, 
+  idUsuarioDestino: number,
+  idMotivoInactivacion: number,
+  observacionInactivacion?: string
+) => {
+  // ⏱️ Timeout extendido a 30 segundos para operaciones complejas de reasignación
+  return await axiosInstance.post('/api/usuarios/reasignar-y-inactivar', {
+    idUsuarioOrigen,
+    idUsuarioDestino,
+    idMotivoInactivacion,
+    observacionInactivacion
+  }, {
+    timeout: 30000 // 30 segundos
+  });
+};
+
+// Reactivar usuario
+export const reactivarUsuario = async (idUsuario: number) => {
+  return await axiosInstance.patch(`/api/usuarios/${idUsuario}/reactivar`);
+};
+
+// ✅ NUEVO: Obtener historial de activaciones/inactivaciones de un usuario
+export const obtenerHistorialUsuario = async (idUsuario: number) => {
+  const response = await axiosInstance.get(`/api/usuarios/${idUsuario}/historial`);
+  return response.data;
+};

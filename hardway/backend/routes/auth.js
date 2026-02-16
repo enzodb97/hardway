@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
     // ✅ Busca el usuario con sus MÚLTIPLES roles
     const usuario = await Usuario.findOne({
       where: { nombreUsuario },
-      attributes: ['idUsuario', 'nombreUsuario', 'contrasena', 'idPersona'],
+      attributes: ['idUsuario', 'nombreUsuario', 'contrasena', 'idPersona', 'estaActivo'],
       include: {
         model: TipoRol,
         as: "roles", // Usar alias de la relación N:M
@@ -47,6 +47,15 @@ router.post("/login", async (req, res) => {
     if (!usuario || usuario.contrasena !== passwordToCheck) {
       console.log(`❌ Credenciales inválidas para ${nombreUsuario}`);
       return res.status(401).json({ error: "Credenciales inválidas" });
+    }
+    
+    // ✅ Verificar que el usuario esté activo
+    if (usuario.estaActivo === 0 || usuario.estaActivo === false) {
+      console.log(`❌ Usuario inactivo: ${nombreUsuario}`);
+      return res.status(403).json({ 
+        error: "Usuario inactivo. Consulte con el administrador.",
+        codigo: "USUARIO_INACTIVO"
+      });
     }
     
     // ✅ Verificar si tiene algún rol de tipo "Picker"

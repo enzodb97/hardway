@@ -24,6 +24,30 @@ const validarCUILCUIT = (valor, tipo) => {
   return null;
 };
 
+// Función para validar formato DNI
+const validarDNI = (valor) => {
+  if (!valor) return "El DNI es obligatorio.";
+  
+  // Remover guiones o puntos si existen
+  const valorLimpio = String(valor).replace(/[-\.]/g, '');
+  
+  // Verificar que solo contenga números
+  if (!/^\d+$/.test(valorLimpio)) {
+    return "El DNI solo debe contener números.";
+  }
+  
+  // Verificar longitud (7 u 8 dígitos)
+  if (valorLimpio.length < 7) {
+    return "El DNI debe tener al menos 7 dígitos.";
+  }
+  
+  if (valorLimpio.length > 8) {
+    return "El DNI no puede superar los 8 dígitos.";
+  }
+  
+  return null;
+};
+
 // Obtener todos los clientes
 router.get("/", async (req, res) => {
   try {
@@ -120,10 +144,17 @@ router.get("/motivos-baja", async (req, res) => {
 router.post("/", async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    // Validar formato CUIL/CUIT si corresponde
+    // Validar formato según tipo de documento
     const tipoDocumento = req.body.tipoDocumento || 'DNI';
+    
     if (tipoDocumento === 'CUIL' || tipoDocumento === 'CUIT') {
       const errorValidacion = validarCUILCUIT(req.body.numeroDocumento, tipoDocumento);
+      if (errorValidacion) {
+        await t.rollback();
+        return res.status(400).json({ error: errorValidacion });
+      }
+    } else if (tipoDocumento === 'DNI') {
+      const errorValidacion = validarDNI(req.body.numeroDocumento);
       if (errorValidacion) {
         await t.rollback();
         return res.status(400).json({ error: errorValidacion });
@@ -195,10 +226,17 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    // Validar formato CUIL/CUIT si corresponde
+    // Validar formato según tipo de documento
     const tipoDocumento = req.body.tipoDocumento || 'DNI';
+    
     if (tipoDocumento === 'CUIL' || tipoDocumento === 'CUIT') {
       const errorValidacion = validarCUILCUIT(req.body.numeroDocumento, tipoDocumento);
+      if (errorValidacion) {
+        await t.rollback();
+        return res.status(400).json({ error: errorValidacion });
+      }
+    } else if (tipoDocumento === 'DNI') {
+      const errorValidacion = validarDNI(req.body.numeroDocumento);
       if (errorValidacion) {
         await t.rollback();
         return res.status(400).json({ error: errorValidacion });

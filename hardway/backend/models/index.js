@@ -17,6 +17,7 @@ const EmpresaEnvio = require('./EmpresaEnvio'); // Nuevo modelo
 const AsignacionPicking = require('./AsignacionPicking'); // Nuevo modelo
 const MotivoModificacionPedido = require('./MotivoModificacionPedido');
 const HistorialModificacionPedido = require('./HistorialModificacionPedido');
+const MotivoInactivacionUsuario = require('./MotivoInactivacionUsuario'); // Nuevo modelo
 const PresentacionProducto = require('./PresentacionProducto'); // Modelo para presentaciones
 const ConfiguracionPresentacion = require('./ConfiguracionPresentacion'); // Modelo para configuración
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
@@ -130,6 +131,12 @@ const setupAssociations = () => {
     foreignKey: "idTipoRol",
     otherKey: "idUsuario",
     as: "usuarios" // Alias para acceder: tipoRol.usuarios
+  });
+
+  // ✅ Relación Usuario -> MotivoInactivacionUsuario
+  Usuario.belongsTo(MotivoInactivacionUsuario, { 
+    foreignKey: "idMotivoInactivacion",
+    as: "motivoInactivacion"
   });
   
   // ❌ RELACIONES ANTIGUAS ELIMINADAS:
@@ -308,6 +315,9 @@ module.exports = {
   // Modelos de auditoría de pedidos
   MotivoModificacionPedido,
   HistorialModificacionPedido,
+  
+  // Modelos de auditoría de usuarios
+  MotivoInactivacionUsuario,
   
   // Modelos de presentaciones de producto
   PresentacionProducto,

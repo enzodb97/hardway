@@ -301,8 +301,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setShowWelcome(true); // Activa el mensaje tras login exitoso
       
       return true;
-    } catch (error) {
-      setError("Credenciales inválidas");
+    } catch (error: any) {
+      // Extraer el mensaje de error del backend
+      const errorMsg = error?.response?.data?.error || "Credenciales inválidas";
+      setError(errorMsg);
       setIsAuthenticated(false);
       setRol(null);
       setRoles([]); // ✅ NUEVO

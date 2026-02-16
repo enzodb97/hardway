@@ -8,7 +8,18 @@ import {
   validarCamposUsuario,
   validarUnicidadUsuario,
   Usuario,
+  obtenerPedidosActivos,
+  obtenerRolesUsuario,
+  obtenerUsuariosPorRoles,
+  inactivarUsuarioDirecto,
+  reasignarYInactivar,
+  reactivarUsuario,
+  obtenerMotivosInactivacion,
+  PedidoActivo,
+  UsuarioPorRol,
+  MotivoInactivacion,
 } from "../../utils/usuariosUtils";
+import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
 import {
   IonPage,
   IonHeader,
@@ -29,6 +40,13 @@ import {
   IonItemDivider,
   IonText,
   IonChip,
+  IonToggle,
+  IonModal,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonTextarea,
 } from "@ionic/react";
 import {
   personAddOutline,
@@ -46,11 +64,19 @@ import {
   chevronForwardOutline,
   eyeOutline,
   eyeOffOutline,
+  toggleOutline,
+  powerOutline,
+  refreshOutline,
+  swapHorizontalOutline,
+  personRemoveOutline,
+  alertCircleOutline,
+  time,
 } from 'ionicons/icons';
 import "./Usuarios.css";
 import { useAuth } from "../../context/AuthContext";
 import zepelin from "../../assets/images/zepelin.png";
 import axiosInstance from "../../config/axios";
+import HistorialUsuario from "./HistorialUsuario";
 
 const Usuarios: React.FC = () => {
   const { roles, hasRole } = useAuth(); // ✅ Usar roles y hasRole
@@ -80,6 +106,22 @@ const Usuarios: React.FC = () => {
   const usersPerPage = 3;
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarPasswordModal, setMostrarPasswordModal] = useState(false);
+  const [mostrarInactivos, setMostrarInactivos] = useState(false); // ✅ NUEVO
+  const [showInactivarModal, setShowInactivarModal] = useState(false); // ✅ NUEVO
+  const [usuarioAInactivar, setUsuarioAInactivar] = useState<Usuario | null>(null); // ✅ NUEVO
+  const [pedidosActivos, setPedidosActivos] = useState<PedidoActivo[]>([]); // ✅ NUEVO
+  const [usuariosParaReasignar, setUsuariosParaReasignar] = useState<UsuarioPorRol[]>([]); // ✅ NUEVO
+  const [usuarioDestinoId, setUsuarioDestinoId] = useState<number | null>(null); // ✅ NUEVO
+  const [motivosInactivacion, setMotivosInactivacion] = useState<MotivoInactivacion[]>([]); // ✅ NUEVO
+  const [motivoSeleccionado, setMotivoSeleccionado] = useState<number | null>(null); // ✅ NUEVO
+  const [observacionInactivacion, setObservacionInactivacion] = useState<string>(''); // ✅ NUEVO
+  
+  // ✅ NUEVO: Estados para historial de usuario
+  const [showHistorial, setShowHistorial] = useState(false);
+  const [usuarioHistorial, setUsuarioHistorial] = useState<{
+    id: number;
+    username: string;
+  } | null>(null);
 
   // Validar si el formulario de nuevo usuario es válido
   const esFormularioValido = useMemo(() => {
@@ -184,31 +226,49 @@ const Usuarios: React.FC = () => {
     );
   }
 
-  // Cargar usuarios y roles al montar
+  // Cargar tipos de rol al montar (solo una vez)
   useEffect(() => {
     if (!hasRole("Administrador")) {
       return;
     }
     
-    cargarUsuarios().then((usuariosData) => {
-      setUsuarios(usuariosData);
-    }).catch((error) => {
-      console.error("Usuarios.tsx: Error al cargar usuarios:", error);
-      setAlertMsg("Error al cargar usuarios");
-      setShowAlert(true);
-    });
-    
-    // ✅ Cargar tipos de rol desde el backend
+    // Cargar tipos de rol desde el backend
     axiosInstance.get("/api/usuarios/tipos-rol")
       .then((res: any) => {
-        setRolesDisponibles(res.data); // Array de {idTipoRol, tipoRol, descripcionRol}
+        setRolesDisponibles(res.data);
       })
       .catch((error) => {
         console.error("Usuarios.tsx: Error al cargar tipos de rol:", error);
         setAlertMsg("Error al cargar roles disponibles");
         setShowAlert(true);
       });
-  }, [roles, hasRole]); // ✅ Actualizar dependencias
+
+    // Cargar motivos de inactivación
+    obtenerMotivosInactivacion()
+      .then((motivos) => {
+        setMotivosInactivacion(motivos);
+      })
+      .catch((error) => {
+        console.error("Usuarios.tsx: Error al cargar motivos:", error);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo al montar, hasRole es estable
+  
+  // Cargar usuarios cuando cambia el filtro de inactivos
+  useEffect(() => {
+    if (!hasRole("Administrador")) {
+      return;
+    }
+    
+    cargarUsuarios(mostrarInactivos).then((usuariosData) => {
+      setUsuarios(usuariosData);
+    }).catch((error) => {
+      console.error("Usuarios.tsx: Error al cargar usuarios:", error);
+      setAlertMsg("Error al cargar usuarios");
+      setShowAlert(true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mostrarInactivos]); // Solo cuando cambia mostrarInactivos, hasRole es estable
 
   // Crear usuario
   const handleCrear = async (e: React.FormEvent) => {
@@ -231,17 +291,142 @@ const Usuarios: React.FC = () => {
       setShowAlert(true);
       setNuevoUsuario({ username: "", password: "", rol: "", roles: [], rolesIds: [] }); // ✅ Resetear también roles
       setMostrarPassword(false); // Resetear visibilidad de contraseña
-      cargarUsuarios().then(setUsuarios);
+      cargarUsuarios(mostrarInactivos).then(setUsuarios);
     } catch {
       setAlertMsg("Error al crear usuario");
       setShowAlert(true);
     }
   };
 
-  // Eliminar usuario
+  // ✅ NUEVO: Inactivar/Reactivar usuario
+  const handleInactivarReactivar = async (usuario: Usuario) => {
+    // Si está inactivo, reactivar directamente
+    if (usuario.estaActivo === false) {
+      try {
+        await reactivarUsuario(usuario.id);
+        setAlertMsg(`Usuario ${usuario.username} reactivado correctamente`);
+        setShowAlert(true);
+        cargarUsuarios(mostrarInactivos).then(setUsuarios);
+      } catch (error: any) {
+        setAlertMsg(error.response?.data?.error || "Error al reactivar usuario");
+        setShowAlert(true);
+      }
+      return;
+    }
+
+    // Si está activo, verificar pedidos
+    try {
+      const resultado = await obtenerPedidosActivos(usuario.id);
+      console.log('Resultado de obtenerPedidosActivos:', resultado);
+      
+      const { count, pedidos } = resultado;
+      
+      // Validar que pedidos sea un array
+      if (!Array.isArray(pedidos)) {
+        console.error('pedidos no es un array:', pedidos);
+        setAlertMsg("Error: formato de datos inválido");
+        setShowAlert(true);
+        return;
+      }
+      
+      console.log(`Usuario ${usuario.username} tiene ${count} pedidos activos`);
+      
+      // ✅ SIEMPRE abrir modal para solicitar motivo, con o sin pedidos
+      setPedidosActivos(pedidos);
+      setUsuarioAInactivar(usuario);
+      
+      if (count > 0 && pedidos.length > 0) {
+        // Tiene pedidos activos, obtener usuarios para reasignación
+        try {
+          console.log('Obteniendo roles del usuario...');
+          const rolesResult = await obtenerRolesUsuario(usuario.id);
+          console.log('Roles obtenidos:', rolesResult);
+          
+          const { rolesIds } = rolesResult;
+          console.log('Buscando usuarios compatibles con roles:', rolesIds);
+          
+          const usuariosCompatibles = await obtenerUsuariosPorRoles(rolesIds, usuario.id);
+          console.log('Usuarios compatibles encontrados:', usuariosCompatibles);
+          
+          setUsuariosParaReasignar(usuariosCompatibles);
+        } catch (errorRoles: any) {
+          console.error('Error al obtener usuarios para reasignación:', errorRoles);
+          setAlertMsg(errorRoles.response?.data?.error || "Error al obtener usuarios para reasignación");
+          setShowAlert(true);
+          return;
+        }
+      } else {
+        // No tiene pedidos, pero igual necesita motivo
+        setUsuariosParaReasignar([]);
+      }
+      
+      // Abrir modal con motivo obligatorio
+      setShowInactivarModal(true);
+
+    } catch (error: any) {
+      console.error('Error en handleInactivarReactivar:', error);
+      setAlertMsg(error.response?.data?.error || "Error al verificar pedidos");
+      setShowAlert(true);
+    }
+  };
+
+  // ✅ NUEVO: Confirmar reasignación e inactivación
+  const handleConfirmarReasignacion = async () => {
+    if (!usuarioAInactivar || !usuarioDestinoId) {
+      setAlertMsg("Debe seleccionar un usuario para reasignar los pedidos");
+      setShowAlert(true);
+      return;
+    }
+
+    if (!motivoSeleccionado) {
+      setAlertMsg("Debe seleccionar un motivo de inactivación");
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      const response = await reasignarYInactivar(
+        usuarioAInactivar.id,
+        usuarioDestinoId,
+        motivoSeleccionado,
+        observacionInactivacion || undefined
+      );
+      setAlertMsg(
+        `${response.data.pedidosReasignados} pedidos reasignados de ${response.data.usuarioOrigen} a ${response.data.usuarioDestino}. Usuario inactivado correctamente.`
+      );
+      setShowAlert(true);
+      setShowInactivarModal(false);
+      setUsuarioAInactivar(null);
+      setUsuarioDestinoId(null);
+      setPedidosActivos([]);
+      setUsuariosParaReasignar([]);
+      setMotivoSeleccionado(null);
+      setObservacionInactivacion('');
+      cargarUsuarios(mostrarInactivos).then(setUsuarios);
+    } catch (error: any) {
+      setAlertMsg(error.response?.data?.error || "Error al reasignar pedidos e inactivar usuario");
+      setShowAlert(true);
+    }
+  };
+
+  // ✅ NUEVO: Mostrar historial de usuario
+  const mostrarHistorial = (usuario: Usuario) => {
+    setUsuarioHistorial({
+      id: usuario.id,
+      username: usuario.username,
+    });
+    setShowHistorial(true);
+  };
+
+  const cerrarHistorial = () => {
+    setShowHistorial(false);
+    setUsuarioHistorial(null);
+  };
+
+  // Eliminar usuario - OBSOLETO
   const handleEliminar = (id: number) => {
-    setUserToDelete(id);
-    setShowDeleteAlert(true);
+    setAlertMsg("La eliminación directa de usuarios no está permitida. Use inactivar en su lugar.");
+    setShowAlert(true);
   };
 
   const confirmDelete = async () => {
@@ -285,7 +470,7 @@ const Usuarios: React.FC = () => {
       setAlertMsg("Usuario actualizado correctamente");
       setShowAlert(true);
       setEditando(null);
-      cargarUsuarios().then(setUsuarios);
+      cargarUsuarios(mostrarInactivos).then(setUsuarios);
     } catch {
       setAlertMsg("Error al actualizar usuario");
       setShowAlert(true);
@@ -483,6 +668,20 @@ const Usuarios: React.FC = () => {
                       clearInput
                     />
                   </IonItem>
+                  
+                  {/* ✅ NUEVO: Toggle para mostrar inactivos */}
+                  <IonItem lines="none">
+                    <IonIcon slot="start" icon={toggleOutline} color="medium" />
+                    <IonLabel>Mostrar usuarios inactivos</IonLabel>
+                    <IonToggle
+                      checked={mostrarInactivos}
+                      onIonChange={(e) => {
+                        setMostrarInactivos(e.detail.checked);
+                        setCurrentPage(1);
+                      }}
+                      color="primary"
+                    />
+                  </IonItem>
                 </div>
 
                 <IonList className="usuarios-list usuarios-list-animate">
@@ -566,7 +765,17 @@ const Usuarios: React.FC = () => {
                   <IonItem key={usuario.id} className="usuarios-list-item">
                     <IonIcon icon={personCircleOutline} slot="start" color="medium" />
                     <IonLabel>
-                      <strong>{usuario.username}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <strong>{usuario.username}</strong>
+                        {/* ✅ NUEVO: Chip de estado */}
+                        <IonChip 
+                          color={usuario.estaActivo !== false ? "success" : "medium"} 
+                          style={{ fontSize: '0.75rem', height: '20px' }}
+                        >
+                          <IonIcon icon={usuario.estaActivo !== false ? checkmarkCircle : closeCircleOutline} />
+                          <IonLabel>{usuario.estaActivo !== false ? "Activo" : "Inactivo"}</IonLabel>
+                        </IonChip>
+                      </div>
                       <div>
                         {usuario.roles && usuario.roles.length > 0 ? (
                           usuario.roles.map((rol, index) => (
@@ -587,6 +796,7 @@ const Usuarios: React.FC = () => {
                       fill="clear"
                       color="warning"
                       onClick={() => handleEditar(usuario)}
+                      disabled={usuario.estaActivo === false}
                     >
                       <IonIcon slot="icon-only" icon={pencilOutline} className="boton" />
                     </IonButton>
@@ -594,15 +804,29 @@ const Usuarios: React.FC = () => {
                       fill="clear"
                       color="tertiary"
                       onClick={() => handleCambiarPassword(usuario.id)}
+                      disabled={usuario.estaActivo === false}
                     >
                       <IonIcon slot="icon-only" icon={keyOutline} className="boton" />
                     </IonButton>
+                    {/* ✅ NUEVO: Botón Historial */}
                     <IonButton
                       fill="clear"
-                      color="danger"
-                      onClick={() => handleEliminar(usuario.id)}
+                      color="medium"
+                      onClick={() => mostrarHistorial(usuario)}
                     >
-                      <IonIcon slot="icon-only" icon={trashOutline} className="boton" />
+                      <IonIcon slot="icon-only" icon={time} className="boton" />
+                    </IonButton>
+                    {/* ✅ MODIFICADO: Botón Inactivar/Reactivar */}
+                    <IonButton
+                      fill="clear"
+                      color={usuario.estaActivo !== false ? "danger" : "success"}
+                      onClick={() => handleInactivarReactivar(usuario)}
+                    >
+                      <IonIcon 
+                        slot="icon-only" 
+                        icon={usuario.estaActivo !== false ? powerOutline : refreshOutline} 
+                        className="boton" 
+                      />
                     </IonButton>
                   </IonItem>
                 )
@@ -716,6 +940,243 @@ const Usuarios: React.FC = () => {
             ]}
             cssClass="password-alert"
           />
+          
+          {/* ✅ NUEVO: Modal de reasignación de pedidos */}
+          <IonModal 
+            isOpen={showInactivarModal} 
+            onDidDismiss={() => {
+              setShowInactivarModal(false);
+              setUsuarioAInactivar(null);
+              setUsuarioDestinoId(null);
+              setPedidosActivos([]);
+              setUsuariosParaReasignar([]);
+            }}
+          >
+            <IonHeader>
+              <IonToolbar color="danger">
+                <IonTitle>
+                  <IonIcon icon={personRemoveOutline} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                  Inactivar Usuario
+                </IonTitle>
+                <IonButtons slot="end">
+                  <IonButton onClick={() => {
+                    setShowInactivarModal(false);
+                    setMotivoSeleccionado(null);
+                    setObservacionInactivacion('');
+                  }}>
+                    <IonIcon icon={closeCircleOutline} />
+                  </IonButton>
+                </IonButtons>
+              </IonToolbar>
+            </IonHeader>
+            <IonContent className="ion-padding">
+              {/* SECCIÓN OBLIGATORIA: Motivo de Inactivación */}
+              <IonCard>
+                <IonCardHeader>
+                  <IonCardTitle color="danger">
+                    📋 Motivo de Inactivación (Obligatorio)
+                  </IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  <IonItem>
+                    <IonIcon icon={alertCircleOutline} slot="start" color="danger" />
+                    <IonLabel position="floating">Seleccione el motivo *</IonLabel>
+                    <IonSelect
+                      value={motivoSeleccionado}
+                      placeholder="Seleccione un motivo"
+                      onIonChange={(e) => setMotivoSeleccionado(e.detail.value)}
+                      interface="alert"
+                    >
+                      {motivosInactivacion.map((motivo) => (
+                        <IonSelectOption key={motivo.idMotivo} value={motivo.idMotivo}>
+                          {motivo.descripcion}
+                        </IonSelectOption>
+                      ))}
+                    </IonSelect>
+                  </IonItem>
+
+                  <IonItem style={{ marginTop: '15px' }}>
+                    <IonLabel position="floating">Observaciones adicionales (opcional)</IonLabel>
+                    <IonTextarea
+                      value={observacionInactivacion}
+                      placeholder="Agregue cualquier detalle relevante sobre la inactivación..."
+                      onIonChange={(e) => setObservacionInactivacion(e.detail.value || '')}
+                      rows={3}
+                      maxlength={500}
+                    />
+                  </IonItem>
+                </IonCardContent>
+              </IonCard>
+
+              {/* SECCIÓN CONDICIONAL: Solo si tiene pedidos activos */}
+              {pedidosActivos.length > 0 && (
+                <>
+                  <IonCard>
+                    <IonCardHeader>
+                      <IonCardTitle color="warning">
+                        ⚠️ El usuario tiene pedidos activos
+                      </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      <p>
+                        El usuario <strong>{usuarioAInactivar?.username}</strong> tiene{' '}
+                        <strong>{pedidosActivos.length}</strong> pedido(s) activo(s).
+                      </p>
+                      <p>
+                        Debe reasignar estos pedidos a otro usuario con los mismos roles antes de inactivarlo.
+                      </p>
+                    </IonCardContent>
+                  </IonCard>
+
+                  <IonCard>
+                    <IonCardHeader>
+                      <IonCardTitle>
+                        📦 Pedidos Activos ({pedidosActivos.length})
+                      </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      <IonList>
+                        {pedidosActivos.map((pedido, index) => (
+                          <IonItem key={index} lines="full">
+                            <IonLabel>
+                              <h3>{pedido.numeroPedido}</h3>
+                              <p>Cliente: {pedido.nombreCliente}</p>
+                              <p>Fecha: {new Date(pedido.fechaPedido).toLocaleDateString()}</p>
+                            </IonLabel>
+                            <div slot="end" className={`pedido-estado-badge ${obtenerClaseDeEstado(pedido.nombreEstado || '')}`}>
+                              {pedido.nombreEstado || `Estado ${pedido.idEstado}`}
+                            </div>
+                          </IonItem>
+                        ))}
+                      </IonList>
+                    </IonCardContent>
+                  </IonCard>
+
+                  <IonCard>
+                    <IonCardHeader>
+                      <IonCardTitle>
+                        👤 Seleccionar Usuario Destino
+                      </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      {usuariosParaReasignar.length > 0 ? (
+                        <>
+                          <IonItem>
+                            <IonIcon icon={personCircleOutline} slot="start" color="primary" />
+                            <IonLabel position="floating">Usuario para reasignar pedidos *</IonLabel>
+                            <IonSelect
+                              value={usuarioDestinoId}
+                              placeholder="Seleccione un usuario"
+                              onIonChange={(e) => setUsuarioDestinoId(e.detail.value)}
+                              interface="alert"
+                            >
+                              {usuariosParaReasignar.map((u) => (
+                                <IonSelectOption key={u.id} value={u.id}>
+                                  {u.username} - {u.roles}
+                                </IonSelectOption>
+                              ))}
+                            </IonSelect>
+                          </IonItem>
+
+                          <IonButton
+                            expand="block"
+                            color="warning"
+                            onClick={handleConfirmarReasignacion}
+                            disabled={!usuarioDestinoId || !motivoSeleccionado}
+                            style={{ marginTop: '20px' }}
+                          >
+                            <IonIcon icon={swapHorizontalOutline} slot="start" />
+                            Reasignar e Inactivar Usuario
+                          </IonButton>
+                        </>
+                      ) : (
+                        <IonText color="danger">
+                          <p>
+                            ⚠️ No hay usuarios activos con los mismos roles disponibles para reasignar.
+                            No se puede inactivar este usuario.
+                          </p>
+                        </IonText>
+                      )}
+                    </IonCardContent>
+                  </IonCard>
+                </>
+              )}
+
+              {/* SECCIÓN: Inactivación directa (sin pedidos) */}
+              {pedidosActivos.length === 0 && (
+                <IonCard>
+                  <IonCardContent>
+                    <IonText>
+                      <p>
+                        El usuario <strong>{usuarioAInactivar?.username}</strong> no tiene pedidos activos.
+                        Puede inactivarlo directamente.
+                      </p>
+                    </IonText>
+
+                    <IonButton
+                      expand="block"
+                      color="danger"
+                      onClick={async () => {
+                        if (!motivoSeleccionado) {
+                          setAlertMsg("Debe seleccionar un motivo de inactivación");
+                          setShowAlert(true);
+                          return;
+                        }
+
+                        try {
+                          await inactivarUsuarioDirecto(
+                            usuarioAInactivar!.id,
+                            motivoSeleccionado,
+                            observacionInactivacion || undefined
+                          );
+                          setAlertMsg(`Usuario ${usuarioAInactivar?.username} inactivado correctamente`);
+                          setShowAlert(true);
+                          setShowInactivarModal(false);
+                          setMotivoSeleccionado(null);
+                          setObservacionInactivacion('');
+                          cargarUsuarios(mostrarInactivos).then(setUsuarios);
+                        } catch (error: any) {
+                          setAlertMsg(error.response?.data?.message || "Error al inactivar usuario");
+                          setShowAlert(true);
+                        }
+                      }}
+                      disabled={!motivoSeleccionado}
+                      style={{ marginTop: '20px' }}
+                    >
+                      <IonIcon icon={personRemoveOutline} slot="start" />
+                      Inactivar Usuario
+                    </IonButton>
+                  </IonCardContent>
+                </IonCard>
+              )}
+
+              {/* Botón Cancelar */}
+              <IonButton
+                expand="block"
+                color="medium"
+                fill="outline"
+                onClick={() => {
+                  setShowInactivarModal(false);
+                  setMotivoSeleccionado(null);
+                  setObservacionInactivacion('');
+                }}
+                style={{ marginTop: '10px' }}
+              >
+                <IonIcon icon={closeCircleOutline} slot="start" />
+                Cancelar
+              </IonButton>
+            </IonContent>
+          </IonModal>
+
+          {/* ✅ NUEVO: Modal de historial */}
+          {usuarioHistorial && (
+            <HistorialUsuario
+              isOpen={showHistorial}
+              onDidDismiss={cerrarHistorial}
+              usuarioId={usuarioHistorial.id}
+              usuarioNombre={usuarioHistorial.username}
+            />
+          )}
         </div>
       </IonContent>
     </IonPage>

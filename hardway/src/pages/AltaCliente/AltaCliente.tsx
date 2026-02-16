@@ -82,7 +82,15 @@ const AltaCliente: React.FC = () => {
   // Handlers delegados a utils
   const handleNumeroDocumentoChange = (e: any) => {
     const value = e.detail.value;
-    const nuevoValor = soloNumeros(value, previousNumeroDocumento);
+    let nuevoValor = soloNumeros(value, previousNumeroDocumento);
+    
+    // Validar longitud máxima según tipo de documento
+    if (formData.tipoDocumento === 'DNI' && nuevoValor.length > 8) {
+      nuevoValor = nuevoValor.substring(0, 8);
+    } else if ((formData.tipoDocumento === 'CUIL' || formData.tipoDocumento === 'CUIT') && nuevoValor.length > 11) {
+      nuevoValor = nuevoValor.substring(0, 11);
+    }
+    
     setFormData({ ...formData, numeroDocumento: nuevoValor });
     setPreviousNumeroDocumento(nuevoValor);
   };
@@ -260,6 +268,7 @@ const AltaCliente: React.FC = () => {
                     type="number"
                     inputmode="numeric"
                     pattern="[0-9]*"
+                    maxlength={formData.tipoDocumento === 'DNI' ? 8 : 11}
                     value={formData.numeroDocumento}
                     onIonChange={handleNumeroDocumentoChange}
                     onWheel={(e: any) => e.target.blur()}

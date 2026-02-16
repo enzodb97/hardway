@@ -7,7 +7,7 @@ const corsConfig = cors({
     "http://localhost:5174", 
     "http://localhost:5175"
   ], // URLs posibles del frontend
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // ✅ Agregado PATCH y OPTIONS
   credentials: true,
 });
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-12-2025 a las 20:37:39
+-- Tiempo de generación: 15-02-2026 a las 23:48:34
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -1048,7 +1048,7 @@ CREATE TABLE `configuracion_presentacion` (
 --
 
 INSERT INTO `configuracion_presentacion` (`idConfiguracion`, `codigoIndumentaria`, `idPresentacion`, `cantidadUnidades`, `precioBase`, `estaActivo`) VALUES
-(1, 'IND001', 1, 1, NULL, 1),
+(1, 'IND001', 1, 1, NULL, 0),
 (2, 'IND001', 2, 20, NULL, 1),
 (3, 'IND001', 3, 5, NULL, 1);
 
@@ -2603,6 +2603,29 @@ INSERT INTO `motivo_cancelacion` (`idMotivo`, `descripcion`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `motivo_inactivacion_usuario`
+--
+
+CREATE TABLE `motivo_inactivacion_usuario` (
+  `idMotivo` int(11) NOT NULL,
+  `descripcion` varchar(100) NOT NULL,
+  `activo` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `motivo_inactivacion_usuario`
+--
+
+INSERT INTO `motivo_inactivacion_usuario` (`idMotivo`, `descripcion`, `activo`) VALUES
+(1, 'Desvinculación laboral', 1),
+(2, 'Detección de fraude', 1),
+(3, 'Errores recurrentes', 1),
+(4, 'Inactividad prolongada', 1),
+(5, 'Otros', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `motivo_modificacion_pedido`
 --
 
@@ -4007,20 +4030,52 @@ CREATE TABLE `usuario` (
   `idUsuario` int(11) NOT NULL,
   `idPersona` int(11) DEFAULT NULL,
   `nombreUsuario` varchar(100) DEFAULT NULL,
-  `contrasena` varchar(100) DEFAULT NULL
+  `contrasena` varchar(100) DEFAULT NULL,
+  `estaActivo` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Indica si el usuario está activo (1) o inactivo (0)',
+  `idMotivoInactivacion` int(11) DEFAULT NULL COMMENT 'Motivo de inactivación del usuario',
+  `fechaInactivacion` datetime DEFAULT NULL COMMENT 'Fecha y hora de inactivación',
+  `observacionInactivacion` text DEFAULT NULL COMMENT 'Observaciones adicionales sobre la inactivación'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`idUsuario`, `idPersona`, `nombreUsuario`, `contrasena`) VALUES
-(1, 10, 'admin', 'admin123'),
-(2, 9, 'mariag', '123'),
-(5, 5, 'anamtz', '123'),
-(6, 6, 'luisrd', '123'),
-(7, 7, 'sofiag', '123'),
-(17, NULL, 'gerenteg', 'gerente_123');
+INSERT INTO `usuario` (`idUsuario`, `idPersona`, `nombreUsuario`, `contrasena`, `estaActivo`, `idMotivoInactivacion`, `fechaInactivacion`, `observacionInactivacion`) VALUES
+(1, 10, 'admin', 'admin123', 1, NULL, NULL, NULL),
+(2, 9, 'mariag', '123', 1, NULL, NULL, NULL),
+(5, 5, 'anamtz', '123', 1, NULL, NULL, NULL),
+(6, 6, 'luisrd', '123', 1, NULL, NULL, NULL),
+(7, 7, 'sofiag', '123', 1, NULL, NULL, NULL),
+(17, NULL, 'gerenteg', 'gerente_123', 1, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuario_historial_estado`
+--
+
+CREATE TABLE `usuario_historial_estado` (
+  `idHistorial` int(11) NOT NULL,
+  `idUsuario` int(11) NOT NULL,
+  `estaActivo` tinyint(1) NOT NULL COMMENT '1 = Activo, 0 = Inactivo',
+  `fechaCambio` datetime NOT NULL DEFAULT current_timestamp(),
+  `idUsuarioModifico` int(11) DEFAULT NULL COMMENT 'Usuario que realizó el cambio',
+  `idMotivoInactivacion` int(11) DEFAULT NULL COMMENT 'Motivo si fue inactivación',
+  `observaciones` text DEFAULT NULL COMMENT 'Observaciones adicionales'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `usuario_historial_estado`
+--
+
+INSERT INTO `usuario_historial_estado` (`idHistorial`, `idUsuario`, `estaActivo`, `fechaCambio`, `idUsuarioModifico`, `idMotivoInactivacion`, `observaciones`) VALUES
+(1, 1, 1, '2026-02-15 19:48:14', NULL, NULL, 'Estado inicial registrado por migración'),
+(2, 2, 1, '2026-02-15 19:48:14', NULL, NULL, 'Estado inicial registrado por migración'),
+(3, 5, 1, '2026-02-15 19:48:14', NULL, NULL, 'Estado inicial registrado por migración'),
+(4, 6, 1, '2026-02-15 19:48:14', NULL, NULL, 'Estado inicial registrado por migración'),
+(5, 7, 1, '2026-02-15 19:48:14', NULL, NULL, 'Estado inicial registrado por migración'),
+(6, 17, 1, '2026-02-15 19:48:14', NULL, NULL, 'Estado inicial registrado por migración');
 
 -- --------------------------------------------------------
 
@@ -4314,6 +4369,13 @@ ALTER TABLE `motivo_cancelacion`
   ADD PRIMARY KEY (`idMotivo`);
 
 --
+-- Indices de la tabla `motivo_inactivacion_usuario`
+--
+ALTER TABLE `motivo_inactivacion_usuario`
+  ADD PRIMARY KEY (`idMotivo`),
+  ADD UNIQUE KEY `unique_descripcion` (`descripcion`);
+
+--
 -- Indices de la tabla `motivo_modificacion_pedido`
 --
 ALTER TABLE `motivo_modificacion_pedido`
@@ -4425,7 +4487,18 @@ ALTER TABLE `unidad_medida`
 --
 ALTER TABLE `usuario`
   ADD PRIMARY KEY (`idUsuario`),
-  ADD UNIQUE KEY `idPersona` (`idPersona`);
+  ADD UNIQUE KEY `idPersona` (`idPersona`),
+  ADD KEY `fk_usuario_motivo_inactivacion` (`idMotivoInactivacion`);
+
+--
+-- Indices de la tabla `usuario_historial_estado`
+--
+ALTER TABLE `usuario_historial_estado`
+  ADD PRIMARY KEY (`idHistorial`),
+  ADD KEY `idx_usuario_fecha` (`idUsuario`,`fechaCambio`),
+  ADD KEY `idx_fecha` (`fechaCambio`),
+  ADD KEY `fk_uh_usuario_mod` (`idUsuarioModifico`),
+  ADD KEY `fk_uh_motivo` (`idMotivoInactivacion`);
 
 --
 -- Indices de la tabla `usuario_tiporol`
@@ -4536,6 +4609,12 @@ ALTER TABLE `motivo_cancelacion`
   MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT de la tabla `motivo_inactivacion_usuario`
+--
+ALTER TABLE `motivo_inactivacion_usuario`
+  MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT de la tabla `motivo_modificacion_pedido`
 --
 ALTER TABLE `motivo_modificacion_pedido`
@@ -4606,6 +4685,12 @@ ALTER TABLE `unidad_medida`
 --
 ALTER TABLE `usuario`
   MODIFY `idUsuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT de la tabla `usuario_historial_estado`
+--
+ALTER TABLE `usuario_historial_estado`
+  MODIFY `idHistorial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Restricciones para tablas volcadas
@@ -4770,7 +4855,16 @@ ALTER TABLE `stock_registro_fallo`
 -- Filtros para la tabla `usuario`
 --
 ALTER TABLE `usuario`
+  ADD CONSTRAINT `fk_usuario_motivo_inactivacion` FOREIGN KEY (`idMotivoInactivacion`) REFERENCES `motivo_inactivacion_usuario` (`idMotivo`) ON DELETE SET NULL,
   ADD CONSTRAINT `usuario_ibfk_persona` FOREIGN KEY (`idPersona`) REFERENCES `persona` (`idPersona`);
+
+--
+-- Filtros para la tabla `usuario_historial_estado`
+--
+ALTER TABLE `usuario_historial_estado`
+  ADD CONSTRAINT `fk_uh_motivo` FOREIGN KEY (`idMotivoInactivacion`) REFERENCES `motivo_inactivacion_usuario` (`idMotivo`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_uh_usuario` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_uh_usuario_mod` FOREIGN KEY (`idUsuarioModifico`) REFERENCES `usuario` (`idUsuario`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `usuario_tiporol`

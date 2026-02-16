@@ -79,6 +79,7 @@ router.get("/pickers", async (req, res) => {
       FROM encargadopicker ep
       JOIN persona p ON ep.idPersona = p.idPersona
       LEFT JOIN usuario u ON u.idPersona = p.idPersona
+      WHERE u.estaActivo = 1 OR u.estaActivo IS NULL
       ORDER BY COALESCE(u.nombreUsuario, p.nombre)
     `);
     
