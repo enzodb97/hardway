@@ -119,14 +119,13 @@ router.get("/tareas", verificarAccesoPicking, async (req, res) => {
         AND ap.idAsignacion = (
           SELECT MAX(ap2.idAsignacion) 
           FROM asignacion_picking ap2 
-          WHERE ap2.numeroPedido = ap.numeroPedido 
-            AND ap2.legajoPicker = ?
+          WHERE ap2.numeroPedido = ap.numeroPedido
         )
       GROUP BY 
         ap.idAsignacion, ap.numeroPedido, p.fechaPedido, p.idEstado, per.nombre, per.apellido,
         c.email, c.telefono, ap.fechaAsignacion, ap.observaciones, ap.completado
       ORDER BY ap.fechaAsignacion DESC
-    `, { replacements: [legajoPicker, legajoPicker] });
+    `, { replacements: [legajoPicker] });
     
     res.json(results);
   } catch (error) {

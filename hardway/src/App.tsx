@@ -152,7 +152,7 @@ const AppRouter = () => {
             <RoleRoute
               path="/reportes/stock-actual"
               component={StockActual}
-              requiredRoles={["Administrador", "Gerente General"]}
+              requiredRoles={["Administrador", "Gerente General", "Picker"]}
               exact
             />
             <RoleRoute
