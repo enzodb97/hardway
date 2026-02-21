@@ -223,7 +223,7 @@ const DetallePedido: React.FC = () => {
       'reducir_cantidad': 'Reducir Cantidad',
       'producto_alternativo': 'Producto Alternativo',
       'reabastecer': 'Reabastecer y Continuar',
-      'continuar': 'Continuar de Todas Formas',
+      'continuar': 'Continuar con el Pedido',
       'cancelar_pedido': 'Cancelar Pedido Completo'
     };
     return nombres[tipo] || tipo;

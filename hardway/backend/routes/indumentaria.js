@@ -711,7 +711,10 @@ router.put('/stock/:codigoIndumentaria', async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const stock = await Stock.findOne({
-      where: { codigoIndumentaria },
+      where: { 
+        codigoIndumentaria,
+        idRack: { [Op.ne]: 99 } // Excluir el rack de No Aptos
+      },
       transaction: t
     });
 
@@ -719,6 +722,13 @@ router.put('/stock/:codigoIndumentaria', async (req, res) => {
       await t.rollback();
       return res.status(404).json({ error: 'Stock no encontrado' });
     }
+
+    // Log para depuración
+    console.log('📍 Stock encontrado para actualización:', {
+      idStock: stock.idStock,
+      idRackAnterior: stock.idRack,
+      idRackNuevo: idRack
+    });
 
     await stock.update({ idRack }, { transaction: t });
     await t.commit();
