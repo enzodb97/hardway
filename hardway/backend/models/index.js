@@ -18,6 +18,7 @@ const AsignacionPicking = require('./AsignacionPicking'); // Nuevo modelo
 const MotivoModificacionPedido = require('./MotivoModificacionPedido');
 const HistorialModificacionPedido = require('./HistorialModificacionPedido');
 const MotivoInactivacionUsuario = require('./MotivoInactivacionUsuario'); // Nuevo modelo
+const NotificacionPedido = require('./NotificacionPedido'); // Modelo para notificaciones de picking
 const PresentacionProducto = require('./PresentacionProducto'); // Modelo para presentaciones
 const ConfiguracionPresentacion = require('./ConfiguracionPresentacion'); // Modelo para configuración
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
@@ -318,6 +319,9 @@ module.exports = {
   
   // Modelos de auditoría de usuarios
   MotivoInactivacionUsuario,
+  
+  // Modelos de notificaciones
+  NotificacionPedido,
   
   // Modelos de presentaciones de producto
   PresentacionProducto,

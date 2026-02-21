@@ -1369,3 +1369,475 @@ ion-button[color="primary"] {
   animation: fadeInUpPicking 0.4s ease-out;
 }
 
+/* Modal de Reporte de Problemas */
+.problema-modal {
+  --max-width: 650px;
+  --border-radius: 16px;
+  --backdrop-opacity: 0.6;
+}
+
+.problema-modal-toolbar {
+  --background: rgba(253, 180, 11, 0.95);
+  --color: #1a1a1a;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.problema-modal-content {
+  --background: rgba(30, 30, 30, 0.98);
+  backdrop-filter: blur(20px);
+}
+
+.problema-form {
+  padding: 20px;
+}
+
+.problema-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(253, 180, 11, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(253, 180, 11, 0.3);
+}
+
+.problema-header h3 {
+  color: #fdb40b;
+  font-size: 1.5rem;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+.problema-header p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.problema-opciones {
+  margin: 30px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(253, 180, 11, 0.2);
+}
+
+.problema-opciones h4 {
+  color: #fdb40b;
+  font-size: 1.1rem;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.radio-option:hover {
+  background: rgba(253, 180, 11, 0.1);
+  border-color: rgba(253, 180, 11, 0.4);
+  transform: translateX(4px);
+}
+
+.radio-option input[type="radio"] {
+  margin-top: 4px;
+  width: 20px;
+  height: 20px;
+  accent-color: #fdb40b;
+  cursor: pointer;
+}
+
+.radio-option input[type="radio"]:checked {
+  transform: scale(1.1);
+}
+
+.radio-content strong {
+  display: block;
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.radio-content p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.problema-actions {
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.problema-actions ion-button {
+  --border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 1rem;
+}
+
+.problema-modal ion-list {
+  background: transparent !important;
+  display: contents !important;
+}
+
+.problema-modal ion-item {
+  --background: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(253, 180, 11, 0.2);
+  --border-radius: 10px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 16px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+}
+
+.problema-modal ion-label {
+  --color: #fff;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.problema-modal ion-select,
+.problema-modal ion-input {
+  --color: #fff;
+  --placeholder-color: rgba(255, 255, 255, 0.5);
+  --background: transparent;
+}
+
+.problema-modal ion-select::part(text) {
+  color: #fff;
+}
+
+/* Estilos para el botón de advertencia en alertas */
+.alert-button-warning {
+  color: #fdb40b !important;
+  font-weight: 600 !important;
+}
+
+.alert-button-confirm {
+  color: #10dc60 !important;
+  font-weight: 600 !important;
+}
+
+.alert-button-cancel {
+  color: #f04141 !important;
+  font-weight: 400 !important;
+}
+
+/* Animaciones del modal de problema */
+@keyframes slideInProblema {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.problema-form {
+  animation: slideInProblema 0.3s ease-out;
+}
+
+/* Responsive para modal de problemas */
+@media (max-width: 768px) {
+  .problema-modal {
+    --max-width: 95%;
+  }
+  
+  .problema-actions {
+    flex-direction: column;
+  }
+  
+  .problema-actions ion-button {
+    width: 100%;
+  }
+}
+
+/* Estilos del botón de notificaciones */
+.notifications-btn {
+  position: relative;
+  --color: #fdb40b;
+  --background: transparent;
+  --border-radius: 50%;
+  --overflow: visible;
+  transition: all 0.3s ease;
+  border-radius: 0px;
+  overflow: visible !important;
+}
+
+.notifications-btn .button-native {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+.notifications-btn:hover {
+  --background: rgba(253, 180, 11, 0.1);
+}
+
+/* Badge de notificaciones */
+.notifications-badge {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* Modal de notificaciones */
+.notificaciones-modal {
+  --max-width: 650px;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.notificaciones-modal .modal-wrapper {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+}
+
+.notificaciones-modal ion-toolbar {
+  --background: linear-gradient(135deg, #fdb40b, #f39c12);
+  --color: #000000;
+  border-bottom: 2px solid rgba(243, 156, 18, 0.8);
+  font-weight: 700;
+}
+
+.notificaciones-modal ion-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.notificaciones-modal ion-header ion-button {
+  --color: #000000;
+  --background-hover: rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  font-weight: 700;
+}
+
+.notificaciones-modal ion-content {
+  --background: rgba(0, 0, 0, 0.8);
+}
+
+.notificaciones-modal ion-list {
+  background: transparent;
+  padding: 8px;
+}
+
+/* Estado vacío de notificaciones */
+.notificaciones-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.notificaciones-empty ion-icon {
+  font-size: 80px;
+  color: #fdb40b;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.notificaciones-empty h3 {
+  color: #ffffff;
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.notificaciones-empty p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Card de notificación */
+.notificacion-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(253, 180, 11, 0.5);
+  border-radius: 12px;
+  margin: 12px;
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.25);
+  transition: all 0.3s ease;
+}
+
+.notificacion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(253, 180, 11, 0.35);
+  border-color: rgba(253, 180, 11, 0.7);
+}
+
+.notificacion-card ion-card-header {
+  padding: 16px;
+  border-bottom: 2px solid rgba(253, 180, 11, 0.3);
+  background: linear-gradient(135deg, rgba(253, 180, 11, 0.15), rgba(243, 156, 18, 0.1));
+}
+
+.notificacion-card ion-card-header > div {
+  position: relative;
+}
+
+.notificacion-card ion-card-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 8px;
+  display: block;
+}
+
+.notificacion-card ion-card-content {
+  padding: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+/* Estilo para notificaciones leídas */
+.notificacion-card.notificacion-leida {
+  opacity: 0.7;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.notificacion-card.notificacion-leida:hover {
+  opacity: 0.85;
+}
+
+/* Badge de destinatario */
+.notificacion-destinatario {
+  margin-bottom: 8px;
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+/* Badge de tipo de notificación */
+.notificacion-tipo {
+  margin-left: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+/* Estilos para el botón de marcar como leída */
+.notificacion-footer ion-button {
+  --background: linear-gradient(135deg, #28a745, #20c997);
+  --color: #ffffff;
+  --border-radius: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 12px rgba(40, 167, 69, 0.3);
+  transition: all 0.3s ease;
+}
+
+.notificacion-footer ion-button:hover {
+  --background: linear-gradient(135deg, #218838, #1fa67a);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+/* Mensaje de notificación */
+.notificacion-mensaje {
+  margin: 12px 0;
+  padding: 16px;
+  border-left: 5px solid #28a745;
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.15));
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.25);
+}
+
+.notificacion-mensaje p {
+  margin: 0;
+  color: #ffffff;
+  line-height: 1.6;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Footer de notificación */
+.notificacion-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(253, 180, 11, 0.15);
+}
+
+.notificacion-fecha {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* Footer del modal de notificaciones */
+.notificaciones-modal ion-footer {
+  background: rgba(0, 0, 0, 0.9);
+  border-top: 2px solid rgba(253, 180, 11, 0.4);
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.notificaciones-modal ion-footer ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+}
+
+.notificaciones-modal ion-footer ion-button {
+  --color: #ffffff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive para modal de notificaciones */
+@media (max-width: 768px) {
+  .notificaciones-modal {
+    --max-width: 95%;
+  }
+  
+  .notificacion-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .notificaciones-empty {
+    padding: 40px 20px;
+  }
+  
+  .notificaciones-empty ion-icon {
+    font-size: 60px;
+  }
+}
+
+

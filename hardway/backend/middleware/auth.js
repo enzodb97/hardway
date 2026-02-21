@@ -28,7 +28,7 @@ const verificarAccesoPedidos = async (req, res, next) => {
             attributes: ['idUsuario', 'nombreUsuario']
           });
           
-          console.log('👤 Usuario del token:', usuarioToken ? { id: usuarioToken.idUsuario, nombre: usuarioToken.nombreUsuario } : 'null');
+          console.log('� Usuario del token:', usuarioToken ? { id: usuarioToken.idUsuario, nombre: usuarioToken.nombreUsuario } : 'null');
           
           if (usuarioToken) {
             nombreUsuario = usuarioToken.nombreUsuario;

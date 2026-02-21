@@ -116,3 +116,132 @@ export const exportarPedidoPDF = (pedido: {
   });
   doc.save(`Pedido_${pedido.id}_Hardway.pdf`);
 };
+
+// Obtener motivos de problemas para reporte del picker
+export const obtenerMotivosProblemas = async () => {
+  try {
+    const res = await axiosInstance.get("/api/picking/motivos-problemas");
+    return res.data;
+  } catch (error) {
+    console.error("Error al obtener motivos de problemas:", error);
+    throw error;
+  }
+};
+
+// Completar tarea de picking con reporte de problema
+export const completarTareaConProblema = async (
+  idAsignacion: number,
+  numeroPedido: string,
+  tieneProblemas: boolean,
+  idMotivoProblema?: number,
+  observacionesProblema?: string,
+  completarParcial?: boolean,
+  idDetallePedidoProblema?: string,
+  cantidadConProblema?: number,
+  observaciones?: string
+) => {
+  try {
+    const idAsignacionNum = Number(idAsignacion);
+
+    console.log("Completando tarea con problema:", {
+      idAsignacion: idAsignacionNum,
+      numeroPedido,
+      tieneProblemas,
+      idMotivoProblema,
+      completarParcial,
+      idDetallePedidoProblema,
+      cantidadConProblema,
+    });
+
+    const res = await axiosInstance.post(
+      `/api/picking/tareas/${numeroPedido}/completar`,
+      {
+        idAsignacion: idAsignacionNum,
+        observaciones: observaciones || "Tarea completada desde frontend",
+        tieneProblemas,
+        idMotivoProblema,
+        observacionesProblema,
+        completarParcial,
+        idDetallePedidoProblema,
+        cantidadConProblema,
+      }
+    );
+
+    console.log("Respuesta completar tarea con problema:", res.data);
+    return res.data;
+  } catch (error: any) {
+    console.error("Error en completarTareaConProblema:", error);
+    console.error("Response data:", error.response?.data);
+    throw error;
+  }
+};
+
+// Obtener notificaciones de un usuario (vendedor)
+export const obtenerNotificacionesUsuario = async (
+  idUsuario: number,
+  soloNoLeidas: boolean = false
+) => {
+  try {
+    const res = await axiosInstance.get(
+      `/api/pedidos/notificaciones/${idUsuario}`,
+      {
+        params: { soloNoLeidas: soloNoLeidas ? "true" : "false" },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error al obtener notificaciones:", error);
+    throw error;
+  }
+};
+
+// Obtener notificaciones de un pedido específico
+export const obtenerNotificacionesPedido = async (numeroPedido: string) => {
+  try {
+    const res = await axiosInstance.get(
+      `/api/pedidos/notificaciones-pedido/${numeroPedido}`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error al obtener notificaciones del pedido:", error);
+    throw error;
+  }
+};
+
+// Marcar notificación como leída
+export const marcarNotificacionLeida = async (idNotificacion: number) => {
+  try {
+    const res = await axiosInstance.put(
+      `/api/pedidos/notificaciones/${idNotificacion}/marcar-leida`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error al marcar notificación como leída:", error);
+    throw error;
+  }
+};
+
+// Resolver notificación de problema (vendedor)
+export const resolverNotificacion = async (
+  idNotificacion: number,
+  tipoResolucion: 'cancelar_articulo' | 'reducir_cantidad' | 'producto_alternativo' | 'reabastecer' | 'continuar' | 'cancelar_pedido',
+  observacionesResolucion?: string,
+  codigoIndumentariaAlternativo?: string,
+  nuevaCantidad?: number
+) => {
+  try {
+    const res = await axiosInstance.put(
+      `/api/pedidos/notificaciones/${idNotificacion}/resolver`,
+      {
+        tipoResolucion,
+        observacionesResolucion,
+        codigoIndumentariaAlternativo,
+        nuevaCantidad
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error al resolver notificación:", error);
+    throw error;
+  }
+};

@@ -43,6 +43,36 @@ const AsignacionPicking = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    tieneProblemas: {
+      type: DataTypes.TINYINT,
+      defaultValue: 0,
+      comment: "1 = Se reportaron problemas durante el picking",
+    },
+    idMotivoProblema: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "FK a motivo_no_apta - Motivo del problema reportado",
+    },
+    observacionesProblema: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: "Detalle adicional del problema reportado por el picker",
+    },
+    idDetallePedidoProblema: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: "ID del detalle de pedido con problema",
+    },
+    cantidadConProblema: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Cantidad de unidades del artículo con problema",
+    },
+    completarParcial: {
+      type: DataTypes.TINYINT,
+      defaultValue: 0,
+      comment: "1 = Picker decidió completar parcialmente el pedido con el problema",
+    },
   },
   {
     tableName: "asignacion_picking",

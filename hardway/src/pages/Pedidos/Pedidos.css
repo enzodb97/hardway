@@ -2081,3 +2081,219 @@
   pointer-events: none;
   z-index: 1;
 }
+
+/* ========================================
+   ESTILOS PARA NOTIFICACIONES DE PROBLEMAS
+   ======================================== */
+
+/* Botón de campanita en header */
+.notifications-btn {
+  position: relative;
+  --overflow: visible;
+  overflow: visible !important;
+}
+
+.notifications-btn .button-native {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+.notifications-badge {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal de notificaciones */
+.notificaciones-modal {
+  --max-width: 650px;
+  --border-radius: 16px;
+}
+
+.notificaciones-modal .modal-wrapper {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+}
+
+.notificaciones-modal ion-toolbar {
+  --background: linear-gradient(135deg, #fdb40b, #f39c12);
+  --color: #000000;
+}
+
+.notificaciones-modal ion-title {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.notificaciones-modal ion-content {
+  --background: rgba(0, 0, 0, 0.8);
+}
+
+/* Estado vacío de notificaciones */
+.notificaciones-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.notificaciones-empty ion-icon {
+  font-size: 80px;
+  color: rgba(253, 180, 11, 0.4);
+  margin-bottom: 20px;
+}
+
+.notificaciones-empty h3 {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.notificaciones-empty p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+/* Cards de notificación */
+.notificacion-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(253, 180, 11, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(253, 180, 11, 0.25);
+  margin: 12px;
+  transition: all 0.3s ease;
+}
+
+.notificacion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(253, 180, 11, 0.35);
+}
+
+.notificacion-card.notificacion-leida {
+  opacity: 0.7;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.notificacion-card ion-card-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(253, 180, 11, 0.2);
+}
+
+.notificacion-card ion-card-title {
+  color: #fdb40b;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.notificacion-estado-badge {
+  margin-right: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 12px;
+}
+
+.notificacion-picker-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 12px;
+}
+
+.notificacion-card ion-card-content {
+  padding: 16px;
+}
+
+/* Mensaje del problema */
+.notificacion-mensaje {
+  padding: 16px;
+  border-left: 5px solid #dc3545;
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.15));
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+}
+
+.notificacion-mensaje p {
+  color: #ffffff;
+  line-height: 1.6;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Footer de la notificación */
+.notificacion-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.notificacion-fecha {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.notificacion-acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.notificacion-acciones ion-button {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Footer del modal */
+.notificaciones-modal ion-footer {
+  border-top: 1px solid rgba(253, 180, 11, 0.3);
+}
+
+.notificaciones-modal ion-footer ion-toolbar {
+  --background: rgba(0, 0, 0, 0.9);
+}
+
+.notificaciones-modal ion-footer ion-button {
+  --color: #fdb40b;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notificaciones-modal {
+    --max-width: 95vw;
+  }
+  
+  .notificacion-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .notificacion-acciones {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .notificacion-acciones ion-button {
+    flex: 1;
+  }
+}
+

@@ -104,6 +104,61 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Endpoint para obtener perfil del usuario autenticado
+router.get("/profile", async (req, res) => {
+  try {
+    // Obtener idUsuario del token o de la sesión
+    // Por ahora, obtener de los headers o query params
+    const idUsuario = req.query.idUsuario || req.headers['x-user-id'];
+    
+    if (!idUsuario) {
+      return res.status(401).json({ error: "No autenticado" });
+    }
+    
+    const usuario = await Usuario.findOne({
+      where: { idUsuario },
+      attributes: ['idUsuario', 'nombreUsuario', 'idPersona', 'estaActivo'],
+      include: {
+        model: TipoRol,
+        as: "roles",
+        attributes: ['idTipoRol', 'tipoRol'],
+        through: { attributes: [] }
+      }
+    });
+    
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    
+    // Buscar legajo si es picker
+    let legajoPicker = null;
+    const esPicker = usuario.roles?.some(rol => 
+      rol.tipoRol && rol.tipoRol.toLowerCase().includes("picker")
+    );
+    
+    if (esPicker && usuario.idPersona) {
+      const picker = await EncargadoPicker.findOne({
+        where: { idPersona: usuario.idPersona }
+      });
+      if (picker) {
+        legajoPicker = picker.legajo;
+      }
+    }
+    
+    res.json({
+      idUsuario: usuario.idUsuario,
+      nombreUsuario: usuario.nombreUsuario,
+      idPersona: usuario.idPersona,
+      roles: usuario.roles?.map(r => r.tipoRol) || [],
+      rolesIds: usuario.roles?.map(r => r.idTipoRol) || [],
+      legajoPicker
+    });
+  } catch (error) {
+    console.error("Error al obtener perfil:", error);
+    res.status(500).json({ error: "Error al obtener perfil" });
+  }
+});
+
 // Endpoint para buscar usuario por nombre de usuario (para cancelaciones)
 router.get("/usuarios/buscar-por-nombre/:nombreUsuario", async (req, res) => {
   const { nombreUsuario } = req.params;

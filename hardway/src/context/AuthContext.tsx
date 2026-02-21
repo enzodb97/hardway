@@ -270,7 +270,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const login = async (usernameInput: string, password: string) => {
     setError(null);
     try {
-      const response = await axiosInstance.post("/api/login", {
+      const response = await axiosInstance.post("/api/auth/login", {
         nombreUsuario: usernameInput,
         contrasena: password,
       });

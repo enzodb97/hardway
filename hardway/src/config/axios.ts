@@ -20,6 +20,7 @@ axiosInstance.interceptors.request.use(
     const username = localStorage.getItem("username");
     const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
     const token = localStorage.getItem("token");
+    const idUsuario = localStorage.getItem("idUsuario");
     
     // Agregar header para todos los endpoints que requieren autenticación
     if (username && isAuthenticated) {
@@ -28,6 +29,11 @@ axiosInstance.interceptors.request.use(
       // Incluir el token JWT en el header Authorization
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+      
+      // Incluir idUsuario para endpoints que lo requieran
+      if (idUsuario) {
+        config.headers['x-user-id'] = idUsuario;
       }
     }
     

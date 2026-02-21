@@ -12,24 +12,62 @@ import {
   IonMenuButton,
   IonIcon,
   useIonViewWillEnter,
+  IonModal,
+  IonSelect,
+  IonSelectOption,
+  IonInput,
+  IonTextarea,
+  IonAlert,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonSearchbar,
 } from "@ionic/react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
-import { documentTextOutline } from "ionicons/icons";
+import { documentTextOutline, checkmarkCircleOutline, closeCircleOutline } from "ionicons/icons";
 import "./DetallePedido.css";
 import zepelin from "../../assets/images/zepelin.png";
 import axiosInstance from "../../config/axios";
-import { exportarPDFDetallePedido } from "../../utils/pedidosUtils";
+import { exportarPDFDetallePedido, handleCancelarPedido, cargarPedidos } from "../../utils/pedidosUtils";
 import { obtenerHistorialModificaciones } from "../../utils/pedidosUtils";
+import { obtenerNotificacionesPedido, resolverNotificacion } from "../../utils/pickingUtils";
+import { obtenerIndumentariaPaginada } from "../../utils/indumentariaUtils";
+import { useAuth } from "../../context/AuthContext";
 
 const DetallePedido: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const location = useLocation();
+  const { username } = useAuth();
   const [prendas, setPrendas] = useState<any[]>([]);
   const [pedido, setPedido] = useState<any>(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
   const [historialModificaciones, setHistorialModificaciones] = useState<any[]>([]);
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
+  const [notificacionesProblemas, setNotificacionesProblemas] = useState<any[]>([]);
+  
+  // Estados para resolución de notificaciones
+  const [notificacionSeleccionada, setNotificacionSeleccionada] = useState<any>(null);
+  const [tipoResolucionSeleccionada, setTipoResolucionSeleccionada] = useState<string>("");
+  const [showModalResolucion, setShowModalResolucion] = useState(false);
+  const [observacionesResolucion, setObservacionesResolucion] = useState("");
+  const [nuevaCantidad, setNuevaCantidad] = useState<number>(0);
+  const [productoAlternativo, setProductoAlternativo] = useState<any>(null);
+  const [indumentariasDisponibles, setIndumentariasDisponibles] = useState<any[]>([]);
+  const [busquedaProducto, setBusquedaProducto] = useState("");
+  const [showAlertResolucion, setShowAlertResolucion] = useState(false);
+  const [alertMsgResolucion, setAlertMsgResolucion] = useState("");
+  const [procesandoResolucion, setProcesandoResolucion] = useState(false);
+
+  // Estados para cancelación de pedido
+  const [pedidoParaCancelar, setPedidoParaCancelar] = useState<string | null>(null);
+  const [motivosCancelacion, setMotivosCancelacion] = useState<any[]>([]);
+  const [motivoSeleccionado, setMotivoSeleccionado] = useState<number | null>(null);
+  const [observacionPersonalizada, setObservacionPersonalizada] = useState<string>("");
+  const [showMotivoModal, setShowMotivoModal] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
 
   // Calcular descuentos por presentación
   const calcularDescuentosPresentacion = () => {
@@ -89,11 +127,123 @@ const DetallePedido: React.FC = () => {
         console.log("📜 Historial recibido:", historial);
         console.log("📊 Cantidad de registros:", historial.length);
         setHistorialModificaciones(historial);
+        
+        // Cargar notificaciones de problemas
+        try {
+          const notificaciones = await obtenerNotificacionesPedido(res.data.pedido.numeroPedido);
+          console.log("⚠️ Notificaciones de problemas:", notificaciones);
+          setNotificacionesProblemas(notificaciones);
+        } catch (error) {
+          console.error("Error al cargar notificaciones:", error);
+          setNotificacionesProblemas([]);
+        }
       }
     } catch (error) {
       console.error("Error al cargar pedido:", error);
     }
   };
+
+  // ==========================================
+  // FUNCIONES DE RESOLUCIÓN DE NOTIFICACIONES
+  // ==========================================
+
+  const abrirModalResolucion = async (notificacion: any, tipoResolucion: string) => {
+    setNotificacionSeleccionada(notificacion);
+    setTipoResolucionSeleccionada(tipoResolucion);
+    setObservacionesResolucion("");
+    setNuevaCantidad(0);
+    setProductoAlternativo(null);
+    setBusquedaProducto("");
+    
+    // Si es producto alternativo, cargar indumentarias disponibles
+    if (tipoResolucion === 'producto_alternativo') {
+      try {
+        const result = await obtenerIndumentariaPaginada(1, 1000, "");
+        setIndumentariasDisponibles(result.prendas);
+      } catch (error) {
+        console.error("Error al cargar indumentarias:", error);
+        setIndumentariasDisponibles([]);
+      }
+    }
+    
+    setShowModalResolucion(true);
+  };
+
+  const procesarResolucion = async () => {
+    if (!notificacionSeleccionada || !tipoResolucionSeleccionada) return;
+    
+    // Validaciones según tipo de resolución
+    if (tipoResolucionSeleccionada === 'reducir_cantidad') {
+      if (!nuevaCantidad || nuevaCantidad <= 0) {
+        setAlertMsgResolucion("Debe especificar una cantidad válida mayor a 0");
+        setShowAlertResolucion(true);
+        return;
+      }
+    }
+    
+    if (tipoResolucionSeleccionada === 'producto_alternativo') {
+      if (!productoAlternativo) {
+        setAlertMsgResolucion("Debe seleccionar un producto alternativo");
+        setShowAlertResolucion(true);
+        return;
+      }
+    }
+    
+    setProcesandoResolucion(true);
+    
+    try {
+      await resolverNotificacion(
+        notificacionSeleccionada.idNotificacion,
+        tipoResolucionSeleccionada as any,
+        observacionesResolucion,
+        productoAlternativo?.codigoIndumentaria,
+        nuevaCantidad || undefined
+      );
+      
+      setShowModalResolucion(false);
+      setAlertMsgResolucion(`✅ Resolución "${obtenerNombreResolucion(tipoResolucionSeleccionada)}" aplicada exitosamente`);
+      setShowAlertResolucion(true);
+      
+      // Recargar pedido y notificaciones
+      await cargarPedido();
+    } catch (error: any) {
+      console.error("Error al procesar resolución:", error);
+      setAlertMsgResolucion(
+        `❌ Error al procesar resolución: ${error.response?.data?.detalle || error.message}`
+      );
+      setShowAlertResolucion(true);
+    } finally {
+      setProcesandoResolucion(false);
+    }
+  };
+
+  const obtenerNombreResolucion = (tipo: string): string => {
+    const nombres: Record<string, string> = {
+      'cancelar_articulo': 'Cancelar Artículo',
+      'reducir_cantidad': 'Reducir Cantidad',
+      'producto_alternativo': 'Producto Alternativo',
+      'reabastecer': 'Reabastecer y Continuar',
+      'continuar': 'Continuar de Todas Formas',
+      'cancelar_pedido': 'Cancelar Pedido Completo'
+    };
+    return nombres[tipo] || tipo;
+  };
+
+  const filtrarIndumentarias = () => {
+    if (!busquedaProducto) return indumentariasDisponibles;
+    
+    const busqueda = busquedaProducto.toLowerCase();
+    return indumentariasDisponibles.filter((item: any) => 
+      item.codigoIndumentaria?.toLowerCase().includes(busqueda) ||
+      item.nombre?.toLowerCase().includes(busqueda) ||
+      item.color?.toLowerCase().includes(busqueda) ||
+      item.talle?.toLowerCase().includes(busqueda)
+    );
+  };
+
+  // ==========================================
+  // FIN FUNCIONES DE RESOLUCIÓN
+  // ==========================================
 
   // Cargar pedido cuando se entra a la vista (navegación Ionic)
   useIonViewWillEnter(() => {
@@ -345,6 +495,174 @@ const DetallePedido: React.FC = () => {
 
         {/* Barra de progreso del pedido */}
         {pedido && <BarraProgreso />}
+
+        {/* Alertas de problemas reportados por el picker */}
+        {notificacionesProblemas.filter(n => n.estadoResolucion === 'pendiente').length > 0 && (
+          <div style={{
+            margin: '20px 0',
+            padding: '20px',
+            backgroundColor: '#fff3cd',
+            border: '2px solid #fdb40b',
+            borderRadius: '12px',
+            boxShadow: '0 4px 12px rgba(253, 180, 11, 0.2)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ fontSize: '32px', marginRight: '12px' }}>⚠️</span>
+              <h3 style={{ margin: 0, color: '#856404', fontSize: '20px' }}>
+                Problemas Reportados en el Picking
+              </h3>
+            </div>
+            
+            {notificacionesProblemas.filter(n => n.estadoResolucion === 'pendiente').map((notif, idx) => (
+              <div key={notif.idNotificacion} style={{
+                marginBottom: idx < notificacionesProblemas.filter(n => n.estadoResolucion === 'pendiente').length - 1 ? '16px' : '0',
+                padding: '16px',
+                backgroundColor: '#ffffff',
+                borderRadius: '8px',
+                border: '1px solid #fdb40b'
+              }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ 
+                    display: 'inline-block',
+                    padding: '4px 12px',
+                    backgroundColor: '#dc3545',
+                    color: 'white',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    marginBottom: '8px'
+                  }}>
+                    {notif.motivoDescripcion || 'Problema reportado'}
+                  </div>
+                  
+                  {notif.pickerAsignado && (
+                    <div style={{ fontSize: '13px', color: '#6c757d', marginTop: '6px' }}>
+                      👤 Reportado por: <strong>{notif.pickerAsignado}</strong>
+                    </div>
+                  )}
+                </div>
+                
+                <div style={{ fontSize: '14px', color: '#495057', lineHeight: '1.6' }}>
+                  {notif.mensaje}
+                </div>
+                
+                {notif.observacionesProblema && (
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '12px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    color: '#495057',
+                    borderLeft: '3px solid #fdb40b'
+                  }}>
+                    <strong>💬 Observaciones:</strong>
+                    <div style={{ marginTop: '6px' }}>{notif.observacionesProblema}</div>
+                  </div>
+                )}
+                
+                {/* Botones de resolución */}
+                <div style={{
+                  marginTop: '16px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid #e9ecef'
+                }}>
+                  <div style={{ marginBottom: '8px', fontSize: '13px', fontWeight: 'bold', color: '#495057' }}>
+                    🔧 Acciones de resolución:
+                  </div>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+                    gap: '8px' 
+                  }}>
+                    <button
+                      onClick={() => abrirModalResolucion(notif, 'continuar')}
+                      style={{
+                        padding: '8px 12px',
+                        backgroundColor: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      ✅ Continuar
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleCancelarPedido(
+                          pedido.numeroPedido,
+                          setPedidoParaCancelar,
+                          setMotivosCancelacion,
+                          setMotivoSeleccionado,
+                          setShowMotivoModal,
+                          setAlertMsg,
+                          setShowAlert
+                        );
+                      }}
+                      style={{
+                        padding: '8px 12px',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      🚫 Cancelar Pedido
+                    </button>
+                    <button
+                      onClick={() => history.push(`/alta-pedido/${pedido.numeroPedido}`)}
+                      style={{
+                        padding: '8px 12px',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      ✏️ Editar Pedido
+                    </button>
+                  </div>
+                </div>
+                
+                <div style={{
+                  marginTop: '12px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid #e9ecef',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '12px',
+                  color: '#6c757d'
+                }}>
+                  <span>
+                    📅 {new Date(notif.fechaNotificacion).toLocaleString('es-AR')}
+                  </span>
+                  <span style={{
+                    padding: '4px 10px',
+                    backgroundColor: notif.completarParcial ? '#28a745' : '#ffc107',
+                    color: notif.completarParcial ? 'white' : '#000',
+                    borderRadius: '4px',
+                    fontWeight: '600'
+                  }}>
+                    {notif.completarParcial ? '✅ Completado parcialmente' : '⏸️ En espera de resolución'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Información del Cliente */}
         {pedido && (
@@ -784,6 +1102,379 @@ const DetallePedido: React.FC = () => {
         >
           Volver
         </IonButton>
+
+        {/* Modal de Resolución */}
+        <IonModal isOpen={showModalResolucion} onDidDismiss={() => setShowModalResolucion(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>
+                {obtenerNombreResolucion(tipoResolucionSeleccionada)}
+              </IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            <div style={{ padding: '20px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ marginBottom: '8px', color: '#495057' }}>
+                  Detalles de la resolución
+                </h4>
+                <p style={{ fontSize: '14px', color: '#6c757d', marginBottom: '16px' }}>
+                  {tipoResolucionSeleccionada === 'cancelar_articulo' && 'El artículo será eliminado del pedido. El stock será devuelto.'}
+                  {tipoResolucionSeleccionada === 'reducir_cantidad' && 'Especifica la nueva cantidad del artículo. La diferencia se devolverá al stock.'}
+                  {tipoResolucionSeleccionada === 'producto_alternativo' && 'Selecciona un producto alternativo para reemplazar el artículo con problema.'}
+                  {tipoResolucionSeleccionada === 'reabastecer' && 'El problema se marcará como "en resolución". La tarea quedará disponible cuando esté resuelto.'}
+                  {tipoResolucionSeleccionada === 'continuar' && 'Autoriza al picker a continuar con el pedido a pesar del problema reportado.'}
+                  {tipoResolucionSeleccionada === 'cancelar_pedido' && 'El pedido completo será cancelado. Todo el stock será devuelto.'}
+                </p>
+              </div>
+
+              {/* Campo específico para Reducir Cantidad */}
+              {tipoResolucionSeleccionada === 'reducir_cantidad' && (
+                <div style={{ marginBottom: '16px' }}>
+                  <IonItem>
+                    <IonLabel position="stacked">
+                      <strong>Nueva Cantidad *</strong>
+                    </IonLabel>
+                    <IonInput
+                      type="number"
+                      value={nuevaCantidad}
+                      onIonChange={(e) => setNuevaCantidad(parseInt(e.detail.value || '0'))}
+                      placeholder="Ingrese la nueva cantidad"
+                      min="1"
+                    />
+                  </IonItem>
+                </div>
+              )}
+
+              {/* Campo específico para Producto Alternativo */}
+              {tipoResolucionSeleccionada === 'producto_alternativo' && (
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <strong>Buscar Producto Alternativo *</strong>
+                  </div>
+                  <IonSearchbar
+                    value={busquedaProducto}
+                    onIonChange={(e) => setBusquedaProducto(e.detail.value || '')}
+                    placeholder="Buscar por código, nombre, color o talle"
+                  />
+                  <IonList style={{ 
+                    maxHeight: '300px', 
+                    overflow: 'auto',
+                    border: '1px solid #e9ecef',
+                    borderRadius: '8px',
+                    marginTop: '8px'
+                  }}>
+                    {filtrarIndumentarias().slice(0, 20).map((item: any) => (
+                      <IonItem
+                        key={item.codigoIndumentaria}
+                        button
+                        onClick={() => setProductoAlternativo(item)}
+                        style={{
+                          backgroundColor: productoAlternativo?.codigoIndumentaria === item.codigoIndumentaria ? '#e7f3ff' : 'white'
+                        }}
+                      >
+                        <IonLabel>
+                          <h3 style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                            {item.codigoIndumentaria}
+                          </h3>
+                          <p style={{ fontSize: '13px', color: '#6c757d' }}>
+                            {item.nombre} - {item.color} - {item.talle} - ${item.precio}
+                          </p>
+                        </IonLabel>
+                        {productoAlternativo?.codigoIndumentaria === item.codigoIndumentaria && (
+                          <IonIcon icon={checkmarkCircleOutline} slot="end" color="primary" />
+                        )}
+                      </IonItem>
+                    ))}
+                    {filtrarIndumentarias().length === 0 && (
+                      <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
+                        No se encontraron productos
+                      </div>
+                    )}
+                  </IonList>
+                  {productoAlternativo && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '12px',
+                      backgroundColor: '#d4edda',
+                      borderRadius: '6px',
+                      border: '1px solid #c3e6cb'
+                    }}>
+                      <strong style={{ color: '#155724' }}>✅ Producto seleccionado:</strong>
+                      <div style={{ marginTop: '4px', fontSize: '14px', color: '#155724' }}>
+                        {productoAlternativo.codigoIndumentaria} - {productoAlternativo.nombre}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Campo de Observaciones (para todos) */}
+              <div style={{ marginBottom: '16px' }}>
+                <IonItem>
+                  <IonLabel position="stacked">
+                    <strong>Observaciones {tipoResolucionSeleccionada === 'continuar' ? '(Instrucciones para el picker)' : ''}</strong>
+                  </IonLabel>
+                  <IonTextarea
+                    value={observacionesResolucion}
+                    onIonChange={(e) => setObservacionesResolucion(e.detail.value || '')}
+                    placeholder="Agregar comentarios u observaciones..."
+                    rows={4}
+                  />
+                </IonItem>
+              </div>
+
+              {/* Botones */}
+              <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                <IonButton
+                  expand="block"
+                  color="secondary"
+                  onClick={() => setShowModalResolucion(false)}
+                  disabled={procesandoResolucion}
+                  style={{ flex: 1 }}
+                >
+                  <IonIcon icon={closeCircleOutline} slot="start" />
+                  Cancelar
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  color="primary"
+                  onClick={procesarResolucion}
+                  disabled={procesandoResolucion}
+                  style={{ flex: 1 }}
+                >
+                  {procesandoResolucion ? (
+                    <>Procesando...</>
+                  ) : (
+                    <>
+                      <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                      Aplicar Resolución
+                    </>
+                  )}
+                </IonButton>
+              </div>
+            </div>
+          </IonContent>
+        </IonModal>
+
+        {/* Alerta de Resolución */}
+        <IonAlert
+          isOpen={showAlertResolucion}
+          onDidDismiss={() => setShowAlertResolucion(false)}
+          header="Resolución de Problema"
+          message={alertMsgResolucion}
+          buttons={['OK']}
+        />
+
+        {/* Modal de Cancelación de Pedido */}
+        <IonModal
+          isOpen={showMotivoModal}
+          onDidDismiss={() => {
+            setShowMotivoModal(false);
+            setMotivoSeleccionado(null);
+            setObservacionPersonalizada("");
+          }}
+          className="motivo-cancelacion-modal"
+        >
+          <div className="motivo-cancelacion-content">
+            <h2 className="motivo-cancelacion-header">Motivo de cancelación</h2>
+            <div className="motivo-cancelacion-pedido-info">
+              Pedido: {pedidoParaCancelar}
+            </div>
+            <div className="motivo-cancelacion-options">
+              {motivosCancelacion.map((motivo) => (
+                <div
+                  key={motivo.idMotivo}
+                  className={`motivo-option ${
+                    motivoSeleccionado === motivo.idMotivo ? "selected" : ""
+                  }`}
+                  onClick={() => setMotivoSeleccionado(motivo.idMotivo)}
+                >
+                  <input
+                    type="radio"
+                    name="motivo"
+                    value={motivo.idMotivo}
+                    checked={motivoSeleccionado === motivo.idMotivo}
+                    onChange={() => setMotivoSeleccionado(motivo.idMotivo)}
+                  />
+                  <div className="motivo-option-content">
+                    <div className="motivo-option-radio"></div>
+                    <div className="motivo-option-text">
+                      {motivo.descripcion}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Campo de observación personalizada - solo visible cuando el motivo es "Otro" (id 6) */}
+            {motivoSeleccionado === 6 && (
+              <div className="observacion-personalizada">
+                <IonItem className="observacion-input-item">
+                  <IonLabel position="stacked">
+                    Observación personalizada *
+                  </IonLabel>
+                  <IonTextarea
+                    value={observacionPersonalizada}
+                    onIonInput={(e: any) =>
+                      setObservacionPersonalizada(e.detail.value!)
+                    }
+                    placeholder="Ingrese el motivo de cancelación..."
+                    rows={3}
+                    maxlength={500}
+                    counter={true}
+                    className="observacion-textarea"
+                  />
+                </IonItem>
+              </div>
+            )}
+            <div className="motivo-cancelacion-buttons">
+              <IonButton
+                onClick={() => {
+                  setShowMotivoModal(false);
+                  setPedidoParaCancelar(null);
+                  setMotivoSeleccionado(null);
+                  setObservacionPersonalizada("");
+                }}
+                className="motivo-cancelacion-btn-cancelar"
+              >
+                Cancelar
+              </IonButton>
+              <IonButton
+                disabled={
+                  !motivoSeleccionado ||
+                  !pedidoParaCancelar ||
+                  (motivoSeleccionado === 6 && !observacionPersonalizada.trim())
+                }
+                className="motivo-cancelacion-btn-confirmar"
+                onClick={async () => {
+                  if (!motivoSeleccionado || !pedidoParaCancelar || !username)
+                    return;
+
+                  // Validar observación si el motivo es "Otro" (id 6)
+                  if (
+                    motivoSeleccionado === 6 &&
+                    !observacionPersonalizada.trim()
+                  ) {
+                    setAlertMsg(
+                      "La observación es requerida cuando el motivo es 'Otro'"
+                    );
+                    setShowAlert(true);
+                    return;
+                  }
+
+                  try {
+                    // Primero obtener el ID del usuario por su nombre de usuario
+                    const userResponse = await fetch(
+                      `/api/auth/usuarios/buscar-por-nombre/${username}`,
+                      {
+                        headers: {
+                          nombreUsuario: username,
+                        },
+                      }
+                    );
+                    let idUsuarioCancelo = null;
+
+                    if (userResponse.ok) {
+                      const userData = await userResponse.json();
+                      idUsuarioCancelo = userData.idUsuario;
+                    }
+
+                    if (!idUsuarioCancelo) {
+                      setAlertMsg(
+                        "Error: No se pudo identificar el usuario que cancela"
+                      );
+                      setShowAlert(true);
+                      return;
+                    }
+
+                    // Preparar el cuerpo de la petición
+                    const requestBody: any = {
+                      idMotivo: motivoSeleccionado,
+                      idUsuarioCancelo: idUsuarioCancelo,
+                    };
+
+                    // Solo incluir observación si el motivo es "Otro" y hay texto
+                    if (
+                      motivoSeleccionado === 6 &&
+                      observacionPersonalizada.trim()
+                    ) {
+                      requestBody.observacionCancelacion =
+                        observacionPersonalizada.trim();
+                    }
+
+                    // Proceder con la cancelación
+                    const response = await fetch(
+                      `/api/pedidos/${pedidoParaCancelar}/cancelar`,
+                      {
+                        method: "PUT",
+                        headers: {
+                          "Content-Type": "application/json",
+                          nombreUsuario: username,
+                        },
+                        body: JSON.stringify(requestBody),
+                      }
+                    );
+
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      setAlertMsg(
+                        errorData.error || "Error al cancelar el pedido."
+                      );
+                      setShowAlert(true);
+                      setShowMotivoModal(false);
+                      setPedidoParaCancelar(null);
+                      setMotivoSeleccionado(null);
+                      setObservacionPersonalizada("");
+                      return;
+                    }
+
+                    setShowDeleteSuccess(true);
+                    setShowMotivoModal(false);
+                    setPedidoParaCancelar(null);
+                    setMotivoSeleccionado(null);
+                    setObservacionPersonalizada("");
+                    // Recargar el pedido para ver los cambios
+                    await cargarPedido();
+                  } catch (error) {
+                    setAlertMsg("Error de conexión al cancelar el pedido.");
+                    setShowAlert(true);
+                    setShowMotivoModal(false);
+                    setPedidoParaCancelar(null);
+                    setMotivoSeleccionado(null);
+                    setObservacionPersonalizada("");
+                  }
+                }}
+              >
+                Confirmar Cancelación
+              </IonButton>
+            </div>
+          </div>
+        </IonModal>
+
+        {/* Alerta de éxito al cancelar */}
+        <IonAlert
+          isOpen={showDeleteSuccess}
+          message="El pedido fue cancelado correctamente."
+          buttons={[
+            {
+              text: "Aceptar",
+              handler: () => {
+                setShowDeleteSuccess(false);
+                history.push('/pedidos');
+              },
+            },
+          ]}
+        />
+
+        {/* Alerta general */}
+        <IonAlert
+          isOpen={showAlert}
+          onDidDismiss={() => setShowAlert(false)}
+          header="Advertencia"
+          message={alertMsg}
+          buttons={["Aceptar"]}
+        />
       </IonContent>
     </IonPage>
   );

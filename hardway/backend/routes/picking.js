@@ -90,6 +90,24 @@ router.get("/pickers", async (req, res) => {
   }
 });
 
+// Obtener motivos de problemas para picking (reutiliza motivo_no_apta)
+router.get("/motivos-problemas", async (req, res) => {
+  try {
+    const [motivos] = await sequelize.query(`
+      SELECT 
+        idMotivo,
+        descripcion
+      FROM motivo_no_apta
+      ORDER BY idMotivo ASC
+    `);
+    
+    res.json(motivos);
+  } catch (error) {
+    console.error("Error al obtener motivos de problemas:", error);
+    res.status(500).json({ error: "Error al obtener motivos de problemas" });
+  }
+});
+
 // Obtener tareas de picking (CON middleware)
 router.get("/tareas", verificarAccesoPicking, async (req, res) => {
   // El legajo ya fue validado por el middleware y está en req.pickerAutenticado
@@ -237,25 +255,60 @@ router.get("/tareas/:numeroPedido", verificarAccesoPicking, async (req, res) => 
   }
 });
 
-// Completar tarea de picking
+// Completar tarea de picking (con soporte para reportar problemas)
 router.post("/tareas/:numeroPedido/completar", verificarAccesoPicking, async (req, res) => {
   const { numeroPedido } = req.params;
-  const { observaciones, idAsignacion } = req.body;
+  const { 
+    observaciones, 
+    idAsignacion,
+    tieneProblemas,
+    idMotivoProblema,
+    observacionesProblema,
+    completarParcial,
+    idDetallePedidoProblema,
+    cantidadConProblema
+  } = req.body;
   
   // Log para diagnóstico
   console.log('📦 Cuerpo de la petición recibido:', JSON.stringify(req.body));
   console.log('🔑 idAsignacion recibido:', idAsignacion, 'tipo:', typeof idAsignacion);
+  console.log('⚠️ Tiene problemas:', tieneProblemas, 'Completar parcial:', completarParcial);
+  console.log('🎯 Artículo problema:', idDetallePedidoProblema, 'Cantidad:', cantidadConProblema);
 
   // Iniciar transacción
   const t = await sequelize.transaction();
   
   try {
+    // VALIDACIÓN: Verificar si hay problemas pendientes de resolución antes de completar
+    if (!tieneProblemas) { // Solo validar cuando se intenta completar sin problemas
+      const [notificacionesPendientes] = await sequelize.query(`
+        SELECT COUNT(*) as total
+        FROM notificacion_pedido n
+        WHERE n.numeroPedido = ?
+          AND n.tipoNotificacion = 'problema_picking'
+          AND n.estadoResolucion = 'pendiente'
+      `, {
+        replacements: [numeroPedido],
+        transaction: t
+      });
+
+      if (notificacionesPendientes[0].total > 0) {
+        await t.rollback();
+        console.log(`❌ Intento de completar pedido ${numeroPedido} con problemas pendientes de resolución`);
+        return res.status(400).json({ 
+          error: "No se puede completar. Hay problemas pendientes de resolución.",
+          detalles: "El vendedor debe resolver los problemas reportados antes de continuar.",
+          cantidadProblemasPendientes: notificacionesPendientes[0].total
+        });
+      }
+    }
+    
+    let idAsignacionActual = null;
+    
     // Manejar caso especial para administradores
     if (req.esAdmin) {
       console.log('🔑 Usuario administrador completando tarea de picking');
       
-      // Si es admin, necesitamos completar la tarea sin especificar legajo (usando idAsignacion)
-      // Asegurarnos de que idAsignacion sea un número válido
       const idAsignacionNum = idAsignacion ? parseInt(idAsignacion, 10) : null;
       console.log('🔍 idAsignacion recibido y convertido:', { 
         original: idAsignacion, 
@@ -266,7 +319,6 @@ router.post("/tareas/:numeroPedido/completar", verificarAccesoPicking, async (re
       });
       
       if (idAsignacionNum && !isNaN(idAsignacionNum)) {
-        // Buscar primero la asignación para obtener el legajo correcto
         const [asignacionResults] = await sequelize.query(`
           SELECT legajoPicker FROM asignacion_picking 
           WHERE numeroPedido = ? AND idAsignacion = ? AND completado = 0
@@ -279,17 +331,50 @@ router.post("/tareas/:numeroPedido/completar", verificarAccesoPicking, async (re
           throw new Error('No se encontró la asignación especificada o ya está completada');
         }
 
-        // Marcar tarea específica como completada
-        await sequelize.query(`
-          UPDATE asignacion_picking 
-          SET completado = 1, fechaCompletado = NOW(), observaciones = ?
-          WHERE numeroPedido = ? AND idAsignacion = ? AND completado = 0
-        `, { 
-          replacements: [observaciones || 'Completada por administrador', numeroPedido, idAsignacionNum],
-          transaction: t 
-        });
+        idAsignacionActual = idAsignacionNum;
         
-        console.log(`✅ Admin completó tarea con ID ${idAsignacionNum} para pedido ${numeroPedido}`);
+        // Si hay problemas, actualizar campos adicionales
+        if (tieneProblemas) {
+          await sequelize.query(`
+            UPDATE asignacion_picking 
+            SET completado = ?, 
+                fechaCompletado = ?, 
+                observaciones = ?,
+                tieneProblemas = 1,
+                idMotivoProblema = ?,
+                observacionesProblema = ?,
+                completarParcial = ?,
+                idDetallePedidoProblema = ?,
+                cantidadConProblema = ?
+            WHERE numeroPedido = ? AND idAsignacion = ? AND completado = 0
+          `, { 
+            replacements: [
+              completarParcial ? 1 : 0, // Solo completar si picker decidió hacerlo parcialmente
+              completarParcial ? new Date() : null,
+              observaciones || 'Completada por administrador',
+              idMotivoProblema,
+              observacionesProblema,
+              completarParcial ? 1 : 0,
+              idDetallePedidoProblema,
+              cantidadConProblema,
+              numeroPedido, 
+              idAsignacionNum
+            ],
+            transaction: t 
+          });
+          console.log(`⚠️ Admin registró problema en tarea ${idAsignacionNum} - Artículo: ${idDetallePedidoProblema}, Cantidad: ${cantidadConProblema}`);
+        } else {
+          // Sin problemas, completar normal
+          await sequelize.query(`
+            UPDATE asignacion_picking 
+            SET completado = 1, fechaCompletado = NOW(), observaciones = ?
+            WHERE numeroPedido = ? AND idAsignacion = ? AND completado = 0
+          `, { 
+            replacements: [observaciones || 'Completada por administrador', numeroPedido, idAsignacionNum],
+            transaction: t 
+          });
+          console.log(`✅ Admin completó tarea con ID ${idAsignacionNum} para pedido ${numeroPedido}`);
+        }
       } else {
         console.log('❌ Error: idAsignacion no válido:', idAsignacion, 'tipo:', typeof idAsignacion);
         throw new Error('Como administrador, debe especificar idAsignacion válido para completar una tarea');
@@ -299,41 +384,158 @@ router.post("/tareas/:numeroPedido/completar", verificarAccesoPicking, async (re
       const legajoPicker = req.pickerAutenticado.legajo;
       console.log(`🔑 Picker ${legajoPicker} completando tarea`);
 
-      // Marcar la tarea como completada
-      await sequelize.query(`
-        UPDATE asignacion_picking 
-        SET completado = 1, fechaCompletado = NOW(), observaciones = ?
+      // Obtener idAsignacion actual del picker
+      const [asignacionResults] = await sequelize.query(`
+        SELECT idAsignacion FROM asignacion_picking
         WHERE numeroPedido = ? AND legajoPicker = ? AND completado = 0
-      `, { 
-        replacements: [observaciones || 'Tarea completada', numeroPedido, legajoPicker],
-        transaction: t 
+        LIMIT 1
+      `, {
+        replacements: [numeroPedido, legajoPicker],
+        transaction: t
       });
+      
+      if (asignacionResults.length > 0) {
+        idAsignacionActual = asignacionResults[0].idAsignacion;
+      }
+
+      // Si hay problemas, actualizar campos adicionales
+      if (tieneProblemas) {
+        await sequelize.query(`
+          UPDATE asignacion_picking 
+          SET completado = ?, 
+              fechaCompletado = ?, 
+              observaciones = ?,
+              tieneProblemas = 1,
+              idMotivoProblema = ?,
+              observacionesProblema = ?,
+              completarParcial = ?,
+              idDetallePedidoProblema = ?,
+              cantidadConProblema = ?
+          WHERE numeroPedido = ? AND legajoPicker = ? AND completado = 0
+        `, { 
+          replacements: [
+            completarParcial ? 1 : 0,
+            completarParcial ? new Date() : null,
+            observaciones || 'Tarea con problema reportado',
+            idMotivoProblema,
+            observacionesProblema,
+            completarParcial ? 1 : 0,
+            idDetallePedidoProblema,
+            cantidadConProblema,
+            numeroPedido, 
+            legajoPicker
+          ],
+          transaction: t 
+        });
+        console.log(`⚠️ Picker ${legajoPicker} registró problema - Artículo: ${idDetallePedidoProblema}, Cantidad: ${cantidadConProblema}`);
+      } else {
+        // Sin problemas, completar normal
+        await sequelize.query(`
+          UPDATE asignacion_picking 
+          SET completado = 1, fechaCompletado = NOW(), observaciones = ?
+          WHERE numeroPedido = ? AND legajoPicker = ? AND completado = 0
+        `, { 
+          replacements: [observaciones || 'Tarea completada', numeroPedido, legajoPicker],
+          transaction: t 
+        });
+      }
     } else {
-      // Caso de error: ni administrador con idAsignacion ni picker con legajo
       throw new Error('No se pudo identificar el picker ni se proporcionó idAsignacion como administrador');
     }
 
-    // Actualizar estado del pedido a "Pendiente de Pago" (estado 2)
-    // FLUJO CORRECTO según base de datos:
-    // 1. En curso -> 2. Pendiente de Pago -> 3. Abonado -> 4. Despachado -> 5. Finalizado -> 6. Cancelado
-    // Después de que el picker completa la recolección, el pedido debe pasar a "Pendiente de Pago" (idEstado=2)
-    console.log(`🔄 Actualizando estado del pedido ${numeroPedido} a Pendiente de Pago (idEstado=2)`);
-    
-    await Pedido.update(
-      { idEstado: 2, fechaModificacion: new Date() },
-      { where: { numeroPedido }, transaction: t }
-    );
+    // Actualizar estado del pedido SOLO si no hay problemas O si se decidió completar parcialmente
+    if (!tieneProblemas || completarParcial) {
+      console.log(`🔄 Actualizando estado del pedido ${numeroPedido} a Pendiente de Pago (idEstado=2)`);
+      await Pedido.update(
+        { idEstado: 2, fechaModificacion: new Date() },
+        { where: { numeroPedido }, transaction: t }
+      );
+    } else {
+      console.log(`⏸️ Pedido ${numeroPedido} queda en estado "En Curso" (esperando resolución del problema)`);
+    }
+
+    // Si hay problemas, crear notificación para el vendedor
+    if (tieneProblemas) {
+      // Obtener idUsuarioCreo del pedido
+      const [pedidoInfo] = await sequelize.query(`
+        SELECT idUsuarioCreo FROM pedido WHERE numeroPedido = ?
+      `, {
+        replacements: [numeroPedido],
+        transaction: t
+      });
+
+      if (pedidoInfo.length > 0 && pedidoInfo[0].idUsuarioCreo) {
+        const idUsuarioVendedor = pedidoInfo[0].idUsuarioCreo;
+        
+        // Obtener descripción del motivo
+        const [motivoInfo] = await sequelize.query(`
+          SELECT descripcion FROM motivo_no_apta WHERE idMotivo = ?
+        `, {
+          replacements: [idMotivoProblema],
+          transaction: t
+        });
+
+        const descripcionMotivo = motivoInfo.length > 0 ? motivoInfo[0].descripcion : 'Problema no especificado';
+        
+        // Construir información del artículo si está disponible
+        let infoArticulo = '';
+        if (idDetallePedidoProblema) {
+          const [articuloInfo] = await sequelize.query(`
+            SELECT dp.codigoIndumentaria, ni.nombre, pp.nombrePresentacion
+            FROM detallepedido dp
+            LEFT JOIN indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
+            LEFT JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+            LEFT JOIN nombreindumentaria ni ON di.idNombre = ni.idNombre
+            LEFT JOIN presentacion_producto pp ON dp.idPresentacion = pp.idPresentacion
+            WHERE dp.idDetallePedido = ?
+            LIMIT 1
+          `, {
+            replacements: [idDetallePedidoProblema],
+            transaction: t
+          });
+
+          if (articuloInfo.length > 0) {
+            const nombreArticulo = articuloInfo[0].nombre || articuloInfo[0].codigoIndumentaria;
+            const presentacion = articuloInfo[0].nombrePresentacion ? ` (${articuloInfo[0].nombrePresentacion})` : '';
+            infoArticulo = ` | Artículo: ${nombreArticulo}${presentacion}${cantidadConProblema ? ` - ${cantidadConProblema} unidades` : ''}`;
+          }
+        }
+        
+        const mensaje = `⚠️ Problema reportado en pedido ${numeroPedido}: ${descripcionMotivo}${infoArticulo}. ${observacionesProblema || ''}${completarParcial ? ' (Pedido completado parcialmente)' : ' (Pedido en espera de resolución)'}`;
+        
+        // Crear notificación
+        await sequelize.query(`
+          INSERT INTO notificacion_pedido 
+          (numeroPedido, idUsuarioDestino, tipoNotificacion, mensaje, idAsignacionPicking, estadoResolucion)
+          VALUES (?, ?, 'problema_picking', ?, ?, 'pendiente')
+        `, {
+          replacements: [numeroPedido, idUsuarioVendedor, mensaje, idAsignacionActual],
+          transaction: t
+        });
+        
+        console.log(`📩 Notificación creada para usuario ${idUsuarioVendedor} sobre problema en pedido ${numeroPedido}`);
+      }
+    }
 
     await t.commit();
+    
+    let estadoFinal = tieneProblemas && !completarParcial ? 'En Curso (con problema)' : 'Pendiente de Pago';
+    let idEstadoFinal = tieneProblemas && !completarParcial ? 1 : 2;
+    
     res.json({ 
-      message: "Tarea de picking completada correctamente", 
-      estado: "Pendiente de Pago",
-      idEstado: 2
+      message: tieneProblemas 
+        ? (completarParcial 
+          ? "Problema reportado. Pedido completado parcialmente." 
+          : "Problema reportado. Pedido en espera de resolución.")
+        : "Tarea de picking completada correctamente", 
+      estado: estadoFinal,
+      idEstado: idEstadoFinal,
+      tieneProblemas: tieneProblemas || false
     });
   } catch (error) {
     await t.rollback();
     console.error("Error al completar tarea:", error);
-    res.status(500).json({ error: "Error al completar tarea" });
+    res.status(500).json({ error: "Error al completar tarea: " + error.message });
   }
 });
 

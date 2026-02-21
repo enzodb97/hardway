@@ -23,6 +23,12 @@ import {
   IonLabel,
   IonTextarea,
   useIonViewWillEnter,
+  IonBadge,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonFooter,
 } from "@ionic/react";
 import {
   cargarPedidos,
@@ -45,7 +51,7 @@ import {
 } from "../../utils/pedidosUtils";
 import { useHistory, useLocation } from "react-router-dom";
 import axiosInstance from "../../config/axios";
-import { pencil, trash, documentText, chevronDown, cash, close } from "ionicons/icons";
+import { pencil, trash, documentText, chevronDown, cash, close, notificationsOutline, checkmarkCircleOutline } from "ionicons/icons";
 import { IonPopover, IonList, IonModal } from "@ionic/react";
 import "./Pedidos.css";
 
@@ -98,6 +104,11 @@ const Pedidos: React.FC = () => {
   const [fechaDesde, setFechaDesde] = useState<Date | null>(null);
   const [fechaHasta, setFechaHasta] = useState<Date | null>(null);
 
+  // Estados para notificaciones de problemas de picking
+  const [notificacionesProblemas, setNotificacionesProblemas] = useState<any[]>([]);
+  const [showNotificacionesModal, setShowNotificacionesModal] = useState(false);
+  const [idUsuarioActual, setIdUsuarioActual] = useState<number | null>(null);
+
   // Lista de todos los estados posibles
   const todosLosEstados = [
     { id: 1, nombre: "En Curso", clase: "en-curso" },
@@ -126,15 +137,57 @@ const Pedidos: React.FC = () => {
     }
   };
 
+  // Función para cargar notificaciones de problemas de picking
+  const cargarNotificacionesProblemas = async () => {
+    try {
+      // Obtener ID del usuario actual
+      const res = await axiosInstance.get('/api/auth/profile');
+      const idUsuario = res.data.idUsuario;
+      setIdUsuarioActual(idUsuario);
+
+      // Obtener TODAS las notificaciones del usuario
+      const notifRes = await axiosInstance.get(`/api/pedidos/notificaciones/${idUsuario}`);
+
+      // Filtrar solo notificaciones de problemas de picking
+      // Excluir pedidos completados (estados 2-6) o con flag completado=1
+      const notificacionesProblemasActivas = notifRes.data.filter(
+        (n: any) =>
+          n.tipoNotificacion === 'problema_picking' &&
+          // Excluir pedidos completados
+          ![2, 3, 4, 5, 6].includes(n.estadoPedido) &&
+          n.completado !== 1 &&
+          // Excluir problemas ya resueltos
+          n.estadoResolucion !== 'resuelto'
+      );
+
+      setNotificacionesProblemas(notificacionesProblemasActivas);
+    } catch (error) {
+      console.error('Error al cargar notificaciones de problemas:', error);
+    }
+  };
+
+  // Función para marcar una notificación como leída
+  const marcarProblemaLeido = async (idNotificacion: number) => {
+    try {
+      await axiosInstance.put(`/api/pedidos/notificaciones/${idNotificacion}/marcar-leida`);
+      // Recargar notificaciones después de marcar como leída
+      await cargarNotificacionesProblemas();
+    } catch (error) {
+      console.error('Error al marcar notificación como leída:', error);
+    }
+  };
+
   // Actualizar cuando se entra a la vista (navegación Ionic)
   useIonViewWillEnter(() => {
     actualizarPedidos();
+    cargarNotificacionesProblemas();
   });
 
   // Actualizar cuando cambia la ubicación (redirecciones)
   useEffect(() => {
     if (location.pathname === '/pedidos') {
       actualizarPedidos();
+      cargarNotificacionesProblemas();
     }
   }, [location]);
 
@@ -201,6 +254,19 @@ const Pedidos: React.FC = () => {
         <IonToolbar>
           <IonMenuButton slot="start" />
           <IonTitle>PEDIDOS</IonTitle>
+          <IonButton
+            slot="end"
+            fill="clear"
+            onClick={() => setShowNotificacionesModal(true)}
+            className="notifications-btn"
+          >
+            <IonIcon icon={notificationsOutline} />
+            {notificacionesProblemas.filter(n => n.leida === 0).length > 0 && (
+              <IonBadge color="danger" className="notifications-badge">
+                {notificacionesProblemas.filter(n => n.leida === 0).length}
+              </IonBadge>
+            )}
+          </IonButton>
         </IonToolbar>
       </IonHeader>
       <IonContent className="pedidos-content">
@@ -805,7 +871,7 @@ const Pedidos: React.FC = () => {
                   try {
                     // Primero obtener el ID del usuario por su nombre de usuario
                     const userResponse = await fetch(
-                      `/api/usuarios/buscar-por-nombre/${username}`,
+                      `/api/auth/usuarios/buscar-por-nombre/${username}`,
                       {
                         headers: {
                           nombreUsuario: username, // Agregar header de autorización si es necesario
@@ -1016,6 +1082,129 @@ const Pedidos: React.FC = () => {
             </IonList>
           </IonContent>
         </IonPopover>
+
+        {/* Modal de notificaciones de problemas de picking */}
+        <IonModal 
+          isOpen={showNotificacionesModal} 
+          onDidDismiss={() => setShowNotificacionesModal(false)}
+          className="notificaciones-modal"
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Problemas Reportados</IonTitle>
+              <IonButton 
+                slot="end" 
+                fill="clear" 
+                onClick={() => setShowNotificacionesModal(false)}
+              >
+                <IonIcon icon={close} />
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+          
+          <IonContent>
+            {notificacionesProblemas.length === 0 ? (
+              <div className="notificaciones-empty">
+                <IonIcon icon={notificationsOutline} />
+                <h3>No hay problemas reportados</h3>
+                <p>Todos los pedidos están en orden</p>
+              </div>
+            ) : (
+              <IonList>
+                {notificacionesProblemas.map((notif) => (
+                  <IonCard 
+                    key={notif.idNotificacion} 
+                    className={`notificacion-card ${notif.leida === 1 ? 'notificacion-leida' : ''}`}
+                  >
+                    <IonCardHeader>
+                      {/* Badge "Nueva" o "Leída" */}
+                      <IonBadge 
+                        color={notif.leida === 1 ? "light" : "danger"}
+                        className="notificacion-estado-badge"
+                      >
+                        {notif.leida === 1 ? "✓ Leída" : "🔔 Nueva"}
+                      </IonBadge>
+                      
+                      {/* Badge para mostrar el picker si es admin */}
+                      {notif.idUsuarioDestino !== idUsuarioActual && (
+                        <IonBadge color="warning" className="notificacion-picker-badge">
+                          👤 Picker: {notif.pickerAsignado}
+                        </IonBadge>
+                      )}
+                      
+                      <IonCardTitle>Pedido: {notif.numeroPedido}</IonCardTitle>
+                    </IonCardHeader>
+                    
+                    <IonCardContent>
+                      <div className="notificacion-mensaje">
+                        <p>{notif.mensaje}</p>
+                      </div>
+                      
+                      <div className="notificacion-footer">
+                        <span className="notificacion-fecha">
+                          📅 {new Date(notif.fechaNotificacion).toLocaleString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                        
+                        <div className="notificacion-acciones">
+                          {/* Botón Ver Detalle */}
+                          <IonButton 
+                            size="small" 
+                            color="primary"
+                            onClick={() => {
+                              setShowNotificacionesModal(false);
+                              history.push(`/detalle-pedido/${notif.numeroPedido}`);
+                            }}
+                          >
+                            Ver Detalle
+                          </IonButton>
+                          
+                          {/* Botón Marcar como leída */}
+                          {notif.leida === 1 ? (
+                            <IonButton 
+                              size="small" 
+                              color="light" 
+                              disabled
+                            >
+                              <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                              ✓ Leída
+                            </IonButton>
+                          ) : (
+                            <IonButton 
+                              size="small" 
+                              color="success"
+                              onClick={() => marcarProblemaLeido(notif.idNotificacion)}
+                            >
+                              <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                              Marcar como leída
+                            </IonButton>
+                          )}
+                        </div>
+                      </div>
+                    </IonCardContent>
+                  </IonCard>
+                ))}
+              </IonList>
+            )}
+          </IonContent>
+          
+          <IonFooter>
+            <IonToolbar>
+              <IonButton 
+                expand="full" 
+                fill="clear" 
+                onClick={() => setShowNotificacionesModal(false)}
+              >
+                Cerrar
+              </IonButton>
+            </IonToolbar>
+          </IonFooter>
+        </IonModal>
       </IonContent>
     </IonPage>
   );

@@ -22,6 +22,8 @@ const {
   Usuario,
   EmpresaEnvio,
   PresentacionProducto,
+  NotificacionPedido,
+  AsignacionPicking,
 } = require("../models");
 const { Sequelize, Op } = require("sequelize");
 
@@ -41,6 +43,623 @@ router.get("/motivos-modificacion", async (req, res) => {
     console.error("Error al obtener motivos de modificación:", error);
     res.status(500).json({ 
       error: "Error al obtener motivos de modificación", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Obtener notificaciones para un usuario (vendedor)
+router.get("/notificaciones/:idUsuario", async (req, res) => {
+  try {
+    const { idUsuario } = req.params;
+    const { soloNoLeidas } = req.query;
+    
+    // Verificar si el usuario es administrador
+    const [usuario] = await sequelize.query(`
+      SELECT u.idUsuario
+      FROM usuario u
+      JOIN usuario_tiporol utr ON u.idUsuario = utr.idUsuario
+      WHERE u.idUsuario = ? AND utr.idTipoRol = 1
+      LIMIT 1
+    `, {
+      replacements: [idUsuario]
+    });
+    
+    const esAdministrador = usuario && usuario.length > 0;
+    
+    console.log(`🔍 [DEBUG] Endpoint /notificaciones/${idUsuario} - Es Admin:`, esAdministrador);
+    
+    // Si es administrador, mostrar TODAS las notificaciones
+    // Si no, solo las del usuario específico
+    const whereCondition = esAdministrador 
+      ? `WHERE 1=1 ${soloNoLeidas === 'true' ? 'AND n.leida = 0' : ''}`
+      : `WHERE n.idUsuarioDestino = ? ${soloNoLeidas === 'true' ? 'AND n.leida = 0' : ''}`;
+    
+    const [notificaciones] = await sequelize.query(`
+      SELECT 
+        n.idNotificacion,
+        n.numeroPedido,
+        n.idUsuarioDestino,
+        n.tipoNotificacion,
+        n.mensaje,
+        n.fechaNotificacion,
+        n.leida,
+        n.fechaLectura,
+        n.idAsignacionPicking,
+        n.estadoResolucion,
+        n.tipoResolucion,
+        n.observacionesResolucion,
+        ap.tieneProblemas,
+        ap.observacionesProblema,
+        m.descripcion as motivoDescripcion,
+        u.nombreUsuario as pickerAsignado
+      FROM notificacion_pedido n
+      LEFT JOIN asignacion_picking ap ON n.idAsignacionPicking = ap.idAsignacion
+      LEFT JOIN motivo_no_apta m ON ap.idMotivoProblema = m.idMotivo
+      LEFT JOIN usuario u ON n.idUsuarioDestino = u.idUsuario
+      ${whereCondition}
+      ORDER BY n.fechaNotificacion DESC
+    `, {
+      replacements: esAdministrador ? [] : [idUsuario]
+    });
+    
+    console.log(`🔍 [DEBUG] Notificaciones encontradas:`, notificaciones.length);
+    console.log(`🔍 [DEBUG] Datos:`, JSON.stringify(notificaciones, null, 2));
+    
+    res.json(notificaciones);
+  } catch (error) {
+    console.error("Error al obtener notificaciones:", error);
+    res.status(500).json({ 
+      error: "Error al obtener notificaciones", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Obtener notificaciones de un pedido específico
+router.get("/notificaciones-pedido/:numeroPedido", async (req, res) => {
+  try {
+    const { numeroPedido } = req.params;
+    
+    const [notificaciones] = await sequelize.query(`
+      SELECT 
+        n.idNotificacion,
+        n.numeroPedido,
+        n.tipoNotificacion,
+        n.mensaje,
+        n.fechaNotificacion,
+        n.leida,
+        n.fechaLectura,
+        n.idAsignacionPicking,
+        n.estadoResolucion,
+        n.tipoResolucion,
+        n.observacionesResolucion,
+        ap.tieneProblemas,
+        ap.observacionesProblema,
+        ap.completarParcial,
+        ap.idDetallePedidoProblema,
+        ap.cantidadConProblema,
+        m.descripcion as motivoDescripcion,
+        u.nombreUsuario as pickerAsignado
+      FROM notificacion_pedido n
+      LEFT JOIN asignacion_picking ap ON n.idAsignacionPicking = ap.idAsignacion
+      LEFT JOIN motivo_no_apta m ON ap.idMotivoProblema = m.idMotivo
+      LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
+      LEFT JOIN usuario u ON ep.idPersona = u.idPersona
+      WHERE n.numeroPedido = ?
+      ORDER BY n.fechaNotificacion DESC
+    `, {
+      replacements: [numeroPedido]
+    });
+    
+    res.json(notificaciones);
+  } catch (error) {
+    console.error("Error al obtener notificaciones del pedido:", error);
+    res.status(500).json({ 
+      error: "Error al obtener notificaciones del pedido", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Marcar notificación como leída
+router.put("/notificaciones/:idNotificacion/marcar-leida", async (req, res) => {
+  try {
+    const { idNotificacion } = req.params;
+    
+    await sequelize.query(`
+      UPDATE notificacion_pedido
+      SET leida = 1, fechaLectura = NOW()
+      WHERE idNotificacion = ?
+    `, {
+      replacements: [idNotificacion]
+    });
+    
+    res.json({ message: "Notificación marcada como leída" });
+  } catch (error) {
+    console.error("Error al marcar notificación como leída:", error);
+    res.status(500).json({ 
+      error: "Error al marcar notificación", 
+      detalle: error.message 
+    });
+  }
+});
+
+// Resolver notificación de problema (vendedor)
+router.put("/notificaciones/:idNotificacion/resolver", async (req, res) => {
+  const { idNotificacion } = req.params;
+  const { 
+    tipoResolucion, 
+    observacionesResolucion, 
+    codigoIndumentariaAlternativo, 
+    nuevaCantidad 
+  } = req.body;
+  
+  const t = await sequelize.transaction();
+  
+  try {
+    // Validar tipo de resolución
+    const tiposValidos = [
+      'cancelar_articulo', 
+      'reducir_cantidad', 
+      'producto_alternativo', 
+      'reabastecer', 
+      'continuar', 
+      'cancelar_pedido'
+    ];
+    
+    if (!tiposValidos.includes(tipoResolucion)) {
+      await t.rollback();
+      return res.status(400).json({ 
+        error: "Tipo de resolución inválido",
+        tiposValidos 
+      });
+    }
+    
+    // Obtener notificación con detalles
+    const notificacion = await NotificacionPedido.findByPk(idNotificacion, { transaction: t });
+    if (!notificacion) {
+      await t.rollback();
+      return res.status(404).json({ error: "Notificación no encontrada" });
+    }
+    
+    // Obtener asignación de picking relacionada
+    const asignacion = await AsignacionPicking.findByPk(
+      notificacion.idAsignacionPicking, 
+      { transaction: t }
+    );
+    
+    if (!asignacion) {
+      await t.rollback();
+      return res.status(404).json({ error: "Asignación de picking no encontrada" });
+    }
+    
+    const numeroPedido = notificacion.numeroPedido;
+    const idUsuarioVendedor = req.usuarioAutenticado?.idUsuario || 1;
+    
+    // Obtener información del pedido y picker
+    const [pedidoInfo] = await sequelize.query(`
+      SELECT p.*, u.idUsuario as idPicker, u.nombreUsuario as pickerNombre
+      FROM pedido p
+      JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
+      JOIN usuario u ON ep.idPersona = u.idPersona
+      WHERE p.numeroPedido = ?
+      LIMIT 1
+    `, {
+      replacements: [numeroPedido],
+      transaction: t
+    });
+    
+    if (!pedidoInfo || pedidoInfo.length === 0) {
+      await t.rollback();
+      return res.status(404).json({ error: "Pedido no encontrado" });
+    }
+    
+    const idPickerDestino = pedidoInfo[0].idPicker;
+    let mensajeParaPicker = "";
+    
+    // ==========================================
+    // EJECUTAR LÓGICA SEGÚN TIPO DE RESOLUCIÓN
+    // ==========================================
+    
+    switch (tipoResolucion) {
+      
+      // ------------------------------------------
+      case 'cancelar_articulo':
+        // Eliminar el artículo del pedido
+        if (!asignacion.idDetallePedidoProblema) {
+          await t.rollback();
+          return res.status(400).json({ 
+            error: "No se encontró el artículo problemático en la asignación" 
+          });
+        }
+        
+        // Obtener detalle del artículo antes de eliminarlo
+        const detalleAEliminar = await DetallePedido.findByPk(
+          asignacion.idDetallePedidoProblema,
+          { transaction: t }
+        );
+        
+        if (!detalleAEliminar) {
+          await t.rollback();
+          return res.status(400).json({ error: "Artículo no encontrado en el pedido" });
+        }
+        
+        // Devolver stock (el picker nunca lo sacó del rack)
+        const stocksEliminar = await Stock.findAll({
+          where: { 
+            codigoIndumentaria: detalleAEliminar.codigoIndumentaria,
+            idRack: { [Op.ne]: 99 } // Excluir rack No Aptos
+          },
+          order: [['idRack', 'ASC']],
+          transaction: t,
+        });
+        
+        if (stocksEliminar && stocksEliminar.length > 0) {
+          const stockEliminar = stocksEliminar[0];
+          await MovimientoStock.create({
+            idMovimientoStock: "MOV-RES-" + Math.random().toString().slice(2, 8),
+            idStock: stockEliminar.idStock,
+            fechaMovimiento: new Date(),
+            cantidad: detalleAEliminar.cantidad,
+            observaciones: `Devolución por cancelación de artículo en resolución de problema - Pedido ${numeroPedido}`,
+          }, { transaction: t });
+        }
+        
+        // Eliminar el detalle
+        await DetallePedido.destroy({
+          where: { idDetallePedido: asignacion.idDetallePedidoProblema },
+          transaction: t
+        });
+        
+        // Registrar en historial
+        await HistorialModificacionPedido.create({
+          numeroPedido,
+          fechaModificacion: new Date(),
+          idUsuarioModifico: idUsuarioVendedor,
+          tipoModificacion: 'Se elimino un producto',
+          codigoIndumentaria: detalleAEliminar.codigoIndumentaria,
+          idDetallePedido: asignacion.idDetallePedidoProblema,
+          cantidadAnterior: detalleAEliminar.cantidad,
+          descripcion: `Artículo eliminado por problema reportado en picking: ${observacionesResolucion || 'Sin observaciones'}`,
+          observaciones: observacionesResolucion
+        }, { transaction: t });
+        
+        mensajeParaPicker = `✅ Resolución: El artículo con problema ha sido CANCELADO del pedido ${numeroPedido}. No es necesario prepararlo. ${observacionesResolucion ? `Nota: ${observacionesResolucion}` : ''}`;
+        break;
+        
+      // ------------------------------------------
+      case 'reducir_cantidad':
+        if (!nuevaCantidad || nuevaCantidad <= 0) {
+          await t.rollback();
+          return res.status(400).json({ 
+            error: "Debe especificar una nueva cantidad válida mayor a 0" 
+          });
+        }
+        
+        if (!asignacion.idDetallePedidoProblema) {
+          await t.rollback();
+          return res.status(400).json({ 
+            error: "No se encontró el artículo problemático" 
+          });
+        }
+        
+        const detalleReducir = await DetallePedido.findByPk(
+          asignacion.idDetallePedidoProblema,
+          { transaction: t }
+        );
+        
+        if (!detalleReducir) {
+          await t.rollback();
+          return res.status(400).json({ error: "Artículo no encontrado" });
+        }
+        
+        if (nuevaCantidad >= detalleReducir.cantidad) {
+          await t.rollback();
+          return res.status(400).json({ 
+            error: "La nueva cantidad debe ser menor a la cantidad actual" 
+          });
+        }
+        
+        const cantidadAnterior = detalleReducir.cantidad;
+        const diferencia = cantidadAnterior - nuevaCantidad;
+        
+        // Devolver stock de la diferencia
+        const stocksReducir = await Stock.findAll({
+          where: { 
+            codigoIndumentaria: detalleReducir.codigoIndumentaria,
+            idRack: { [Op.ne]: 99 }
+          },
+          order: [['idRack', 'ASC']],
+          transaction: t,
+        });
+        
+        if (stocksReducir && stocksReducir.length > 0) {
+          await MovimientoStock.create({
+            idMovimientoStock: "MOV-RED-" + Math.random().toString().slice(2, 8),
+            idStock: stocksReducir[0].idStock,
+            fechaMovimiento: new Date(),
+            cantidad: diferencia,
+            observaciones: `Devolución por reducción de cantidad en resolución - Pedido ${numeroPedido}`,
+          }, { transaction: t });
+        }
+        
+        // Actualizar cantidad y recalcular descuento proporcional
+        const descuentoProporcional = detalleReducir.descuentoItem 
+          ? (detalleReducir.descuentoItem / cantidadAnterior) * nuevaCantidad 
+          : 0;
+        
+        await DetallePedido.update(
+          { 
+            cantidad: nuevaCantidad,
+            descuentoItem: descuentoProporcional
+          },
+          { 
+            where: { idDetallePedido: asignacion.idDetallePedidoProblema },
+            transaction: t 
+          }
+        );
+        
+        // Registrar en historial
+        await HistorialModificacionPedido.create({
+          numeroPedido,
+          fechaModificacion: new Date(),
+          idUsuarioModifico: idUsuarioVendedor,
+          tipoModificacion: 'Se modifico la cantidad de un producto',
+          codigoIndumentaria: detalleReducir.codigoIndumentaria,
+          idDetallePedido: asignacion.idDetallePedidoProblema,
+          cantidadAnterior,
+          cantidadNueva: nuevaCantidad,
+          descripcion: `Cantidad reducida por problema en picking: ${cantidadAnterior} → ${nuevaCantidad}`,
+          observaciones: observacionesResolucion
+        }, { transaction: t });
+        
+        mensajeParaPicker = `📦 Resolución: La cantidad del artículo con problema en pedido ${numeroPedido} se redujo de ${cantidadAnterior} a ${nuevaCantidad} unidades. Prepara solo ${nuevaCantidad}. ${observacionesResolucion ? `Nota: ${observacionesResolucion}` : ''}`;
+        break;
+        
+      // ------------------------------------------
+      case 'producto_alternativo':
+        if (!codigoIndumentariaAlternativo) {
+          await t.rollback();
+          return res.status(400).json({ 
+            error: "Debe especificar el código del producto alternativo" 
+          });
+        }
+        
+        if (!asignacion.idDetallePedidoProblema) {
+          await t.rollback();
+          return res.status(400).json({ error: "No se encontró el artículo problemático" });
+        }
+        
+        const detalleOriginal = await DetallePedido.findByPk(
+          asignacion.idDetallePedidoProblema,
+          { transaction: t }
+        );
+        
+        if (!detalleOriginal) {
+          await t.rollback();
+          return res.status(400).json({ error: "Artículo original no encontrado" });
+        }
+        
+        // Verificar que el producto alternativo existe y tiene stock
+        const stockAlternativo = await Stock.findAll({
+          where: { 
+            codigoIndumentaria: codigoIndumentariaAlternativo,
+            idRack: { [Op.ne]: 99 }
+          },
+          order: [['idRack', 'ASC']],
+          transaction: t,
+        });
+        
+        if (!stockAlternativo || stockAlternativo.length === 0) {
+          await t.rollback();
+          return res.status(400).json({ 
+            error: "El producto alternativo no tiene stock disponible" 
+          });
+        }
+        
+        // Devolver stock del producto original
+        const stocksOriginal = await Stock.findAll({
+          where: { 
+            codigoIndumentaria: detalleOriginal.codigoIndumentaria,
+            idRack: { [Op.ne]: 99 }
+          },
+          order: [['idRack', 'ASC']],
+          transaction: t,
+        });
+        
+        if (stocksOriginal && stocksOriginal.length > 0) {
+          await MovimientoStock.create({
+            idMovimientoStock: "MOV-RALT-" + Math.random().toString().slice(2, 8),
+            idStock: stocksOriginal[0].idStock,
+            fechaMovimiento: new Date(),
+            cantidad: detalleOriginal.cantidad,
+            observaciones: `Devolución por reemplazo con producto alternativo - Pedido ${numeroPedido}`,
+          }, { transaction: t });
+        }
+        
+        // Descontar stock del producto alternativo
+        await MovimientoStock.create({
+          idMovimientoStock: "MOV-DALT-" + Math.random().toString().slice(2, 8),
+          idStock: stockAlternativo[0].idStock,
+          fechaMovimiento: new Date(),
+          cantidad: -detalleOriginal.cantidad,
+          observaciones: `Descuento por producto alternativo - Pedido ${numeroPedido}`,
+        }, { transaction: t });
+        
+        // Eliminar detalle original
+        await DetallePedido.destroy({
+          where: { idDetallePedido: asignacion.idDetallePedidoProblema },
+          transaction: t
+        });
+        
+        // Crear nuevo detalle con producto alternativo
+        const nuevoDetalle = await DetallePedido.create({
+          idDetallePedido: "DPED-" + Math.random().toString().slice(2, 8),
+          numeroPedido,
+          codigoIndumentaria: codigoIndumentariaAlternativo,
+          cantidad: detalleOriginal.cantidad,
+          idPresentacion: detalleOriginal.idPresentacion || 1,
+          descuentoItem: detalleOriginal.descuentoItem || 0,
+          cantidadPresentaciones: detalleOriginal.cantidadPresentaciones || 1,
+          unidadesTotales: detalleOriginal.unidadesTotales || detalleOriginal.cantidad
+        }, { transaction: t });
+        
+        // Registrar en historial
+        await HistorialModificacionPedido.create({
+          numeroPedido,
+          fechaModificacion: new Date(),
+          idUsuarioModifico: idUsuarioVendedor,
+          tipoModificacion: 'Se reemplazo un producto',
+          codigoIndumentaria: detalleOriginal.codigoIndumentaria,
+          idDetallePedido: nuevoDetalle.idDetallePedido,
+          descripcion: `Producto ${detalleOriginal.codigoIndumentaria} reemplazado por ${codigoIndumentariaAlternativo} debido a problema en picking`,
+          observaciones: observacionesResolucion
+        }, { transaction: t });
+        
+        mensajeParaPicker = `🔄 Resolución: Producto alternativo asignado en pedido ${numeroPedido}. Prepara ${codigoIndumentariaAlternativo} (${detalleOriginal.cantidad} unidades) en lugar del producto original. ${observacionesResolucion ? `Nota: ${observacionesResolucion}` : ''}`;
+        break;
+        
+      // ------------------------------------------
+      case 'reabastecer':
+        // Limpiar flag de problemas y poner en estado "en resolución"
+        await AsignacionPicking.update(
+          { 
+            tieneProblemas: 0
+          },
+          { 
+            where: { idAsignacion: asignacion.idAsignacion },
+            transaction: t 
+          }
+        );
+        
+        mensajeParaPicker = `🔄 Resolución: El problema del pedido ${numeroPedido} está siendo REABASTECIDO. La tarea quedará disponible nuevamente cuando esté resuelto. ${observacionesResolucion ? `Nota: ${observacionesResolucion}` : ''}`;
+        break;
+        
+      // ------------------------------------------
+      case 'continuar':
+        // Autorizar al picker a continuar con el producto a pesar del problema
+        await AsignacionPicking.update(
+          { 
+            tieneProblemas: 0
+          },
+          { 
+            where: { idAsignacion: asignacion.idAsignacion },
+            transaction: t 
+          }
+        );
+        
+        mensajeParaPicker = `✅ Resolución: El vendedor autorizó CONTINUAR con el pedido ${numeroPedido} a pesar del problema reportado. Procede con la preparación normal. ${observacionesResolucion ? `Instrucciones: ${observacionesResolucion}` : ''}`;
+        break;
+        
+      // ------------------------------------------
+      case 'cancelar_pedido':
+        // Usar lógica existente de cancelación de pedido
+        // Esta lógica ya está implementada en el endpoint DELETE o PUT de cancelación
+        // Por simplicidad, aquí marcaremos el estado como Cancelado
+        
+        await sequelize.query(`
+          UPDATE pedido 
+          SET idEstado = 6, 
+              fechaCancelacion = NOW(),
+              idUsuarioCancelo = ?
+          WHERE numeroPedido = ?
+        `, {
+          replacements: [idUsuarioVendedor, numeroPedido],
+          transaction: t
+        });
+        
+        // Devolver todo el stock del pedido
+        const detallesCancelar = await DetallePedido.findAll({
+          where: { numeroPedido },
+          transaction: t
+        });
+        
+        for (const detalle of detallesCancelar) {
+          const stocksCancelar = await Stock.findAll({
+            where: { 
+              codigoIndumentaria: detalle.codigoIndumentaria,
+              idRack: { [Op.ne]: 99 }
+            },
+            order: [['idRack', 'ASC']],
+            transaction: t,
+          });
+          
+          if (stocksCancelar && stocksCancelar.length > 0) {
+            await MovimientoStock.create({
+              idMovimientoStock: "MOV-CANC-" + Math.random().toString().slice(2, 8),
+              idStock: stocksCancelar[0].idStock,
+              fechaMovimiento: new Date(),
+              cantidad: detalle.cantidad,
+              observaciones: `Devolución por cancelación total del pedido ${numeroPedido}`,
+            }, { transaction: t });
+          }
+        }
+        
+        // Registrar cancelación en historial
+        await HistorialModificacionPedido.create({
+          numeroPedido,
+          fechaModificacion: new Date(),
+          idUsuarioModifico: idUsuarioVendedor,
+          tipoModificacion: 'Cancelacion',
+          descripcion: `Pedido cancelado por problema en picking: ${observacionesResolucion || 'Sin observaciones'}`,
+          observaciones: observacionesResolucion
+        }, { transaction: t });
+        
+        mensajeParaPicker = `❌ Resolución: El pedido ${numeroPedido} ha sido CANCELADO completamente debido al problema reportado. No continuar con la preparación. ${observacionesResolucion ? `Motivo: ${observacionesResolucion}` : ''}`;
+        break;
+    }
+    
+    // ==========================================
+    // ACTUALIZAR NOTIFICACIÓN ORIGINAL
+    // ==========================================
+    
+    await NotificacionPedido.update(
+      {
+        estadoResolucion: 'resuelto',
+        tipoResolucion,
+        idUsuarioResolvio: idUsuarioVendedor,
+        fechaResolucion: new Date(),
+        observacionesResolucion,
+        codigoIndumentariaAlternativo: codigoIndumentariaAlternativo || null,
+        nuevaCantidad: nuevaCantidad || null
+      },
+      { 
+        where: { idNotificacion },
+        transaction: t 
+      }
+    );
+    
+    // ==========================================
+    // CREAR NOTIFICACIÓN PARA EL PICKER
+    // ==========================================
+    
+    await NotificacionPedido.create({
+      numeroPedido,
+      idUsuarioDestino: idPickerDestino,
+      tipoNotificacion: 'resolucion_vendedor',
+      mensaje: mensajeParaPicker,
+      fechaNotificacion: new Date(),
+      leida: 0,
+      idAsignacionPicking: asignacion.idAsignacion,
+      estadoResolucion: 'resuelto'
+    }, { transaction: t });
+    
+    await t.commit();
+    
+    res.json({ 
+      success: true,
+      message: "Resolución aplicada exitosamente",
+      tipoResolucion,
+      mensajeParaPicker
+    });
+    
+  } catch (error) {
+    await t.rollback();
+    console.error("Error al resolver notificación:", error);
+    res.status(500).json({ 
+      error: "Error al resolver notificación", 
       detalle: error.message 
     });
   }

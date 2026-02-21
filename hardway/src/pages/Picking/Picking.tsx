@@ -18,6 +18,15 @@ import {
   IonModal,
   IonInput,
   IonFooter,
+  IonSelect,
+  IonSelectOption,
+  IonTextarea,
+  IonText,
+  IonBadge,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
 } from "@ionic/react";
 import {
   checkmarkCircleOutline,
@@ -37,6 +46,7 @@ import {
   playSkipBackOutline,
   playSkipForwardOutline,
   chevronDownOutline,
+  notificationsOutline,
 } from "ionicons/icons";
 import { useAuth } from "../../context/AuthContext";
 import { useHistory } from "react-router-dom";
@@ -45,7 +55,12 @@ import {
   verPickingList,
   completarTareaPicking,
   exportarPedidoPDF,
+  obtenerMotivosProblemas,
+  completarTareaConProblema,
+  marcarNotificacionLeida,
+  obtenerNotificacionesPedido,
 } from "../../utils/pickingUtils";
+import axiosInstance from "../../config/axios";
 import "./Picking.css";
 
 const PAGE_SIZE = 6; // Cantidad de tareas por página
@@ -61,8 +76,19 @@ const Picking: React.FC = () => {
   const [alertMsg, setAlertMsg] = useState("");
   const [tareaSeleccionada, setTareaSeleccionada] = useState<any>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showProblemaModal, setShowProblemaModal] = useState(false);
+  const [motivosProblemas, setMotivosProblemas] = useState<any[]>([]);
+  const [motivoSeleccionado, setMotivoSeleccionado] = useState<number | null>(null);
+  const [observacionesProblema, setObservacionesProblema] = useState("");
+  const [articuloSeleccionado, setArticuloSeleccionado] = useState<any | null>(null);
+  const [cantidadProblema, setCantidadProblema] = useState<number>(0);
   const [pickingList, setPickingList] = useState<any[]>([]);
   const [showPickingList, setShowPickingList] = useState(false);
+  
+  // Estados para notificaciones de resolución
+  const [notificacionesResolucion, setNotificacionesResolucion] = useState<any[]>([]);
+  const [idUsuarioActual, setIdUsuarioActual] = useState<number | null>(null);
+  const [showNotificacionesModal, setShowNotificacionesModal] = useState(false);
   
   // Estados de paginación
   const [page, setPage] = useState(1);
@@ -84,6 +110,62 @@ const Picking: React.FC = () => {
     }
   };
 
+  // Función auxiliar para formatear items del picking list (elimina triplicación)
+  const formatearItemsPickingList = (detallesPedido: any[]) => {
+    return detallesPedido.map((detalle: any) => {
+      const indumentaria = detalle.Indumentarium || {};
+      const detalleInd = indumentaria.DetalleIndumentarium || {};
+      const nombreInd = detalleInd.NombreIndumentarium || {};
+      const color = detalleInd.Color || {};
+      const talle = detalleInd.Talle || {};
+      const categoria = detalleInd.CategoriaIndumentarium || {};
+      return {
+        nombre_producto: nombreInd.nombre || "Sin nombre",
+        codigoIndumentaria: detalle.codigoIndumentaria,
+        referencia: indumentaria.codigoIndumentaria,
+        id: indumentaria.idIndumentaria || detalle.codigoIndumentaria || "-",
+        cantidad: detalle.cantidad,
+        rack: indumentaria.Stock?.Rack?.numeroRack || indumentaria.Stock?.idRack?.toString() || "Sin asignar",
+        categoria: categoria.categoria || "Sin categoría",
+        color: color.color || "N/A",
+        talle: talle.talle || "N/A",
+        nombrePresentacion: obtenerNombrePresentacion(detalle.idPresentacion),
+        cantidadPresentaciones: detalle.cantidadPresentaciones,
+        unidadesTotales: detalle.unidadesTotales,
+      };
+    });
+  };
+
+  // Helper para mostrar alertas (reduce código repetitivo)
+  const mostrarAlerta = (mensaje: string) => {
+    setAlertMsg(mensaje);
+    setShowAlert(true);
+  };
+
+  // Función para limpiar formulario de problemas
+  const limpiarFormularioProblema = () => {
+    setMotivoSeleccionado(null);
+    setObservacionesProblema("");
+    setArticuloSeleccionado(null);
+    setCantidadProblema(0);
+  };
+
+  // Función para verificar si hay problemas pendientes de resolución
+  const verificarProblemasPendientes = async (numeroPedido: string): Promise<boolean> => {
+    try {
+      const notificaciones = await obtenerNotificacionesPedido(numeroPedido);
+      const pendientes = notificaciones.filter(
+        (n: any) => n.tipoNotificacion === 'problema_picking' && n.estadoResolucion === 'pendiente'
+      );
+      return pendientes.length > 0;
+    } catch (error) {
+      console.error("Error al verificar problemas pendientes:", error);
+      return false; // En caso de error, permitir continuar
+    }
+  };
+
+
+
   const cargarTareas = async () => {
     setLoading(true);
     try {
@@ -99,8 +181,7 @@ const Picking: React.FC = () => {
       
       // Si es picker y no tiene tareas, mostrar mensaje informativo
       if (data.length === 0 && hasRole("Picker")) {
-        setAlertMsg("Todavía no tiene ningún pedido asignado");
-        setShowAlert(true);
+        mostrarAlerta("Todavía no tiene ningún pedido asignado");
       }
     } catch (err: any) {
       console.error("Error al cargar tareas:", err);
@@ -125,6 +206,59 @@ const Picking: React.FC = () => {
       setTareasFiltradas([]);
     }
     setLoading(false);
+  };
+
+  // Función para cargar notificaciones de resolución
+  const cargarNotificacionesResolucion = async () => {
+    try {
+      // Obtener idUsuario del usuario autenticado
+      const res = await axiosInstance.get('/api/auth/profile');
+      const idUsuario = res.data.idUsuario;
+      setIdUsuarioActual(idUsuario);
+      
+      // Obtener todas las notificaciones de tipo 'resolucion_vendedor'
+      // Si es administrador, recibirá TODAS las notificaciones
+      const notifRes = await axiosInstance.get(`/api/pedidos/notificaciones/${idUsuario}`);
+      
+      // Filtrar notificaciones de resolución
+      const notificacionesResoluciones = notifRes.data.filter(
+        (n: any) => n.tipoNotificacion === 'resolucion_vendedor'
+      );
+      
+      // Estados que indican que un pedido está completado
+      const estadosCompletados = [2, 3, 4, 5, 6];
+      
+      // Filtrar solo las notificaciones cuyo pedido NO esté completado
+      const notificacionesActivas = notificacionesResoluciones.filter((notif: any) => {
+        // Buscar si existe una tarea con este número de pedido
+        const tareaAsociada = tareas.find((t: any) => t.numeroPedido === notif.numeroPedido);
+        
+        if (tareaAsociada) {
+          // Si la tarea está completada (completado=1 o estado completado), NO mostrar la notificación
+          const pedidoCompletado = tareaAsociada.completado === 1 || estadosCompletados.includes(tareaAsociada.idEstado);
+          return !pedidoCompletado; // Solo mostrar si el pedido NO está completado
+        }
+        
+        // Si no se encuentra la tarea, mostrar la notificación por defecto
+        return true;
+      });
+      
+      setNotificacionesResolucion(notificacionesActivas);
+    } catch (error) {
+      console.error("Error al cargar notificaciones de resolución:", error);
+      setNotificacionesResolucion([]);
+    }
+  };
+
+  // Función para marcar notificación como leída y recargar tareas
+  const marcarResolucionLeida = async (idNotificacion: number) => {
+    try {
+      await marcarNotificacionLeida(idNotificacion);
+      await cargarNotificacionesResolucion();
+      await cargarTareas(); // Recargar tareas porque puede haber cambios en los pedidos
+    } catch (error) {
+      console.error("Error al marcar notificación como leída:", error);
+    }
   };
 
   // Función para filtrar tareas
@@ -156,8 +290,19 @@ const Picking: React.FC = () => {
 
   useEffect(() => {
     cargarTareas();
+    cargarMotivos();
+    cargarNotificacionesResolucion();
     // eslint-disable-next-line
   }, []);
+
+  const cargarMotivos = async () => {
+    try {
+      const motivos = await obtenerMotivosProblemas();
+      setMotivosProblemas(motivos);
+    } catch (error) {
+      console.error("Error al cargar motivos de problemas:", error);
+    }
+  };
 
   // Actualizar tareas filtradas cuando cambian las tareas
   useEffect(() => {
@@ -200,36 +345,7 @@ const Picking: React.FC = () => {
 
       // Transformamos los datos para tener un formato compatible con el componente
       if (response && response.pedido && response.pedido.DetallePedidos) {
-        // Convertir los detalles del pedido al formato esperado por el componente
-        const itemsFormateados = response.pedido.DetallePedidos.map(
-          (detalle: any) => {
-            // Extraemos los datos anidados
-            const indumentaria = detalle.Indumentarium || {};
-            const detalleInd = indumentaria.DetalleIndumentarium || {};
-            const nombreInd = detalleInd.NombreIndumentarium || {};
-            const color = detalleInd.Color || {};
-            const talle = detalleInd.Talle || {};
-            const categoria = detalleInd.CategoriaIndumentarium || {};
-
-            return {
-              nombre_producto: nombreInd.nombre || "Sin nombre",
-              codigoIndumentaria: detalle.codigoIndumentaria,
-              referencia: indumentaria.codigoIndumentaria,
-              cantidad: detalle.cantidad,
-              rack:
-                indumentaria.Stock?.Rack?.numeroRack ||
-                indumentaria.Stock?.idRack?.toString() ||
-                "Sin asignar",
-              categoria: categoria.categoria || "Sin categoría",
-              color: color.color || "N/A",
-              talle: talle.talle || "N/A",
-              nombrePresentacion: obtenerNombrePresentacion(detalle.idPresentacion),
-              cantidadPresentaciones: detalle.cantidadPresentaciones,
-              unidadesTotales: detalle.unidadesTotales,
-            };
-          }
-        );
-
+        const itemsFormateados = formatearItemsPickingList(response.pedido.DetallePedidos);
         setPickingList(itemsFormateados);
       } else {
         // Si no hay datos o el formato es inesperado, inicializamos como array vacío
@@ -239,8 +355,7 @@ const Picking: React.FC = () => {
       setShowPickingList(true);
     } catch (err) {
       console.error("Error detallado:", err);
-      setAlertMsg("Error al obtener picking list");
-      setShowAlert(true);
+      mostrarAlerta("Error al obtener picking list");
     }
   };
 
@@ -284,6 +399,111 @@ const Picking: React.FC = () => {
     }
   };
 
+  const handleReportarProblema = async () => {
+    // Cerrar confirm y cargar la lista de artículos antes de abrir el modal
+    setShowConfirm(false);
+    
+    try {
+      // Si pickingList está vacío, cargar los artículos del pedido
+      if (pickingList.length === 0 && tareaSeleccionada) {
+        const response = await verPickingList(tareaSeleccionada.numeroPedido);
+        
+        if (response && response.pedido && response.pedido.DetallePedidos) {
+          const itemsFormateados = formatearItemsPickingList(response.pedido.DetallePedidos);
+          setPickingList(itemsFormateados);
+        }
+      }
+      
+      // Abrir modal de reporte de problemas
+      setShowProblemaModal(true);
+    } catch (err) {
+      console.error("Error al cargar artículos para reporte:", err);
+      mostrarAlerta("Error al cargar la lista de artículos");
+    }
+  };
+
+  const handleCompletarConProblema = async () => {
+    try {
+      // Validaciones
+      if (!articuloSeleccionado) {
+        mostrarAlerta("Por favor seleccione el artículo con problema");
+        return;
+      }
+
+      if (!cantidadProblema || cantidadProblema <= 0) {
+        const tipoCantidad = articuloSeleccionado.nombrePresentacion && 
+                            articuloSeleccionado.nombrePresentacion !== 'Unidad'
+          ? articuloSeleccionado.nombrePresentacion
+          : 'unidades';
+        mostrarAlerta(`Por favor ingrese la cantidad de ${tipoCantidad} con problema`);
+        return;
+      }
+
+      // Validar cantidad máxima según presentación
+      const maxCantidad = articuloSeleccionado.nombrePresentacion && 
+                         articuloSeleccionado.nombrePresentacion !== 'Unidad'
+        ? articuloSeleccionado.cantidadPresentaciones
+        : articuloSeleccionado.cantidad;
+      
+      const tipoCantidad = articuloSeleccionado.nombrePresentacion && 
+                          articuloSeleccionado.nombrePresentacion !== 'Unidad'
+        ? articuloSeleccionado.nombrePresentacion + '(s)'
+        : 'unidades';
+
+      if (cantidadProblema > maxCantidad) {
+        mostrarAlerta(`La cantidad no puede superar ${maxCantidad} ${tipoCantidad}`);
+        return;
+      }
+
+      if (!motivoSeleccionado) {
+        mostrarAlerta("Por favor seleccione un motivo para el problema");
+        return;
+      }
+
+      if (!tareaSeleccionada || !tareaSeleccionada.idAsignacion) {
+        mostrarAlerta("Error: No se encontró ID de asignación para esta tarea");
+        return;
+      }
+
+      // Buscar el idDetallePedido del artículo seleccionado
+      // Necesitamos hacer una petición para obtener el idDetallePedido
+      const response = await verPickingList(tareaSeleccionada.numeroPedido);
+      const detalleCompleto = response.pedido.DetallePedidos.find(
+        (d: any) => d.codigoIndumentaria === articuloSeleccionado.codigoIndumentaria
+      );
+
+      if (!detalleCompleto || !detalleCompleto.idDetallePedido) {
+        mostrarAlerta("Error: No se encontró el ID del detalle del pedido");
+        return;
+      }
+
+      const resultado = await completarTareaConProblema(
+        tareaSeleccionada.idAsignacion,
+        tareaSeleccionada.numeroPedido,
+        true, // tieneProblemas
+        motivoSeleccionado,
+        observacionesProblema,
+        false, // completarParcial - siempre esperar resolución
+        detalleCompleto.idDetallePedido,
+        cantidadProblema
+      );
+
+      mostrarAlerta(resultado.message || "Problema reportado correctamente");
+      setShowProblemaModal(false);
+      
+      // Limpiar formulario
+      limpiarFormularioProblema();
+      
+      cargarTareas();
+      setShowPickingList(false);
+    } catch (err: any) {
+      console.error("Error en handleCompletarConProblema:", err);
+      mostrarAlerta(err.response?.data?.error || "Error al reportar problema. Verifica la consola para más detalles.");
+    }
+  };
+
+
+
   // Calcular estadísticas
   const estadosCompletados = [2, 3, 4, 5, 6];
   
@@ -310,6 +530,25 @@ const Picking: React.FC = () => {
       <IonHeader>
         <IonToolbar className="picking-toolbar">
           <IonTitle>Gestión de Picking</IonTitle>
+          
+          {/* Botón de Notificaciones con Badge */}
+          <IonButton 
+            slot="end" 
+            fill="clear" 
+            onClick={() => setShowNotificacionesModal(true)}
+            className="notifications-btn"
+          >
+            <IonIcon icon={notificationsOutline} />
+            {notificacionesResolucion.filter((n: any) => n.leida === 0).length > 0 && (
+              <IonBadge 
+                color="danger"
+                className="notifications-badge"
+              >
+                {notificacionesResolucion.filter((n: any) => n.leida === 0).length}
+              </IonBadge>
+            )}
+          </IonButton>
+          
           <IonButton 
             slot="end" 
             fill="clear" 
@@ -458,32 +697,24 @@ const Picking: React.FC = () => {
                               onClick={async () => {
                                 try {
                                   const response = await verPickingList(tarea.numeroPedido);
-                                  const productos = (response?.pedido?.DetallePedidos || []).map((detalle: any) => {
-                                    const indumentaria = detalle.Indumentarium || {};
-                                    const detalleInd = indumentaria.DetalleIndumentarium || {};
-                                    const nombreInd = detalleInd.NombreIndumentarium || {};
-                                    const color = detalleInd.Color || {};
-                                    const talle = detalleInd.Talle || {};
-                                    const categoria = detalleInd.CategoriaIndumentarium || {};
-                                    return {
-                                      id: indumentaria.idIndumentaria || detalle.codigoIndumentaria || "-",
-                                      nombre: nombreInd.nombre || "Sin nombre",
-                                      cantidad: detalle.cantidad || 0,
-                                      rack: indumentaria.Stock?.Rack?.numeroRack || indumentaria.Stock?.idRack?.toString() || "Sin asignar",
-                                      categoria: categoria.categoria || "Sin categoría",
-                                      color: color.color || "N/A",
-                                      talle: talle.talle || "N/A",
-                                      nombrePresentacion: obtenerNombrePresentacion(detalle.idPresentacion),
-                                      cantidadPresentaciones: detalle.cantidadPresentaciones,
-                                    };
-                                  });
+                                  const itemsFormateados = formatearItemsPickingList(response?.pedido?.DetallePedidos || []);
+                                  const productos = itemsFormateados.map(item => ({
+                                    id: item.id,
+                                    nombre: item.nombre_producto,
+                                    cantidad: item.cantidad,
+                                    rack: item.rack,
+                                    categoria: item.categoria,
+                                    color: item.color,
+                                    talle: item.talle,
+                                    nombrePresentacion: item.nombrePresentacion,
+                                    cantidadPresentaciones: item.cantidadPresentaciones,
+                                  }));
                                   exportarPedidoPDF({
                                     id: tarea.numeroPedido,
                                     productos,
                                   });
                                 } catch (err) {
-                                  setAlertMsg("Error al exportar el pedido a PDF");
-                                  setShowAlert(true);
+                                  mostrarAlerta("Error al exportar el pedido a PDF");
                                 }
                               }}
                             >
@@ -760,8 +991,8 @@ const Picking: React.FC = () => {
           isOpen={showConfirm}
           onDidDismiss={() => setShowConfirm(false)}
           cssClass="picking-confirm-alert"
-          header="Confirmar Finalización"
-          message="¿Estás seguro de que deseas marcar esta tarea como completada? Esta acción actualizará el estado del pedido."
+          header="Completar Tarea"
+          message="¿Hubo algún problema con los productos de este pedido?"
           buttons={[
             {
               text: "Cancelar",
@@ -769,22 +1000,266 @@ const Picking: React.FC = () => {
               cssClass: "alert-button-cancel",
             },
             {
-              text: "Completar Tarea",
-              cssClass: "alert-button-confirm",
+              text: "Reportar Problema",
+              cssClass: "alert-button-warning",
               handler: () => {
+                handleReportarProblema();
+              },
+            },
+            {
+              text: "Completar sin problemas",
+              cssClass: "alert-button-confirm",
+              handler: async () => {
                 if (!tareaSeleccionada || !tareaSeleccionada.idAsignacion) {
-                  setAlertMsg("Error: No se encontró ID de asignación para esta tarea");
-                  setShowAlert(true);
+                  mostrarAlerta("Error: No se encontró ID de asignación para esta tarea");
                   return false;
                 }
-                return handleCompletarTarea(
+                
+                // Validar si hay problemas pendientes
+                const tienePendientes = await verificarProblemasPendientes(tareaSeleccionada.numeroPedido);
+                
+                if (tienePendientes) {
+                  mostrarAlerta("⚠️ No se puede completar. Este pedido tiene problemas reportados pendientes de resolución. El vendedor debe resolver los problemas primero.");
+                  return false;
+                }
+                
+                // Si no hay problemas pendientes, completar normalmente
+                await handleCompletarTarea(
                   tareaSeleccionada.idAsignacion,
                   tareaSeleccionada.numeroPedido
                 );
+                return true;
               },
             },
           ]}
         />
+
+        {/* Modal de reporte de problema */}
+        <IonModal
+          isOpen={showProblemaModal}
+          onDidDismiss={() => {
+            setShowProblemaModal(false);
+            limpiarFormularioProblema();
+          }}
+          className="problema-modal"
+        >
+          <IonHeader>
+            <IonToolbar className="problema-modal-toolbar">
+              <IonTitle>Reportar Problema</IonTitle>
+              <IonButton
+                slot="end"
+                fill="clear"
+                onClick={() => {
+                  setShowProblemaModal(false);
+                  limpiarFormularioProblema();
+                }}
+                className="modal-close-btn"
+              >
+                <IonIcon icon={closeOutline} />
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+          
+          <IonContent className="problema-modal-content">
+            <div className="problema-form">
+              <div className="problema-header">
+                <h3>⚠️ Reporte de Problema</h3>
+                <p>Seleccione el artículo y la cantidad con problema</p>
+              </div>
+
+              <IonList>
+                <IonItem>
+                  <IonLabel position="stacked">
+                    Artículo con problema <span style={{ color: 'red' }}>*</span>
+                  </IonLabel>
+                  <IonSelect
+                    value={articuloSeleccionado?.codigoIndumentaria}
+                    placeholder="Seleccionar artículo"
+                    onIonChange={(e: any) => {
+                      const articulo = pickingList.find(
+                        (item) => item.codigoIndumentaria === e.detail.value
+                      );
+                      setArticuloSeleccionado(articulo);
+                      setCantidadProblema(0); // Reset cantidad al cambiar artículo
+                    }}
+                  >
+                    {pickingList.map((item) => {
+                      // Formatear la descripción según la presentación
+                      let descripcionCantidad = '';
+                      if (item.nombrePresentacion && item.cantidadPresentaciones && item.nombrePresentacion !== 'Unidad') {
+                        // Tiene presentación especial (Pack o Caja Cerrada)
+                        descripcionCantidad = `${item.cantidadPresentaciones} ${item.nombrePresentacion}(s) = ${item.unidadesTotales} unidades`;
+                      } else {
+                        // Solo unidades
+                        descripcionCantidad = `${item.cantidad} unidad(es)`;
+                      }
+                      
+                      return (
+                        <IonSelectOption
+                          key={item.codigoIndumentaria}
+                          value={item.codigoIndumentaria}
+                        >
+                          {item.nombre_producto} - {item.color} - {item.talle} ({descripcionCantidad})
+                        </IonSelectOption>
+                      );
+                    })}
+                  </IonSelect>
+                </IonItem>
+
+                {articuloSeleccionado && (
+                  <>
+                    {/* Mostrar información de presentación si existe */}
+                    {articuloSeleccionado.nombrePresentacion && 
+                     articuloSeleccionado.cantidadPresentaciones && 
+                     articuloSeleccionado.nombrePresentacion !== 'Unidad' && (
+                      <div style={{
+                        margin: '12px 16px',
+                        padding: '12px',
+                        backgroundColor: '#e3f2fd',
+                        borderRadius: '8px',
+                        borderLeft: '4px solid #2196f3'
+                      }}>
+                        <div style={{ fontSize: '13px', color: '#1976d2', marginBottom: '6px' }}>
+                          <strong>📦 Presentación: {articuloSeleccionado.nombrePresentacion}</strong>
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#555' }}>
+                          • Cantidad disponible: <strong>{articuloSeleccionado.cantidadPresentaciones} {articuloSeleccionado.nombrePresentacion}(s)</strong>
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#555' }}>
+                          • Equivalente a: <strong>{articuloSeleccionado.unidadesTotales} unidades totales</strong>
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#555' }}>
+                          • Unidades por {articuloSeleccionado.nombrePresentacion}: <strong>{articuloSeleccionado.unidadesTotales / articuloSeleccionado.cantidadPresentaciones}</strong>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <IonItem>
+                      <IonLabel position="stacked">
+                        {articuloSeleccionado.nombrePresentacion && 
+                         articuloSeleccionado.nombrePresentacion !== 'Unidad'
+                          ? `Cantidad de ${articuloSeleccionado.nombrePresentacion}(s) con problema`
+                          : 'Cantidad de unidades con problema'
+                        } <span style={{ color: 'red' }}>*</span>
+                      </IonLabel>
+                      <IonInput
+                        type="number"
+                        value={cantidadProblema}
+                        placeholder={
+                          articuloSeleccionado.nombrePresentacion && 
+                          articuloSeleccionado.nombrePresentacion !== 'Unidad'
+                            ? `Máximo: ${articuloSeleccionado.cantidadPresentaciones} ${articuloSeleccionado.nombrePresentacion}(s)`
+                            : `Máximo: ${articuloSeleccionado.cantidad} unidades`
+                        }
+                        min="1"
+                        max={
+                          articuloSeleccionado.nombrePresentacion && 
+                          articuloSeleccionado.nombrePresentacion !== 'Unidad'
+                            ? articuloSeleccionado.cantidadPresentaciones
+                            : articuloSeleccionado.cantidad
+                        }
+                        onIonChange={(e) => {
+                          const valor = parseInt(e.detail.value || "0");
+                          const max = articuloSeleccionado.nombrePresentacion && 
+                                     articuloSeleccionado.nombrePresentacion !== 'Unidad'
+                            ? articuloSeleccionado.cantidadPresentaciones
+                            : articuloSeleccionado.cantidad;
+                          
+                          // Validar rango: mínimo 1, máximo el disponible
+                          if (valor < 1) {
+                            setCantidadProblema(1);
+                          } else if (valor > max) {
+                            setCantidadProblema(max);
+                          } else {
+                            setCantidadProblema(valor);
+                          }
+                        }}
+                      />
+                    </IonItem>
+                    
+                    {/* Mostrar conversión a unidades si es presentación especial */}
+                    {articuloSeleccionado.nombrePresentacion && 
+                     articuloSeleccionado.nombrePresentacion !== 'Unidad' && 
+                     cantidadProblema > 0 && (
+                      <div style={{
+                        margin: '8px 16px',
+                        padding: '8px 12px',
+                        backgroundColor: '#fff3cd',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        color: '#856404'
+                      }}>
+                        💡 <strong>{cantidadProblema} {articuloSeleccionado.nombrePresentacion}(s)</strong> equivalen a <strong>{cantidadProblema * (articuloSeleccionado.unidadesTotales / articuloSeleccionado.cantidadPresentaciones)} unidades</strong>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                <IonItem>
+                  <IonLabel position="stacked">
+                    Motivo del problema <span style={{ color: 'red' }}>*</span>
+                  </IonLabel>
+                  <IonSelect
+                    value={motivoSeleccionado}
+                    placeholder="Seleccionar motivo"
+                    onIonChange={(e: any) => setMotivoSeleccionado(e.detail.value)}
+                  >
+                    {motivosProblemas.map((motivo) => (
+                      <IonSelectOption key={motivo.idMotivo} value={motivo.idMotivo}>
+                        {motivo.descripcion}
+                      </IonSelectOption>
+                    ))}
+                  </IonSelect>
+                </IonItem>
+
+                <IonItem>
+                  <IonLabel position="stacked">Observaciones adicionales</IonLabel>
+                  <IonInput
+                    value={observacionesProblema}
+                    placeholder="Detalles del problema (opcional)"
+                    onIonChange={(e) => setObservacionesProblema(e.detail.value || "")}
+                  />
+                </IonItem>
+
+                <div className="problema-opciones">
+                  <div style={{
+                    margin: '16px',
+                    padding: '16px',
+                    backgroundColor: '#fff3cd',
+                    borderRadius: '8px',
+                    borderLeft: '4px solid #ffc107'
+                  }}>
+                    <h4 style={{ color: '#856404', marginBottom: '8px' }}>ℹ️ Acción del sistema</h4>
+                    <p style={{ color: '#856404', fontSize: '14px', margin: 0 }}>
+                      El pedido quedará pendiente hasta que el problema sea resuelto por el vendedor o administrador.
+                    </p>
+                  </div>
+                </div>
+              </IonList>
+
+              <div className="problema-actions">
+                <IonButton
+                  expand="block"
+                  color="medium"
+                  onClick={() => {
+                    setShowProblemaModal(false);
+                    limpiarFormularioProblema();
+                  }}
+                >
+                  Cancelar
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  color="warning"
+                  onClick={handleCompletarConProblema}
+                  disabled={!motivoSeleccionado}
+                >
+                  Confirmar Reporte
+                </IonButton>
+              </div>
+            </div>
+          </IonContent>
+        </IonModal>
         
         {/* Modal de notificaciones */}
         <IonAlert
@@ -800,6 +1275,121 @@ const Picking: React.FC = () => {
             }
           ]}
         />
+        
+        {/* Modal de Notificaciones de Resolución */}
+        <IonModal
+          isOpen={showNotificacionesModal}
+          onDidDismiss={() => setShowNotificacionesModal(false)}
+          className="notificaciones-modal"
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Notificaciones de Resolución</IonTitle>
+              <IonButton slot="end" fill="clear" onClick={() => setShowNotificacionesModal(false)}>
+                <IonIcon icon={closeOutline} />
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+          
+          <IonContent>
+            {notificacionesResolucion.length === 0 ? (
+              <div className="notificaciones-empty">
+                <IonIcon icon={notificationsOutline} />
+                <h3>No hay notificaciones</h3>
+                <p>Todas las notificaciones de resolución aparecerán aquí</p>
+              </div>
+            ) : (
+              <IonList>
+                {notificacionesResolucion.map((notif) => (
+                  <IonCard 
+                    key={notif.idNotificacion} 
+                    className={`notificacion-card ${notif.leida === 1 ? 'notificacion-leida' : ''}`}
+                  >
+                    <IonCardHeader>
+                      <div>
+                        {/* Mostrar destinatario si es administrador viendo notificaciones de otros */}
+                        {notif.idUsuarioDestino && idUsuarioActual && notif.idUsuarioDestino !== idUsuarioActual && (
+                          <IonBadge color="warning" className="notificacion-destinatario">
+                            👤 Para: {notif.pickerAsignado || `Usuario #${notif.idUsuarioDestino}`}
+                          </IonBadge>
+                        )}
+                        {/* Badge para indicar si es nueva o leída */}
+                        {notif.leida === 1 ? (
+                          <IonBadge color="medium" style={{ marginBottom: '8px', marginRight: '8px' }}>
+                            ✓ Leída
+                          </IonBadge>
+                        ) : (
+                          <IonBadge color="danger" style={{ marginBottom: '8px', marginRight: '20px' }}>
+                            🔔 Nueva
+                          </IonBadge>
+                        )}
+                        <IonCardTitle>
+                          Pedido: {notif.numeroPedido}
+                        </IonCardTitle>
+                        <IonBadge color="success" className="notificacion-tipo">
+                          Resolución
+                        </IonBadge>
+                      </div>
+                    </IonCardHeader>
+                    
+                    <IonCardContent>
+                      <div className="notificacion-mensaje">
+                        <p>{notif.mensaje}</p>
+                      </div>
+                      
+                      <div className="notificacion-footer">
+                        <span className="notificacion-fecha">
+                          📅 {new Date(notif.fechaNotificacion).toLocaleString('es-AR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                        
+                        {notif.leida === 1 ? (
+                          <IonButton
+                            size="small"
+                            color="light"
+                            disabled
+                          >
+                            <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                            ✓ Leída
+                          </IonButton>
+                        ) : (
+                          <IonButton
+                            size="small"
+                            color="success"
+                            onClick={async () => {
+                              await marcarResolucionLeida(notif.idNotificacion);
+                              // NO cerrar modal, mantenerlo abierto
+                            }}
+                          >
+                            <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                            Marcar como leída
+                          </IonButton>
+                        )}
+                      </div>
+                    </IonCardContent>
+                  </IonCard>
+                ))}
+              </IonList>
+            )}
+          </IonContent>
+          
+          <IonFooter>
+            <IonToolbar>
+              <IonButton 
+                expand="full" 
+                onClick={() => setShowNotificacionesModal(false)}
+                fill="clear"
+              >
+                Cerrar
+              </IonButton>
+            </IonToolbar>
+          </IonFooter>
+        </IonModal>
       </IonContent>
     </IonPage>
   );
