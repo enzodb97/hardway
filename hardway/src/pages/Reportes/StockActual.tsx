@@ -214,9 +214,9 @@ const StockActual: React.FC = () => {
       .get("/api/reportes/stock-actual")
       .then((res) => {
         // Mapeo para adaptar los nombres del backend a los del frontend
-        // Filtrar indumentarias con stock > 0 y excluir rack 0 y 99 (no aptas)
+        // Filtrar indumentarias excluyendo solo rack 0 y 99 (no aptas), incluyendo stock 0
         const disponibles = (res.data as any[])
-          .filter((s) => s.stock_actual > 0 && s.rack !== 0 && s.rack !== 99)
+          .filter((s) => s.stock_actual >= 0 && s.rack !== 0 && s.rack !== 99)
           .map((s) => ({
             codigoIndumentaria: s.codigo,
             nombre_producto: s.producto,

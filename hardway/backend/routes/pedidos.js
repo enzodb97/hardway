@@ -28,6 +28,98 @@ const {
 const { Sequelize, Op } = require("sequelize");
 
 // =====================================================
+// FUNCIONES HELPER PARA CÁLCULO DE DESCUENTOS
+// =====================================================
+
+/**
+ * Calcula los descuentos de un pedido completo
+ * @param {Array} prendas - Array de prendas con codigoIndumentaria, cantidad, idPresentacion
+ * @param {Number} idCliente - ID del cliente
+ * @param {Object} transaction - Transacción de Sequelize
+ * @returns {Object} { totalPedido, subtotalOriginal, descuentoOrden, esVip }
+ */
+async function calcularDescuentosPedido(prendas, idCliente, transaction) {
+  let totalPedido = 0;
+  let subtotalOriginal = 0;
+
+  // Calcular subtotal y aplicar descuentos por presentación
+  if (prendas && Array.isArray(prendas)) {
+    for (const prenda of prendas) {
+      // Obtener precio de la prenda
+      const [precioRow] = await sequelize.query(
+        `SELECT pr.precio FROM indumentaria i
+          JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+          JOIN precioindumentaria pr ON di.idPrecio = pr.idPrecio
+          WHERE i.codigoIndumentaria = ? LIMIT 1`,
+        { replacements: [prenda.codigoIndumentaria], transaction }
+      );
+      const precio = precioRow[0]?.precio || 0;
+      const subtotal = precio * prenda.cantidad;
+      subtotalOriginal += subtotal;
+
+      // Aplicar descuentos por presentación
+      // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
+      let precioConDescuento = precio;
+      const idPres = prenda.idPresentacion || 1;
+
+      if (idPres === 3) {
+        // Pack: 5% de descuento
+        precioConDescuento = precio * 0.95;
+      } else if (idPres === 2) {
+        // Caja Cerrada: 10% de descuento
+        precioConDescuento = precio * 0.90;
+      }
+
+      totalPedido += precioConDescuento * prenda.cantidad;
+    }
+  }
+
+  // Verificar si el cliente es VIP
+  let esVip = false;
+  try {
+    const [vipRows] = await sequelize.query(
+      "SELECT idCliente FROM vista_clientes_vip WHERE idCliente = ?",
+      { replacements: [idCliente], transaction }
+    );
+    esVip = vipRows.length > 0;
+  } catch (e) {
+    esVip = false;
+  }
+
+  // Calcular descuento VIP (sobre subtotal original, antes de descuentos de presentación)
+  const descuentoOrden = esVip ? subtotalOriginal * 0.1 : 0;
+
+  return {
+    totalPedido,
+    subtotalOriginal,
+    descuentoOrden,
+    esVip,
+  };
+}
+
+/**
+ * Calcula el descuento de un item individual según su presentación
+ * @param {Number} precioUnitario - Precio unitario del producto
+ * @param {Number} cantidad - Cantidad del producto
+ * @param {Number} idPresentacion - ID de presentación (1=Unidad, 2=Caja Cerrada, 3=Pack)
+ * @returns {Number} descuentoItem - Monto del descuento
+ */
+function calcularDescuentoItem(precioUnitario, cantidad, idPresentacion = 1) {
+  const subtotal = precioUnitario * cantidad;
+  let descuentoItem = 0;
+
+  if (idPresentacion === 3) {
+    // Pack: 5% de descuento
+    descuentoItem = subtotal * 0.05;
+  } else if (idPresentacion === 2) {
+    // Caja Cerrada: 10% de descuento
+    descuentoItem = subtotal * 0.10;
+  }
+
+  return descuentoItem;
+}
+
+// =====================================================
 // RUTAS PÚBLICAS (antes del middleware de autenticación)
 // =====================================================
 
@@ -744,54 +836,9 @@ router.post("/", async (req, res) => {
       "0"
     )}`;
 
-    // Calcular el total del pedido (precio * cantidad de cada prenda con descuentos de presentación)
-    let totalPedido = 0;
-    let subtotalOriginalTotal = 0; // Para calcular descuento VIP sobre subtotal sin descuentos
-    if (prendas && Array.isArray(prendas)) {
-      for (const prenda of prendas) {
-        // Obtener precio de la prenda
-        const [precioRow] = await sequelize.query(
-          `SELECT pr.precio FROM indumentaria i
-            JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
-            JOIN precioindumentaria pr ON di.idPrecio = pr.idPrecio
-            WHERE i.codigoIndumentaria = ? LIMIT 1`,
-          { replacements: [prenda.codigoIndumentaria] }
-        );
-        const precio = precioRow[0]?.precio || 0;
-        const subtotalOriginal = precio * prenda.cantidad;
-        subtotalOriginalTotal += subtotalOriginal; // Acumular subtotal sin descuentos
-        
-        // Aplicar descuentos por presentación
-        // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
-        let precioConDescuento = precio;
-        const idPres = prenda.idPresentacion || 1;
-        
-        if (idPres === 3) {
-          // Pack: 5% de descuento
-          precioConDescuento = precio * 0.95;
-        } else if (idPres === 2) {
-          // Caja Cerrada: 10% de descuento
-          precioConDescuento = precio * 0.90;
-        }
-        
-        totalPedido += precioConDescuento * prenda.cantidad;
-      }
-    }
-
-    // Verificar si el cliente es VIP
-    let esVip = false;
-    try {
-      const [vipRows] = await sequelize.query(
-        "SELECT idCliente FROM vista_clientes_vip WHERE idCliente = ?",
-        { replacements: [idCliente] }
-      );
-      esVip = vipRows.length > 0;
-    } catch (e) {
-      esVip = false;
-    }
-
-    // Calcular descuento global si es VIP (sobre subtotal original, antes de descuentos de presentación)
-    const descuentoOrden = esVip ? subtotalOriginalTotal * 0.1 : 0;
+    // Calcular descuentos usando la función helper
+    const { totalPedido, subtotalOriginal, descuentoOrden, esVip } = 
+      await calcularDescuentosPedido(prendas, idCliente, t);
 
     // Crea el pedido (fechaPedido se asigna automáticamente por la BD)
     const pedido = await Pedido.create(
@@ -818,20 +865,13 @@ router.post("/", async (req, res) => {
           { replacements: [prenda.codigoIndumentaria] }
         );
         const precioUnitario = precioRow[0]?.precio || 0;
-        const subtotalOriginal = precioUnitario * prenda.cantidad;
         
-        // Calcular descuento por presentación
-        // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
-        let descuentoItem = 0;
-        const idPres = prenda.idPresentacion || 1;
-        
-        if (idPres === 3) {
-          // Pack: 5% de descuento
-          descuentoItem = subtotalOriginal * 0.05;
-        } else if (idPres === 2) {
-          // Caja Cerrada: 10% de descuento
-          descuentoItem = subtotalOriginal * 0.10;
-        }
+        // Calcular descuento por presentación usando la función helper
+        const descuentoItem = calcularDescuentoItem(
+          precioUnitario,
+          prenda.cantidad,
+          prenda.idPresentacion || 1
+        );
         
         await DetallePedido.create(
           {
@@ -1236,12 +1276,30 @@ router.put("/:numeroPedido", async (req, res) => {
     // 4. Crea los nuevos detalles y descuenta stock
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
+        // Obtener precio unitario para calcular descuento
+        const [precioRow] = await sequelize.query(
+          `SELECT pr.precio FROM indumentaria i
+            JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+            JOIN precioindumentaria pr ON di.idPrecio = pr.idPrecio
+            WHERE i.codigoIndumentaria = ? LIMIT 1`,
+          { replacements: [prenda.codigoIndumentaria], transaction: t }
+        );
+        const precioUnitario = precioRow[0]?.precio || 0;
+        
+        // Calcular descuento por presentación
+        const descuentoItem = calcularDescuentoItem(
+          precioUnitario,
+          prenda.cantidad,
+          prenda.idPresentacion || 1
+        );
+        
         await DetallePedido.create(
           {
             idDetallePedido: "DPED-" + Math.random().toString().slice(2, 8),
             numeroPedido,
             codigoIndumentaria: prenda.codigoIndumentaria,
             cantidad: prenda.cantidad,
+            descuentoItem: descuentoItem,
             idPresentacion: prenda.idPresentacion || 1,
             cantidadPresentaciones: prenda.cantidadPresentaciones || prenda.cantidad,
             unidadesTotales: prenda.unidadesTotales || prenda.cantidad,
@@ -1274,12 +1332,17 @@ router.put("/:numeroPedido", async (req, res) => {
       }
     }
 
-    // 5. Actualizar el pedido con el usuario que modifica y forzar fechaModificacion
+    // 5. Recalcular descuentos del pedido
+    const { totalPedido, subtotalOriginal, descuentoOrden, esVip } = 
+      await calcularDescuentosPedido(prendas, idCliente, t);
+
+    // 6. Actualizar el pedido con los nuevos valores incluyendo descuentos
     await sequelize.query(
       `UPDATE pedido SET 
          idCliente = ?, 
          idEstado = ?, 
          idEmpresaEnvio = ?,
+         descuentoOrden = ?,
          idUsuarioModifico = ?, 
          fechaModificacion = NOW() 
        WHERE numeroPedido = ?`,
@@ -1288,6 +1351,7 @@ router.put("/:numeroPedido", async (req, res) => {
           idCliente,
           idEstado,
           idEmpresaEnvio || null,
+          descuentoOrden,
           req.usuarioAutenticado.idUsuario,
           numeroPedido,
         ],

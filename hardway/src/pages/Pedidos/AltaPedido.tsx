@@ -1059,8 +1059,13 @@ const AltaPedido: React.FC = () => {
                                       i.codigoIndumentaria ===
                                       prenda.codigoIndumentaria
                                   );
+                                  
+                                  // Ajustar stock en modo edición sumando unidades del pedido original
+                                  const unidadesOriginales = obtenerUnidadesOriginalesPedido(
+                                    prenda.codigoIndumentaria
+                                  );
                                   const maxStock = prendaCat
-                                    ? prendaCat.cantidadIndumentaria
+                                    ? prendaCat.cantidadIndumentaria + unidadesOriginales
                                     : 1;
 
                                   // Calcular unidades ya agregadas en OTRAS presentaciones
@@ -1407,8 +1412,14 @@ const AltaPedido: React.FC = () => {
                     .filter(p => p.codigoIndumentaria === prenda.codigoIndumentaria)
                     .reduce((total, p) => total + (p.unidadesTotales || p.cantidad), 0);
                   
-                  // Stock disponible = stock real - unidades ya en el pedido
-                  const stockDisponible = prenda.cantidadIndumentaria - unidadesYaAgregadas;
+                  // Ajustar stock en modo edición sumando unidades del pedido original
+                  const unidadesOriginales = obtenerUnidadesOriginalesPedido(
+                    prenda.codigoIndumentaria
+                  );
+                  
+                  // Stock disponible = (stock real + unidades originales) - unidades ya en el pedido
+                  const stockDisponible = 
+                    (prenda.cantidadIndumentaria + unidadesOriginales) - unidadesYaAgregadas;
                   const maxPresentaciones = Math.floor(stockDisponible / unidadesPorPresentacion);
 
                   return (
@@ -1588,13 +1599,14 @@ const AltaPedido: React.FC = () => {
                   );
                 })}
             </IonList>
-            <IonButton
-              expand="block"
-              color="medium"
-              onClick={() => setShowIndumentariaModal(false)}
-            >
-              Cerrar
-            </IonButton>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
+              <IonButton
+                color="medium"
+                onClick={() => setShowIndumentariaModal(false)}
+              >
+                Cerrar
+              </IonButton>
+            </div>
           </IonContent>
         </IonModal>
 

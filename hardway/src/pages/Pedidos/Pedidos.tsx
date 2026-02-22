@@ -260,7 +260,7 @@ const Pedidos: React.FC = () => {
             onClick={() => setShowNotificacionesModal(true)}
             className="notifications-btn"
           >
-            <IonIcon icon={notificationsOutline} />
+            <IonIcon icon={notificationsOutline} color="light" size="medium" />
             {notificacionesProblemas.filter(n => n.leida === 0).length > 0 && (
               <IonBadge color="danger" className="notifications-badge">
                 {notificacionesProblemas.filter(n => n.leida === 0).length}

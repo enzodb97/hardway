@@ -283,6 +283,20 @@ router.post("/", async (req, res) => {
   const t = await sequelize.transaction();
   
   try {
+    // Validar que el nombre de usuario no exista (case-insensitive)
+    const usuarioExistente = await Usuario.findOne({
+      where: sequelize.where(
+        sequelize.fn('LOWER', sequelize.col('nombreUsuario')),
+        sequelize.fn('LOWER', username)
+      )
+    });
+
+    if (usuarioExistente) {
+      return res.status(400).json({ 
+        error: `Ya existe un usuario con el nombre: ${username} (no se distingue entre mayúsculas y minúsculas)` 
+      });
+    }
+
     // Validar contraseña
     const errorPassword = validarPassword(password);
     if (errorPassword) {
@@ -370,6 +384,29 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { username, roles } = req.body; // ✅ Ahora recibe array: roles: [2, 8]
   try {
+    // Validar que el nombre de usuario no exista en otro usuario (case-insensitive)
+    const usuarioExistente = await Usuario.findOne({
+      where: {
+        [Op.and]: [
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('nombreUsuario')),
+            sequelize.fn('LOWER', username)
+          ),
+          {
+            idUsuario: {
+              [Op.ne]: req.params.id
+            }
+          }
+        ]
+      }
+    });
+
+    if (usuarioExistente) {
+      return res.status(400).json({ 
+        error: `Ya existe otro usuario con el nombre: ${username} (no se distingue entre mayúsculas y minúsculas)` 
+      });
+    }
+
     // Validar que se enviaron roles
     if (!roles || !Array.isArray(roles) || roles.length === 0) {
       return res.status(400).json({ error: "Debe asignar al menos un rol" });

@@ -90,8 +90,13 @@ export function validarUnicidadUsuario(
 ): string | null {
   const { username, id } = usuario;
   if (username) {
-    const existe = usuarios.find((u) => u.username === username && u.id !== id);
-    if (existe) return `Ya existe un usuario con el nombre: ${username}`;
+    // Comparación case-insensitive para evitar duplicados con mayúsculas/minúsculas
+    const existe = usuarios.find(
+      (u) => u.username.toLowerCase() === username.toLowerCase() && u.id !== id
+    );
+    if (existe) {
+      return `Ya existe un usuario con el nombre: ${username} (no se distingue entre mayúsculas y minúsculas)`;
+    }
   }
   return null;
 }
