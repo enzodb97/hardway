@@ -746,6 +746,7 @@ router.post("/", async (req, res) => {
 
     // Calcular el total del pedido (precio * cantidad de cada prenda con descuentos de presentación)
     let totalPedido = 0;
+    let subtotalOriginalTotal = 0; // Para calcular descuento VIP sobre subtotal sin descuentos
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
         // Obtener precio de la prenda
@@ -758,6 +759,7 @@ router.post("/", async (req, res) => {
         );
         const precio = precioRow[0]?.precio || 0;
         const subtotalOriginal = precio * prenda.cantidad;
+        subtotalOriginalTotal += subtotalOriginal; // Acumular subtotal sin descuentos
         
         // Aplicar descuentos por presentación
         // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
@@ -788,8 +790,8 @@ router.post("/", async (req, res) => {
       esVip = false;
     }
 
-    // Calcular descuento global si es VIP
-    const descuentoOrden = esVip ? totalPedido * 0.1 : 0;
+    // Calcular descuento global si es VIP (sobre subtotal original, antes de descuentos de presentación)
+    const descuentoOrden = esVip ? subtotalOriginalTotal * 0.1 : 0;
 
     // Crea el pedido (fechaPedido se asigna automáticamente por la BD)
     const pedido = await Pedido.create(

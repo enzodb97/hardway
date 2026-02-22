@@ -165,7 +165,8 @@ const AltaPedido: React.FC = () => {
     return acc + precio * prenda.cantidad;
   }, 0);
   
-  const descuento = esVip ? totalPedido * 0.1 : 0;
+  // Descuento VIP se aplica sobre el subtotal original (antes de descuentos de presentación)
+  const descuento = esVip ? totalSinDescuentos * 0.1 : 0;
   const totalConDescuento = totalPedido - descuento;
 
   // Limpiar formulario y prendas SIEMPRE al entrar a la página de alta
@@ -460,6 +461,20 @@ const AltaPedido: React.FC = () => {
     // eslint-disable-next-line
   }, [datosDelPedido, indumentaria, esEdicion, prendasCargadasDesdeServidor]);
 
+  // --- Función helper para obtener unidades originales del pedido ---
+  const obtenerUnidadesOriginalesPedido = (codigoIndumentaria: string): number => {
+    if (!esEdicion || !datosDelPedido) return 0;
+    
+    // Sumar TODAS las líneas del mismo producto (puede haber múltiples presentaciones)
+    const totalUnidadesOriginales = datosDelPedido
+      .filter((detalle: any) => detalle.codigoIndumentaria === codigoIndumentaria)
+      .reduce((total: number, detalle: any) => {
+        return total + (detalle.unidadesTotales || detalle.cantidad || 0);
+      }, 0);
+    
+    return totalUnidadesOriginales;
+  };
+
   // --- Lógica de prendas ---
   const agregarPrenda = (
     prenda: any,
@@ -501,12 +516,22 @@ const AltaPedido: React.FC = () => {
 
     // Validar stock total (lo ya agregado + lo nuevo)
     const totalUnidades = unidadesYaAgregadas + cantidadAVerificar;
+    
+    // Calcular stock ajustado considerando unidades del pedido original si es edición
+    const unidadesOriginales = obtenerUnidadesOriginalesPedido(prenda.codigoIndumentaria);
+    const stockAjustado = prenda.cantidadIndumentaria + unidadesOriginales;
 
-    if (totalUnidades > prenda.cantidadIndumentaria) {
+    if (totalUnidades > stockAjustado) {
+      const mensajeBase = `Stock insuficiente. Ya tienes ${unidadesYaAgregadas} unidades agregadas en otras presentaciones. ` +
+        `Intentas agregar ${cantidadAVerificar} más pero solo hay ${stockAjustado} disponibles en total`;
+      
+      const mensajeDetalle = esEdicion && unidadesOriginales > 0
+        ? ` (${prenda.cantidadIndumentaria} en stock + ${unidadesOriginales} del pedido original)`
+        : '';
+      
       setAlertMsg(
-        `Stock insuficiente. Ya tienes ${unidadesYaAgregadas} unidades agregadas en otras presentaciones. ` +
-        `Intentas agregar ${cantidadAVerificar} más pero solo hay ${prenda.cantidadIndumentaria} disponibles en total. ` +
-        `Puedes agregar máximo ${prenda.cantidadIndumentaria - unidadesYaAgregadas} unidades adicionales.`
+        mensajeBase + mensajeDetalle + `. ` +
+        `Puedes agregar máximo ${stockAjustado - unidadesYaAgregadas} unidades adicionales.`
       );
       setShowAlert(true);
       return;
@@ -590,10 +615,31 @@ const AltaPedido: React.FC = () => {
         i => i.codigoIndumentaria === codigoIndumentaria
       );
       
-      if (prendaCatalogo && totalUnidades > prendaCatalogo.cantidadIndumentaria) {
-        erroresStock.push(
-          `${prendaCatalogo.nombre}: intentas pedir ${totalUnidades} unidades pero solo hay ${prendaCatalogo.cantidadIndumentaria} disponibles`
-        );
+      if (prendaCatalogo) {
+        // Calcular stock ajustado considerando unidades del pedido original si es edición
+        const unidadesOriginales = obtenerUnidadesOriginalesPedido(codigoIndumentaria);
+        const stockDisponible = prendaCatalogo.cantidadIndumentaria + unidadesOriginales;
+        
+        // Logging de debug para ediciones
+        if (esEdicion && unidadesOriginales > 0) {
+          console.log(`📦 Validación de stock para ${prendaCatalogo.nombre}:`, {
+            esEdicion,
+            stockActual: prendaCatalogo.cantidadIndumentaria,
+            unidadesOriginales,
+            stockDisponible,
+            totalUnidadesSolicitadas: totalUnidades,
+            esValido: totalUnidades <= stockDisponible
+          });
+        }
+        
+        if (totalUnidades > stockDisponible) {
+          const mensajeBase = `${prendaCatalogo.nombre}: intentas pedir ${totalUnidades} unidades pero solo hay ${stockDisponible} disponibles`;
+          const mensajeDetalle = esEdicion && unidadesOriginales > 0
+            ? ` (${prendaCatalogo.cantidadIndumentaria} en stock + ${unidadesOriginales} del pedido original)`
+            : '';
+          
+          erroresStock.push(mensajeBase + mensajeDetalle);
+        }
       }
     }
 
@@ -1103,6 +1149,15 @@ const AltaPedido: React.FC = () => {
                       indumentaria.forEach(
                         (prenda) => delete prenda._cantidadTemp
                       );
+                      
+                      // Pre-cargar configuraciones de presentación para las primeras 20 prendas
+                      const prendasAPrecargar = indumentaria.slice(0, 20);
+                      prendasAPrecargar.forEach((prenda) => {
+                        if (!configuracionesPorProducto.has(prenda.codigoIndumentaria)) {
+                          cargarConfiguracionesProducto(prenda.codigoIndumentaria);
+                        }
+                      });
+                      
                       setShowIndumentariaModal(true);
                     }}
                   >
@@ -1124,6 +1179,39 @@ const AltaPedido: React.FC = () => {
                   {totalSinDescuentos.toFixed(2)}
                 </div>
                 
+                {/* Descuento VIP - Se muestra primero porque se aplica sobre el subtotal */}
+                {esVip && (
+                  <>
+                    <div
+                      style={{
+                        color: "goldenrod",
+                        fontWeight: 600,
+                        textShadow:
+                          "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+                        marginTop: "8px",
+                      }}
+                    >
+                      <span role="img" aria-label="vip">
+                        👑
+                      </span>{" "}
+                      Cliente VIP : 10% de descuento aplicado
+                    </div>
+                    {descuento > 0 && (
+                      <div>
+                        <strong>Descuento VIP (10%):</strong> -${descuento.toFixed(2)}
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {/* Separador visual entre descuento VIP y descuentos de presentación */}
+                {esVip && (descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
+                  <div style={{ 
+                    borderTop: "1px dashed #ddd", 
+                    margin: "8px 0" 
+                  }}></div>
+                )}
+                
                 {/* Descuentos por presentación */}
                 {descuentoPacks > 0 && (
                   <div style={{ color: "#2196F3", fontSize: "0.95em" }}>
@@ -1136,36 +1224,14 @@ const AltaPedido: React.FC = () => {
                   </div>
                 )}
                 
-                {(descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
-                  <div style={{ marginTop: "4px" }}>
-                    <strong>Total con descuentos de presentación:</strong> $
-                    {totalPedido.toFixed(2)}
-                  </div>
-                )}
-                
-                {esVip && (
-                  <div
-                    style={{
-                      color: "goldenrod",
-                      fontWeight: 600,
-                      textShadow:
-                        "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
-                      marginTop: "8px",
-                    }}
-                  >
-                    <span role="img" aria-label="vip">
-                      👑
-                    </span>{" "}
-                    Cliente VIP : 10% de descuento aplicado
-                  </div>
-                )}
-                {descuento > 0 && (
-                  <div>
-                    <strong>Descuento VIP:</strong> -${descuento.toFixed(2)}
-                  </div>
-                )}
-                <div style={{ marginTop: "8px", fontSize: "1.1em" }}>
-                  <strong>Total a pagar:</strong> $
+                {/* Total final */}
+                <div style={{ 
+                  marginTop: "12px", 
+                  fontSize: "1.1em",
+                  paddingTop: "8px",
+                  borderTop: "2px solid #fdb40b"
+                }}>
+                  <strong>💰 Total a pagar:</strong> $
                   {totalConDescuento.toFixed(2)}
                 </div>
               </div>

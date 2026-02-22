@@ -725,7 +725,6 @@ const Picking: React.FC = () => {
                             <IonButton
                               size="small"
                               color="primary"
-                              fill="outline"
                               onClick={() => handleVerPickingList(tarea.numeroPedido)}
                             >
                               <IonIcon icon={locationOutline} slot="start" />
@@ -1069,8 +1068,8 @@ const Picking: React.FC = () => {
 
               <IonList>
                 <IonItem>
-                  <IonLabel position="stacked">
-                    Artículo con problema <span style={{ color: 'red' }}>*</span>
+                  <IonLabel position="stacked" style={{ color: 'white', fontSize: '20px', fontWeight: '500' }}>
+                    Artículo con problema <span style={{ color: '#ff6b6b' }}>*</span>
                   </IonLabel>
                   <IonSelect
                     value={articuloSeleccionado?.codigoIndumentaria}
@@ -1135,12 +1134,12 @@ const Picking: React.FC = () => {
                     )}
                     
                     <IonItem>
-                      <IonLabel position="stacked">
+                      <IonLabel position="stacked" style={{ color: 'white', fontSize: '20px', fontWeight: '500' }}>
                         {articuloSeleccionado.nombrePresentacion && 
                          articuloSeleccionado.nombrePresentacion !== 'Unidad'
                           ? `Cantidad de ${articuloSeleccionado.nombrePresentacion}(s) con problema`
                           : 'Cantidad de unidades con problema'
-                        } <span style={{ color: 'red' }}>*</span>
+                        } <span style={{ color: '#ff6b6b' }}>*</span>
                       </IonLabel>
                       <IonInput
                         type="number"
@@ -1196,8 +1195,8 @@ const Picking: React.FC = () => {
                 )}
 
                 <IonItem>
-                  <IonLabel position="stacked">
-                    Motivo del problema <span style={{ color: 'red' }}>*</span>
+                  <IonLabel position="stacked" style={{ color: 'white', fontSize: '20px', fontWeight: '500' }}>
+                    Motivo del problema <span style={{ color: '#ff6b6b' }}>*</span>
                   </IonLabel>
                   <IonSelect
                     value={motivoSeleccionado}
@@ -1213,7 +1212,7 @@ const Picking: React.FC = () => {
                 </IonItem>
 
                 <IonItem>
-                  <IonLabel position="stacked">Observaciones adicionales</IonLabel>
+                  <IonLabel position="stacked" style={{ color: 'white', fontSize: '20px', fontWeight: '500' }}>Observaciones adicionales</IonLabel>
                   <IonInput
                     value={observacionesProblema}
                     placeholder="Detalles del problema (opcional)"

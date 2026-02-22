@@ -798,6 +798,30 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
 
     let currentY = finalY;
 
+    // Descuento VIP (si aplica) - Se muestra primero porque se aplica sobre el subtotal
+    if (pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0) {
+      currentY += 6;
+      doc.setTextColor(218, 165, 32); // Color dorado
+      doc.setLineWidth(0.05); // Grosor del contorno
+      doc.text("Descuento VIP (10%):", 14, currentY, { renderingMode: "fillThenStroke" });
+      doc.setLineWidth(0.05); // Grosor del contorno
+      doc.text(
+        `-$${Number(pedido.descuentoOrden).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        subtotalColumnEnd,
+        currentY,
+        { align: "right", renderingMode: "fillThenStroke" }
+      );
+      doc.setTextColor(0, 0, 0); // Volver a negro
+    }
+
+    // Espacio adicional si hay descuento VIP y descuentos de presentación
+    if (pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0 && 
+        (descuentoCajaCerrada > 0 || descuentoPack > 0)) {
+      currentY += 3;
+    }
+
     // Descuento por Caja Cerrada (si aplica)
     if (descuentoCajaCerrada > 0) {
       currentY += 6;
@@ -828,41 +852,6 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
         currentY,
         { align: "right" }
       );
-    }
-
-    // Total con descuentos de presentación (si hay descuentos)
-    if (descuentoCajaCerrada > 0 || descuentoPack > 0) {
-      currentY += 6;
-      const totalConDescuentosPresentacion = subtotalSinDescuentos - descuentoCajaCerrada - descuentoPack;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.text("Total con descuentos de presentación:", 14, currentY);
-      doc.text(
-        `$${Number(totalConDescuentosPresentacion).toLocaleString("es-AR", {
-          minimumFractionDigits: 2,
-        })}`,
-        subtotalColumnEnd,
-        currentY,
-        { align: "right" }
-      );
-    }
-
-    // Descuento VIP (si aplica)
-    if (pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0) {
-      currentY += 6;
-      doc.setTextColor(218, 165, 32); // Color dorado
-      doc.setLineWidth(0.05); // Grosor del contorno
-      doc.text("Descuento VIP (10%):", 14, currentY, { renderingMode: "fillThenStroke" });
-      doc.setLineWidth(0.05); // Grosor del contorno
-      doc.text(
-        `-$${Number(pedido.descuentoOrden).toLocaleString("es-AR", {
-          minimumFractionDigits: 2,
-        })}`,
-        subtotalColumnEnd,
-        currentY,
-        { align: "right", renderingMode: "fillThenStroke" }
-      );
-      doc.setTextColor(0, 0, 0); // Volver a negro
     }
 
     // Total - alineado con la columna Subtotal de la tabla

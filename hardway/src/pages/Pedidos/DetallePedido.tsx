@@ -1029,6 +1029,30 @@ const DetallePedido: React.FC = () => {
               </span>
             </div>
 
+            {/* Descuento VIP - Se muestra primero porque se aplica sobre el subtotal */}
+            {pedido &&
+              pedido.descuentoOrden &&
+              Number(pedido.descuentoOrden) > 0 && (
+                <div className="tabla-resumen-row tabla-resumen-row-descuento" style={{ marginTop: '4px' }}>
+                  <span className="tabla-resumen-label">
+                    👑 Cliente VIP - 10% de descuento:
+                  </span>
+                  <span className="tabla-resumen-valor">
+                    -{mostrarPrecio(pedido.descuentoOrden)}
+                  </span>
+                </div>
+              )}
+
+            {/* Separador visual entre descuento VIP y descuentos de presentación */}
+            {pedido && pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0 && 
+             (descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
+              <div style={{ 
+                borderTop: '1px dashed #ddd', 
+                margin: '8px 0',
+                paddingTop: '8px'
+              }}></div>
+            )}
+
             {/* Descuentos por presentación */}
             {descuentoPacks > 0 && (
               <div className="tabla-resumen-row" style={{ color: '#2196F3', fontSize: '0.95em' }}>
@@ -1051,35 +1075,9 @@ const DetallePedido: React.FC = () => {
               </div>
             )}
 
-            {/* Total con descuentos de presentación */}
-            {(descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
-              <div className="tabla-resumen-row" style={{ marginTop: '4px' }}>
-                <span className="tabla-resumen-label">
-                  <strong>Total con descuentos de presentación:</strong>
-                </span>
-                <span className="tabla-resumen-valor">
-                  {mostrarPrecio(totalConDescuentosPresentacion)}
-                </span>
-              </div>
-            )}
-
-            {/* Descuento VIP */}
-            {pedido &&
-              pedido.descuentoOrden &&
-              Number(pedido.descuentoOrden) > 0 && (
-                <div className="tabla-resumen-row tabla-resumen-row-descuento" style={{ marginTop: '8px' }}>
-                  <span className="tabla-resumen-label">
-                    👑 Cliente VIP - 10% de descuento:
-                  </span>
-                  <span className="tabla-resumen-valor">
-                    -{mostrarPrecio(pedido.descuentoOrden)}
-                  </span>
-                </div>
-              )}
-
             {/* Total */}
             {pedido && (
-              <div className="tabla-resumen-row tabla-resumen-row-total" style={{ marginTop: '8px', fontSize: '1.1em' }}>
+              <div className="tabla-resumen-row tabla-resumen-row-total" style={{ marginTop: '12px', fontSize: '1.1em', paddingTop: '8px', borderTop: '2px solid #fdb40b' }}>
                 <span className="tabla-resumen-label">💰 Total a pagar:</span>
                 <span className="tabla-resumen-valor">
                   {mostrarPrecio(Number(pedido.total))}
