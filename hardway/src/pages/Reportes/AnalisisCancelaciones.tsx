@@ -203,7 +203,7 @@ const AnalisisCancelaciones: React.FC = () => {
   const exportarPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const title = "Motivos de Cancelaciones de Pedidos";
+    const title = "Estadistica de Cancelaciones de Pedidos";
     const textWidth = doc.getTextWidth(title);
     const x = (pageWidth - textWidth) / 2;
     const logoBase64 =
@@ -235,7 +235,7 @@ const AnalisisCancelaciones: React.FC = () => {
       }
     }
 
-    doc.save("Motivos_cancelaciones.pdf");
+    doc.save("Estadisticas_cancelaciones.pdf");
     setToastPDF(true);
   };
 
@@ -321,7 +321,7 @@ const AnalisisCancelaciones: React.FC = () => {
     <IonPage className="analisis-cancelaciones-page">
       <IonHeader>
         <IonToolbar className="analisis-cancelaciones-toolbar">
-          <IonTitle>⚠️ Motivos de Cancelaciones</IonTitle>
+          <IonTitle>⚠️ Estadistica de Cancelaciones</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="analisis-cancelaciones-content">
@@ -330,7 +330,7 @@ const AnalisisCancelaciones: React.FC = () => {
           <IonRow>
             <IonCol size="12">
               <div className="analisis-title-section">
-                <h1 className="analisis-main-title">Motivos de Cancelaciones</h1>
+                <h1 className="analisis-main-title">Estadistica de Cancelaciones</h1>
                 <div className="analisis-emission-date">
                   Fecha de emisión: {fechaEmision}
                 </div>

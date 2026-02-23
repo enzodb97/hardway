@@ -82,17 +82,17 @@ const Reportes: React.FC = () => {
                 <div className="reportes-stat-icon">👥</div>
                 <div className="reportes-stat-content">
                   <div className="reportes-stat-number">{totalClientes}</div>
-                  <div className="reportes-stat-label">Clientes Activos</div>
+                  <div className="reportes-stat-label">Clientes VIP</div>
                 </div>
               </div>
 
-              <div className="reportes-stat-card">
+              {/*<div className="reportes-stat-card">
                 <div className="reportes-stat-icon">📦</div>
                 <div className="reportes-stat-content">
                   <div className="reportes-stat-number">{totalProductos}</div>
                   <div className="reportes-stat-label">Productos</div>
                 </div>
-              </div>
+              </div>*/}
 
               <div className="reportes-stat-card">
                 <div className="reportes-stat-icon">📊</div>
@@ -249,7 +249,7 @@ const Reportes: React.FC = () => {
                     <IonCardHeader className="reporte-card-header">
                       <IonCardTitle className="reporte-card-title">
                         <IonIcon icon={close} />
-                        Motivos de Cancelaciones
+                        Estadistica de Cancelaciones
                       </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent className="reporte-card-content">

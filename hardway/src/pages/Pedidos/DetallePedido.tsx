@@ -1067,7 +1067,7 @@ const DetallePedido: React.FC = () => {
             {descuentoCajasCerradas > 0 && (
               <div className="tabla-resumen-row" style={{ color: '#4CAF50', fontSize: '0.95em' }}>
                 <span className="tabla-resumen-label">
-                  📦 Descuento por Cajas Cerradas (10%):
+                  📦 Descuento por Cajas (10%):
                 </span>
                 <span className="tabla-resumen-valor">
                   -{mostrarPrecio(descuentoCajasCerradas)}

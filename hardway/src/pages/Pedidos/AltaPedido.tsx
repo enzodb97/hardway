@@ -1150,18 +1150,24 @@ const AltaPedido: React.FC = () => {
                     onClick={async () => {
                       // Recargar indumentaria antes de abrir el modal
                       await cargarIndumentaria();
+                      
                       // Limpiar cantidades temporales antes de abrir el modal
                       indumentaria.forEach(
                         (prenda) => delete prenda._cantidadTemp
                       );
                       
-                      // Pre-cargar configuraciones de presentación para las primeras 20 prendas
-                      const prendasAPrecargar = indumentaria.slice(0, 20);
-                      prendasAPrecargar.forEach((prenda) => {
-                        if (!configuracionesPorProducto.has(prenda.codigoIndumentaria)) {
-                          cargarConfiguracionesProducto(prenda.codigoIndumentaria);
-                        }
-                      });
+                      // Limpiar caché de configuraciones para forzar recarga de datos actualizados
+                      setConfiguracionesPorProducto(new Map());
+                      setPresentacionSeleccionada(new Map());
+                      setCantidadPresentaciones(new Map());
+                      
+                      // Pre-cargar configuraciones de presentación de TODAS las prendas
+                      // Esperar a que se carguen TODAS antes de abrir el modal
+                      await Promise.all(
+                        indumentaria.map((prenda) => 
+                          cargarConfiguracionesProducto(prenda.codigoIndumentaria)
+                        )
+                      );
                       
                       setShowIndumentariaModal(true);
                     }}

@@ -1176,22 +1176,44 @@ router.put("/:numeroPedido", async (req, res) => {
       }, { transaction: t });
     }
 
+    // Función helper para obtener nombre de presentación
+    const obtenerNombrePresentacion = async (idPresentacion) => {
+      if (!idPresentacion || idPresentacion === 1) return 'Unidad';
+      try {
+        const presentacion = await PresentacionProducto.findByPk(idPresentacion, { transaction: t });
+        return presentacion ? presentacion.nombrePresentacion : 'Unidad';
+      } catch (error) {
+        return 'Unidad';
+      }
+    };
+
     // Crear un mapa de los detalles anteriores para comparación
+    // Clave: codigoIndumentaria_idPresentacion para distinguir diferentes presentaciones del mismo producto
     const mapaAnteriores = new Map();
     detallesAnteriores.forEach(det => {
-      mapaAnteriores.set(det.codigoIndumentaria, {
+      const clave = `${det.codigoIndumentaria}_${det.idPresentacion || 1}`;
+      mapaAnteriores.set(clave, {
         cantidad: det.cantidad,
-        idDetallePedido: det.idDetallePedido
+        idDetallePedido: det.idDetallePedido,
+        idPresentacion: det.idPresentacion || 1,
+        cantidadPresentaciones: det.cantidadPresentaciones || det.cantidad,
+        unidadesTotales: det.unidadesTotales || det.cantidad
       });
     });
 
     // Detectar cambios en los ítems
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
-        const anterior = mapaAnteriores.get(prenda.codigoIndumentaria);
+        const idPresentacionPrenda = prenda.idPresentacion || 1;
+        const clave = `${prenda.codigoIndumentaria}_${idPresentacionPrenda}`;
+        const anterior = mapaAnteriores.get(clave);
+        
+        const cantidadPresentacionesPrenda = prenda.cantidadPresentaciones || prenda.cantidad;
+        const unidadesTotalesPrenda = prenda.unidadesTotales || prenda.cantidad;
         
         if (!anterior) {
           // Ítem agregado
+          const nombrePresentacion = await obtenerNombrePresentacion(idPresentacionPrenda);
           await HistorialModificacionPedido.create({
             numeroPedido,
             fechaModificacion: new Date(),
@@ -1200,11 +1222,12 @@ router.put("/:numeroPedido", async (req, res) => {
             observaciones,
             tipoModificacion: 'Se agrego un producto',
             codigoIndumentaria: prenda.codigoIndumentaria,
-            cantidadNueva: prenda.cantidad,
-            descripcion: `Se agregó ${prenda.cantidad} unidad(es) del producto ${prenda.codigoIndumentaria}`
+            cantidadNueva: unidadesTotalesPrenda,
+            descripcion: `Se agregó ${cantidadPresentacionesPrenda} ${nombrePresentacion}(s) del producto ${prenda.codigoIndumentaria} (${unidadesTotalesPrenda} unidades totales)`
           }, { transaction: t });
-        } else if (anterior.cantidad !== prenda.cantidad) {
+        } else if (anterior.unidadesTotales !== unidadesTotalesPrenda) {
           // Cambio de cantidad
+          const nombrePresentacion = await obtenerNombrePresentacion(idPresentacionPrenda);
           await HistorialModificacionPedido.create({
             numeroPedido,
             fechaModificacion: new Date(),
@@ -1214,19 +1237,21 @@ router.put("/:numeroPedido", async (req, res) => {
             tipoModificacion: 'Se modifico la cantidad de un producto',
             codigoIndumentaria: prenda.codigoIndumentaria,
             idDetallePedido: anterior.idDetallePedido,
-            cantidadAnterior: anterior.cantidad,
-            cantidadNueva: prenda.cantidad,
-            descripcion: `Cantidad modificada de ${anterior.cantidad} a ${prenda.cantidad} del producto ${prenda.codigoIndumentaria}`
+            cantidadAnterior: anterior.unidadesTotales,
+            cantidadNueva: unidadesTotalesPrenda,
+            descripcion: `Cantidad modificada de ${anterior.cantidadPresentaciones} a ${cantidadPresentacionesPrenda} ${nombrePresentacion}(s) del producto ${prenda.codigoIndumentaria} (${anterior.unidadesTotales} → ${unidadesTotalesPrenda} unidades totales)`
           }, { transaction: t });
         }
         
         // Marcar como procesado
-        mapaAnteriores.delete(prenda.codigoIndumentaria);
+        mapaAnteriores.delete(clave);
       }
     }
 
     // Ítems eliminados (los que quedaron en el mapa)
-    for (const [codigoIndumentaria, datos] of mapaAnteriores) {
+    for (const [clave, datos] of mapaAnteriores) {
+      const codigoIndumentaria = clave.split('_')[0];
+      const nombrePresentacion = await obtenerNombrePresentacion(datos.idPresentacion);
       await HistorialModificacionPedido.create({
         numeroPedido,
         fechaModificacion: new Date(),
@@ -1236,8 +1261,8 @@ router.put("/:numeroPedido", async (req, res) => {
         tipoModificacion: 'Se elimino un producto',
         codigoIndumentaria: codigoIndumentaria,
         idDetallePedido: datos.idDetallePedido,
-        cantidadAnterior: datos.cantidad,
-        descripcion: `Se eliminó ${datos.cantidad} unidad(es) del producto ${codigoIndumentaria}`
+        cantidadAnterior: datos.unidadesTotales,
+        descripcion: `Se eliminó ${datos.cantidadPresentaciones} ${nombrePresentacion}(s) del producto ${codigoIndumentaria} (${datos.unidadesTotales} unidades totales)`
       }, { transaction: t });
     }
 

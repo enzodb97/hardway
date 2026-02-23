@@ -73,14 +73,12 @@ const Indumentaria: React.FC = () => {
   const [configuracionPresentaciones, setConfiguracionPresentaciones] = useState<ConfiguracionPresentacion[]>([]);
   const [nuevaPresentacion, setNuevaPresentacion] = useState({
     idPresentacion: 0,
-    cantidadUnidades: 1,
-    precioBase: null as number | null
+    cantidadUnidades: 1
   });
   const [editandoPresentacionId, setEditandoPresentacionId] = useState<number | null>(null);
   const [presentacionEditada, setPresentacionEditada] = useState<{
     cantidadUnidades: number;
-    precioBase: number | null;
-  }>({ cantidadUnidades: 1, precioBase: null });
+  }>({ cantidadUnidades: 1 });
 
   const cargarIndumentaria = async () => {
     setLoading(true);
@@ -390,7 +388,7 @@ const Indumentaria: React.FC = () => {
         selectedItem,
         nuevaPresentacion.idPresentacion,
         nuevaPresentacion.cantidadUnidades,
-        nuevaPresentacion.precioBase
+        null
       );
       
       // Recargar configuración
@@ -400,8 +398,7 @@ const Indumentaria: React.FC = () => {
       // Limpiar formulario
       setNuevaPresentacion({
         idPresentacion: 0,
-        cantidadUnidades: 1,
-        precioBase: null
+        cantidadUnidades: 1
       });
       
       setAlertMsg('Presentación agregada correctamente');
@@ -418,7 +415,7 @@ const Indumentaria: React.FC = () => {
       await actualizarConfiguracionPresentacion(
         config.idConfiguracion,
         config.cantidadUnidades,
-        config.precioBase,
+        null,
         config.estaActivo
       );
       
@@ -457,15 +454,14 @@ const Indumentaria: React.FC = () => {
   const handleIniciarEdicion = (config: ConfiguracionPresentacion) => {
     setEditandoPresentacionId(config.idConfiguracion);
     setPresentacionEditada({
-      cantidadUnidades: config.cantidadUnidades,
-      precioBase: config.precioBase
+      cantidadUnidades: config.cantidadUnidades
     });
   };
 
   // Función para cancelar edición
   const handleCancelarEdicion = () => {
     setEditandoPresentacionId(null);
-    setPresentacionEditada({ cantidadUnidades: 1, precioBase: null });
+    setPresentacionEditada({ cantidadUnidades: 1 });
   };
 
   // Función para guardar edición de una presentación
@@ -479,8 +475,7 @@ const Indumentaria: React.FC = () => {
     try {
       const configActualizada = {
         ...config,
-        cantidadUnidades: presentacionEditada.cantidadUnidades,
-        precioBase: presentacionEditada.precioBase
+        cantidadUnidades: presentacionEditada.cantidadUnidades
       };
       
       await handleActualizarPresentacion(configActualizada);
@@ -492,7 +487,7 @@ const Indumentaria: React.FC = () => {
       }
       
       setEditandoPresentacionId(null);
-      setPresentacionEditada({ cantidadUnidades: 1, precioBase: null });
+      setPresentacionEditada({ cantidadUnidades: 1 });
     } catch (error: any) {
       console.error('Error al guardar edición:', error);
       setAlertMsg(error.message || 'Error al guardar cambios');
@@ -1634,8 +1629,7 @@ const Indumentaria: React.FC = () => {
           setConfiguracionPresentaciones([]);
           setNuevaPresentacion({
             idPresentacion: 0,
-            cantidadUnidades: 1,
-            precioBase: null
+            cantidadUnidades: 1
           });
         }}
         className="modal-no-apta"
@@ -1731,39 +1725,10 @@ const Indumentaria: React.FC = () => {
                                   }}
                                 />
                               </div>
-                              <div>
-                                <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>
-                                  Precio base (opcional):
-                                </label>
-                                <IonInput
-                                  type="number"
-                                  min={0}
-                                  step="0.01"
-                                  value={presentacionEditada.precioBase || ''}
-                                  onIonChange={(e) => setPresentacionEditada({
-                                    ...presentacionEditada,
-                                    precioBase: e.detail.value ? Number(e.detail.value) : null
-                                  })}
-                                  placeholder="Auto"
-                                  style={{
-                                    '--background': 'white',
-                                    '--padding-start': '8px',
-                                    '--padding-end': '8px',
-                                    border: '1px solid #cbd5e1',
-                                    borderRadius: '4px',
-                                    fontSize: '0.875rem'
-                                  }}
-                                />
-                              </div>
                             </div>
                           ) : (
                             <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
                               <span>Cantidad: <strong>{config.cantidadUnidades}</strong> unidades</span>
-                              {config.precioBase && (
-                                <span style={{ marginLeft: '12px' }}>
-                                  Precio: <strong>${config.precioBase}</strong>
-                                </span>
-                              )}
                             </div>
                           )}
                         </div>
@@ -1884,24 +1849,6 @@ const Indumentaria: React.FC = () => {
                 />
               </IonItem>
 
-              <IonItem lines="none" className="modal-no-apta-item">
-                <IonLabel position="stacked" className="modal-no-apta-label">
-                  Precio Base <span className="modal-no-apta-label-optional">(opcional)</span>
-                </IonLabel>
-                <IonInput
-                  type="number"
-                  placeholder="Dejar vacío para calcular automáticamente"
-                  min={0}
-                  step="0.01"
-                  value={nuevaPresentacion.precioBase || ''}
-                  onIonChange={(e) => setNuevaPresentacion({
-                    ...nuevaPresentacion,
-                    precioBase: e.detail.value ? Number(e.detail.value) : null
-                  })}
-                  className="modal-no-apta-input"
-                />
-              </IonItem>
-
               <IonButton
                 expand="block"
                 color="tertiary"
@@ -1937,8 +1884,7 @@ const Indumentaria: React.FC = () => {
                   setConfiguracionPresentaciones([]);
                   setNuevaPresentacion({
                     idPresentacion: 0,
-                    cantidadUnidades: 1,
-                    precioBase: null
+                    cantidadUnidades: 1
                   });
                 }}
               >
