@@ -44,7 +44,12 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         ap.completado,
         COALESCE(u.nombreUsuario, CONCAT(per.nombre, ' ', COALESCE(per.apellido, ''))) as nombrePicker
       FROM pedido p
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = p.numeroPedido
+        )
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona per ON ep.idPersona = per.idPersona
       LEFT JOIN usuario u ON u.idPersona = per.idPersona
@@ -75,7 +80,12 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
       JOIN ciudad ci ON d.idCiudad = ci.idCiudad
       JOIN detallepedido dp ON p.numeroPedido = dp.numeroPedido
       LEFT JOIN empresa_envio ee ON p.idEmpresaEnvio = ee.idEmpresaEnvio
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = p.numeroPedido
+        )
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona p_picker ON ep.idPersona = p_picker.idPersona
       LEFT JOIN usuario u_picker ON u_picker.idPersona = p_picker.idPersona

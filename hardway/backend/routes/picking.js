@@ -495,9 +495,10 @@ router.post("/tareas/:numeroPedido/completar", verificarAccesoPicking, async (re
           });
 
           if (articuloInfo.length > 0) {
-            const nombreArticulo = articuloInfo[0].nombre || articuloInfo[0].codigoIndumentaria;
+            const codigoIndumentaria = articuloInfo[0].codigoIndumentaria || 'SIN-CÓDIGO';
+            const nombreArticulo = articuloInfo[0].nombre || 'Sin nombre';
             const presentacion = articuloInfo[0].nombrePresentacion ? ` (${articuloInfo[0].nombrePresentacion})` : '';
-            infoArticulo = ` | Artículo: ${nombreArticulo}${presentacion}${cantidadConProblema ? ` - ${cantidadConProblema} unidades` : ''}`;
+            infoArticulo = ` | Artículo: ${codigoIndumentaria} - ${nombreArticulo}${presentacion}${cantidadConProblema ? ` - ${cantidadConProblema} unidades` : ''}`;
           }
         }
         

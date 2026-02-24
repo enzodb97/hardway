@@ -48,6 +48,7 @@ import {
   IonCardTitle,
   IonCardContent,
   IonTextarea,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import {
   personAddOutline,
@@ -270,6 +271,19 @@ const Usuarios: React.FC = () => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mostrarInactivos]); // Solo cuando cambia mostrarInactivos, hasRole es estable
+
+  // Recargar usuarios cada vez que la vista entra (para sincronización automática)
+  useIonViewWillEnter(() => {
+    if (!hasRole("Administrador")) {
+      return;
+    }
+    
+    cargarUsuarios(mostrarInactivos).then((usuariosData) => {
+      setUsuarios(usuariosData);
+    }).catch((error) => {
+      console.error("Usuarios.tsx: Error al cargar usuarios:", error);
+    });
+  });
 
   // Crear usuario
   const handleCrear = async (e: React.FormEvent) => {

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-02-2026 a las 02:42:58
+-- Tiempo de generación: 23-02-2026 a las 02:09:26
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -3829,7 +3829,7 @@ CREATE TABLE `presentacion_producto` (
 
 INSERT INTO `presentacion_producto` (`idPresentacion`, `nombrePresentacion`, `descripcion`) VALUES
 (1, 'Unidad', 'Venta individual'),
-(2, 'Caja Cerrada', 'Bulto sin abrir'),
+(2, 'Caja', 'Bulto sin abrir'),
 (3, 'Pack', 'Conjunto de unidades');
 
 -- --------------------------------------------------------
@@ -4048,9 +4048,7 @@ CREATE TABLE `unidad_medida` (
 
 INSERT INTO `unidad_medida` (`idUnidadMedida`, `nombreUnidad`, `abreviatura`) VALUES
 (1, 'Unidad', 'un.'),
-(2, 'Par', 'par'),
-(3, 'Set', 'set'),
-(4, 'Pack', 'pack');
+(2, 'Par', 'par');
 
 -- --------------------------------------------------------
 

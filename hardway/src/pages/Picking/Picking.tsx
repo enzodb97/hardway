@@ -28,6 +28,7 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import {
   checkmarkCircleOutline,
@@ -289,12 +290,17 @@ const Picking: React.FC = () => {
     }
   };
 
+  // Cargar datos al montar el componente
   useEffect(() => {
-    cargarTareas();
     cargarMotivos();
-    cargarNotificacionesResolucion();
     // eslint-disable-next-line
   }, []);
+
+  // Recargar datos cada vez que la vista entra (para sincronización automática)
+  useIonViewWillEnter(() => {
+    cargarTareas();
+    cargarNotificacionesResolucion();
+  });
 
   const cargarMotivos = async () => {
     try {
@@ -405,13 +411,16 @@ const Picking: React.FC = () => {
     setShowConfirm(false);
     
     try {
-      // Si pickingList está vacío, cargar los artículos del pedido
-      if (pickingList.length === 0 && tareaSeleccionada) {
+      // SIEMPRE recargar los artículos del pedido para asegurar datos actualizados
+      // (el usuario pudo haber editado el pedido desde otra vista)
+      if (tareaSeleccionada) {
         const response = await verPickingList(tareaSeleccionada.numeroPedido);
         
         if (response && response.pedido && response.pedido.DetallePedidos) {
           const itemsFormateados = formatearItemsPickingList(response.pedido.DetallePedidos);
           setPickingList(itemsFormateados);
+        } else {
+          setPickingList([]);
         }
       }
       

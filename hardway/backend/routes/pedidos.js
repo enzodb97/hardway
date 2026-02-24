@@ -183,12 +183,15 @@ router.get("/notificaciones/:idUsuario", async (req, res) => {
         n.observacionesResolucion,
         ap.tieneProblemas,
         ap.observacionesProblema,
+        ap.completado,
         m.descripcion as motivoDescripcion,
-        u.nombreUsuario as pickerAsignado
+        u.nombreUsuario as pickerAsignado,
+        p.idEstado as estadoPedido
       FROM notificacion_pedido n
       LEFT JOIN asignacion_picking ap ON n.idAsignacionPicking = ap.idAsignacion
       LEFT JOIN motivo_no_apta m ON ap.idMotivoProblema = m.idMotivo
       LEFT JOIN usuario u ON n.idUsuarioDestino = u.idUsuario
+      LEFT JOIN pedido p ON n.numeroPedido = p.numeroPedido
       ${whereCondition}
       ORDER BY n.fechaNotificacion DESC
     `, {
@@ -1648,6 +1651,23 @@ router.post("/:numeroPedido/asignar-picker", async (req, res) => {
   const { numeroPedido } = req.params;
   const { pickerId } = req.body;
   try {
+    // Validar que no existan problemas de picking pendientes
+    const [problemasPendientes] = await sequelize.query(
+      `SELECT COUNT(*) as total
+       FROM notificacion_pedido
+       WHERE numeroPedido = ? 
+         AND tipoNotificacion = 'problema_picking'
+         AND estadoResolucion = 'pendiente'`,
+      { replacements: [numeroPedido] }
+    );
+
+    if (problemasPendientes[0].total > 0) {
+      return res.status(400).json({ 
+        error: "No se puede reasignar el picker mientras existan problemas de picking pendientes de resolución",
+        problemasPendientes: problemasPendientes[0].total
+      });
+    }
+
     // 1. Marcar como completadas todas las asignaciones activas previas de este pedido
     await sequelize.query(
       `UPDATE asignacion_picking SET completado = 1, fechaCompletado = NOW() WHERE numeroPedido = ? AND completado = 0`,

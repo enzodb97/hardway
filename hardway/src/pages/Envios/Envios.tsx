@@ -37,6 +37,7 @@ import {
   IonSpinner,
   IonMenuButton,
   IonToast,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import {
   carOutline,
@@ -98,12 +99,13 @@ const Envios: React.FC = () => {
   const goToNextPage = () => setPagina(Math.min(totalPaginas, pagina + 1));
 
   useEffect(() => {
-    cargarPedidos();
-  }, []);
-
-  useEffect(() => {
     filtrarPedidos();
   }, [pedidos, searchTerm, filtroEstado]);
+
+  // Recargar pedidos cada vez que la vista entra (para sincronización automática)
+  useIonViewWillEnter(() => {
+    cargarPedidos();
+  });
 
   const cargarPedidos = async () => {
     try {

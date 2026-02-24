@@ -527,7 +527,12 @@ router.get("/:id/pedidos-activos", async (req, res) => {
       LEFT JOIN cliente c ON p.idCliente = c.idCliente
       LEFT JOIN persona per ON c.idPersona = per.idPersona
       LEFT JOIN estadopedido ep_estado ON p.idEstado = ep_estado.idEstado
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = p.numeroPedido
+        )
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN usuario upicker ON ep.idPersona = upicker.idPersona
       WHERE p.idEstado IN (:estadosActivos)
@@ -681,7 +686,12 @@ router.patch("/:id/inactivar", verificarAccesoPedidos, async (req, res) => {
     const [pedidosActivos] = await sequelize.query(`
       SELECT COUNT(DISTINCT p.numeroPedido) as total
       FROM pedido p
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = p.numeroPedido
+        )
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN usuario upicker ON ep.idPersona = upicker.idPersona
       WHERE p.idEstado IN (:estadosActivos)
@@ -830,7 +840,12 @@ router.post("/reasignar-y-inactivar", verificarAccesoPedidos, async (req, res) =
     const [conteoAntes] = await sequelize.query(`
       SELECT COUNT(DISTINCT p.numeroPedido) as totalOrigen
       FROM pedido p
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = p.numeroPedido
+        )
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN usuario upicker ON ep.idPersona = upicker.idPersona
       WHERE p.idEstado IN (:estadosActivos)
@@ -925,7 +940,12 @@ router.post("/reasignar-y-inactivar", verificarAccesoPedidos, async (req, res) =
       SELECT DISTINCT p.numeroPedido, p.idEstado, ep_estado.tipoEstado
       FROM pedido p
       LEFT JOIN estadopedido ep_estado ON p.idEstado = ep_estado.idEstado
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = p.numeroPedido
+        )
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN usuario upicker ON ep.idPersona = upicker.idPersona
       WHERE p.idEstado IN (:estadosActivos)
@@ -951,7 +971,12 @@ router.post("/reasignar-y-inactivar", verificarAccesoPedidos, async (req, res) =
     const [verificacion] = await sequelize.query(`
       SELECT COUNT(DISTINCT p.numeroPedido) as totalPendientes
       FROM pedido p
-      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido
+      LEFT JOIN asignacion_picking ap ON p.numeroPedido = ap.numeroPedido 
+        AND ap.idAsignacion = (
+          SELECT MAX(ap2.idAsignacion) 
+          FROM asignacion_picking ap2 
+          WHERE ap2.numeroPedido = p.numeroPedido
+        )
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN usuario upicker ON ep.idPersona = upicker.idPersona
       WHERE p.idEstado IN (:estadosActivos)

@@ -178,6 +178,17 @@ const Pedidos: React.FC = () => {
     }
   };
 
+  // Función para verificar si un pedido tiene problemas pendientes
+  const verificarProblemasPendientes = (numeroPedido: string) => {
+    const problemasPendientes = notificacionesProblemas.filter(
+      (n) => n.numeroPedido === numeroPedido && n.estadoResolucion === 'pendiente'
+    );
+    return {
+      tieneProblemas: problemasPendientes.length > 0,
+      cantidad: problemasPendientes.length
+    };
+  };
+
   // Actualizar cuando se entra a la vista (navegación Ionic)
   useIonViewWillEnter(() => {
     actualizarPedidos();
@@ -463,6 +474,16 @@ const Pedidos: React.FC = () => {
                                   fill="outline"
                                   color="success"
                                   onClick={async (e) => {
+                                    // Verificar si hay problemas pendientes
+                                    const { tieneProblemas, cantidad } = verificarProblemasPendientes(pedido.numeroPedido);
+                                    if (tieneProblemas) {
+                                      setAlertMsg(
+                                        `Este pedido tiene ${cantidad} problema(s) de picking pendiente(s). Debe resolver los problemas antes de reasignar el picker.`
+                                      );
+                                      setShowAlert(true);
+                                      return;
+                                    }
+
                                     const pickerAsignado =
                                       await obtenerPickerAsignado(
                                         pedido.numeroPedido
@@ -707,6 +728,16 @@ const Pedidos: React.FC = () => {
                   {
                     text: "Cambiar Picker",
                     handler: () => {
+                      // Verificar si hay problemas pendientes antes de cambiar picker
+                      if (!pedidoParaAsignar) return;
+                      
+                      const { tieneProblemas, cantidad } = verificarProblemasPendientes(pedidoParaAsignar);
+                      if (tieneProblemas) {
+                        setAlertMsg(
+                          `Este pedido tiene ${cantidad} problema(s) de picking pendiente(s). Debe resolver los problemas antes de reasignar el picker.`
+                        );
+                        return;
+                      }
                       setShowPickerDropdown(pedidoParaAsignar);
                       setShowAlert(false);
                     },

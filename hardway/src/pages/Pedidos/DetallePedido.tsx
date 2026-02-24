@@ -242,6 +242,49 @@ const DetallePedido: React.FC = () => {
     );
   };
 
+  // Función para resaltar el código de indumentaria en el mensaje
+  const resaltarCodigoIndumentaria = (mensaje: string) => {
+    // Buscar el patrón "Artículo: CODIGO - Nombre"
+    const regex = /(\| Artículo: )([A-Z0-9-]+)( - )/g;
+    const partes = mensaje.split(regex);
+    
+    if (partes.length === 1) {
+      // No se encontró el patrón, devolver mensaje original
+      return <span>{mensaje}</span>;
+    }
+    
+    // Reconstruir el mensaje con el código resaltado
+    return (
+      <span>
+        {partes.map((parte, index) => {
+          // Si es un código (índice impar y matches el patrón)
+          if (index % 4 === 2 && /^[A-Z0-9-]+$/.test(parte)) {
+            return (
+              <span
+                key={index}
+                style={{
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  fontFamily: 'monospace',
+                  fontSize: '16px',
+                  marginLeft: '4px',
+                  marginRight: '4px',
+                  display: 'inline-block'
+                }}
+              >
+                {parte}
+              </span>
+            );
+          }
+          return <span key={index}>{parte}</span>;
+        })}
+      </span>
+    );
+  };
+
   // ==========================================
   // FIN FUNCIONES DE RESOLUCIÓN
   // ==========================================
@@ -544,7 +587,7 @@ const DetallePedido: React.FC = () => {
                 </div>
                 
                 <div style={{ fontSize: '14px', color: '#495057', lineHeight: '1.6' }}>
-                  {notif.mensaje}
+                  {resaltarCodigoIndumentaria(notif.mensaje)}
                 </div>
                 
                 {notif.observacionesProblema && (

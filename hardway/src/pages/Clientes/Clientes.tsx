@@ -26,6 +26,7 @@ import {
   IonSkeletonText,
   IonToggle,
   IonInput,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import {
   add,
@@ -155,6 +156,11 @@ const Clientes: React.FC = () => {
   useEffect(() => {
     setPaginaActual(1);
   }, [busqueda, filtroLocalidad, filtroDocumento, soloVip]);
+
+  // Recargar clientes cada vez que la vista entra (para sincronización automática)
+  useIonViewWillEnter(() => {
+    recargarClientes();
+  });
 
   // Manejo de refresh
   const doRefresh = async (event: CustomEvent) => {
