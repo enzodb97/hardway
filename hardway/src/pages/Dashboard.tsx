@@ -18,6 +18,7 @@ import {
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { formatFechaHoraCompleta } from "../utils/dateFormatters";
 import { useEffect, useState } from "react";
 import {
   peopleOutline,
@@ -154,12 +155,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="welcome-time">
             <IonIcon icon={timeOutline} />
-            <span>{new Date().toLocaleDateString("es-AR", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}</span>
+            <span>{formatFechaHoraCompleta()}</span>
           </div>
         </div>
 

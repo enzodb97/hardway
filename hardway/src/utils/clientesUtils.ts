@@ -115,6 +115,9 @@ export function validarCamposCliente(
   if (telefonoStr.length < 7) {
     return "El teléfono debe tener al menos 7 caracteres.";
   }
+  if (telefonoStr.length > 13) {
+    return "El teléfono no puede superar los 13 caracteres.";
+  }
 
   return null;
 }

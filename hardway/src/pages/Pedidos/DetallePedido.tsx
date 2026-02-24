@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { formatFechaHoraCorta } from "../../utils/dateFormatters";
 import {
   IonPage,
   IonHeader,
@@ -647,7 +648,7 @@ const DetallePedido: React.FC = () => {
                   color: '#6c757d'
                 }}>
                   <span>
-                    📅 {new Date(notif.fechaNotificacion).toLocaleString('es-AR')}
+                    📅 {formatFechaHoraCorta(notif.fechaNotificacion)}
                   </span>
                   <span style={{
                     padding: '4px 10px',
@@ -745,7 +746,7 @@ const DetallePedido: React.FC = () => {
             <p className="usuario-creacion">
               <strong>Fecha del pedido:</strong>{" "}
               {pedido.fechaPedido
-                ? new Date(pedido.fechaPedido).toLocaleString("es-AR")
+                ? formatFechaHoraCorta(pedido.fechaPedido)
                 : "-"}
             </p>
           </div>
@@ -764,7 +765,7 @@ const DetallePedido: React.FC = () => {
               <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
                 <p className="fecha-modificacion" style={{ marginBottom: '8px' }}>
                   <strong>Última modificación:</strong>{" "}
-                  {new Date(pedido.fechaModificacion).toLocaleString("es-AR")}
+                  {formatFechaHoraCorta(pedido.fechaModificacion)}
                 </p>
                 {pedido.usuarioModifico && (
                   <p className="fecha-modificacion" style={{ marginBottom: '0' }}>
@@ -819,7 +820,7 @@ const DetallePedido: React.FC = () => {
                                 {item.descripcion}
                               </strong>
                               <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-                                📅 {new Date(item.fechaModificacion).toLocaleString("es-AR")}
+                                📅 {formatFechaHoraCorta(item.fechaModificacion)}
                               </div>
                             </div>
                             <span 
@@ -902,7 +903,7 @@ const DetallePedido: React.FC = () => {
             {pedido.fechaCancelacion && (
               <p className="fecha-cancelacion">
                 <strong>Fecha de cancelación:</strong>{" "}
-                {new Date(pedido.fechaCancelacion).toLocaleString("es-AR")}
+                {formatFechaHoraCorta(pedido.fechaCancelacion)}
               </p>
             )}
 

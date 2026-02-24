@@ -276,16 +276,16 @@
 .envios-page .pedido-header {
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  align-items: center !important;
-  gap: 1rem;
+  flex-wrap: nowrap;
+  align-items: stretch !important;
+  gap: 0;
   background: rgba(50, 50, 50, 0.95);
   padding: 0;
   margin: -1.25rem -1.25rem 1rem -1.25rem;
   border-bottom: 3px solid #fdb40b;
   width: calc(100% + 2.5rem);
   box-sizing: border-box;
-  height: 80px;
+  min-height: 80px;
 }
 
 .envios-page .pedido-header::before {
@@ -313,12 +313,33 @@
   padding-left: 1.25rem;
 }
 
-.envios-page .pedido-title ion-card-title {
-  color: #ffffff;
-  font-size: 1.2rem;
+.envios-page .pedido-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 1.25rem 0 1.25rem;
+  margin: 10px;
+}
+
+.envios-page .pedido-badges-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0 1.25rem 0.5rem 1.25rem;
+  flex-wrap: wrap;
+  margin: 10px;
+}
+
+.envios-page .pedido-title-row ion-card-title {
+  color: #fdb40b !important;
+  font-size: 1.3rem;
   margin: 0;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px rgba(253, 180, 11, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .envios-page .status-badge {
@@ -342,10 +363,10 @@
   border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 500;
-  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
 }
 
 .envios-page .pedido-date {
@@ -358,8 +379,6 @@
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   flex-shrink: 0;
-  height: 100%;
-  padding-right: 1.25rem;
 }
 
 .envios-page .pedido-date ion-icon {
@@ -1657,9 +1676,18 @@
   }
   
   .envios-page .pedido-header {
-    text-align: center;
-    padding: 0.75rem;
+    padding: 0;
     margin: -1rem -1rem 1rem -1rem;
+    min-height: auto;
+  }
+  
+  .envios-page .pedido-title-row {
+    padding: 0.5rem 0.75rem 0 0.75rem;
+  }
+  
+  .envios-page .pedido-badges-row {
+    padding: 0 0.75rem 0.5rem 0.75rem;
+    justify-content: center;
   }
   
   .envios-page .stat-item {

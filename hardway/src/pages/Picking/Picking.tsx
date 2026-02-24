@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { formatFechaHoraCorta } from "../../utils/dateFormatters";
 import {
   IonPage,
   IonHeader,
@@ -684,7 +685,7 @@ const Picking: React.FC = () => {
                             <div className="info-item">
                               <IonIcon icon={timeOutline} />
                               <span>
-                                {new Date(tarea.fechaAsignacion).toLocaleString("es-AR")}
+                                {formatFechaHoraCorta(tarea.fechaAsignacion)}
                               </span>
                             </div>
                           </div>
@@ -1338,13 +1339,7 @@ const Picking: React.FC = () => {
                       
                       <div className="notificacion-footer">
                         <span className="notificacion-fecha">
-                          📅 {new Date(notif.fechaNotificacion).toLocaleString('es-AR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          📅 {formatFechaHoraCorta(notif.fechaNotificacion)}
                         </span>
                         
                         {notif.leida === 1 ? (

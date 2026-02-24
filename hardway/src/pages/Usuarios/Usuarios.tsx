@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { formatFechaSola } from "../../utils/dateFormatters";
 import {
   cargarUsuarios,
   crearUsuario,
@@ -1041,7 +1042,7 @@ const Usuarios: React.FC = () => {
                             <IonLabel>
                               <h3>{pedido.numeroPedido}</h3>
                               <p>Cliente: {pedido.nombreCliente}</p>
-                              <p>Fecha: {new Date(pedido.fechaPedido).toLocaleDateString()}</p>
+                              <p>Fecha: {formatFechaSola(pedido.fechaPedido)}</p>
                             </IonLabel>
                             <div slot="end" className={`pedido-estado-badge ${obtenerClaseDeEstado(pedido.nombreEstado || '')}`}>
                               {pedido.nombreEstado || `Estado ${pedido.idEstado}`}

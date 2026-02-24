@@ -33,6 +33,7 @@ import {
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./ProductosMasPedidos.table.css";
 import "./StockActual.css";
+import { formatFechaHoraCompleta } from "../../utils/dateFormatters";
 import { checkmarkCircle } from "ionicons/icons";
 interface StockActual {
   codigoIndumentaria: string;
@@ -50,7 +51,7 @@ const StockActual: React.FC = () => {
   const [stock, setStock] = useState<StockActual[]>([]);
   const [pagina, setPagina] = useState(1);
   const [mostrarTodos, setMostrarTodos] = useState(false);
-  const fechaEmision = new Date().toLocaleString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
   const [toastExcel, setToastExcel] = useState(false);
   const [toastPDF, setToastPDF] = useState(false);
 

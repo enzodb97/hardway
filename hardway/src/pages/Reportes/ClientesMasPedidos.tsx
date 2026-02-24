@@ -31,6 +31,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { formatFechaHoraCompleta } from "../../utils/dateFormatters";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./ProductosMasPedidos.table.css";
 import "./ClientesMasPedidos.css";
@@ -280,7 +281,7 @@ const ClientesMasPedidos: React.FC = () => {
     ? 1
     : Math.ceil(top10Clientes.length / PAGE_SIZE);
 
-  const fechaEmision = new Date().toLocaleString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
 
   // Calcular estadísticas (solo top 10)
   const totalClientes = top10Clientes.length;

@@ -34,6 +34,7 @@ import {
   Filler,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { formatFechaHoraCompleta } from "../../utils/dateFormatters";
 import "./ProductosMasPedidos.table.css";
 import "./ProductosMasPedidos.css";
 import { checkmarkCircle, trendingUp, trendingDown, analytics } from "ionicons/icons";
@@ -124,7 +125,7 @@ const ProductosMasPedidos: React.FC = () => {
   const [incluirGrafico, setIncluirGrafico] = useState(false);
   const chartRef = useRef<any>(null);
   const [graficoListo, setGraficoListo] = useState(false);
-  const fechaEmision = new Date().toLocaleString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
   const [showToast, setShowToast] = useState({ open: false, message: "" });
   const history = useHistory();
 

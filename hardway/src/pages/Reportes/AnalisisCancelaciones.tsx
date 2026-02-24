@@ -33,6 +33,7 @@ import {
   ArcElement,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { formatFechaHoraCompleta } from "../../utils/dateFormatters";
 import "./ProductosMasPedidos.table.css";
 import "./AnalisisCancelaciones.css";
 
@@ -59,7 +60,7 @@ const AnalisisCancelaciones: React.FC = () => {
   const [toastPDF, setToastPDF] = useState(false);
   const [incluirGrafico, setIncluirGrafico] = useState(false);
   const chartRef = useRef<any>(null);
-  const fechaEmision = new Date().toLocaleString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
   const history = useHistory();
 
   // Calcular estadísticas

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
 import { obtenerIconoEstado } from "../../utils/pedidosUtils";
+import { formatFechaHoraCorta } from "../../utils/dateFormatters";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {
@@ -386,7 +387,7 @@ const Pedidos: React.FC = () => {
                       </IonCol>
                       <IonCol className="text-center">
                         {pedido.fechaPedido
-                          ? new Date(pedido.fechaPedido).toLocaleString("es-AR")
+                          ? formatFechaHoraCorta(pedido.fechaPedido)
                           : ""}
                       </IonCol>
                       <IonCol className="text-center">
@@ -1142,13 +1143,7 @@ const Pedidos: React.FC = () => {
                       
                       <div className="notificacion-footer">
                         <span className="notificacion-fecha">
-                          📅 {new Date(notif.fechaNotificacion).toLocaleString('es-ES', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          📅 {formatFechaHoraCorta(notif.fechaNotificacion)}
                         </span>
                         
                         <div className="notificacion-acciones">

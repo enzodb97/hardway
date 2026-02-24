@@ -1,4 +1,5 @@
 // Migradas desde Pedidos.tsx
+import { formatFechaHoraCompleta, formatFechaSola } from "./dateFormatters";
 
 // Manejar cancelación de pedido (abre modal y carga motivos)
 export const handleCancelarPedido = async (
@@ -268,7 +269,7 @@ export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
       dni = String((p.Cliente.Persona as any).dni ?? "");
     }
     const fecha = p.fechaPedido
-      ? new Date(p.fechaPedido).toLocaleDateString("es-AR")
+      ? formatFechaSola(p.fechaPedido)
       : "";
     return (
       (p.numeroPedido && normalizar(p.numeroPedido).includes(filtroNorm)) ||
@@ -496,7 +497,7 @@ export const exportarPDF = (
   doc.text(title, x, 18);
 
   // Fecha y hora de emisión
-  const fechaEmision = new Date().toLocaleString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
   doc.setFontSize(10);
   doc.text(`Fecha de emisión: ${fechaEmision}`, x, 25);
 
@@ -527,7 +528,7 @@ export const exportarPDF = (
           }`.trim()
         : "Sin cliente",
       pedido.fechaPedido
-        ? new Date(pedido.fechaPedido).toLocaleString("es-AR")
+        ? formatFechaHoraCompleta(pedido.fechaPedido)
         : "",
     ]),
     startY,
@@ -576,26 +577,14 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
     doc.text(title, pageWidth / 2, 20, { align: "center" });
 
     // Fecha de emisión - centrada
-    const fechaEmision = new Date().toLocaleString("es-AR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const fechaEmision = formatFechaHoraCompleta();
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`Fecha de emisión: ${fechaEmision}`, pageWidth / 2, 28, { align: "center" });
 
     // Fecha del pedido
     if (pedido.fechaPedido || pedido.fecha_pedido || pedido.createdAt) {
-      const fechaPedido = new Date(pedido.fechaPedido || pedido.fecha_pedido || pedido.createdAt).toLocaleString("es-AR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      const fechaPedido = formatFechaHoraCompleta(pedido.fechaPedido || pedido.fecha_pedido || pedido.createdAt);
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       doc.text(`Fecha del Pedido: ${fechaPedido}`, 14, 38);

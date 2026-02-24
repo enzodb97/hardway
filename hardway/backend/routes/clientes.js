@@ -48,6 +48,30 @@ const validarDNI = (valor) => {
   return null;
 };
 
+// Función para validar teléfono
+const validarTelefono = (valor) => {
+  if (!valor) return "El teléfono es obligatorio.";
+  
+  const valorLimpio = String(valor).trim();
+  
+  // Verificar que solo contenga números
+  if (!/^\d+$/.test(valorLimpio)) {
+    return "El teléfono solo debe contener números.";
+  }
+  
+  // Verificar longitud mínima
+  if (valorLimpio.length < 7) {
+    return "El teléfono debe tener al menos 7 dígitos.";
+  }
+  
+  // Verificar longitud máxima
+  if (valorLimpio.length > 13) {
+    return "El teléfono no puede superar los 13 dígitos.";
+  }
+  
+  return null;
+};
+
 // Obtener todos los clientes
 router.get("/", async (req, res) => {
   try {
@@ -160,6 +184,13 @@ router.post("/", async (req, res) => {
         return res.status(400).json({ error: errorValidacion });
       }
     }
+    
+    // Validar teléfono
+    const errorTelefono = validarTelefono(req.body.telefono);
+    if (errorTelefono) {
+      await t.rollback();
+      return res.status(400).json({ error: errorTelefono });
+    }
 
     // Crear domicilio
     const domicilio = await Domicilio.create(
@@ -241,6 +272,13 @@ router.put("/:id", async (req, res) => {
         await t.rollback();
         return res.status(400).json({ error: errorValidacion });
       }
+    }
+    
+    // Validar teléfono
+    const errorTelefono = validarTelefono(req.body.telefono);
+    if (errorTelefono) {
+      await t.rollback();
+      return res.status(400).json({ error: errorTelefono });
     }
 
     // 1. Buscar cliente y persona

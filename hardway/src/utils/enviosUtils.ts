@@ -1,6 +1,7 @@
 import axiosInstance from "../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { formatFechaHoraCompleta, formatFechaSola } from "./dateFormatters";
 
 export interface PedidoEnvio {
   numeroPedido: string;
@@ -78,7 +79,7 @@ export const exportarPDFPendientesDespacho = (pedidos: PedidoEnvio[]) => {
   doc.setFontSize(14);
   doc.text(title, x, 18);
   doc.setFontSize(10);
-  const fechaEmision = new Date().toLocaleDateString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
   doc.text(`Fecha de emisión: ${fechaEmision}`, x, 25);
   doc.text(`Total de pedidos pendientes: ${pedidosPendientes.length}`, x, 32);
   
@@ -91,7 +92,7 @@ export const exportarPDFPendientesDespacho = (pedidos: PedidoEnvio[]) => {
       pedido.cliente_email,
       pedido.direccion_envio.length > 30 ? pedido.direccion_envio.substring(0, 30) + "..." : pedido.direccion_envio,
       pedido.total_items.toString(),
-      new Date(pedido.fechaPedido).toLocaleDateString("es-AR"),
+      formatFechaSola(pedido.fechaPedido),
       (pedido.nombreDespachador && pedido.nombreDespachador.trim()) || "Sin asignar"
     ]),
     startY: 40,
@@ -138,7 +139,7 @@ export const exportarPDFPendientesPorEmpresa = (pedidos: PedidoEnvio[]) => {
   doc.setFontSize(14);
   doc.text(title, x, 18);
   doc.setFontSize(10);
-  const fechaEmision = new Date().toLocaleDateString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
   doc.text(`Fecha de emisión: ${fechaEmision}`, x, 25);
   doc.text(`Total de pedidos pendientes: ${pedidosPendientes.length}`, x, 32);
   
@@ -181,7 +182,7 @@ export const exportarPDFPendientesPorEmpresa = (pedidos: PedidoEnvio[]) => {
       `${pedido.nombre} ${pedido.apellido}`,
       pedido.empresaEnvio || "Sin asignar",
       pedido.total_items.toString(),
-      new Date(pedido.fechaPedido).toLocaleDateString("es-AR"),
+      formatFechaSola(pedido.fechaPedido),
       (pedido.nombreDespachador && pedido.nombreDespachador.trim()) || "Sin asignar"
     ]),
     startY: finalY + 20,

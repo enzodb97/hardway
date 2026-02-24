@@ -36,6 +36,7 @@ import {
   Legend,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { formatFechaHoraCompleta } from "../../utils/dateFormatters";
 import "./TendenciasEmpresaEnvios.css";
 
 Chart.register(
@@ -66,7 +67,7 @@ const TendenciasEmpresaEnvios: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [incluirGrafico, setIncluirGrafico] = useState(true);
   const [chartRef, setChartRef] = useState<any>(null);
-  const fechaEmision = new Date().toLocaleString("es-AR");
+  const fechaEmision = formatFechaHoraCompleta();
   const history = useHistory();
 
   // Cargar datos cuando cambie el filtro

@@ -97,7 +97,15 @@ const AltaCliente: React.FC = () => {
 
   const handleTelefonoChange = (e: any) => {
     const value = e.detail.value;
-    const nuevoValor = soloNumeros(value, previousTelefono);
+    let nuevoValor = soloNumeros(value, previousTelefono);
+    
+    // Validar longitud máxima de 13 caracteres
+    if (nuevoValor.length > 13) {
+      setAlertMessage("El teléfono no puede superar los 13 dígitos.");
+      setShowAlert(true);
+      return; // No actualizar el estado si supera el límite
+    }
+    
     setFormData({ ...formData, telefono: nuevoValor });
     setPreviousTelefono(nuevoValor);
   };

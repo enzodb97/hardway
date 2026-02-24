@@ -7,6 +7,7 @@ import {
   exportarPDFPendientesPorEmpresa,
   PedidoEnvio,
 } from "../../utils/enviosUtils";
+import { formatFechaHoraCorta } from "../../utils/dateFormatters";
 import { useAuth } from "../../context/AuthContext";
 import {
   IonPage,
@@ -56,6 +57,7 @@ import {
   playSkipForwardOutline,
   createOutline,
   documentTextOutline,
+  personOutline,
 } from "ionicons/icons";
 import "./Envios.css";
 
@@ -496,10 +498,13 @@ const Envios: React.FC = () => {
               <IonCard key={pedido.numeroPedido} className="pedido-card">
                 <IonCardHeader>
                   <div className="pedido-header">
-                    <div className="pedido-title">
+                    <div className="pedido-title-row">
                       <IonCardTitle>Pedido #{pedido.numeroPedido}</IonCardTitle>
+                    </div>
+                    <div className="pedido-badges-row">
                       {hasRole("Administrador") && pedido.nombreDespachador && pedido.nombreDespachador.trim() && (
                         <div className="despachador-badge">
+                          <IonIcon icon={personOutline} style={{ fontSize: '14px', marginRight: '4px' }} />
                           {pedido.nombreDespachador.trim()}
                         </div>
                       )}
@@ -508,13 +513,11 @@ const Envios: React.FC = () => {
                         className="status-badge"
                       >
                         {Number(pedido.idEstado) === 4 ? "Despachado" : "Pendiente"}
-                      </IonBadge>{" "}
+                      </IonBadge>
                       <div className="pedido-date">
                         <IonIcon icon={calendarOutline} />
                         <span>
-                          {new Date(pedido.fechaPedido).toLocaleDateString(
-                            "es-AR"
-                          )}
+                          {formatFechaHoraCorta(pedido.fechaPedido)}
                         </span>
                       </div>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatFechaHoraCompleta } from '../../utils/dateFormatters';
 import {
   IonModal,
   IonHeader,
@@ -82,14 +83,7 @@ const HistorialUsuario: React.FC<HistorialUsuarioProps> = ({
   };
 
   const formatearFecha = (fechaString: string) => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatFechaHoraCompleta(fechaString);
   };
 
   const formatearFechaRelativa = (fechaString: string) => {
