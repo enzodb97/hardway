@@ -17,6 +17,7 @@ interface AuthContextType {
   roles: string[]; // ✅ NUEVO: Array de roles del usuario
   rolesIds: number[]; // ✅ NUEVO: Array de IDs de roles
   username: string | null;
+  userId: number | null; // ✅ ID del usuario autenticado
   showWelcome: boolean;
   setShowWelcome: (show: boolean) => void;
   legajoPicker: string | null;
@@ -36,6 +37,7 @@ const AuthContext = createContext<AuthContextType>({
   roles: [], // ✅ Array vacío por defecto
   rolesIds: [], // ✅ Array vacío por defecto
   username: null,
+  userId: null, // ✅ ID del usuario por defecto
   showWelcome: false,
   setShowWelcome: () => {},
   legajoPicker: null,
@@ -52,6 +54,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [roles, setRoles] = useState<string[]>([]); // ✅ NUEVO: Array de roles
   const [rolesIds, setRolesIds] = useState<number[]>([]); // ✅ NUEVO: Array de IDs
   const [username, setUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null); // ✅ ID del usuario autenticado
   const [showWelcome, setShowWelcome] = useState(false);
   const [legajoPicker, setLegajoPicker] = useState<string | null>(null);
   const [loading, setLoading] = useState(true); // ✅ Estado de carga
@@ -158,6 +161,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       try {
         const authStatus = localStorage.getItem("isAuthenticated");
         const storedUsername = localStorage.getItem("username");
+        const storedUserId = localStorage.getItem("idUsuario"); // ✅ ID del usuario
         let storedRol = localStorage.getItem("rol"); // deprecated - por compatibilidad
         const storedRoles = localStorage.getItem("roles"); // ✅ NUEVO
         const storedRolesIds = localStorage.getItem("rolesIds"); // ✅ NUEVO
@@ -189,6 +193,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
               setIsAuthenticated(true);
               setRol(storedRol); // deprecated
               setUsername(storedUsername);
+              setUserId(storedUserId ? parseInt(storedUserId) : null); // ✅ Cargar ID del usuario
               setLegajoPicker(storedLegajoPicker);
               
               // ✅ Cargar roles del localStorage o del response
@@ -218,6 +223,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
               setRoles([]);
               setRolesIds([]);
               setUsername(null);
+              setUserId(null); // ✅ Limpiar ID del usuario
               setLegajoPicker(null);
             }
           } catch (error) {
@@ -229,6 +235,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             setRoles([]);
             setRolesIds([]);
             setUsername(null);
+            setUserId(null); // ✅ Limpiar ID del usuario
             setLegajoPicker(null);
           }
         } else {
@@ -240,6 +247,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
           setRoles([]);
           setRolesIds([]);
           setUsername(null);
+          setUserId(null); // ✅ Limpiar ID del usuario
           localStorage.removeItem("legajoPicker");
         }
       } catch (error) {
@@ -252,6 +260,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setRoles([]);
         setRolesIds([]);
         setUsername(null);
+        setUserId(null); // ✅ Limpiar ID del usuario
         setLegajoPicker(null);
       } finally {
         // ✅ SIEMPRE finalizar carga, sin importar qué pase
@@ -305,6 +314,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setRoles(response.data.roles || []); // ✅ NUEVO
       setRolesIds(response.data.rolesIds || []); // ✅ NUEVO
       setUsername(response.data.nombreUsuario);
+      setUserId(response.data.id || null); // ✅ Guardar ID del usuario en estado
       setLegajoPicker(response.data.legajoPicker || null);
       setShowWelcome(true); // Activa el mensaje tras login exitoso
       
@@ -318,6 +328,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       setRoles([]); // ✅ NUEVO
       setRolesIds([]); // ✅ NUEVO
       setUsername(null);
+      setUserId(null); // ✅ Limpiar ID del usuario
       setLegajoPicker(null);
       localStorage.removeItem("legajoPicker");
       return false;
@@ -346,6 +357,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setRoles([]);
     setRolesIds([]);
     setUsername(null);
+    setUserId(null); // ✅ Limpiar ID del usuario
     setLegajoPicker(null);
     setError(null);
     
@@ -365,6 +377,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         roles, // ✅ NUEVO
         rolesIds, // ✅ NUEVO
         username,
+        userId, // ✅ ID del usuario autenticado
         showWelcome,
         setShowWelcome,
         legajoPicker,

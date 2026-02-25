@@ -1124,13 +1124,13 @@ const Pedidos: React.FC = () => {
           <IonHeader>
             <IonToolbar>
               <IonTitle>Problemas Reportados</IonTitle>
-              <IonButton 
+              {/*<IonButton 
                 slot="end" 
                 fill="clear" 
                 onClick={() => setShowNotificacionesModal(false)}
               >
                 <IonIcon icon={close} />
-              </IonButton>
+              </IonButton>*/}
             </IonToolbar>
           </IonHeader>
           

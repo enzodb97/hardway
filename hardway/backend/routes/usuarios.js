@@ -663,6 +663,14 @@ router.patch("/:id/inactivar", verificarAccesoPedidos, async (req, res) => {
       return res.status(400).json({ error: "Debe especificar el motivo de inactivación" });
     }
 
+    // ✅ VALIDAR: No puede inactivarse a sí mismo
+    if (req.usuarioAutenticado && req.usuarioAutenticado.idUsuario === parseInt(idUsuario)) {
+      await t.rollback();
+      return res.status(403).json({ 
+        error: "No puede inactivarse a sí mismo. Solicite a otro administrador que realice esta acción." 
+      });
+    }
+
     // Verificar si el usuario existe
     const usuario = await Usuario.findByPk(idUsuario, { transaction: t });
     if (!usuario) {
@@ -781,6 +789,14 @@ router.post("/reasignar-y-inactivar", verificarAccesoPedidos, async (req, res) =
       await t.rollback();
       return res.status(400).json({ 
         error: "El usuario origen y destino no pueden ser el mismo" 
+      });
+    }
+
+    // ✅ VALIDAR: No puede inactivarse a sí mismo
+    if (req.usuarioAutenticado && req.usuarioAutenticado.idUsuario === parseInt(idUsuarioOrigen)) {
+      await t.rollback();
+      return res.status(403).json({ 
+        error: "No puede inactivarse a sí mismo. Solicite a otro administrador que realice esta acción." 
       });
     }
 

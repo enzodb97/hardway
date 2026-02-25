@@ -213,7 +213,7 @@ const HistorialUsuario: React.FC<HistorialUsuarioProps> = ({
             {estadisticas && (
               <IonCard className="estadisticas-card">
                 <IonCardHeader>
-                  <IonCardTitle>
+                  <IonCardTitle color="light">
                     <IonIcon icon={analytics} />
                     Estadísticas
                   </IonCardTitle>

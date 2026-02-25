@@ -142,7 +142,7 @@ const Dashboard: React.FC = () => {
               {greeting}, {username}
             </h1>
             <p className="welcome-subtitle">
-              Sistema de Gestión Pegasus
+              Sistema de Gestión Integral
             </p>
             {/* ✅ Mostrar todos los roles del usuario */}
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
 
         {/* Footer info */}
         <div className="dashboard-footer">
-          <p>Sistema Pegasus v1.0 - Gestión Integral de Pedidos e Inventario</p>
+          <p>Sistema de Gestión Integral de Pedidos e Inventario</p>
         </div>
       </IonContent>
     </IonPage>

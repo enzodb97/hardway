@@ -81,7 +81,7 @@ import axiosInstance from "../../config/axios";
 import HistorialUsuario from "./HistorialUsuario";
 
 const Usuarios: React.FC = () => {
-  const { roles, hasRole } = useAuth(); // ✅ Usar roles y hasRole
+  const { roles, hasRole, userId } = useAuth(); // ✅ Usar roles, hasRole y userId
   
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [nuevoUsuario, setNuevoUsuario] = useState<Omit<Usuario, "id">>({
@@ -315,6 +315,13 @@ const Usuarios: React.FC = () => {
 
   // ✅ NUEVO: Inactivar/Reactivar usuario
   const handleInactivarReactivar = async (usuario: Usuario) => {
+    // ✅ VALIDAR: No puede inactivarse a sí mismo
+    if (userId && usuario.id === userId) {
+      setAlertMsg("No puede inactivarse a sí mismo. Solicite a otro administrador que realice esta acción.");
+      setShowAlert(true);
+      return;
+    }
+
     // Si está inactivo, reactivar directamente
     if (usuario.estaActivo === false) {
       try {
@@ -966,6 +973,7 @@ const Usuarios: React.FC = () => {
               setPedidosActivos([]);
               setUsuariosParaReasignar([]);
             }}
+            className="modal-inactivar"
           >
             <IonHeader>
               <IonToolbar color="danger">
@@ -986,7 +994,7 @@ const Usuarios: React.FC = () => {
             </IonHeader>
             <IonContent className="ion-padding">
               {/* SECCIÓN OBLIGATORIA: Motivo de Inactivación */}
-              <IonCard>
+              <IonCard className="motivo-inactivacion-card">
                 <IonCardHeader>
                   <IonCardTitle color="danger">
                     📋 Motivo de Inactivación (Obligatorio)
