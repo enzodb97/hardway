@@ -257,13 +257,18 @@ export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
     (str || "")
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[^a-z0-9]/g, ""); // Solo elimina tildes y caracteres especiales, no números ni letras
+      .replace(/[\u0300-\u036f]/g, "") // Eliminar diacríticos (acentos)
+      .replace(/[^a-z0-9\s]/g, "") // Mantener letras, números y espacios
+      .replace(/\s+/g, " ") // Normalizar espacios múltiples a uno solo
+      .trim();
 
   const filtroNorm = normalizar(filtro);
 
   return pedidos.filter((p) => {
     const nombre = p.Cliente?.Persona?.nombre || "";
     const apellido = p.Cliente?.Persona?.apellido || "";
+    const nombreCompleto = `${nombre} ${apellido}`.trim(); // Combinar nombre y apellido
+    
     let dni = "";
     if (p.Cliente?.Persona && (p.Cliente.Persona as any).dni !== undefined) {
       dni = String((p.Cliente.Persona as any).dni ?? "");
@@ -271,8 +276,10 @@ export function filtrarPedidos(pedidos: Pedido[], filtro: string): Pedido[] {
     const fecha = p.fechaPedido
       ? formatFechaSola(p.fechaPedido)
       : "";
+    
     return (
       (p.numeroPedido && normalizar(p.numeroPedido).includes(filtroNorm)) ||
+      (nombreCompleto && normalizar(nombreCompleto).includes(filtroNorm)) ||
       (nombre && normalizar(nombre).includes(filtroNorm)) ||
       (apellido && normalizar(apellido).includes(filtroNorm)) ||
       (dni && normalizar(dni).includes(filtroNorm)) ||

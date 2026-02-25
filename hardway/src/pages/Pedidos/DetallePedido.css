@@ -13,20 +13,25 @@
 
 /* Estilos para la barra de progreso */
 .barra-progreso-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 20px 0;
-  padding: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 32px auto;
+  padding: 48px 32px;
   overflow-x: auto;
+  max-width: 1200px;
+  border: 1px solid rgba(253, 180, 11, 0.1);
 }
 
 .barra-progreso {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0;
   min-width: 600px;
   position: relative;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .paso-progreso {
@@ -34,6 +39,7 @@
   align-items: center;
   flex: 1;
   position: relative;
+  min-width: 0;
 }
 
 .paso-contenido {
@@ -42,26 +48,31 @@
   align-items: center;
   z-index: 2;
   position: relative;
+  width: 100%;
+  padding: 0 8px;
 }
 
 .circulo-estado {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #e5e7eb;
-  border: 3px solid #d1d5db;
-  transition: all 0.3s ease;
-  margin-bottom: 8px;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border: 4px solid #d1d5db;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 
 .circulo-estado.activo {
-  background-color: #fdb40b;
+  background: linear-gradient(135deg, #fdb40b 0%, #f59e0b 100%);
   border-color: #fdb40b;
   color: white;
-  box-shadow: 0 4px 12px rgba(253, 180, 11, 0.3);
+  box-shadow: 0 8px 20px rgba(253, 180, 11, 0.4), 0 4px 8px rgba(253, 180, 11, 0.2);
+  transform: scale(1.05);
 }
 
 .circulo-estado.actual {
@@ -69,24 +80,47 @@
   box-shadow: 0 0 0 0 rgba(253, 180, 11, 0.7);
 }
 
+.circulo-estado.actual::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #fdb40b;
+  animation: ripple 2s infinite;
+}
+
 @keyframes pulse-dorado {
   0% {
-    box-shadow: 0 0 0 0 rgba(253, 180, 11, 0.7);
+    box-shadow: 0 0 0 0 rgba(253, 180, 11, 0.7), 0 8px 20px rgba(253, 180, 11, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(253, 180, 11, 0);
+    box-shadow: 0 0 0 15px rgba(253, 180, 11, 0), 0 8px 20px rgba(253, 180, 11, 0.4);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(253, 180, 11, 0);
+    box-shadow: 0 0 0 0 rgba(253, 180, 11, 0), 0 8px 20px rgba(253, 180, 11, 0.4);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
   }
 }
 
 .icono-estado {
-  font-size: 20px;
+  font-size: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .circulo-estado.activo .icono-estado {
   color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .info-estado {
@@ -94,44 +128,51 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 120px;
+  max-width: 140px;
+  min-height: 48px;
 }
 
 .nombre-estado {
-  font-weight: 600;
-  font-size: 14px;
-  color: #374151;
-  margin-bottom: 4px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #1f2937;
+  margin-bottom: 6px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .descripcion-estado {
-  font-size: 12px;
+  font-size: 13px;
   color: #6b7280;
-  line-height: 1.3;
+  line-height: 1.4;
+  font-weight: 500;
 }
 
 .paso-contenido.completado .nombre-estado {
-  color: #fdb40b;
-  font-weight: 700;
+  color: #ea580c;
+  font-weight: 800;
 }
 
 .paso-contenido.completado .descripcion-estado {
   color: #92400e;
+  font-weight: 600;
 }
 
 .linea-conexion {
   position: absolute;
-  top: 25px;
+  top: 35px;
   left: 50%;
   right: -50%;
-  height: 3px;
-  background-color: #e5e7eb;
+  height: 4px;
+  background: linear-gradient(90deg, #e5e7eb 0%, #d1d5db 100%);
   z-index: 1;
-  transition: all 0.3s ease;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
 }
 
 .linea-conexion.completada {
-  background-color: #fdb40b;
+  background: linear-gradient(90deg, #fdb40b 0%, #f59e0b 100%);
+  box-shadow: 0 2px 8px rgba(253, 180, 11, 0.3);
 }
 
 /* Estilos para estado cancelado */
@@ -139,95 +180,115 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
 .estado-cancelado {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  padding: 24px 40px;
+  border-radius: 16px;
+  border: 2px solid #dc2626;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.15);
 }
 
 .circulo-cancelado {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  background-color: #dc2626;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4), 0 4px 8px rgba(220, 38, 38, 0.2);
+  border: 4px solid #fee2e2;
 }
 
 .icono-cancelado {
-  font-size: 24px;
+  font-size: 32px;
   color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .info-estado-cancelado {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .nombre-estado-cancelado {
-  font-size: 18px;
-  font-weight: 700;
-  color: #dc2626;
-  margin-bottom: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #991b1b;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 
 .descripcion-estado-cancelado {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 15px;
+  color: #7f1d1d;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 /* Responsividad para la barra de progreso */
 @media (max-width: 768px) {
   .barra-progreso-container {
-    padding: 16px;
-    margin: 16px 0;
+    padding: 32px 16px;
+    margin: 20px 8px;
   }
   
   .barra-progreso {
-    min-width: 480px;
-    gap: 8px;
+    min-width: 500px;
+    padding: 0 12px;
   }
   
   .circulo-estado {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
   }
   
   .icono-estado {
-    font-size: 16px;
+    font-size: 22px;
   }
   
   .nombre-estado {
-    font-size: 12px;
+    font-size: 13px;
   }
   
   .descripcion-estado {
-    font-size: 10px;
+    font-size: 11px;
   }
   
   .info-estado {
-    max-width: 90px;
+    max-width: 110px;
+    min-height: 42px;
+  }
+  
+  .estado-cancelado {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    text-align: center;
   }
   
   .circulo-cancelado {
-    width: 50px;
-    height: 50px;
+    width: 64px;
+    height: 64px;
   }
   
   .icono-cancelado {
-    font-size: 20px;
+    font-size: 26px;
   }
   
   .nombre-estado-cancelado {
-    font-size: 16px;
+    font-size: 18px;
   }
   
   .descripcion-estado-cancelado {
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 

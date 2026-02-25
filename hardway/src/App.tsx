@@ -1,3 +1,4 @@
+import React from "react";
 import {
   IonApp,
   IonRouterOutlet,
@@ -40,24 +41,71 @@ setupIonicReact();
 
 const AppRouter = () => {
   const { isAuthenticated, showWelcome, setShowWelcome, username, loading } = useAuth();
+  const [forceRender, setForceRender] = React.useState(false);
 
   console.log("🎯 AppRouter render:", { loading, isAuthenticated, username });
 
+  // Observar cambios de loading
+  React.useEffect(() => {
+    console.log("👀 OBSERVADOR: loading cambió a:", loading);
+  }, [loading]);
+
+  // 🛡️ FAILSAFE SECUNDARIO: Si loading se queda en true por más de 3 segundos, forzar renderizado
+  React.useEffect(() => {
+    console.log(`⚙️ useEffect loading cambió a: ${loading}`);
+    if (loading) {
+      console.log("⏳ Loading iniciado, iniciando FAILSAFE secundario...");
+      const secondaryFailsafe = setTimeout(() => {
+        console.error("🚨 FAILSAFE SECUNDARIO ACTIVADO: Loading bloqueado por más de 3 segundos, forzando renderizado");
+        setForceRender(true);
+      }, 3000);
+      
+      return () => clearTimeout(secondaryFailsafe);
+    } else {
+      console.log("✅ Loading terminado, desmontando IonLoading...");
+      // Forzar cierre de cualquier IonLoading que pueda estar abierto
+      const loadingElement = document.querySelector('ion-loading');
+      if (loadingElement) {
+        console.log("🧹 Limpiando IonLoading manualmente del DOM");
+        loadingElement.dismiss().catch(() => {
+          console.warn("⚠️ No se pudo cerrar IonLoading con dismiss, removiendo del DOM");
+          loadingElement.remove();
+        });
+      }
+      setForceRender(false);
+    }
+  }, [loading]);
+
   return (
     <>
-      {/* Loading overlay - se muestra/oculta según el estado */}
-      <IonLoading 
-        isOpen={loading} 
-        message="Cargando..."
-        onDidDismiss={() => console.log("🔓 IonLoading cerrado")}
-      />
+      {console.log(`🔍 Renderizando AppRouter - loading: ${loading}, forceRender: ${forceRender}, shouldShowLoading: ${loading}, shouldRenderApp: ${!loading || forceRender}`)}
       
-      {/* Renderizar app solo cuando loading es false */}
-      {!loading && (
+      {/* Loading overlay - solo renderizar cuando loading=true para asegurar desmontaje */}
+      {loading && (
+        <>
+          {console.log("🔄 Montando IonLoading...")}
+          <IonLoading 
+            key="auth-loading"
+            isOpen={true} 
+            message="Cargando..."
+            duration={2000}
+            onDidDismiss={() => {
+              console.log("🔓 IonLoading onDidDismiss ejecutado");
+            }}
+            onWillDismiss={() => {
+              console.log("🔓 IonLoading onWillDismiss ejecutado");
+            }}
+          />
+        </>
+      )}
+      
+      {/* Renderizar app solo cuando loading es false O cuando el failsafe secundario se activa */}
+      {(!loading || forceRender) && (
         <>
           {console.log("✅ Loading finalizado, renderizando aplicación")}
     <IonReactRouter>
       {isAuthenticated ? (
+        <ClientesProvider>
         <IonSplitPane contentId="main" when="md">
           <Menu />
           <IonRouterOutlet id="main">
@@ -191,6 +239,7 @@ const AppRouter = () => {
             />
           </IonRouterOutlet>
         </IonSplitPane>
+        </ClientesProvider>
       ) : (
         <IonRouterOutlet>
           <Route exact path="/login" component={Login} />
@@ -215,9 +264,7 @@ const App: React.FC = () => {
   return (
     <IonApp>
       <AuthProvider>
-        <ClientesProvider>
-          <AppRouter />
-        </ClientesProvider>
+        <AppRouter />
       </AuthProvider>
     </IonApp>
   );

@@ -15,9 +15,11 @@ import {
   IonCol,
   IonSpinner,
   IonIcon,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
+import { countClientesVip } from "../../utils/clientesVipUtils";
 import { people, cube, trendingUp, close, send } from "ionicons/icons";
 import "./ReportesDashboard.css";
 
@@ -26,19 +28,22 @@ const Reportes: React.FC = () => {
   const [clientes, setClientes] = useState<any[]>([]);
   const [productos, setProductos] = useState<any[]>([]);
   const [stock, setStock] = useState<any[]>([]);
+  const [clientesVipCount, setClientesVipCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     setLoading(true);
     Promise.all([
       axiosInstance.get("/api/reportes/clientes-mas-pedidos"),
       axiosInstance.get("/api/reportes/productos-mas-pedidos"),
       axiosInstance.get("/api/reportes/stock-actual"),
+      countClientesVip(),
     ])
-      .then(([clientesRes, productosRes, stockRes]) => {
+      .then(([clientesRes, productosRes, stockRes, vipCount]) => {
         setClientes(clientesRes.data || []);
         setProductos(productosRes.data || []);
         setStock(stockRes.data || []);
+        setClientesVipCount(vipCount || 0);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -51,7 +56,6 @@ const Reportes: React.FC = () => {
   const bajoStock = stock.filter((s: any) => s.stock_actual <= 30);
   
   // Calcular estadísticas generales
-  const totalClientes = clientes.length;
   const totalProductos = productos.length;
   const totalStock = stock.length;
 
@@ -81,7 +85,7 @@ const Reportes: React.FC = () => {
               <div className="reportes-stat-card">
                 <div className="reportes-stat-icon">👥</div>
                 <div className="reportes-stat-content">
-                  <div className="reportes-stat-number">{totalClientes}</div>
+                  <div className="reportes-stat-number">{clientesVipCount}</div>
                   <div className="reportes-stat-label">Clientes VIP</div>
                 </div>
               </div>

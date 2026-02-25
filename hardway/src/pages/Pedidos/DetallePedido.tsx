@@ -457,6 +457,22 @@ const DetallePedido: React.FC = () => {
     if (progresoActual === -1) {
       return (
         <div className="barra-progreso-container">
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '24px',
+            paddingBottom: '16px',
+            borderBottom: '2px solid rgba(220, 38, 38, 0.1)'
+          }}>
+            <h3 style={{ 
+              margin: 0, 
+              fontSize: '18px', 
+              fontWeight: '700',
+              color: '#991b1b',
+              letterSpacing: '-0.01em'
+            }}>
+              Estado del Pedido
+            </h3>
+          </div>
           <div className="progreso-cancelado">
             <div className="estado-cancelado">
               <div className="circulo-cancelado">
@@ -478,6 +494,30 @@ const DetallePedido: React.FC = () => {
 
     return (
       <div className="barra-progreso-container">
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '32px',
+          paddingBottom: '20px',
+          borderBottom: '2px solid rgba(253, 180, 11, 0.15)'
+        }}>
+          <h3 style={{ 
+            margin: '0 0 8px 0', 
+            fontSize: '20px', 
+            fontWeight: '800',
+            color: '#1f2937',
+            letterSpacing: '-0.02em'
+          }}>
+            Estado del Pedido
+          </h3>
+          <p style={{
+            margin: 0,
+            fontSize: '14px',
+            color: '#6b7280',
+            fontWeight: '500'
+          }}>
+            Seguimiento en tiempo real del proceso
+          </p>
+        </div>
         <div className="barra-progreso">
           {estadosPedido.map((estado, index) => (
             <div key={estado.id} className="paso-progreso">

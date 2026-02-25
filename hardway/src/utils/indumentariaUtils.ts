@@ -377,6 +377,7 @@ export async function obtenerIndumentariaPaginada(
         normalizar(item.nombre).includes(normalizar(busqueda)) ||
         normalizar(item.talle).includes(normalizar(busqueda)) ||
         normalizar(item.color).includes(normalizar(busqueda)) ||
+        normalizar(item.nombreTela).includes(normalizar(busqueda)) ||
         normalizar(item.categoria).includes(normalizar(busqueda)) ||
         normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
         (item.idIndumentaria &&
@@ -467,6 +468,7 @@ export async function obtenerIndumentariasNoAptas(
         normalizar(item.nombre).includes(normalizar(busqueda)) ||
         normalizar(item.talle).includes(normalizar(busqueda)) ||
         normalizar(item.color).includes(normalizar(busqueda)) ||
+        normalizar(item.nombreTela).includes(normalizar(busqueda)) ||
         normalizar(item.categoria).includes(normalizar(busqueda)) ||
         normalizar(item.codigoIndumentaria).includes(normalizar(busqueda)) ||
         (item.idIndumentaria &&

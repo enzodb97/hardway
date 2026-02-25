@@ -75,18 +75,11 @@ const validarTelefono = (valor) => {
 // Obtener todos los clientes
 router.get("/", async (req, res) => {
   try {
-    // Obtén todos los idPersona que están en la tabla usuario
-    const usuarios = await sequelize.query(
-      "SELECT idPersona FROM usuario WHERE idPersona IS NOT NULL"
-    );
-    const idsPersonasUsuarios = usuarios[0].map((u) => u.idPersona);
-
-    // Busca solo los clientes cuyo idPersona NO está en la tabla usuario
+    // ✅ MODIFICADO: Obtener TODOS los clientes sin excluir usuarios
+    // Anteriormente se excluían personas que también eran usuarios, 
+    // pero un empleado puede ser cliente legítimamente
     const clientes = await Cliente.findAll({
-      attributes: ['idCliente', 'idPersona', 'email', 'telefono', 'estaActivo'], // Especificar explícitamente los atributos
-      where: idsPersonasUsuarios.length
-        ? { idPersona: { [Sequelize.Op.notIn]: idsPersonasUsuarios } }
-        : {},
+      attributes: ['idCliente', 'idPersona', 'email', 'telefono', 'estaActivo'],
       include: {
         model: Persona,
         attributes: ["dni", "tipoDocumento", "nombre", "apellido", "direccion"],
@@ -120,8 +113,8 @@ router.get("/", async (req, res) => {
         email: c.email || "",
         telefono: c.telefono || "",
         tipoDocumento: c.Persona?.tipoDocumento || "DNI",
-        numeroDocumento: String(c.Persona?.dni || ""), // Convertir a string
-        nombre: (c.Persona?.nombre || "").trim(), // Eliminar espacios extra
+        numeroDocumento: String(c.Persona?.dni || ""),
+        nombre: (c.Persona?.nombre || "").trim(),
         apellido: (c.Persona?.apellido || "").trim(),
         domicilio: c.Persona?.direccion || "",
         calle: c.Persona?.Domicilio?.calle || "",
@@ -130,13 +123,12 @@ router.get("/", async (req, res) => {
         numeroDepartamento: c.Persona?.Domicilio?.departamento || "",
         observaciones: c.Persona?.Domicilio?.observaciones || "",
         barrio: c.Persona?.Domicilio?.Barrio?.nombreBarrio || "",
-        localidad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // Cambiado de ciudad a localidad
-        ciudad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "", // Mantener ambos para compatibilidad
-        cp: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Cambiado de codigoPostal a cp
-        codigoPostal: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "", // Mantener ambos para compatibilidad
-        estaActivo: c.estaActivo, // Mapear el estado activo sin valor por defecto
+        localidad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "",
+        ciudad: c.Persona?.Domicilio?.Ciudad?.nombreCiudad || "",
+        cp: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "",
+        codigoPostal: c.Persona?.Domicilio?.Ciudad?.codigoPostal || "",
+        estaActivo: c.estaActivo,
       };
-      
       
       return clienteFormateado;
     });

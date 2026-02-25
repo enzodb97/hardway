@@ -3,6 +3,13 @@
   --ion-default-font: "Roboto", "Helvetica Neue", sans-serif !important;
 }
 
+.despacho-toolbar {
+    --background: rgba(0, 0, 0, 0.8);
+    --color: #ffffff;
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(253, 180, 11, 0.3);
+}
+
 .envios-page {
   --ion-background-color: transparent;
 }

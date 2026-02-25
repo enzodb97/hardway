@@ -9,6 +9,7 @@ export interface PedidoEnvio {
   cliente_email: string;
   nombre: string;
   apellido: string;
+  documento?: string;
   direccion_envio: string;
   total_items: number;
   codigoSeguimiento?: string;

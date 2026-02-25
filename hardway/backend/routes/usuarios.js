@@ -3,6 +3,7 @@ const router = express.Router();
 const { Usuario, TipoRol, sequelize, EncargadoPicker, Persona, MotivoInactivacionUsuario } = require('../models'); // ✅ Agregado MotivoInactivacionUsuario
 const { Domicilio } = require('../models/Ubicacion'); // ✅ Importar Domicilio
 const { verificarAccesoPedidos } = require('../middleware/auth'); // ✅ Importar middleware de autenticación
+const { Op } = require('sequelize'); // ✅ Importar operadores de Sequelize
 
 // ✅ NUEVO: Función para obtener o crear domicilio genérico
 async function obtenerDomicilioGenerico() {

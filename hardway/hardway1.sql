@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-02-2026 a las 02:09:26
+-- Tiempo de generación: 25-02-2026 a las 07:46:28
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -3721,7 +3721,7 @@ INSERT INTO `pedido` (`numeroPedido`, `idCliente`, `idUsuarioCreo`, `idUsuarioMo
 
 CREATE TABLE `persona` (
   `idPersona` int(11) NOT NULL,
-  `dni` int(11) DEFAULT NULL,
+  `dni` bigint(20) DEFAULT NULL,
   `tipoDocumento` enum('DNI','CUIL','CUIT') DEFAULT 'DNI',
   `nombre` varchar(100) DEFAULT NULL,
   `apellido` varchar(100) DEFAULT NULL,
@@ -3764,25 +3764,25 @@ INSERT INTO `persona` (`idPersona`, `dni`, `tipoDocumento`, `nombre`, `apellido`
 (51, 89100118, 'DNI', 'Matias', 'Romero', NULL, 52),
 (52, 89100119, 'DNI', 'Paula', 'Suarez', NULL, 53),
 (53, 89100120, 'DNI', 'Martin', 'Gomez', NULL, 54),
-(54, 2147483647, 'CUIL', 'María', 'García', 'Av. Corrientes 800', 55),
-(55, 2147483647, 'CUIL', 'Luis', 'Rodríguez', 'Rivadavia 3560', 56),
-(56, 2147483647, 'CUIL', 'Sofía', 'Fernández', 'San Martín 50', 57),
-(57, 2147483647, 'CUIL', 'Carlos', 'López', 'Chile 100', 58),
-(58, 2147483647, 'CUIL', 'Ana', 'Martínez', 'Córdoba 2000', 59),
-(59, 2147483647, 'CUIL', 'Pablo', 'Gómez', 'Santa Fe 555', 60),
-(60, 2147483647, 'CUIL', 'Laura', 'Díaz', 'Libertador 400', 61),
-(61, 2147483647, 'CUIL', 'Martín', 'Acosta', 'Tucumán 999', 62),
-(62, 2147483647, 'CUIL', 'Florencia', 'Blanco', 'Paraná 12', 63),
-(63, 2147483647, 'CUIT', 'Distribuidora Sol del Sur S.A.', '', 'Lima 500', 64),
-(64, 2147483647, 'CUIT', 'Logística Rápida SRL', '', 'Santa Cruz 1200', 65),
-(65, 2147483647, 'CUIT', 'Textiles del Litoral', '', 'Constitución 88', 66),
-(66, 2147483647, 'CUIT', 'Maderas del Norte SAS', '', 'Alem 300', 67),
-(67, 2147483647, 'CUIT', 'Tecno Global SRL', '', 'Defensa 950', 68),
-(68, 2147483647, 'CUIT', 'Alimentos Pura Vida', '', 'Juncal 700', 69),
-(69, 2147483647, 'CUIT', 'Constructora Cima', '', 'Perú 15', 70),
-(70, 2147483647, 'CUIT', 'Editorial Páginas SA', '', 'Independencia 800', 71),
-(71, 2147483647, 'CUIT', 'Servicios Web Pro', '', 'Belgrano 1100', 72),
-(72, 2147483647, 'CUIT', 'Herramientas Metálicas SRL', '', 'Salta 15', 73);
+(54, 27859286802, 'CUIL', 'María', 'García', 'Av. Corrientes 800', 55),
+(55, 27109818942, 'CUIL', 'Luis', 'Rodríguez', 'Rivadavia 3560', 56),
+(56, 27352978962, 'CUIL', 'Sofía', 'Fernández', 'San Martín 50', 57),
+(57, 27718230062, 'CUIL', 'Carlos', 'López', 'Chile 100', 58),
+(58, 27469560882, 'CUIL', 'Ana', 'Martínez', 'Córdoba 2000', 59),
+(59, 27457586482, 'CUIL', 'Pablo', 'Gómez', 'Santa Fe 555', 60),
+(60, 27468095612, 'CUIL', 'Laura', 'Díaz', 'Libertador 400', 61),
+(61, 27775538632, 'CUIL', 'Martín', 'Acosta', 'Tucumán 999', 62),
+(62, 27522373852, 'CUIL', 'Florencia', 'Blanco', 'Paraná 12', 63),
+(63, 30778262375, 'CUIT', 'Distribuidora Sol del Sur S.A.', '', 'Lima 500', 64),
+(64, 33379489830, 'CUIT', 'Logística Rápida SRL', '', 'Santa Cruz 1200', 65),
+(65, 33346104231, 'CUIT', 'Textiles del Litoral', '', 'Constitución 88', 66),
+(66, 33442114865, 'CUIT', 'Maderas del Norte SAS', '', 'Alem 300', 67),
+(67, 30024376491, 'CUIT', 'Tecno Global SRL', '', 'Defensa 950', 68),
+(68, 33013020189, 'CUIT', 'Alimentos Pura Vida', '', 'Juncal 700', 69),
+(69, 33383450523, 'CUIT', 'Constructora Cima', '', 'Perú 15', 70),
+(70, 30324498822, 'CUIT', 'Editorial Páginas SA', '', 'Independencia 800', 71),
+(71, 30606743542, 'CUIT', 'Servicios Web Pro', '', 'Belgrano 1100', 72),
+(72, 30778017000, 'CUIT', 'Herramientas Metálicas SRL', '', 'Salta 15', 73);
 
 -- --------------------------------------------------------
 
@@ -3829,7 +3829,7 @@ CREATE TABLE `presentacion_producto` (
 
 INSERT INTO `presentacion_producto` (`idPresentacion`, `nombrePresentacion`, `descripcion`) VALUES
 (1, 'Unidad', 'Venta individual'),
-(2, 'Caja', 'Bulto sin abrir'),
+(2, 'Caja Cerrada', 'Bulto sin abrir'),
 (3, 'Pack', 'Conjunto de unidades');
 
 -- --------------------------------------------------------
@@ -4048,7 +4048,9 @@ CREATE TABLE `unidad_medida` (
 
 INSERT INTO `unidad_medida` (`idUnidadMedida`, `nombreUnidad`, `abreviatura`) VALUES
 (1, 'Unidad', 'un.'),
-(2, 'Par', 'par');
+(2, 'Par', 'par'),
+(3, 'Set', 'set'),
+(4, 'Pack', 'pack');
 
 -- --------------------------------------------------------
 

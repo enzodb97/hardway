@@ -91,6 +91,7 @@ const Picking: React.FC = () => {
   const [notificacionesResolucion, setNotificacionesResolucion] = useState<any[]>([]);
   const [idUsuarioActual, setIdUsuarioActual] = useState<number | null>(null);
   const [showNotificacionesModal, setShowNotificacionesModal] = useState(false);
+  const [mostrarLeidas, setMostrarLeidas] = useState(true);
   
   // Estados de paginación
   const [page, setPage] = useState(1);
@@ -1292,52 +1293,180 @@ const Picking: React.FC = () => {
           className="notificaciones-modal"
         >
           <IonHeader>
-            <IonToolbar>
-              <IonTitle>Notificaciones de Resolución</IonTitle>
-              <IonButton slot="end" fill="clear" onClick={() => setShowNotificacionesModal(false)}>
-                <IonIcon icon={closeOutline} />
+            <IonToolbar style={{ 
+              '--background': 'linear-gradient(135deg, rgba(253, 180, 11, 0.95), rgba(243, 156, 18, 0.95))',
+              '--color': '#ffffff',
+              padding: '4px 8px'
+            }}>
+              <IonTitle style={{ 
+                fontWeight: '700',
+                fontSize: '20px',
+                letterSpacing: '-0.02em',
+                color: '#000000',
+              }}>
+                Notificaciones de Resolución
+              </IonTitle>
+              <IonButton 
+                slot="end" 
+                fill="solid"
+                color={mostrarLeidas ? "light" : "success"}
+                onClick={() => setMostrarLeidas(!mostrarLeidas)}
+                style={{ 
+                  marginRight: '8px',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  letterSpacing: '0.3px',
+                  textTransform: 'uppercase',
+                  '--border-radius': '8px',
+                  '--padding-start': '12px',
+                  '--padding-end': '12px',
+                  '--box-shadow': mostrarLeidas 
+                    ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
+                    : '0 4px 12px rgba(40, 167, 69, 0.3)',
+                  transition: 'all 0.3s ease',
+                  position: 'relative'
+                }}
+              >
+                <IonIcon 
+                  icon={mostrarLeidas ? closeOutline : checkmarkCircleOutline} 
+                  slot="start"
+                  style={{ fontSize: '18px' }}
+                />
+                <span>{mostrarLeidas ? 'Ocultar leídas' : 'Mostrar leídas'}</span>
+                {!mostrarLeidas && notificacionesResolucion.filter(n => n.leida !== 1).length > 0 && (
+                  <IonBadge 
+                    color="danger"
+                    style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      fontSize: '11px',
+                      fontWeight: '800',
+                      minWidth: '20px',
+                      height: '20px',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(220, 38, 38, 0.5)',
+                      animation: 'pulse 2s infinite'
+                    }}
+                  >
+                    {notificacionesResolucion.filter(n => n.leida !== 1).length}
+                  </IonBadge>
+                )}
               </IonButton>
+              {/*<IonButton 
+                slot="end" 
+                fill="clear" 
+                onClick={() => setShowNotificacionesModal(false)}
+                style={{
+                  '--color': '#ffffff',
+                  '--color-hover': '#fdb40b',
+                  fontSize: '24px'
+                }}
+              >
+                <IonIcon icon={closeOutline} />
+              </IonButton>*/}
             </IonToolbar>
           </IonHeader>
           
           <IonContent>
-            {notificacionesResolucion.length === 0 ? (
-              <div className="notificaciones-empty">
-                <IonIcon icon={notificationsOutline} />
-                <h3>No hay notificaciones</h3>
-                <p>Todas las notificaciones de resolución aparecerán aquí</p>
-              </div>
-            ) : (
-              <IonList>
-                {notificacionesResolucion.map((notif) => (
+            {(() => {
+              // Filtrar notificaciones según el estado de mostrarLeidas
+              const notificacionesFiltradas = mostrarLeidas 
+                ? notificacionesResolucion 
+                : notificacionesResolucion.filter(n => n.leida !== 1);
+              
+              if (notificacionesFiltradas.length === 0) {
+                return (
+                  <div className="notificaciones-empty">
+                    <IonIcon icon={notificationsOutline} />
+                    <h3>No hay notificaciones</h3>
+                    <p>
+                      {mostrarLeidas 
+                        ? 'Todas las notificaciones de resolución aparecerán aquí' 
+                        : 'No hay notificaciones sin leer'}
+                    </p>
+                  </div>
+                );
+              }
+              
+              return (
+                <IonList>
+                  {notificacionesFiltradas.map((notif) => (
                   <IonCard 
                     key={notif.idNotificacion} 
                     className={`notificacion-card ${notif.leida === 1 ? 'notificacion-leida' : ''}`}
                   >
                     <IonCardHeader>
-                      <div>
-                        {/* Mostrar destinatario si es administrador viendo notificaciones de otros */}
-                        {notif.idUsuarioDestino && idUsuarioActual && notif.idUsuarioDestino !== idUsuarioActual && (
-                          <IonBadge color="warning" className="notificacion-destinatario">
-                            👤 Para: {notif.pickerAsignado || `Usuario #${notif.idUsuarioDestino}`}
+                      <div style={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        gap: '12px' 
+                      }}>
+                        {/* Fila superior: Badges de estado */}
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '8px',
+                          flexWrap: 'wrap'
+                        }}>
+                          {/* Badge para indicar si es nueva o leída */}
+                          {notif.leida === 1 ? (
+                            <IonBadge color="medium" style={{ 
+                              fontSize: '12px',
+                              padding: '4px 10px',
+                              fontWeight: '600'
+                            }}>
+                              ✓ Leída
+                            </IonBadge>
+                          ) : (
+                            <IonBadge color="danger" style={{ 
+                              fontSize: '12px',
+                              padding: '4px 10px',
+                              fontWeight: '600',
+                              animation: 'pulse 2s infinite'
+                            }}>
+                              🔔 Nueva
+                            </IonBadge>
+                          )}
+                          
+                          <IonBadge color="success" style={{ 
+                            fontSize: '12px',
+                            padding: '4px 10px',
+                            fontWeight: '600'
+                          }}>
+                            Resolución
                           </IonBadge>
-                        )}
-                        {/* Badge para indicar si es nueva o leída */}
-                        {notif.leida === 1 ? (
-                          <IonBadge color="medium" style={{ marginBottom: '8px', marginRight: '8px' }}>
-                            ✓ Leída
-                          </IonBadge>
-                        ) : (
-                          <IonBadge color="danger" style={{ marginBottom: '8px', marginRight: '20px' }}>
-                            🔔 Nueva
-                          </IonBadge>
-                        )}
-                        <IonCardTitle>
-                          Pedido: {notif.numeroPedido}
-                        </IonCardTitle>
-                        <IonBadge color="success" className="notificacion-tipo">
-                          Resolución
-                        </IonBadge>
+                          
+                          {/* Mostrar destinatario si es administrador viendo notificaciones de otros */}
+                          {notif.idUsuarioDestino && idUsuarioActual && notif.idUsuarioDestino !== idUsuarioActual && (
+                            <IonBadge color="warning" style={{ 
+                              fontSize: '12px',
+                              padding: '4px 10px',
+                              fontWeight: '600'
+                            }}>
+                              👤 Para: {notif.pickerAsignado || `Usuario #${notif.idUsuarioDestino}`}
+                            </IonBadge>
+                          )}
+                        </div>
+                        
+                        {/* Fila inferior: Título del pedido */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <IonCardTitle style={{ 
+                            margin: 0,
+                            fontSize: '18px',
+                            fontWeight: '700',
+                            color: '#1f2937'
+                          }}>
+                            Pedido: {notif.numeroPedido}
+                          </IonCardTitle>
+                        </div>
                       </div>
                     </IonCardHeader>
                     
@@ -1376,9 +1505,10 @@ const Picking: React.FC = () => {
                       </div>
                     </IonCardContent>
                   </IonCard>
-                ))}
-              </IonList>
-            )}
+                  ))}
+                </IonList>
+              );
+            })()}
           </IonContent>
           
           <IonFooter>

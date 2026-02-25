@@ -45,6 +45,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  console.log("🏗️ AuthProvider montándose...");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rol, setRol] = useState<string | null>(null); // @deprecated - mantener por compatibilidad
@@ -54,6 +55,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [legajoPicker, setLegajoPicker] = useState<string | null>(null);
   const [loading, setLoading] = useState(true); // ✅ Estado de carga
+  
+  console.log("🔧 AuthProvider estado inicial - loading:", loading);
 
   // ✅ NUEVA función: Verificar si el usuario tiene un rol específico
   const hasRole = (roleName: string): boolean => {
@@ -139,15 +142,16 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   // Configurar interceptor de axios una sola vez al inicio
   useEffect(() => {
+    console.log("🚀 AuthContext: useEffect iniciado");
     let isMounted = true; // Para evitar actualizaciones después del desmontaje
     
-    // ⚠️ FAILSAFE: Forzar desactivación del loading después de 3 segundos máximo
+    // ⚠️ FAILSAFE: Forzar desactivación del loading después de 2 segundos máximo
     const failsafeTimeout = setTimeout(() => {
-      console.warn("⚠️ FAILSAFE: Forzando loading = false después de 3 segundos");
+      console.error("⚠️ FAILSAFE ACTIVADO: Forzando loading = false después de 2 segundos");
       if (isMounted) {
         setLoading(false);
       }
-    }, 3000);
+    }, 2000);
     
     const validateAuth = async () => {
       console.log("🔍 AuthContext: Iniciando validación de autenticación...");
@@ -159,7 +163,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         const storedRolesIds = localStorage.getItem("rolesIds"); // ✅ NUEVO
         const storedLegajoPicker = localStorage.getItem("legajoPicker");
         
-        console.log("📦 LocalStorage:", { authStatus, storedUsername, storedRol, storedRoles });
+        console.log("📦 LocalStorage:", { authStatus, storedUsername, storedRol, storedRoles, tieneRoles: !!storedRoles });
         
         // Normaliza el valor del rol para pickers al recargar (mantener por compatibilidad)
         if (storedRol && storedRol.toLowerCase().includes("picker")) {
@@ -173,7 +177,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
           try {
             const res = await axiosInstance.get("/api/usuarios/validate", {
               params: { username: storedUsername },
-              timeout: 5000 // Timeout de 5 segundos
+              timeout: 3000 // Timeout de 3 segundos (menor que FAILSAFE)
             });
             
             console.log("📡 Respuesta del backend:", res.data);
@@ -228,7 +232,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             setLegajoPicker(null);
           }
         } else {
-          console.log("ℹ️ No hay sesión guardada, iniciando limpio");
+          console.log("ℹ️ No hay sesión guardada o datos incompletos");
           // No hay sesión guardada, limpiar todo
           if (!isMounted) return;
           setIsAuthenticated(false);
@@ -251,10 +255,14 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setLegajoPicker(null);
       } finally {
         // ✅ SIEMPRE finalizar carga, sin importar qué pase
-        console.log("🏁 AuthContext: Finalizando validación, loading = false");
+        console.log("🏁 FINALLY ejecutado - AuthContext: Finalizando validación, loading = false");
         clearTimeout(failsafeTimeout); // Cancelar el failsafe
         if (isMounted) {
+          console.log("🔄 Llamando setLoading(false)...");
           setLoading(false);
+          console.log("✅ setLoading(false) ejecutado");
+        } else {
+          console.warn("⚠️ Componente desmontado, no se actualiza loading");
         }
       }
     };
@@ -343,6 +351,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     
     console.log("✅ Sesión cerrada y datos eliminados completamente");
   };
+
+  console.log("🎁 AuthProvider renderizando con estado:", { loading, isAuthenticated, username });
 
   return (
     <AuthContext.Provider

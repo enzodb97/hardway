@@ -1620,23 +1620,52 @@ ion-button[color="primary"] {
 }
 
 .notificaciones-modal ion-toolbar {
-  --background: linear-gradient(135deg, #fdb40b, #f39c12);
-  --color: #000000;
+  --background: linear-gradient(135deg, rgba(253, 180, 11, 0.95), rgba(243, 156, 18, 0.95));
+  --color: #ffffff;
   border-bottom: 2px solid rgba(243, 156, 18, 0.8);
   font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .notificaciones-modal ion-title {
   font-weight: 700;
-  font-size: 1.2rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 1.3rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
 }
 
 .notificaciones-modal ion-header ion-button {
-  --color: #000000;
-  --background-hover: rgba(0, 0, 0, 0.1);
-  --border-radius: 8px;
+  --color: #ffffff;
   font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notificaciones-modal ion-header ion-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.notificaciones-modal ion-header ion-button:active {
+  transform: translateY(0);
+}
+
+/* Estilos específicos para el botón de ocultar/mostrar */
+.notificaciones-modal ion-header ion-button[color="light"] {
+  --background: #ffffff;
+  --color: #1f2937;
+  --background-hover: #f3f4f6;
+}
+
+.notificaciones-modal ion-header ion-button[color="success"] {
+  --background: linear-gradient(135deg, #28a745, #20c997);
+  --color: #ffffff;
+  --background-hover: linear-gradient(135deg, #218838, #1fa67a);
+}
+
+.notificaciones-modal ion-header ion-button[fill="clear"] {
+  --color: #ffffff;
+  --background-hover: rgba(255, 255, 255, 0.1);
+  font-size: 1.5rem;
 }
 
 .notificaciones-modal ion-content {
@@ -1696,7 +1725,7 @@ ion-button[color="primary"] {
 }
 
 .notificacion-card ion-card-header {
-  padding: 16px;
+  padding: 20px;
   border-bottom: 2px solid rgba(253, 180, 11, 0.3);
   background: linear-gradient(135deg, rgba(253, 180, 11, 0.15), rgba(243, 156, 18, 0.1));
 }
@@ -1711,6 +1740,28 @@ ion-button[color="primary"] {
   font-weight: 700;
   margin-top: 8px;
   display: block;
+}
+
+/* Animación de pulso para notificaciones nuevas */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+/* Estilos mejorados para badges en el header */
+.notificacion-card ion-badge {
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .notificacion-card ion-card-content {

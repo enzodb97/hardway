@@ -65,6 +65,7 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         c.email AS cliente_email,
         pe.nombre,
         pe.apellido,
+        pe.dni AS documento,
         CONCAT(d.calle, ' ', d.altura, ', ', ci.nombreCiudad) AS direccion_envio,
         SUM(dp.cantidad) AS total_items,
         p.codigoSeguimiento,
@@ -90,7 +91,7 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
       LEFT JOIN persona p_picker ON ep.idPersona = p_picker.idPersona
       LEFT JOIN usuario u_picker ON u_picker.idPersona = p_picker.idPersona
       WHERE ${whereClause}
-      GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, p.fechaPedido, direccion_envio, 
+      GROUP BY p.numeroPedido, c.email, pe.nombre, pe.apellido, pe.dni, p.fechaPedido, direccion_envio, 
                p.codigoSeguimiento, p.idEmpresaEnvio, ee.nombre, p.idEstado, 
                u_picker.nombreUsuario, p_picker.nombre, p_picker.apellido
       ORDER BY p.fechaPedido DESC

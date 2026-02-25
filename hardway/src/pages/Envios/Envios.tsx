@@ -165,16 +165,37 @@ const Envios: React.FC = () => {
 
     console.log("🔍 Filtrando pedidos - Total:", pedidos.length, "| Filtro:", filtroEstado);
 
+    // Función para normalizar texto (eliminar acentos, mayúsculas y caracteres especiales)
+    const normalizar = (str: string) =>
+      (str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Eliminar diacríticos (acentos)
+        .replace(/[^a-z0-9\s]/g, "") // Mantener letras, números y espacios
+        .replace(/\s+/g, " ") // Normalizar espacios múltiples a uno solo
+        .trim();
+
     // Filtrar por término de búsqueda
     if (searchTerm.trim()) {
-      pedidosFiltrados = pedidosFiltrados.filter(
-        (pedido) =>
-          pedido.numeroPedido.toString().includes(searchTerm) ||
-          `${pedido.nombre} ${pedido.apellido}`
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          pedido.cliente_email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const terminoNormalizado = normalizar(searchTerm);
+      
+      pedidosFiltrados = pedidosFiltrados.filter((pedido) => {
+        const numeroPedido = pedido.numeroPedido.toString();
+        const nombreCompleto = normalizar(`${pedido.nombre} ${pedido.apellido}`);
+        const nombre = normalizar(pedido.nombre);
+        const apellido = normalizar(pedido.apellido);
+        const email = normalizar(pedido.cliente_email);
+        const documento = (pedido.documento || "").toString();
+
+        return (
+          numeroPedido.includes(searchTerm) ||
+          nombreCompleto.includes(terminoNormalizado) ||
+          nombre.includes(terminoNormalizado) ||
+          apellido.includes(terminoNormalizado) ||
+          email.includes(terminoNormalizado) ||
+          documento.includes(searchTerm)
+        );
+      });
     }
 
     // Filtrar por estado (usando Number() para evitar problemas de tipo)
@@ -362,10 +383,9 @@ const Envios: React.FC = () => {
   return (
     <IonPage className="envios-page">
       <IonHeader>
-        <IonToolbar>
+        <IonToolbar className="despacho-toolbar">
           <IonMenuButton slot="start" />
           <IonTitle>
-            <IonIcon icon={carOutline} className="header-icon" />
             Centro de Despacho
           </IonTitle>
           <IonButton

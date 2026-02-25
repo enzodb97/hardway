@@ -83,8 +83,9 @@ const ClientesMasPedidos: React.FC = () => {
   const [showToast, setShowToast] = useState({ open: false, message: "" });
 
   useEffect(() => {
+    // Obtiene solo pedidos finalizados (estado 5)
     axiosInstance
-      .get("/api/reportes/clientes-mas-pedidos?incluirCancelados=false")
+      .get("/api/reportes/clientes-mas-pedidos")
       .then((res) => setClientes(res.data))
       .catch((error) => {
         console.error("Error al cargar clientes con más pedidos:", error);

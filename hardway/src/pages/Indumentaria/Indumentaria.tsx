@@ -568,7 +568,7 @@ const Indumentaria: React.FC = () => {
           <IonItem lines="none">
             <IonIcon icon={search} slot="start" style={{ color: '#64748b' }} />
             <IonInput
-              placeholder="Buscar por descripción, código, color, talle o categoría..."
+              placeholder="Buscar por descripción, código, color, talle, tela o categoría..."
               value={busqueda}
               onIonChange={(e) => {
                 setPage(1);
@@ -981,7 +981,17 @@ const Indumentaria: React.FC = () => {
                 min={1}
                 max={prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria}
                 value={cantidadNoApta || ''}
-                onIonChange={(e) => setCantidadNoApta(Number(e.detail.value))}
+                onIonChange={(e) => {
+                  const valor = Number(e.detail.value);
+                  // Prevenir valores negativos
+                  if (valor < 0) {
+                    setAlertMsg("⚠️ No se aceptan números negativos. Por favor ingrese una cantidad válida.");
+                    setShowAlert(true);
+                    setCantidadNoApta(0);
+                    return;
+                  }
+                  setCantidadNoApta(valor);
+                }}
                 className="modal-no-apta-input"
               />
             </IonItem>
@@ -1057,8 +1067,15 @@ const Indumentaria: React.FC = () => {
                 expand="block"
                 color="warning"
                 onClick={async () => {
-                  if (!selectedItem || cantidadNoApta <= 0 || !idMotivoSeleccionado) {
+                  if (!selectedItem || cantidadNoApta <= 0 || isNaN(cantidadNoApta) || !idMotivoSeleccionado) {
                     setAlertMsg("Por favor complete todos los campos requeridos (cantidad y motivo)");
+                    setShowAlert(true);
+                    return;
+                  }
+                  
+                  // Validación adicional para números negativos
+                  if (cantidadNoApta < 1) {
+                    setAlertMsg("La cantidad debe ser mayor a 0");
                     setShowAlert(true);
                     return;
                   }
@@ -1238,7 +1255,17 @@ const Indumentaria: React.FC = () => {
                 min={1}
                 max={prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria}
                 value={cantidadReingreso || ''}
-                onIonChange={(e) => setCantidadReingreso(Number(e.detail.value))}
+                onIonChange={(e) => {
+                  const valor = Number(e.detail.value);
+                  // Prevenir valores negativos
+                  if (valor < 0) {
+                    setAlertMsg("⚠️ No se aceptan números negativos. Por favor ingrese una cantidad válida.");
+                    setShowAlert(true);
+                    setCantidadReingreso(0);
+                    return;
+                  }
+                  setCantidadReingreso(valor);
+                }}
                 className="modal-no-apta-input"
               />
             </IonItem>
@@ -1384,7 +1411,17 @@ const Indumentaria: React.FC = () => {
                 min={1}
                 max={prendas.find(p => p.codigoIndumentaria === selectedItem)?.cantidadIndumentaria}
                 value={cantidadScrap || ''}
-                onIonChange={(e) => setCantidadScrap(Number(e.detail.value))}
+                onIonChange={(e) => {
+                  const valor = Number(e.detail.value);
+                  // Prevenir valores negativos
+                  if (valor < 0) {
+                    setAlertMsg("⚠️ No se aceptan números negativos. Por favor ingrese una cantidad válida.");
+                    setShowAlert(true);
+                    setCantidadScrap(0);
+                    return;
+                  }
+                  setCantidadScrap(valor);
+                }}
                 className="modal-no-apta-input"
               />
             </IonItem>

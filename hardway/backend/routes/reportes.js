@@ -2,12 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { sequelize } = require("../config/database");
 
-// Obtener clientes con más pedidos
+// Obtener clientes con más pedidos (solo pedidos finalizados - estado 5)
 router.get("/clientes-mas-pedidos", async (req, res) => {
   try {
-    // Excluir pedidos cancelados (idEstado = 6) si se solicita
-    const incluirCancelados = req.query.incluirCancelados === "true";
-    const whereEstado = incluirCancelados ? "" : "WHERE ped.idEstado != 6";
     const [result] = await sequelize.query(`
       SELECT
         c.idCliente,
@@ -30,7 +27,7 @@ router.get("/clientes-mas-pedidos", async (req, res) => {
         detalleindumentaria di ON i.idDetalle = di.idDetalle
       JOIN
         precioindumentaria pr ON di.idPrecio = pr.idPrecio
-      ${whereEstado}
+      WHERE ped.idEstado = 5
       GROUP BY
         c.idCliente, p.nombre, p.apellido, c.email
       ORDER BY
@@ -417,7 +414,7 @@ router.get("/tendencias-empresas-envio", async (req, res) => {
         JOIN 
           empresa_envio e ON p.idEmpresaEnvio = e.idEmpresaEnvio
         WHERE
-          p.fechaPedido >= NOW() - INTERVAL ${meses} MONTH -- Filtro dinámico de meses
+          p.fechaPedido >= DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL ${meses} MONTH), '%Y-%m-01') -- Filtro desde inicio del mes
           AND p.estaActivo = 1
           AND p.idEstado != 6
         GROUP BY 
@@ -436,7 +433,7 @@ router.get("/tendencias-empresas-envio", async (req, res) => {
           empresa_envio e ON p.idEmpresaEnvio = e.idEmpresaEnvio
         WHERE
           -- Restringe el rango de fechas para no sobrecargar el JOIN
-          p.fechaPedido >= NOW() - INTERVAL ${meses + 1} MONTH 
+          p.fechaPedido >= DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL ${meses + 1} MONTH), '%Y-%m-01') 
           AND p.estaActivo = 1
           AND p.idEstado != 6
         GROUP BY 

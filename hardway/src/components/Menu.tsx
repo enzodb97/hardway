@@ -45,7 +45,7 @@ const Menu: React.FC = () => {
   
   // Reportes - solo Administrador y Gerente General
   if (hasAnyRole(["Administrador", "Gerente General"])) {
-    appPages.push({ title: "Reportes", url: "/Reportes", icon: bookmarkOutline });
+    appPages.push({ title: "Reportes", url: "/reportes", icon: bookmarkOutline });
   }
   
   // Pedidos - Administrador y Vendedor
@@ -55,7 +55,7 @@ const Menu: React.FC = () => {
   
   // Clientes - Administrador y Vendedor
   if (hasAnyRole(["Administrador", "Vendedor"])) {
-    appPages.push({ title: "Clientes", url: "/Clientes", icon: peopleOutline });
+    appPages.push({ title: "Clientes", url: "/clientes", icon: peopleOutline });
   }
   
   // Usuarios - solo Administrador

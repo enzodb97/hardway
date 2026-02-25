@@ -12,13 +12,17 @@ interface LocationState {
 }
 
 const Login: React.FC = () => {
+  console.log("🔑 Login component montándose...");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
   const location = useLocation<LocationState>();
   const { login, error, isAuthenticated } = useAuth();
+  
+  console.log("🔑 Login render - isAuthenticated:", isAuthenticated);
 
   useEffect(() => {
+    console.log("🔑 Login useEffect - isAuthenticated:", isAuthenticated);
     if (isAuthenticated) {
       const redirectPath = location.state?.from?.pathname || "/dashboard";
       history.replace(redirectPath);
@@ -33,6 +37,8 @@ const Login: React.FC = () => {
       history.push(redirectPath);
     }
   };
+
+  console.log("🔑 Login renderizando formulario...");
 
   return (
     <IonPage className="login-page">

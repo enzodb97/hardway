@@ -633,7 +633,7 @@ const Clientes: React.FC = () => {
             className="clientes-search"
             value={busqueda}
             onIonChange={(e) => setBusqueda(e.detail.value!)}
-            placeholder="Buscar por nombre, documento, teléfono o email..."
+            placeholder="Buscar por nombre, apellido, documento, teléfono o email..."
             showClearButton="focus"
           />
 

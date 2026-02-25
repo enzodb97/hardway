@@ -232,16 +232,14 @@ const AltaPedido: React.FC = () => {
         return newMap;
       });
 
-      // Establecer presentación por defecto (Unidad = 1)
+      // NO establecer presentación por defecto - forzar al usuario a seleccionar
       if (configuraciones.length > 0) {
-        setPresentacionSeleccionada((prev) => {
-          const newMap = new Map(prev);
-          newMap.set(codigoIndumentaria, 1);
-          return newMap;
-        });
+        // Solo establecer cantidad por defecto
         setCantidadPresentaciones((prev) => {
           const newMap = new Map(prev);
-          newMap.set(codigoIndumentaria, 1);
+          if (!newMap.has(codigoIndumentaria)) {
+            newMap.set(codigoIndumentaria, 1);
+          }
           return newMap;
         });
       }
@@ -486,6 +484,14 @@ const AltaPedido: React.FC = () => {
       nombrePresentacion: string;
     }
   ) => {
+    // Validar que tenga presentación seleccionada si hay configuraciones
+    const configuraciones = configuracionesPorProducto.get(prenda.codigoIndumentaria) || [];
+    if (configuraciones.length > 0 && !presentacion) {
+      setAlertMsg("Debe seleccionar una presentación antes de agregar el producto");
+      setShowAlert(true);
+      return;
+    }
+
     // Validar si ya existe la combinación de indumentaria + presentación
     const idPresentacionActual = presentacion?.idPresentacion || 1;
     const yaExiste = prendasSeleccionadas.some(
@@ -935,7 +941,9 @@ const AltaPedido: React.FC = () => {
                       </p>
                     </div>
                   ) : (
-                    <div className="prendas-list" key={`prendas-${prendasSeleccionadas.length}-${Date.now()}`}>
+
+                    /*<div className="prendas-list" key={`prendas-${prendasSeleccionadas.length}-${Date.now()}`}>*/
+                    <div className="prendas-list">
                       {prendasSeleccionadas.map((prenda, index) => (
                         <div
                           key={`${prenda.codigoIndumentaria}-${prenda.idPresentacion || 1}-${index}`}
@@ -1389,11 +1397,28 @@ const AltaPedido: React.FC = () => {
               {indumentaria
                 .filter((i) => {
                   const filtro = (filtroIndumentaria ?? "").toLowerCase();
-                  return (
+                  const cumpleBusqueda = (
                     (i.nombre ?? "").toLowerCase().includes(filtro) ||
                     (i.codigoIndumentaria &&
                       i.codigoIndumentaria.toLowerCase().includes(filtro))
                   );
+                  
+                  if (!cumpleBusqueda) return false;
+                  
+                  // Calcular stock disponible real
+                  const unidadesYaAgregadas = prendasSeleccionadas
+                    .filter(p => p.codigoIndumentaria === i.codigoIndumentaria)
+                    .reduce((total, p) => total + (p.unidadesTotales || p.cantidad), 0);
+                  
+                  const unidadesOriginales = obtenerUnidadesOriginalesPedido(
+                    i.codigoIndumentaria
+                  );
+                  
+                  const stockDisponible = 
+                    (i.cantidadIndumentaria + unidadesOriginales) - unidadesYaAgregadas;
+                  
+                  // Solo mostrar si tiene stock disponible
+                  return stockDisponible > 0;
                 })
                 .map((prenda) => {
                   const configuraciones =
@@ -1451,10 +1476,11 @@ const AltaPedido: React.FC = () => {
                             {configuraciones.length > 0 && (
                               <div className="presentacion-group">
                                 <IonLabel className="presentacion-label">
-                                  Presentación:
+                                  Presentación: <span style={{ color: 'red' }}>*</span>
                                 </IonLabel>
                                 <IonSelect
-                                  value={presentacionActual}
+                                  value={presentacionActual || undefined}
+                                  placeholder="Seleccione una presentación"
                                   onIonChange={(e) => {
                                     const newValue = Number(e.detail.value);
                                     setPresentacionSeleccionada((prev) => {
@@ -1562,6 +1588,7 @@ const AltaPedido: React.FC = () => {
                         {/* Botón Agregar */}
                         <div className="indumentaria-item-actions">
                           <IonButton
+                            disabled={configuraciones.length > 0 && !presentacionActual}
                             onClick={async () => {
                               // Cargar configuraciones si no están cargadas
                               if (configuraciones.length === 0) {

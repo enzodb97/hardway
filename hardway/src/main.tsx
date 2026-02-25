@@ -1,7 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import { AuthProvider } from './context/AuthContext';
 
 // Selección del elemento contenedor
 const container = document.getElementById('root') as HTMLElement;
@@ -15,10 +14,9 @@ if (!container) {
 const root = createRoot(container);
 
 // Renderizado de la aplicación
+// AuthProvider está dentro de App.tsx, no aquí (evitar duplicación)
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <App />
   </React.StrictMode>
 );

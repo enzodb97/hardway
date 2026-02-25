@@ -288,7 +288,7 @@ const Pedidos: React.FC = () => {
             <IonCol size="10">
               <div className="pedidos-buscador">
                 <IonInput
-                  placeholder="Buscar por cliente, fecha o N° de pedido"
+                  placeholder="Buscar por cliente, fecha, N° de pedido o documento"
                   value={busqueda === " " ? "" : busqueda}
                   onIonChange={(e) => setBusqueda(e.detail.value!)}
                   clearInput
