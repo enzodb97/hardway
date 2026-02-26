@@ -211,8 +211,14 @@ const Envios: React.FC = () => {
         (pedido) => Number(pedido.idEstado) === 4
       );
       console.log("✅ Despachados filtrados:", pedidosFiltrados.length);
+    } else if (filtroEstado === "todos") {
+      // Filtro 'total': solo mostrar pedidos con idEstado 3, 4 o 5
+      pedidosFiltrados = pedidosFiltrados.filter(
+        (pedido) => [3, 4, 5].includes(Number(pedido.idEstado))
+      );
+      console.log("🔵 Mostrando pedidos con estado 3, 4 o 5:", pedidosFiltrados.length);
     } else {
-      console.log("🔵 Mostrando TODOS los pedidos");
+      console.log("🔵 Mostrando TODOS los pedidos (sin filtro de estado)");
     }
 
     setPedidosFiltrados(pedidosFiltrados);

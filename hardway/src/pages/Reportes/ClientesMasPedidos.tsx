@@ -382,7 +382,7 @@ const ClientesMasPedidos: React.FC = () => {
           size: 12,
         },
         offset: 16,
-        formatter: (value: number) => `$${value.toLocaleString()}`,
+        formatter: (value: number) => `$${value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         clamp: true,
         display: true,
       },
@@ -392,7 +392,7 @@ const ClientesMasPedidos: React.FC = () => {
             const idx = context.dataIndex;
             const c = top10Clientes[idx];
             return [
-              `Valor total: $${c.total_valor.toLocaleString()}`,
+              `Valor total: $${c.total_valor.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
               `Total pedidos: ${c.total_pedidos}`,
               `Email: ${c.email || "-"}`,
             ];
@@ -464,7 +464,7 @@ const ClientesMasPedidos: React.FC = () => {
                   <div className="clientes-stat-card">
                     <div className="clientes-stat-icon">💰</div>
                     <div className="clientes-stat-content">
-                      <div className="clientes-stat-number">${valorTotalAcumulado.toLocaleString()}</div>
+                      <div className="clientes-stat-number">${valorTotalAcumulado.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       <div className="clientes-stat-label">Valor Acumulado</div>
                     </div>
                   </div>
@@ -506,7 +506,7 @@ const ClientesMasPedidos: React.FC = () => {
                             {c.total_pedidos}
                           </IonCol>
                           <IonCol size="2" className="clientes-table-cell clientes-valor-alto" style={{ textAlign: "right" }}>
-                            ${c.total_valor.toLocaleString()}
+                            ${c.total_valor.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </IonCol>
                         </IonRow>
                       );

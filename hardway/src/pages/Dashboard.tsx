@@ -37,12 +37,28 @@ const Dashboard: React.FC = () => {
   const history = useHistory();
   const { logout, username, roles, hasAnyRole } = useAuth(); // ✅ Usar roles y hasAnyRole
   const [greeting, setGreeting] = useState("");
+  const [currentTime, setCurrentTime] = useState(formatFechaHoraCompleta());
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting("Buenos días");
     else if (hour < 20) setGreeting("Buenas tardes");
     else setGreeting("Buenas noches");
+  }, []);
+
+  // ✅ Actualizar la hora cada segundo
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(formatFechaHoraCompleta());
+      
+      // También actualizar el saludo si cambia la hora
+      const hour = new Date().getHours();
+      if (hour < 12) setGreeting("Buenos días");
+      else if (hour < 20) setGreeting("Buenas tardes");
+      else setGreeting("Buenas noches");
+    }, 1000); // Actualizar cada segundo
+
+    return () => clearInterval(intervalId); // Limpiar intervalo al desmontar
   }, []);
 
   const handleLogout = () => {
@@ -155,7 +171,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="welcome-time">
             <IonIcon icon={timeOutline} />
-            <span>{formatFechaHoraCompleta()}</span>
+            <span>{currentTime}</span>
           </div>
         </div>
 

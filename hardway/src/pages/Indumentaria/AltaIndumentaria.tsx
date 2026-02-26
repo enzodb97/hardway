@@ -156,11 +156,34 @@ const AltaIndumentaria: React.FC = () => {
       return;
     }
     
-    // Validación inmediata para precio
-    if (campo === "precio" && valor && parseFloat(valor) <= 0) {
-      setAlertMsg("El precio debe ser mayor a 0. Por favor, ingresa un valor válido.");
-      setShowAlert(true);
-      return;
+    // Validación y formato para precio
+    if (campo === "precio" && valor) {
+      // Reemplazar comas por puntos para normalizar y validar
+      let valorNormalizado = valor.replace(/,/g, '.');
+      
+      // Validar que sea un número válido
+      const numeroValor = parseFloat(valorNormalizado);
+      if (isNaN(numeroValor) || numeroValor <= 0) {
+        setAlertMsg("El precio debe ser mayor a 0. Por favor, ingresa un valor válido.");
+        setShowAlert(true);
+        return;
+      }
+      
+      // Limitar a 2 decimales
+      const partes = valorNormalizado.split('.');
+      if (partes.length > 2) {
+        setAlertMsg("Formato de precio inválido. Use un solo separador decimal.");
+        setShowAlert(true);
+        return;
+      }
+      
+      if (partes.length === 2 && partes[1].length > 2) {
+        // Limitar a 2 decimales
+        valorNormalizado = partes[0] + '.' + partes[1].substring(0, 2);
+      }
+      
+      // Convertir de vuelta a formato español (punto por coma) para mostrar en el input
+      valor = valorNormalizado.replace(/\./g, ',');
     }
     
     const newForm = { ...form, [campo]: valor };
@@ -511,11 +534,12 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                           <IonItem>
                             <IonLabel position="floating" class="titulo">Precio</IonLabel>
                             <IonInput
-                              type="number"
+                              type="text"
+                              inputmode="decimal"
                               value={form.precio}
                               onIonChange={(e) => handleChange("precio", e.detail.value!)}
                               
-                              placeholder="Ej: 1200"
+                              placeholder="Ej: 1200 o 1200,50"
                             />
                           </IonItem>
                         </IonCol>

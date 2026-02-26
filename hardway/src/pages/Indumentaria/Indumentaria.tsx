@@ -716,7 +716,7 @@ const Indumentaria: React.FC = () => {
                 <IonCol size="0.5">{item.talle}</IonCol>
                 <IonCol size="1">{item.categoria}</IonCol>
                 <IonCol size="1">
-                  <span className="precio-badge">${item.precio}</span>
+                  <span className="precio-badge">${Number(item.precio).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </IonCol>
                 <IonCol size="1">
                   <span className={`estado-badge ${getEstadoClass(item.estado)}`}>

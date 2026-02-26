@@ -586,8 +586,8 @@ const ProductosMasPedidos: React.FC = () => {
             t.total_vendido,
             t.total_pedidos,
             t.productos_diferentes,
-            `$${(Number(t.precio_promedio) || 0).toFixed(2)}`,
-            `$${(Number(t.valor_total) || 0).toFixed(0)}`,
+            `$${(Number(t.precio_promedio) || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            `$${(Number(t.valor_total) || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             `${(Number(t.participacion_mes) || 0).toFixed(1)}%`,
             `${(Number(t.tendencia_porcentual) || 0) > 0 ? '+' : ''}${(Number(t.tendencia_porcentual) || 0).toFixed(1)}%`,
             t.direccion_tendencia,
@@ -664,7 +664,7 @@ const ProductosMasPedidos: React.FC = () => {
                   <div className="productos-stat-card">
                     <div className="productos-stat-icon">💰</div>
                     <div className="productos-stat-content">
-                      <div className="productos-stat-number">${ventasTotales.toLocaleString()}</div>
+                      <div className="productos-stat-number">${ventasTotales.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       <div className="productos-stat-label">Ventas Totales</div>
                     </div>
                   </div>
@@ -754,7 +754,7 @@ const ProductosMasPedidos: React.FC = () => {
               <IonCol size="12">
                 <IonCard className="productos-table-card">
                   <IonCardContent>
-                    <h3 style={{color: '#0057ff', marginBottom: '20px', textAlign: 'center'}}>
+                    <h3 style={{color: '#ffffff', marginBottom: '20px', textAlign: 'center'}}>
                       Detalle de Tendencias - {categoriaSeleccionada}
                     </h3>
                     <IonGrid className="productos-table-grid">
@@ -788,10 +788,10 @@ const ProductosMasPedidos: React.FC = () => {
                             {t.productos_diferentes}
                           </IonCol>
                           <IonCol size="1.5" className="productos-table-cell">
-                            ${(Number(t.precio_promedio) || 0).toFixed(2)}
+                            ${(Number(t.precio_promedio) || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </IonCol>
                           <IonCol size="1.5" className="productos-table-cell">
-                            ${(Number(t.valor_total) || 0).toLocaleString()}
+                            ${(Number(t.valor_total) || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </IonCol>
                           <IonCol size="1" className="productos-table-cell">
                             {(Number(t.participacion_mes) || 0).toFixed(1)}%

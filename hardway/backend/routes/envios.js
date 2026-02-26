@@ -16,7 +16,7 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
     const { rol, legajoPicker } = req.query;
     
     // Si es Picker, solo traer sus pedidos asignados
-    let whereClause = 'p.idEstado IN (3, 4) AND p.estaActivo = 1';
+    let whereClause = 'p.idEstado IN (3, 4, 5) AND p.estaActivo = 1';
     if (rol === 'Picker' && legajoPicker) {
       whereClause += ` AND ap.legajoPicker = '${legajoPicker}'`;
     }
@@ -31,7 +31,7 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
         SUM(CASE WHEN ap.completado = 0 THEN 1 ELSE 0 END) as asignacionesPendientes
       FROM asignacion_picking ap
       JOIN pedido p ON ap.numeroPedido = p.numeroPedido
-      WHERE p.idEstado IN (3, 4) AND p.estaActivo = 1
+      WHERE p.idEstado IN (3, 4, 5) AND p.estaActivo = 1
     `);
     console.log('🔍 Debug de asignaciones:', asignacionesDebug[0]);
     
@@ -53,7 +53,7 @@ router.get("/pendientes", verificarAccesoEnvios, async (req, res) => {
       LEFT JOIN encargadopicker ep ON ap.legajoPicker = ep.legajo
       LEFT JOIN persona per ON ep.idPersona = per.idPersona
       LEFT JOIN usuario u ON u.idPersona = per.idPersona
-      WHERE p.idEstado IN (3, 4) AND p.estaActivo = 1
+      WHERE p.idEstado IN (3, 4, 5) AND p.estaActivo = 1
       LIMIT 5
     `);
     console.log('📋 Ejemplos de asignaciones:', ejemplosAsignacion);

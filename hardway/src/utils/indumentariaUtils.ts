@@ -238,10 +238,13 @@ export interface GuardarIndumentariaParams {
 }
 
 export const guardarIndumentaria = async ({ form, esEdicion, id }: GuardarIndumentariaParams) => {
+  // Normalizar el precio: convertir coma a punto para enviar al backend
+  const precioNormalizado = form.precio ? form.precio.toString().replace(/,/g, '.') : form.precio;
+  
   let idPrecio = form.idPrecio;
-  if (form.precio && !form.idPrecio) {
+  if (precioNormalizado && !form.idPrecio) {
     const precioRes = await axiosInstance.post("/api/precios", {
-      precio: form.precio,
+      precio: precioNormalizado,
     });
     idPrecio = precioRes.data.idPrecio;
   }
@@ -271,7 +274,7 @@ export const guardarIndumentaria = async ({ form, esEdicion, id }: GuardarIndume
   if (esEdicion && id) {
     if (idDetalle === form.idDetalle) {
       await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
-        precio: form.precio,
+        precio: precioNormalizado,
       });
     } else {
       await axiosInstance.put(`/api/indumentaria/${id}`, {
@@ -279,7 +282,7 @@ export const guardarIndumentaria = async ({ form, esEdicion, id }: GuardarIndume
         idDetalle,
       });
       await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
-        precio: form.precio,
+        precio: precioNormalizado,
       });
     }
 
@@ -309,7 +312,7 @@ export const guardarIndumentaria = async ({ form, esEdicion, id }: GuardarIndume
       idRack: parseInt(form.idRack) || null,
     });
     await axiosInstance.put(`/api/detalle-indumentaria/${idDetalle}/precio`, {
-      precio: form.precio,
+      precio: precioNormalizado,
     });
   }
 };

@@ -5,7 +5,13 @@ import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
 import { obtenerIconoEstado } from "../../utils/pedidosUtils";
 import { formatFechaHoraCorta } from "../../utils/dateFormatters";
 import DatePicker from "react-datepicker";
+import { registerLocale } from "react-datepicker";
+import { es } from "date-fns/locale/es";
 import "react-datepicker/dist/react-datepicker.css";
+
+// Registrar locale español
+registerLocale("es", es);
+
 import {
   IonPage,
   IonHeader,
@@ -313,6 +319,7 @@ const Pedidos: React.FC = () => {
                   placeholderText="Seleccionar fecha desde"
                   dateFormat="dd/MM/yyyy"
                   className="fecha-picker-input"
+                  locale="es"
                   isClearable
                 />
               </div>
@@ -326,6 +333,7 @@ const Pedidos: React.FC = () => {
                   placeholderText="Seleccionar fecha hasta"
                   dateFormat="dd/MM/yyyy"
                   className="fecha-picker-input"
+                  locale="es"
                   isClearable
                   minDate={fechaDesde || undefined}
                 />
