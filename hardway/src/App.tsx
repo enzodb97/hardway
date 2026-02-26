@@ -36,6 +36,7 @@ import Envios from "./pages/Envios/Envios";
 import DebugAuth from "./pages/DebugAuth";
 import AccesoRestringido from "./pages/AccesoRestringido";
 import NotFound from "./pages/NotFound";
+import NotFound from "./pages/NotFound";
 import "@ionic/react/css/core.css";
 import "./theme/variables.css";
 
@@ -242,6 +243,8 @@ const AppRouter = () => {
                 );
               }}
             />
+            {/* Ruta catch-all para 404 - debe estar al final */}
+            <Route component={NotFound} />
             {/* Ruta catch-all para 404 - debe estar al final */}
             <Route component={NotFound} />
           </IonRouterOutlet>
