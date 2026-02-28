@@ -8,6 +8,7 @@ const {
   DetallePedido,
   sequelize 
 } = require('../models');
+const { EstadoPedido, EmpresaEnvio } = require("../models");
 const { Domicilio, Ciudad } = require('../models/Ubicacion');
 
 // Obtener todos los pedidos 'Abonado' (idEstado = 3) y 'Despachado' (idEstado = 4) para despacho

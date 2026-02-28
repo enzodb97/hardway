@@ -15,6 +15,7 @@ const Login: React.FC = () => {
   console.log("🔑 Login component montándose...");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  
   const history = useHistory();
   const location = useLocation<LocationState>();
   const { login, error, isAuthenticated } = useAuth();
@@ -58,7 +59,7 @@ const Login: React.FC = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="input-group">
-                  <label className="input-label">Usuario *</label>
+                  <label className="input-label">Usuario</label>
                   <input
                     type="text"
                     className="custom-input"
@@ -71,7 +72,7 @@ const Login: React.FC = () => {
                 </div>
 
                 <div className="input-group">
-                  <label className="input-label">Contraseña *</label>
+                  <label className="input-label">Contraseña</label>
                   <input
                     type="password"
                     className="custom-input"
@@ -85,10 +86,18 @@ const Login: React.FC = () => {
 
                 {error && <div className="error-message">{error}</div>}
 
-                <button type="submit" className="primary-button">
+                <button type="submit" className="primary-button" style={{ background: "#feaf00" }}>
                   INICIAR SESIÓN
                 </button>
               </form>
+              <button
+                type="button"
+                className="secondary-button"
+                style={{ marginTop: 16, width: "100%", fontFamily: "Poppins, sans-serif", fontWeight: 600 }}
+                onClick={() => history.push('/chatbot')}
+              >
+                🤖 Asistente de Pedidos para Clientes 🤖
+              </button>
             </div>
 
             <div className="password-section">
@@ -98,6 +107,7 @@ const Login: React.FC = () => {
             </div>
           </div>
         </div>
+        {/* El formulario de invitado ahora vive en la ruta /invitado */}
       </IonContent>
     </IonPage>
   );

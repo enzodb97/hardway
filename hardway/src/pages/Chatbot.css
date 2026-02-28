@@ -1,0 +1,756 @@
+/* Styles for guest chatbot */
+
+.chatbot-page ion-content {
+  --background: radial-gradient(
+    125% 125% at 50% 10%,
+    #ffffff 40%,
+    #f59e0b 100%
+  ) !important;
+}
+
+.chatbot-progress {
+  /* Responsive progress container using CSS variables for circle sizing */
+  /* Make circle size responsive: scales with viewport but stays within bounds */
+  --circle-size: clamp(48px, 6.5vw, 80px); /* responsive circle diameter */
+  --circle-gap: 8px; /* gap around circles */
+  --circle-offset: calc(var(--circle-size) / 2 + var(--circle-gap));
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 32px auto;
+  padding: 32px 28px;
+  position: relative;
+  overflow: visible;
+  max-width: 1100px;
+  border: 1px solid rgba(253, 180, 11, 0.08);
+  /* Reserve vertical space so absolute .chatbot-steps labels don't overlap following content */
+  box-sizing: border-box;
+  min-height: calc(var(--circle-size) + 130px);
+  padding-bottom: calc(var(--circle-size) / 2 + 28px);
+}
+
+/* Remove any decorative dotted/background image coming from global theme inside this component */
+.chatbot-progress::before,
+.chatbot-progress::after {
+  display: none !important;
+  background-image: none !important;
+}
+
+/* Prevent ion progress parts or any nested element from showing a repeating dotted SVG background */
+.chatbot-progress ion-progress-bar,
+.chatbot-progress ::part(bar),
+.chatbot-progress ::part(buffer),
+.chatbot-progress ::part(track) {
+  background-image: none !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Hide Ionic buffer animated dots (some browsers render a child with class .buffer-circles or part="stream") */
+.chatbot-progress .buffer-circles,
+.chatbot-progress [part="stream"],
+.chatbot-progress ::part(stream) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.progreso-cancelado {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0;
+}
+.estado-cancelado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #feece9, #fff6f6);
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid #f5c6c3;
+}
+.circulo-cancelado {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  color: #fff;
+  font-size: 20px;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12);
+}
+.info-estado-cancelado .nombre-estado-cancelado {
+  font-weight: 800;
+  color: #991b1b;
+}
+.info-estado-cancelado .descripcion-estado-cancelado {
+  color: #7f1d1d;
+}
+.chatbot-progress-line {
+  position: absolute;
+  left: var(--circle-offset);
+  right: var(--circle-offset);
+  /* center the line at half the circle size */
+  top: calc(var(--circle-size) / 2);
+  transform: translateY(-50%);
+  height: calc(var(--circle-size) / 12);
+  /* neutral track color so the filled bar stands out */
+  background: linear-gradient(90deg, #8d6307 0%, #e6eaef 100%);
+  z-index: 0;
+  border-radius: 4px;
+}
+
+/* Style Ionic progress bar inside our container and center it */
+.chatbot-progress ion-progress-bar {
+  /* Use variable offsets so the progress bar always aligns between the outer halves of the circles */
+  position: absolute;
+  left: var(--circle-offset);
+  right: var(--circle-offset);
+  /* align the visual bar with the line */
+  top: calc(var(--circle-size) / 2);
+  transform: translateY(-50%);
+  height: calc(var(--circle-size) / 10);
+  width: auto;
+  border-radius: 8px;
+  z-index: 0; /* behind the circles but above background */
+  overflow: hidden;
+}
+.chatbot-progress ::part(bar) {
+  height: 100%;
+  border-radius: 8px;
+  /* filled portion color (progress) - warm yellow gradient */
+  background: linear-gradient(90deg, #fdb40b 0%, #f59e0b 100%) !important;
+}
+
+.chatbot-progress ::part(buffer) {
+  /* buffer / secondary fill - lighter yellow */
+  background: linear-gradient(
+    90deg,
+    rgba(253, 180, 11, 0.22) 0%,
+    rgba(245, 158, 11, 0.12) 100%
+  ) !important;
+}
+
+.chatbot-progress ::part(track) {
+  /* ensure track remains subtle and doesn't clash */
+  background: transparent !important;
+}
+.chatbot-steps {
+  /* Absolute overlay so circles sit exactly above the progress bar */
+  position: absolute;
+  left: var(--circle-offset);
+  right: var(--circle-offset);
+  top: 0;
+  z-index: 4; /* above the progress bar */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: start;
+  gap: 8px;
+  padding-top: calc(
+    var(--circle-size) / 2 + 6px
+  ); /* push labels below the bar */
+}
+.chatbot-step {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  min-width: 0;
+  justify-self: stretch;
+}
+.chatbot-step .chatbot-step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  position: relative;
+}
+.chatbot-step-circle {
+  width: var(--circle-size);
+  height: var(--circle-size);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border: calc(var(--circle-size) / 18) solid #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; /* allow z-index stacking */
+  z-index: 4;
+  /* center circle vertically over the progress bar */
+  transform: translateY(-50%);
+  margin-bottom: 8px;
+}
+.chatbot-step.active .chatbot-step-circle {
+  background: linear-gradient(135deg, #fdb40b 0%, #f59e0b 100%);
+  border-color: #fdb40b;
+  color: white;
+  box-shadow:
+    0 8px 20px rgba(253, 180, 11, 0.32),
+    0 4px 8px rgba(253, 180, 11, 0.18);
+  transform: translateY(-50%) scale(1.06);
+}
+.chatbot-step.actual .chatbot-step-circle {
+  animation: pulse-dorado 2s infinite;
+}
+.chatbot-step-circle .icono-estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* make the icon box a proportional square inside the circle so it stays centered */
+  width: calc(var(--circle-size) * 0.56);
+  height: calc(var(--circle-size) * 0.56);
+  font-size: calc(var(--circle-size) * 0.38);
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+.chatbot-step .nombre-estado {
+  font-weight: 700;
+  font-size: calc(
+    12px + (var(--circle-size) - 48px) * 0.06
+  ); /* scale slightly with circle */
+  color: #1f2937;
+  margin-top: 6px;
+  text-align: center;
+  line-height: 1.05;
+}
+.chatbot-step .nombre-estado,
+.chatbot-step .descripcion-estado {
+  word-break: break-word;
+}
+.chatbot-step .descripcion-estado {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+@keyframes pulse-dorado {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(253, 180, 11, 0.7),
+      0 8px 20px rgba(253, 180, 11, 0.4);
+  }
+  70% {
+    box-shadow:
+      0 0 0 15px rgba(253, 180, 11, 0),
+      0 8px 20px rgba(253, 180, 11, 0.4);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(253, 180, 11, 0),
+      0 8px 20px rgba(253, 180, 11, 0.4);
+  }
+}
+
+/* Chat bubbles */
+.custom-input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+.primary-button {
+  background: #0f172a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+}
+.secondary-button {
+  background: #eef2ff;
+  color: #1f2937;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e6e6fa;
+}
+.chat-bubble-bot {
+  background: #ffffff;
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.chat-bubble-user {
+  background: #0f172a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.chat-window {
+  background: #f7fafc;
+  padding: 12px;
+  border-radius: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  border: 1px solid #eef2ff;
+}
+
+/* Result card */
+.chat-result {
+  margin-top: 16px;
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(253, 180, 11, 0.06);
+}
+.chat-detail-item {
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Visual polish: result header, icons and animations */
+.chat-result.fade-in {
+  animation: fadeInUp 360ms ease both;
+}
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.result-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  color: #fff;
+  font-size: 22px;
+  box-shadow: 0 8px 20px rgba(6, 182, 212, 0.18);
+}
+.chat-result h4 {
+  margin: 0;
+  font-size: 20px;
+}
+
+/* New result card styles */
+.result-subtitle {
+  font-size: 15px;
+  color: #4b5563;
+  margin-top: 6px;
+  font-weight: 600;
+}
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  background: #fbfdff;
+  border-radius: 10px;
+  border: 1px solid #eef6fb;
+  box-shadow: 0 6px 14px rgba(2, 6, 23, 0.04);
+  flex-wrap: wrap;
+}
+.result-row .label {
+  color: #6b7280;
+  font-size: 14px;
+  flex: 0 0 auto;
+  min-width: 110px;
+}
+.result-row .value {
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 16px;
+  text-align: right;
+  flex: 1 1 auto;
+  min-width: 80px;
+  word-break: break-word;
+}
+.tracking-row {
+  align-items: center;
+}
+.copy-button {
+  margin-left: 12px;
+  background: linear-gradient(90deg, #ffffff, #f3f8ff);
+  border: 1px solid #dbeafe;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #0f172a;
+  box-shadow: 0 6px 14px rgba(14, 165, 233, 0.06);
+}
+.copy-button:hover {
+  box-shadow: 0 12px 22px rgba(14, 165, 233, 0.12);
+  transform: translateY(-2px);
+}
+.status-badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  /*background: linear-gradient(90deg, #eef2ff, #f0f9ff);*/
+  color: #0f172a;
+  font-weight: 800;
+  border: 1px solid #e6eefc;
+  font-size: 14px;
+}
+.status-badge.delivered {
+  /*background: linear-gradient(90deg, #ecfdf5, #dcfce7);*/
+  color: #065f46;
+  border-color: #bbf7d0;
+}
+
+/* Tracking links block */
+.tracking-links {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+.tracking-links .track-link {
+  background: linear-gradient(90deg, #ffffff, #f3f8ff);
+  border: 1px solid #dbeafe;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #0f172a;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 14px rgba(14, 165, 233, 0.06);
+}
+.tracking-links .track-link:hover {
+  box-shadow: 0 12px 22px rgba(14, 165, 233, 0.12);
+  transform: translateY(-2px);
+}
+
+@media (min-width: 720px) {
+  .result-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.result-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  color: #fff;
+  font-size: 26px;
+  box-shadow: 0 10px 26px rgba(6, 182, 212, 0.18);
+}
+
+/* Responsive: stack label/value on small screens for better readability */
+@media (max-width: 720px) {
+  .result-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .result-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .result-row .label {
+    min-width: 0;
+    margin-bottom: 6px;
+  }
+  .result-row .value {
+    text-align: left;
+  }
+  .result-row .copy-button {
+    margin-left: 0;
+    margin-top: 8px;
+    align-self: flex-end;
+  }
+  .chatbot-container {
+    width: 92vw;
+    min-height: unset;
+  }
+}
+
+/* Intermediate breakpoint: slightly larger circles on medium-large screens */
+@media (min-width: 1100px) and (max-width: 1299px) {
+  .chatbot-progress {
+    --circle-size: 110px;
+  }
+  .result-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+    box-shadow: 0 11px 28px rgba(6, 182, 212, 0.19);
+  }
+}
+
+/* Extra-large screens */
+@media (min-width: 1300px) {
+  .chatbot-progress {
+    --circle-size: 130px; /* larger circles on wide screens */
+  }
+  .result-icon {
+    width: 72px;
+    height: 72px;
+    font-size: 32px;
+    box-shadow: 0 12px 30px rgba(6, 182, 212, 0.2);
+  }
+}
+.result-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  color: #fff;
+  font-size: 26px;
+  box-shadow: 0 10px 26px rgba(6, 182, 212, 0.18);
+}
+
+.chat-detail-item {
+  padding: 12px;
+  border-radius: 8px;
+  background: #fbfdff;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 10px rgba(2, 6, 23, 0.04);
+  border: 1px solid #eef6fb;
+  transform-origin: bottom;
+}
+.chat-detail-item.slide-up {
+  animation: slideIn 360ms ease both;
+}
+
+.detalle-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.detalle-meta div {
+  color: #374151;
+}
+
+/* Buttons */
+.secondary-button {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.secondary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(14, 165, 233, 0.08);
+}
+.primary-button {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.12);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* small badges inside item rows */
+.item-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #fff, #fbfdff);
+  border: 1px solid #eef6fb;
+  box-shadow: 0 4px 10px rgba(2, 6, 23, 0.03);
+}
+
+@media (max-width: 480px) {
+  .chatbot-step {
+    width: auto;
+    font-size: 11px;
+  }
+  .chatbot-progress {
+    --circle-size: 48px;
+  }
+}
+
+/* Enhanced UI: avatars, input row, colors */
+.chatbot-page .ion-title {
+  font-weight: 700;
+  color: #0f172a;
+  
+}
+
+.message-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin: 8px 0;
+}
+.message-row.bot {
+  justify-content: flex-start;
+}
+.message-row.user {
+  justify-content: flex-end;
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+}
+.avatar.bot {
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+}
+.avatar.user {
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+}
+.chat-bubble-bot {
+  max-width: 78%;
+  background: #ffffff;
+  color: #111827;
+  padding: 10px 14px;
+  border-radius: 12px 12px 12px 4px;
+  box-shadow: 0 6px 14px rgba(2, 6, 23, 0.06);
+}
+.chat-bubble-user {
+  max-width: 78%;
+  background: linear-gradient(90deg, #6366f1, #7c3aed);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px 12px 4px 12px;
+  box-shadow: 0 6px 14px rgba(99, 102, 241, 0.16);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+.chat-input-row .input-field {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: #fff;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid #e6eefc;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.04);
+}
+.chat-input-row input.input-field-element {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 8px 6px;
+  font-size: 14px;
+  background: transparent;
+  color: #0f172a;
+}
+.send-button {
+  background: linear-gradient(90deg, #06b6d4, #0ea5e9);
+  border: none;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(6, 182, 212, 0.18);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.send-button:active {
+  transform: translateY(1px);
+}
+.muted {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Small responsive tweaks */
+@media (max-width: 600px) {
+  .chatbot-progress {
+    padding: 20px 16px;
+    margin: 20px 12px;
+  }
+  .chat-window {
+    max-height: 60vh;
+  }
+}
+
+/* Centered container: half width and half height of viewport */
+.chatbot-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  height: calc(100vh - 56px); /* leave header space */
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+.chatbot-container {
+  width: 42vw;
+  height: auto;
+  min-width: 320px;
+  background: transparent;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Make chat-window flexible inside container: use flex so it fills remaining space */
+.chatbot-container .chat-window {
+  max-height: none;
+  flex: 1 1 auto;
+  min-height: 0; /* allow flex child to shrink properly */
+  overflow-y: auto;
+}
+
+.chatbot-container .chat-result {
+  overflow: auto;
+  max-height: 100%;
+}
+
+@media (max-width: 720px) {
+  .chatbot-container {
+    width: 90vw;
+    height: 85vh;
+    min-width: unset;
+    min-height: 520px;
+  }
+  .chatbot-progress {
+    --circle-size: 56px;
+    padding: 22px 14px;
+  }
+}

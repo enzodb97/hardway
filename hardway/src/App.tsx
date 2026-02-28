@@ -24,6 +24,7 @@ import AltaPedido from "./pages/Pedidos/AltaPedido";
 import DetallePedido from "./pages/Pedidos/DetallePedido";
 import Indumentaria from "./pages/Indumentaria/Indumentaria";
 import AltaIndumentaria from "./pages/Indumentaria/AltaIndumentaria";
+import Chatbot from "./pages/Chatbot";
 import Reportes from "./pages/Reportes/Reportes";
 import ClientesMasPedidos from "./pages/Reportes/ClientesMasPedidos";
 import AnalisisCancelaciones from "./pages/Reportes/AnalisisCancelaciones";
@@ -105,6 +106,9 @@ const AppRouter = () => {
         <>
           {console.log("✅ Loading finalizado, renderizando aplicación")}
     <IonReactRouter>
+      {/* Public chatbot route available without authentication */}
+      <Route exact path="/chatbot" component={Chatbot} />
+      <Route exact path="/invitado" render={() => <Redirect to="/chatbot" />} />
       {isAuthenticated ? (
         <ClientesProvider>
         <IonSplitPane contentId="main" when="md">
@@ -246,6 +250,9 @@ const AppRouter = () => {
       ) : (
         <IonRouterOutlet>
           <Route exact path="/login" component={Login} />
+          {/* Public chatbot routes available without authentication */}
+          <Route exact path="/chatbot" component={Chatbot} />
+          <Route exact path="/invitado" render={() => <Redirect to="/chatbot" />} />
           {/* Ruta catch-all para usuarios no autenticados */}
           <Redirect to="/login" />
         </IonRouterOutlet>

@@ -14,13 +14,24 @@ const { setupAssociations } = require("./models");
 
 // Middlewares globales
 app.use(corsConfig);
-app.use(express.json());
+// Parsear bodies JSON y guardar rawBody para diagnóstico cuando haga falta
+app.use(express.json({ verify: (req, _res, buf) => { try { req.rawBody = buf.toString(); } catch (e) { req.rawBody = ''; } } }));
+// Parsear bodies urlencoded por compatibilidad
+app.use(express.urlencoded({ extended: true }));
 
 // Conectar a la base de datos
 connectDB();
 
 // Configurar relaciones entre modelos
 setupAssociations();
+
+// Registrar ruta pública de envios antes de cualquier router montado en '/api'
+const consultaInvitadoHandler = require("./routes/enviosPublico");
+app.post("/api/envios/consulta-invitado", consultaInvitadoHandler);
+
+// Registrar endpoint público para detalle de pedido
+const detallePedidoPublicoHandler = require("./routes/detallePedidoPublico");
+app.post("/api/pedidos/detalle-publico", detallePedidoPublicoHandler);
 
 // Importar rutas
 const authRoutes = require("./routes/auth");
@@ -31,7 +42,6 @@ const indumentariaRoutes = require("./routes/indumentaria");
 const auxiliaresRoutes = require("./routes/auxiliares");
 const reportesRoutes = require("./routes/reportes");
 const pickingRoutes = require("./routes/picking");
-const enviosRoutes = require("./routes/envios");
 const ubicacionRoutes = require("./routes/ubicacion");
 const clientesVipRoutes = require("./routes/clientesVip");
 const presentacionesRoutes = require("./routes/presentaciones");
@@ -50,8 +60,11 @@ app.use("/api/auxiliares", auxiliaresRoutes);
 app.use("/api", ubicacionRoutes);
 app.use("/api/reportes", reportesRoutes);
 app.use("/api/picking", pickingRoutes);
-app.use("/api/envios", enviosRoutes);
-app.use("/api/presentaciones", presentacionesRoutes);
+// (La ruta pública de envíos ya fue registrada arriba)
+
+const { verificarAccesoEnvios } = require("./middleware/auth");
+app.use("/api/envios", verificarAccesoEnvios, require("./routes/envios"));
+
 
 // Endpoint de prueba
 app.get("/api/health", (req, res) => {

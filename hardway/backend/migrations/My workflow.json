@@ -1,0 +1,216 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consulta-pedido",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [7008, 496],
+      "id": "6dfb7784-0cf7-4826-a282-344f62893ad3",
+      "name": "Webhook",
+      "webhookId": "0b8facda-ce00-45eb-9ed0-8bd81e5c6170"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "numeroPedido",
+              "value": "={{ $node[\"Webhook\"].json[\"body\"].numeroPedido }}"
+            },
+            {
+              "name": "dni",
+              "value": "={{ $node[\"Webhook\"].json[\"body\"].dni }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $node[\"Webhook\"].json[\"body\"].email }}"
+            },
+            {
+              "name": "action",
+              "value": "={{ $node[\"Webhook\"].json[\"body\"].action }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [7296, 496],
+      "id": "e12a6b76-c311-4184-85f1-598dfbd92040",
+      "name": "Normalize Body"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.action }}",
+              "value2": "detalle"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [7504, 496],
+      "id": "a731ceec-4341-4338-a83f-67799fd52d14",
+      "name": "If - detalle?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/api/pedidos/detalle-publico",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "numeroPedido",
+              "value": "={{ $json.numeroPedido }}"
+            },
+            {
+              "name": "dni",
+              "value": "={{ $json.dni }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {
+          "bodyContentType": "json"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [7776, 320],
+      "id": "d0cc5c1a-d7d9-44cb-a2a2-dcb27e9e3cb9",
+      "name": "Detalle Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/api/envios/consulta-invitado",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "numeroPedido",
+              "value": "={{ $json.numeroPedido }}"
+            },
+            {
+              "name": "dni",
+              "value": "={{ $json.dni }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {
+          "bodyContentType": "json"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [7776, 672],
+      "id": "599f4514-a121-4835-9014-ef0548df4b78",
+      "name": "HTTP Request - Resumen"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [8208, 496],
+      "id": "967e7926-71d9-4a26-8066-b11bfabd0ec8",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If - detalle?": {
+      "main": [
+        [
+          {
+            "node": "Detalle Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request - Resumen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detalle Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Resumen": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Body": {
+      "main": [
+        [
+          {
+            "node": "If - detalle?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "19d0bce0-189e-4569-92eb-b4d199c0c4d7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "880b63742460cf01edc69df22e756e29515a7e283c914d56e7bcd7413b548a76"
+  },
+  "id": "5zCI6ggnq0WTzFVH",
+  "tags": []
+}
