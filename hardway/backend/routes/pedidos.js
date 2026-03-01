@@ -860,15 +860,34 @@ router.post("/", async (req, res) => {
     // Crea los detalles del pedido y descuenta stock
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
-        // Obtener precio unitario
-        const [precioRow] = await sequelize.query(
-          `SELECT pr.precio FROM indumentaria i
+        // Obtener todos los datos del producto para el snapshot histórico
+        const [productoRow] = await sequelize.query(
+          `SELECT 
+            pr.precio,
+            ni.nombre,
+            co.color,
+            ta.talle,
+            cat.categoria,
+            te.tipoTela as tela,
+            pp.nombrePresentacion
+          FROM indumentaria i
             JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
             JOIN precioindumentaria pr ON di.idPrecio = pr.idPrecio
-            WHERE i.codigoIndumentaria = ? LIMIT 1`,
-          { replacements: [prenda.codigoIndumentaria] }
+            LEFT JOIN nombreindumentaria ni ON di.idNombre = ni.idNombre
+            LEFT JOIN color co ON di.idColor = co.idColor
+            LEFT JOIN talle ta ON di.idTalle = ta.idTalle
+            LEFT JOIN categoriaindumentaria cat ON di.idCategoria = cat.idCategoria
+            LEFT JOIN tela te ON di.idTela = te.idTela
+            LEFT JOIN presentacion_producto pp ON pp.idPresentacion = ?
+          WHERE i.codigoIndumentaria = ? LIMIT 1`,
+          { 
+            replacements: [prenda.idPresentacion || 1, prenda.codigoIndumentaria],
+            transaction: t 
+          }
         );
-        const precioUnitario = precioRow[0]?.precio || 0;
+        
+        const productoData = productoRow[0] || {};
+        const precioUnitario = productoData.precio || 0;
         
         // Obtener porcentaje de descuento para esta presentación
         const porcentajeDescuento = mapaDescuentos.get(prenda.idPresentacion || 1) || 0;
@@ -883,6 +902,7 @@ router.post("/", async (req, res) => {
         
         console.log(`  💰 ${prenda.codigoIndumentaria}: Presentación ${prenda.idPresentacion}, Descuento ${porcentajeDescuento}% = $${descuentoItem.toFixed(2)}`);
         
+        // Crear detalle del pedido con snapshot de datos
         await DetallePedido.create(
           {
             idDetallePedido: "DPED-" + Math.random().toString().slice(2, 8),
@@ -893,6 +913,14 @@ router.post("/", async (req, res) => {
             idPresentacion: prenda.idPresentacion || 1,
             cantidadPresentaciones: prenda.cantidadPresentaciones || prenda.cantidad,
             unidadesTotales: prenda.unidadesTotales || prenda.cantidad,
+            // Snapshot de datos históricos
+            nombreProducto: productoData.nombre,
+            colorProducto: productoData.color,
+            talleProducto: productoData.talle,
+            categoriaProducto: productoData.categoria,
+            telaProducto: productoData.tela,
+            precioUnitario: precioUnitario,
+            nombrePresentacion: productoData.nombrePresentacion,
           },
           { transaction: t }
         );
@@ -1051,33 +1079,33 @@ router.get("/:numeroPedido/detalle-plano", async (req, res) => {
     const [detalleItems] = await sequelize.query(
       `
       SELECT
-        ni.nombre AS nombre_producto,
-        ta.talle,
-        co.color,
-        pr.precio AS precio_unitario,
+        -- Usar snapshot si existe, sino obtener de tablas actuales
+        COALESCE(dp.nombreProducto, ni.nombre) AS nombre_producto,
+        COALESCE(dp.talleProducto, ta.talle) AS talle,
+        COALESCE(dp.colorProducto, co.color) AS color,
+        COALESCE(dp.precioUnitario, pr.precio) AS precio_unitario,
         dp.cantidad,
         dp.descuentoItem AS descuento_por_item,
-        (pr.precio * dp.cantidad - IFNULL(dp.descuentoItem,0)) AS subtotal,
+        -- Calcular subtotal usando el precio guardado en el snapshot
+        (COALESCE(dp.precioUnitario, pr.precio) * dp.cantidad - IFNULL(dp.descuentoItem,0)) AS subtotal,
         dp.idPresentacion,
         dp.cantidadPresentaciones,
         dp.unidadesTotales,
-        pp.nombrePresentacion
+        COALESCE(dp.nombrePresentacion, pp.nombrePresentacion) AS nombrePresentacion,
+        COALESCE(dp.categoriaProducto, cat.categoria) AS categoria,
+        COALESCE(dp.telaProducto, te.tipoTela) AS tela
       FROM
         detallepedido dp
-      JOIN
-        indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
-      JOIN
-        detalleindumentaria di ON i.idDetalle = di.idDetalle
-      JOIN
-        nombreindumentaria ni ON di.idNombre = ni.idNombre
-      JOIN
-        precioindumentaria pr ON di.idPrecio = pr.idPrecio
-      JOIN
-        talle ta ON di.idTalle = ta.idTalle
-      JOIN
-        color co ON di.idColor = co.idColor
-      LEFT JOIN
-        presentacion_producto pp ON dp.idPresentacion = pp.idPresentacion
+      -- LEFT JOIN para permitir que el snapshot funcione sin depender de datos actuales
+      LEFT JOIN indumentaria i ON dp.codigoIndumentaria = i.codigoIndumentaria
+      LEFT JOIN detalleindumentaria di ON i.idDetalle = di.idDetalle
+      LEFT JOIN nombreindumentaria ni ON di.idNombre = ni.idNombre
+      LEFT JOIN precioindumentaria pr ON di.idPrecio = pr.idPrecio
+      LEFT JOIN talle ta ON di.idTalle = ta.idTalle
+      LEFT JOIN color co ON di.idColor = co.idColor
+      LEFT JOIN categoriaindumentaria cat ON di.idCategoria = cat.idCategoria
+      LEFT JOIN tela te ON di.idTela = te.idTela
+      LEFT JOIN presentacion_producto pp ON dp.idPresentacion = pp.idPresentacion
       WHERE
         dp.numeroPedido = ?
       `,

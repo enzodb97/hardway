@@ -485,9 +485,6 @@
 
 /* Extra-large screens */
 @media (min-width: 1300px) {
-  .chatbot-progress {
-    --circle-size: 130px; /* larger circles on wide screens */
-  }
   .chatbot-result-icon {
     width: 72px;
     height: 72px;

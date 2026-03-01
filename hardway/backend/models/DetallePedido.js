@@ -23,6 +23,35 @@ const DetallePedido = sequelize.define(
       type: DataTypes.INTEGER,
       comment: "Total de unidades (calculado)",
     },
+    // Columnas de snapshot para preservar datos históricos del producto
+    nombreProducto: {
+      type: DataTypes.STRING(100),
+      comment: "Nombre del producto al momento del pedido",
+    },
+    colorProducto: {
+      type: DataTypes.STRING(50),
+      comment: "Color del producto al momento del pedido",
+    },
+    talleProducto: {
+      type: DataTypes.STRING(20),
+      comment: "Talle del producto al momento del pedido",
+    },
+    categoriaProducto: {
+      type: DataTypes.STRING(50),
+      comment: "Categoría del producto al momento del pedido",
+    },
+    telaProducto: {
+      type: DataTypes.STRING(50),
+      comment: "Tela del producto al momento del pedido",
+    },
+    precioUnitario: {
+      type: DataTypes.DECIMAL(10, 2),
+      comment: "Precio unitario al momento del pedido",
+    },
+    nombrePresentacion: {
+      type: DataTypes.STRING(50),
+      comment: "Nombre de la presentación al momento del pedido",
+    },
   },
   { tableName: "detallepedido", timestamps: false }
 );
