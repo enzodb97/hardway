@@ -42,6 +42,13 @@ async function calcularDescuentosPedido(prendas, idCliente, transaction) {
   let totalPedido = 0;
   let subtotalOriginal = 0;
 
+  // Cargar porcentajes de descuento desde la BD
+  const presentaciones = await PresentacionProducto.findAll({ transaction });
+  const mapaDescuentos = new Map();
+  presentaciones.forEach(p => {
+    mapaDescuentos.set(p.idPresentacion, p.porcentajeDescuento || 0);
+  });
+
   // Calcular subtotal y aplicar descuentos por presentación
   if (prendas && Array.isArray(prendas)) {
     for (const prenda of prendas) {
@@ -57,18 +64,10 @@ async function calcularDescuentosPedido(prendas, idCliente, transaction) {
       const subtotal = precio * prenda.cantidad;
       subtotalOriginal += subtotal;
 
-      // Aplicar descuentos por presentación
-      // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
-      let precioConDescuento = precio;
+      // Aplicar descuentos por presentación desde la BD
       const idPres = prenda.idPresentacion || 1;
-
-      if (idPres === 3) {
-        // Pack: 5% de descuento
-        precioConDescuento = precio * 0.95;
-      } else if (idPres === 2) {
-        // Caja Cerrada: 10% de descuento
-        precioConDescuento = precio * 0.90;
-      }
+      const porcentajeDescuento = mapaDescuentos.get(idPres) || 0;
+      const precioConDescuento = precio * (1 - porcentajeDescuento / 100);
 
       totalPedido += precioConDescuento * prenda.cantidad;
     }
@@ -99,23 +98,17 @@ async function calcularDescuentosPedido(prendas, idCliente, transaction) {
 
 /**
  * Calcula el descuento de un item individual según su presentación
+ * NOTA: Esta función es síncrona y no puede consultar la BD.
+ * Los descuentos deben calcularse con calcularDescuentosPedido() para obtener valores actualizados.
  * @param {Number} precioUnitario - Precio unitario del producto
  * @param {Number} cantidad - Cantidad del producto
  * @param {Number} idPresentacion - ID de presentación (1=Unidad, 2=Caja Cerrada, 3=Pack)
+ * @param {Number} porcentajeDescuento - Porcentaje de descuento (opcional, por defecto 0)
  * @returns {Number} descuentoItem - Monto del descuento
  */
-function calcularDescuentoItem(precioUnitario, cantidad, idPresentacion = 1) {
+function calcularDescuentoItem(precioUnitario, cantidad, idPresentacion = 1, porcentajeDescuento = 0) {
   const subtotal = precioUnitario * cantidad;
-  let descuentoItem = 0;
-
-  if (idPresentacion === 3) {
-    // Pack: 5% de descuento
-    descuentoItem = subtotal * 0.05;
-  } else if (idPresentacion === 2) {
-    // Caja Cerrada: 10% de descuento
-    descuentoItem = subtotal * 0.10;
-  }
-
+  const descuentoItem = subtotal * (porcentajeDescuento / 100);
   return descuentoItem;
 }
 
@@ -856,6 +849,14 @@ router.post("/", async (req, res) => {
       { transaction: t }
     );
 
+    // Obtener porcentajes de descuento de presentaciones
+    const presentaciones = await PresentacionProducto.findAll({ transaction: t });
+    const mapaDescuentos = new Map();
+    presentaciones.forEach(p => {
+      mapaDescuentos.set(p.idPresentacion, p.porcentajeDescuento || 0);
+    });
+    console.log('📊 Porcentajes de descuento cargados:', Array.from(mapaDescuentos.entries()));
+
     // Crea los detalles del pedido y descuenta stock
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
@@ -869,12 +870,18 @@ router.post("/", async (req, res) => {
         );
         const precioUnitario = precioRow[0]?.precio || 0;
         
+        // Obtener porcentaje de descuento para esta presentación
+        const porcentajeDescuento = mapaDescuentos.get(prenda.idPresentacion || 1) || 0;
+        
         // Calcular descuento por presentación usando la función helper
         const descuentoItem = calcularDescuentoItem(
           precioUnitario,
           prenda.cantidad,
-          prenda.idPresentacion || 1
+          prenda.idPresentacion || 1,
+          porcentajeDescuento
         );
+        
+        console.log(`  💰 ${prenda.codigoIndumentaria}: Presentación ${prenda.idPresentacion}, Descuento ${porcentajeDescuento}% = $${descuentoItem.toFixed(2)}`);
         
         await DetallePedido.create(
           {
@@ -1301,6 +1308,14 @@ router.put("/:numeroPedido", async (req, res) => {
       transaction: t,
     });
 
+    // Obtener porcentajes de descuento de presentaciones
+    const presentaciones = await PresentacionProducto.findAll({ transaction: t });
+    const mapaDescuentos = new Map();
+    presentaciones.forEach(p => {
+      mapaDescuentos.set(p.idPresentacion, p.porcentajeDescuento || 0);
+    });
+    console.log('📊 Porcentajes de descuento cargados (edición):', Array.from(mapaDescuentos.entries()));
+
     // 4. Crea los nuevos detalles y descuenta stock
     if (prendas && Array.isArray(prendas)) {
       for (const prenda of prendas) {
@@ -1314,12 +1329,18 @@ router.put("/:numeroPedido", async (req, res) => {
         );
         const precioUnitario = precioRow[0]?.precio || 0;
         
+        // Obtener porcentaje de descuento para esta presentación
+        const porcentajeDescuento = mapaDescuentos.get(prenda.idPresentacion || 1) || 0;
+        
         // Calcular descuento por presentación
         const descuentoItem = calcularDescuentoItem(
           precioUnitario,
           prenda.cantidad,
-          prenda.idPresentacion || 1
+          prenda.idPresentacion || 1,
+          porcentajeDescuento
         );
+        
+        console.log(`  💰 ${prenda.codigoIndumentaria}: Presentación ${prenda.idPresentacion}, Descuento ${porcentajeDescuento}% = $${descuentoItem.toFixed(2)}`);
         
         await DetallePedido.create(
           {

@@ -43,7 +43,8 @@ import {
 } from "../../utils/pedidosUtils";
 import { useClientesVip } from "../../utils/useClientesVip";
 import axiosInstance from "../../config/axios";
-import { obtenerConfiguracionesPorProducto } from "../../services/presentacionesService";
+import { obtenerConfiguracionesPorProducto, obtenerPresentaciones } from "../../services/presentacionesService";
+import { PresentacionProducto } from "../../types/presentaciones";
 import "./AltaPedido.css";
 import zepelin from "../../assets/images/zepelin.png";
 import { useClientes, Cliente } from "../../context/ClientesContext";
@@ -111,6 +112,11 @@ const AltaPedido: React.FC = () => {
     Map<string, number>
   >(new Map());
 
+  // --- Descuentos por Presentación ---
+  const [presentacionesConDescuento, setPresentacionesConDescuento] = useState<
+    Map<number, number>
+  >(new Map());
+
   // --- Empresas de Envío ---
   const [empresasEnvio, setEmpresasEnvio] = useState<
     { idEmpresaEnvio: number; nombre: string }[]
@@ -147,19 +153,21 @@ const AltaPedido: React.FC = () => {
     
     let precio = precioOriginal;
     
-    // Aplicar descuentos por tipo de presentación
-    // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
+    // Aplicar descuentos por tipo de presentación (dinámicos desde BD)
     const idPres = prenda.idPresentacion || 1;
-    if (idPres === 3) {
-      // Pack: 5% de descuento
-      const descuento = subtotalOriginal * 0.05;
-      descuentoPacks += descuento;
-      precio = precio * 0.95;
-    } else if (idPres === 2) {
-      // Caja Cerrada: 10% de descuento
-      const descuento = subtotalOriginal * 0.10;
-      descuentoCajasCerradas += descuento;
-      precio = precio * 0.90;
+    const porcentajeDescuento = presentacionesConDescuento.get(idPres) || 0;
+    
+    if (porcentajeDescuento > 0) {
+      const descuento = subtotalOriginal * (porcentajeDescuento / 100);
+      
+      // Acumular descuentos por tipo
+      if (idPres === 3) {
+        descuentoPacks += descuento;
+      } else if (idPres === 2) {
+        descuentoCajasCerradas += descuento;
+      }
+      
+      precio = precio * (1 - porcentajeDescuento / 100);
     }
     
     return acc + precio * prenda.cantidad;
@@ -168,6 +176,25 @@ const AltaPedido: React.FC = () => {
   // Descuento VIP se aplica sobre el subtotal original (antes de descuentos de presentación)
   const descuento = esVip ? totalSinDescuentos * 0.1 : 0;
   const totalConDescuento = totalPedido - descuento;
+
+  // Cargar presentaciones con descuentos al montar el componente
+  useEffect(() => {
+    const cargarDescuentos = async () => {
+      try {
+        const presentaciones = await obtenerPresentaciones();
+        const mapDescuentos = new Map<number, number>();
+        presentaciones.forEach(p => {
+          mapDescuentos.set(p.idPresentacion, p.porcentajeDescuento || 0);
+        });
+        setPresentacionesConDescuento(mapDescuentos);
+      } catch (error) {
+        console.error('Error al cargar descuentos de presentaciones:', error);
+        // Valores por defecto en caso de error
+        setPresentacionesConDescuento(new Map([[1, 0], [2, 10], [3, 5]]));
+      }
+    };
+    cargarDescuentos();
+  }, []);
 
   // Limpiar formulario y prendas SIEMPRE al entrar a la página de alta
   useEffect(() => {
@@ -1234,12 +1261,12 @@ const AltaPedido: React.FC = () => {
                 {/* Descuentos por presentación */}
                 {descuentoPacks > 0 && (
                   <div style={{ color: "#2196F3", fontSize: "0.95em" }}>
-                    📦 Descuento por Packs (5%): -${descuentoPacks.toFixed(2)}
+                    📦 Descuento por Packs ({presentacionesConDescuento.get(3) || 5}%): -${descuentoPacks.toFixed(2)}
                   </div>
                 )}
                 {descuentoCajasCerradas > 0 && (
                   <div style={{ color: "#4CAF50", fontSize: "0.95em" }}>
-                    📦 Descuento por Cajas Cerradas (10%): -${descuentoCajasCerradas.toFixed(2)}
+                    📦 Descuento por Cajas Cerradas ({presentacionesConDescuento.get(2) || 10}%): -${descuentoCajasCerradas.toFixed(2)}
                   </div>
                 )}
                 

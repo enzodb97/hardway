@@ -104,6 +104,7 @@ export interface Presentacion {
   idPresentacion: number;
   nombrePresentacion: string;
   descripcion?: string;
+  porcentajeDescuento?: number; // Porcentaje de descuento (0-100)
 }
 
 export interface ConfiguracionPresentacion {

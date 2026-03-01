@@ -58,3 +58,30 @@ export const eliminarConfiguracion = async (idConfiguracion: number) => {
   );
   return response.data;
 };
+
+/**
+ * Actualiza el porcentaje de descuento de una presentación
+ * @param idPresentacion - ID de la presentación (1=Unidad, 2=Caja Cerrada, 3=Pack)
+ * @param porcentajeDescuento - Nuevo porcentaje de descuento (0-100, solo enteros)
+ */
+export const actualizarPorcentajeDescuento = async (
+  idPresentacion: number,
+  porcentajeDescuento: number
+): Promise<any> => {
+  // Asegurar que sea un número entero
+  const porcentajeEntero = Math.round(Math.abs(porcentajeDescuento));
+  
+  if (porcentajeEntero < 0 || porcentajeEntero > 100) {
+    throw new Error("El porcentaje debe estar entre 0 y 100");
+  }
+
+  if (!Number.isInteger(porcentajeEntero)) {
+    throw new Error("El porcentaje debe ser un número entero");
+  }
+
+  const response = await axiosInstance.put(
+    `/api/presentaciones/${idPresentacion}/descuento`,
+    { porcentajeDescuento: porcentajeEntero }
+  );
+  return response.data;
+};

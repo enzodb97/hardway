@@ -132,6 +132,7 @@ ion-content.usuarios-content {
   gap: 16px;
   scroll-margin-top: 20px;
   position: relative;
+  max-height: 800px;
 }
 
 .usuarios-search-container {

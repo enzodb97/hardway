@@ -474,9 +474,100 @@ const verificarAccesoEnvios = async (req, res, next) => {
   }
 };
 
+// Middleware de autorización para configuración de descuentos
+const verificarAccesoConfiguracion = async (req, res, next) => {
+  console.log('🔍 Verificando acceso a configuración de descuentos...');
+  
+  let nombreUsuario = req.headers.nombreusuario;
+  
+  // Si no hay nombreUsuario en headers, intentar extraerlo del token Bearer
+  if (!nombreUsuario) {
+    const authorization = req.headers.authorization;
+    
+    if (authorization && authorization.startsWith('Bearer ')) {
+      const token = authorization.split(' ')[1];
+      
+      // Para tokens temporales del formato "temp-token-{idUsuario}"
+      if (token.startsWith('temp-token-')) {
+        const idUsuario = token.replace('temp-token-', '');
+        
+        try {
+          const usuarioToken = await Usuario.findOne({
+            where: { idUsuario: parseInt(idUsuario) },
+            attributes: ['idUsuario', 'nombreUsuario']
+          });
+          
+          if (usuarioToken) {
+            nombreUsuario = usuarioToken.nombreUsuario;
+          }
+        } catch (error) {
+          console.error('Error extrayendo usuario del token:', error);
+        }
+      }
+    }
+  }
+
+  if (!nombreUsuario) {
+    return res.status(401).json({
+      error: "Acceso denegado: necesitas iniciar sesión para configurar descuentos",
+      codigo: "NO_AUTH",
+    });
+  }
+
+  try {
+    const usuario = await Usuario.findOne({
+      where: { nombreUsuario },
+      include: [{
+        model: TipoRol,
+        as: 'roles',
+        attributes: ["idTipoRol", "tipoRol"],
+        through: { attributes: [] }
+      }]
+    });
+
+    if (!usuario) {
+      return res.status(401).json({
+        error: "Usuario no encontrado",
+        codigo: "USER_NOT_FOUND",
+      });
+    }
+
+    // Verificar si el usuario tiene rol de Administrador (1) o Encargado de Stock (7)
+    const tieneAcceso = usuario.roles?.some(rol => 
+      rol.idTipoRol === 1 || rol.idTipoRol === 7
+    );
+
+    if (!tieneAcceso) {
+      return res.status(403).json({
+        error: "Acceso denegado: solo Administradores y Encargados de Stock pueden configurar descuentos",
+        codigo: "INSUFFICIENT_PERMISSIONS",
+        rolesActuales: usuario.roles?.map(r => r.tipoRol) || [],
+      });
+    }
+
+    console.log('✅ Acceso autorizado para configurar descuentos:', nombreUsuario);
+
+    // Pasar información del usuario al siguiente middleware/endpoint
+    req.usuarioAutenticado = {
+      idUsuario: usuario.idUsuario,
+      nombreUsuario: usuario.nombreUsuario,
+      roles: usuario.roles?.map(r => ({ idTipoRol: r.idTipoRol, tipoRol: r.tipoRol })) || [],
+    };
+
+    next();
+  } catch (error) {
+    console.error("Error en verificarAccesoConfiguracion:", error);
+    return res.status(500).json({
+      error: "Error interno al verificar permisos",
+      codigo: "INTERNAL_ERROR",
+    });
+  }
+};
+
 module.exports = {
   verificarAccesoPedidos,
   verificarAutenticacion,
   verificarAccesoPicking,
   verificarAccesoEnvios,
+  verificarAccesoConfiguracion,
 };

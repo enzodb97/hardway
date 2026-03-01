@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verificarAutenticacion } = require("../middleware/auth");
+const { verificarAutenticacion, verificarAccesoConfiguracion } = require("../middleware/auth");
 const {
   PresentacionProducto,
   ConfiguracionPresentacion,
@@ -13,7 +13,7 @@ router.use(verificarAutenticacion);
 // ========================================
 // OBTENER TODAS LAS PRESENTACIONES
 // ========================================
-router.get("/presentaciones", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const presentaciones = await PresentacionProducto.findAll({
       order: [["idPresentacion", "ASC"]],
@@ -184,5 +184,73 @@ router.delete("/configuraciones/:id", async (req, res) => {
     res.status(500).json({ error: "Error al eliminar configuración" });
   }
 });
+
+// ========================================
+// ACTUALIZAR PORCENTAJE DE DESCUENTO DE UNA PRESENTACIÓN
+// ========================================
+router.put(
+  "/:id/descuento",
+  verificarAccesoConfiguracion,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { porcentajeDescuento } = req.body;
+
+      // Validar que el porcentaje esté presente
+      if (porcentajeDescuento === undefined || porcentajeDescuento === null) {
+        return res.status(400).json({ error: "El porcentaje de descuento es requerido" });
+      }
+
+      // Validar que el porcentaje sea un número entero entre 0 y 100
+      const porcentaje = parseInt(porcentajeDescuento);
+      if (isNaN(porcentaje) || !Number.isInteger(Number(porcentajeDescuento))) {
+        return res.status(400).json({ 
+          error: "El porcentaje de descuento debe ser un número entero" 
+        });
+      }
+      
+      if (porcentaje < 0 || porcentaje > 100) {
+        return res.status(400).json({ 
+          error: "El porcentaje de descuento debe estar entre 0 y 100" 
+        });
+      }
+
+      // Buscar la presentación
+      const presentacion = await PresentacionProducto.findByPk(id);
+
+      if (!presentacion) {
+        return res.status(404).json({ error: "Presentación no encontrada" });
+      }
+
+      // Guardar valor anterior para el log
+      const valorAnterior = presentacion.porcentajeDescuento;
+
+      // Actualizar el porcentaje
+      await presentacion.update({ porcentajeDescuento: porcentaje });
+
+      // Log de auditoría
+      console.log(`✅ Descuento actualizado:`, {
+        presentacion: presentacion.nombrePresentacion,
+        valorAnterior: `${valorAnterior}%`,
+        valorNuevo: `${porcentaje}%`,
+        usuario: req.usuarioAutenticado?.nombreUsuario || 'Desconocido',
+        fecha: new Date().toISOString()
+      });
+
+      res.json({ 
+        mensaje: `Descuento actualizado correctamente de ${valorAnterior}% a ${porcentaje}%`,
+        presentacion: {
+          idPresentacion: presentacion.idPresentacion,
+          nombrePresentacion: presentacion.nombrePresentacion,
+          porcentajeDescuento: presentacion.porcentajeDescuento,
+          valorAnterior
+        }
+      });
+    } catch (error) {
+      console.error("Error al actualizar porcentaje de descuento:", error);
+      res.status(500).json({ error: "Error al actualizar porcentaje de descuento" });
+    }
+  }
+);
 
 module.exports = router;

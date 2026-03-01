@@ -47,6 +47,7 @@ import {
   actualizarConfiguracionPresentacion,
   eliminarConfiguracionPresentacion,
 } from "../../utils/indumentariaUtils";
+import { actualizarPorcentajeDescuento } from "../../services/presentacionesService";
 import "./Indumentaria.css";
 
 const PAGE_SIZE = 6;
@@ -79,6 +80,12 @@ const Indumentaria: React.FC = () => {
   const [presentacionEditada, setPresentacionEditada] = useState<{
     cantidadUnidades: number;
   }>({ cantidadUnidades: 1 });
+
+  // Estados para configuración de descuentos
+  const [showDescuentosModal, setShowDescuentosModal] = useState(false);
+  const [presentacionesConDescuento, setPresentacionesConDescuento] = useState<Presentacion[]>([]);
+  const [descuentosEditados, setDescuentosEditados] = useState<Map<number, number>>(new Map());
+  const [guardandoDescuento, setGuardandoDescuento] = useState<number | null>(null);
 
   const cargarIndumentaria = async () => {
     setLoading(true);
@@ -626,6 +633,42 @@ const Indumentaria: React.FC = () => {
             >
               <IonIcon icon={trash} slot="start" />
               {mostrarNoAptas ? 'Ver Todas' : 'Ver No Aptas'}
+            </IonButton>
+          </IonItem>
+        </div>
+
+        {/* Botón de configuración de descuentos */}
+        <div className="filter-container" style={{ padding: '12px 16px', marginTop: '8px' }}>
+          <IonItem lines="none" style={{ '--background': 'transparent' }}>
+            <IonLabel style={{ color: '#475569', fontWeight: '500' }}>
+              ⚙️ Configurar descuentos globales por presentación
+            </IonLabel>
+            <IonButton
+              slot="end"
+              fill="outline"
+              color="tertiary"
+              onClick={async () => {
+                try {
+                  const presentaciones = await obtenerPresentaciones();
+                  setPresentacionesConDescuento(presentaciones);
+                  
+                  // Inicializar mapa de descuentos editados con valores actuales
+                  const mapaInicial = new Map<number, number>();
+                  presentaciones.forEach(p => {
+                    mapaInicial.set(p.idPresentacion, p.porcentajeDescuento || 0);
+                  });
+                  setDescuentosEditados(mapaInicial);
+                  
+                  setShowDescuentosModal(true);
+                } catch (error) {
+                  console.error('Error al cargar presentaciones:', error);
+                  setAlertMsg('Error al cargar las presentaciones');
+                  setShowAlert(true);
+                }
+              }}
+            >
+              <IonIcon icon={settingsOutline} slot="start" />
+              Configurar Descuentos
             </IonButton>
           </IonItem>
         </div>
@@ -1930,6 +1973,271 @@ const Indumentaria: React.FC = () => {
                 }}
               >
                 <IonIcon icon={checkmarkCircle} slot="start" />
+                Cerrar
+              </IonButton>
+            </div>
+          </IonToolbar>
+        </IonFooter>
+      </IonModal>
+
+      {/* Modal para configuración de descuentos globales */}
+      <IonModal 
+        isOpen={showDescuentosModal} 
+        onDidDismiss={() => {
+          setShowDescuentosModal(false);
+          setPresentacionesConDescuento([]);
+          setDescuentosEditados(new Map());
+          setGuardandoDescuento(null);
+        }}
+        className="modal-descuentos"
+      >
+        <IonHeader>
+          <IonToolbar color="tertiary">
+            <IonTitle>
+              <IonIcon icon={settingsOutline} style={{ marginRight: '8px' }} />
+              Configuración de  Descuentos por Presentación
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        
+        <IonContent className="ion-padding">
+          <div style={{ padding: '20px' }}>
+            {/* Header descriptivo */}
+            <div style={{ 
+              marginBottom: '24px', 
+              padding: '16px', 
+              backgroundColor: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ margin: '0 0 8px 0', color: '#334155', fontSize: '16px' }}>
+                Descuentos Globales por Tipo de Presentación
+              </h3>
+              <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6' }}>
+                Configure los porcentajes de descuento que se aplicarán automáticamente en todos los pedidos 
+                según el tipo de presentación. Estos descuentos son independientes del descuento VIP.
+              </p>
+              <div style={{
+                marginTop: '12px',
+                padding: '8px 12px',
+                backgroundColor: '#fff7ed',
+                borderLeft: '4px solid #f59e0b',
+                borderRadius: '4px',
+                fontSize: '13px',
+                color: '#92400e'
+              }}>
+                🔒 <strong>Permisos:</strong> Solo Administradores y Encargados de Stock pueden modificar estos valores
+              </div>
+            </div>
+
+            {/* Lista de presentaciones con descuentos configurables */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {presentacionesConDescuento
+                .filter(presentacion => presentacion.idPresentacion !== 1) // Excluir "Unidad"
+                .map((presentacion) => {
+                const descuentoActual = descuentosEditados.get(presentacion.idPresentacion) ?? presentacion.porcentajeDescuento ?? 0;
+                const precioEjemplo = 1000;
+                const precioConDescuento = precioEjemplo * (1 - descuentoActual / 100);
+                
+                // Colores según tipo de presentación
+                const colores = {
+                  1: { bg: '#f0f9ff', border: '#bae6fd', icon: '📦' }, // Unidad - azul claro
+                  2: { bg: '#f0fdf4', border: '#bbf7d0', icon: '📦' }, // Caja Cerrada - verde
+                  3: { bg: '#fef3c7', border: '#fde68a', icon: '📦' }  // Pack - amarillo
+                };
+                const colorConfig = colores[presentacion.idPresentacion as keyof typeof colores] || colores[1];
+
+                return (
+                  <div 
+                    key={presentacion.idPresentacion}
+                    style={{
+                      padding: '20px',
+                      backgroundColor: colorConfig.bg,
+                      border: `2px solid ${colorConfig.border}`,
+                      borderRadius: '12px',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    {/* Header de la tarjeta */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '24px' }}>{colorConfig.icon}</span>
+                        <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#1e293b' }}>
+                          {presentacion.nombrePresentacion}
+                        </h4>
+                      </div>
+                      <p style={{ margin: '4px 0 0 32px', fontSize: '13px', color: '#64748b' }}>
+                        {presentacion.descripcion}
+                      </p>
+                    </div>
+
+                    {/* Input de porcentaje */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{ 
+                        display: 'block', 
+                        marginBottom: '8px', 
+                        fontSize: '14px', 
+                        fontWeight: '600',
+                        color: '#475569'
+                      }}>
+                        Porcentaje de descuento (%)
+                      </label>
+                      <p style={{ 
+                        fontSize: '12px', 
+                        color: '#64748b', 
+                        margin: '0 0 12px 0',
+                        fontStyle: 'italic'
+                      }}>
+                        ℹ️ Solo números enteros entre 0 y 100
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IonInput
+                          type="number"
+                          min={0}
+                          max={100}
+                          step="1"
+                          value={descuentoActual}
+                          onIonInput={(e: any) => {
+                            let valor = parseInt(e.target.value);
+                            if (isNaN(valor) || valor < 0) valor = 0;
+                            if (valor > 100) valor = 100;
+                            // Asegurar que sea un entero
+                            valor = Math.round(Math.abs(valor));
+                            
+                            setDescuentosEditados(prev => {
+                              const newMap = new Map(prev);
+                              newMap.set(presentacion.idPresentacion, valor);
+                              return newMap;
+                            });
+                          }}
+                          style={{
+                            '--background': 'white',
+                            '--padding-start': '12px',
+                            '--padding-end': '12px',
+                            border: '2px solid #cbd5e1',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            flex: 1,
+                            maxWidth: '150px'
+                          }}
+                        />
+                        <IonButton
+                          color="success"
+                          onClick={async () => {
+                            setGuardandoDescuento(presentacion.idPresentacion);
+                            try {
+                              const valorAnterior = presentacion.porcentajeDescuento || 0;
+                              await actualizarPorcentajeDescuento(presentacion.idPresentacion, descuentoActual);
+                              
+                              // Actualizar el valor en la lista local
+                              setPresentacionesConDescuento(prev => 
+                                prev.map(p => 
+                                  p.idPresentacion === presentacion.idPresentacion 
+                                    ? { ...p, porcentajeDescuento: descuentoActual }
+                                    : p
+                                )
+                              );
+                              
+                              setAlertMsg(
+                                `✅ Descuento actualizado de ${valorAnterior}% a ${descuentoActual}% para ${presentacion.nombrePresentacion}`
+                              );
+                              setShowAlert(true);
+                            } catch (error: any) {
+                              console.error('Error al guardar descuento:', error);
+                              setAlertMsg(
+                                error.response?.data?.error || 'Error al actualizar el descuento'
+                              );
+                              setShowAlert(true);
+                            } finally {
+                              setGuardandoDescuento(null);
+                            }
+                          }}
+                          disabled={
+                            guardandoDescuento === presentacion.idPresentacion ||
+                            descuentoActual === (presentacion.porcentajeDescuento || 0)
+                          }
+                          style={{ minWidth: '120px' }}
+                        >
+                          {guardandoDescuento === presentacion.idPresentacion ? (
+                            'Guardando...'
+                          ) : descuentoActual === (presentacion.porcentajeDescuento || 0) ? (
+                            '✓ Guardado'
+                          ) : (
+                            <>
+                              <IonIcon icon={checkmarkCircle} slot="start" />
+                              Guardar
+                            </>
+                          )}
+                        </IonButton>
+                      </div>
+                    </div>
+
+                    {/* Preview del descuento */}
+                    <div style={{
+                      padding: '12px',
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      color: '#475569',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <strong>💡 Ejemplo:</strong> ${precioEjemplo.toLocaleString('es-AR')} 
+                      {descuentoActual > 0 && (
+                        <>
+                          {' → '}
+                          <span style={{ color: '#16a34a', fontWeight: 'bold' }}>
+                            ${precioConDescuento.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          <span style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}>
+                            ({descuentoActual}% de descuento)
+                          </span>
+                        </>
+                      )}
+                      {descuentoActual === 0 && (
+                        <span style={{ color: '#64748b', marginLeft: '4px' }}>
+                          (sin descuento)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Nota informativa final */}
+            <div style={{
+              marginTop: '24px',
+              padding: '16px',
+              backgroundColor: '#eff6ff',
+              borderRadius: '8px',
+              border: '1px solid #bfdbfe',
+              fontSize: '13px',
+              color: '#1e40af',
+              lineHeight: '1.6'
+            }}>
+              <strong>ℹ️ Importante:</strong> Los cambios se aplicarán inmediatamente a todos los nuevos pedidos. 
+              Los pedidos existentes mantendrán los descuentos con los que fueron creados.
+            </div>
+          </div>
+        </IonContent>
+        
+        <IonFooter>
+          <IonToolbar>
+            <div style={{ padding: '12px', display: 'flex', justifyContent: 'center' }}>
+              <IonButton 
+                expand="block"
+                fill="solid"
+                color="medium"
+                onClick={() => {
+                  setShowDescuentosModal(false);
+                  setPresentacionesConDescuento([]);
+                  setDescuentosEditados(new Map());
+                  setGuardandoDescuento(null);
+                }}
+                style={{ minWidth: '200px' }}
+              >
+                <IonIcon icon={close} slot="start" />
                 Cerrar
               </IonButton>
             </div>

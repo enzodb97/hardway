@@ -104,6 +104,7 @@ import {
 } from "ionicons/icons";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { obtenerPresentaciones } from "../services/presentacionesService";
 
 // Función utilitaria para obtener headers de autorización
 const getAuthHeaders = () => {
@@ -564,6 +565,13 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
   };
 
   try {
+    // Cargar presentaciones con sus descuentos
+    const presentaciones = await obtenerPresentaciones();
+    const presentacionesConDescuento = new Map<number, number>();
+    presentaciones.forEach(p => {
+      presentacionesConDescuento.set(p.idPresentacion, p.porcentajeDescuento || 0);
+    });
+
     // Obtener información completa del pedido
     const res = await axiosInstance.get(`/api/pedidos/${numeroPedido}/detalle-plano`);
     const pedido = res.data.pedido;
@@ -740,23 +748,15 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
     // La columna Subtotal termina en: margen izquierdo (14) + ancho de todas las columnas
     const subtotalColumnEnd = 14 + 45 + 28 + 18 + 22 + 26 + 16 + 26; // = 181
 
-    // Calcular descuentos de presentación y subtotal sin descuentos
+    // Calcular descuentos de presentación usando valores guardados en el pedido
     let descuentoCajaCerrada = 0;
     let descuentoPack = 0;
     let subtotalSinDescuentos = 0;
+    let subtotalPacks = 0;
+    let subtotalCajasCerradas = 0;
     
-    console.log('=== Calculando descuentos de presentación ===');
+    console.log('=== Calculando descuentos de presentación (valores guardados) ===');
     prendas.forEach((prenda: any) => {
-      // descuento_por_item es un valor absoluto en pesos, no un porcentaje
-      const descuentoItem = Number(prenda.descuento_por_item) || 0;
-      
-      console.log('Prenda:', {
-        nombre: prenda.nombre_producto,
-        idPresentacion: prenda.idPresentacion,
-        descuento_por_item: prenda.descuento_por_item,
-        descuentoItem: descuentoItem
-      });
-      
       // Calcular subtotal sin descuentos de esta prenda
       const precioUnitarioSinDescuento = prenda.precio_unitario;
       const unidadesPorPresentacion = prenda.unidadesTotales / prenda.cantidadPresentaciones;
@@ -765,19 +765,49 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
       
       subtotalSinDescuentos += subtotalPrenda;
       
-      if (prenda.idPresentacion === 2) { // Caja Cerrada
-        descuentoCajaCerrada += descuentoItem;
-        console.log('Agregando a descuento Caja Cerrada:', descuentoItem);
-      } else if (prenda.idPresentacion === 3) { // Pack
-        descuentoPack += descuentoItem;
-        console.log('Agregando a descuento Pack:', descuentoItem);
+      // USAR EL DESCUENTO GUARDADO en el pedido (no recalcular)
+      // Esto preserva los descuentos que estaban vigentes al momento de crear el pedido
+      const descuentoGuardado = Number(prenda.descuento_por_item) || 0;
+      const idPres = prenda.idPresentacion || 1;
+      
+      // Acumular subtotales por presentación (siempre, no solo cuando hay descuento)
+      if (idPres === 2) { // Caja Cerrada
+        subtotalCajasCerradas += subtotalPrenda;
+        if (descuentoGuardado > 0) {
+          descuentoCajaCerrada += descuentoGuardado;
+          console.log('Agregando a descuento Caja Cerrada:', descuentoGuardado);
+        }
+      } else if (idPres === 3) { // Pack
+        subtotalPacks += subtotalPrenda;
+        if (descuentoGuardado > 0) {
+          descuentoPack += descuentoGuardado;
+          console.log('Agregando a descuento Pack:', descuentoGuardado);
+        }
       }
     });
     
-    console.log('Totales descuentos:', {
+    // Calcular porcentajes históricos desde los descuentos guardados
+    const porcentajePackHistorico = subtotalPacks > 0 
+      ? Math.round((descuentoPack / subtotalPacks) * 100) 
+      : 0;
+    const porcentajeCajaHistorico = subtotalCajasCerradas > 0 
+      ? Math.round((descuentoCajaCerrada / subtotalCajasCerradas) * 100) 
+      : 0;
+    
+    console.log('Totales descuentos guardados:', {
       descuentoCajaCerrada,
-      descuentoPack
+      descuentoPack,
+      subtotalSinDescuentos,
+      porcentajePackHistorico,
+      porcentajeCajaHistorico
     });
+    
+    // Calcular total con descuentos guardados
+    const subtotalConDescuentosPresent = subtotalSinDescuentos - descuentoCajaCerrada - descuentoPack;
+    const descuentoVIP = pedido.descuentoOrden ? Number(pedido.descuentoOrden) : 0;
+    const totalFinal = subtotalConDescuentosPresent - descuentoVIP;
+    
+    console.log('Total final (usando descuentos guardados):', totalFinal);
 
     // Subtotal - alineado con la columna Subtotal de la tabla
     doc.setFontSize(10);
@@ -794,7 +824,60 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
 
     let currentY = finalY;
 
-    // Descuento VIP (si aplica) - Se muestra primero porque se aplica sobre el subtotal
+    // Descuentos de presentación (primero)
+    // Descuento por Pack (si aplica)
+    if (descuentoPack > 0) {
+      currentY += 6;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(33, 150, 243); // Azul
+      doc.text(`Descuento por Pack (${porcentajePackHistorico}%):`, 14, currentY);
+      doc.text(
+        `-$${Number(descuentoPack).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        subtotalColumnEnd,
+        currentY,
+        { align: "right" }
+      );
+      doc.setTextColor(0, 0, 0); // Volver a negro
+    }
+
+    // Descuento por Caja Cerrada (si aplica)
+    if (descuentoCajaCerrada > 0) {
+      currentY += 6;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(76, 175, 80); // Verde
+      doc.text(`Descuento por Caja Cerrada (${porcentajeCajaHistorico}%):`, 14, currentY);
+      doc.text(
+        `-$${Number(descuentoCajaCerrada).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        subtotalColumnEnd,
+        currentY,
+        { align: "right" }
+      );
+      doc.setTextColor(0, 0, 0); // Volver a negro
+    }
+
+    // Subtotal con descuentos de presentación (si hay descuentos)
+    if (descuentoPack > 0 || descuentoCajaCerrada > 0) {
+      currentY += 6;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text("Subtotal con descuentos de presentación:", 14, currentY);
+      doc.text(
+        `$${Number(subtotalConDescuentosPresent).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })}`,
+        subtotalColumnEnd,
+        currentY,
+        { align: "right" }
+      );
+    }
+
+    // Descuento VIP (si aplica) - Se muestra después de los descuentos de presentación
     if (pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0) {
       currentY += 6;
       doc.setTextColor(218, 165, 32); // Color dorado
@@ -812,51 +895,13 @@ export const exportarPDFDetallePedido = async (numeroPedido: string) => {
       doc.setTextColor(0, 0, 0); // Volver a negro
     }
 
-    // Espacio adicional si hay descuento VIP y descuentos de presentación
-    if (pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0 && 
-        (descuentoCajaCerrada > 0 || descuentoPack > 0)) {
-      currentY += 3;
-    }
-
-    // Descuento por Caja Cerrada (si aplica)
-    if (descuentoCajaCerrada > 0) {
-      currentY += 6;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.text("Descuento por Caja Cerrada (10%):", 14, currentY);
-      doc.text(
-        `-$${Number(descuentoCajaCerrada).toLocaleString("es-AR", {
-          minimumFractionDigits: 2,
-        })}`,
-        subtotalColumnEnd,
-        currentY,
-        { align: "right" }
-      );
-    }
-
-    // Descuento por Pack (si aplica)
-    if (descuentoPack > 0) {
-      currentY += 6;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.text("Descuento por Pack (5%):", 14, currentY);
-      doc.text(
-        `-$${Number(descuentoPack).toLocaleString("es-AR", {
-          minimumFractionDigits: 2,
-        })}`,
-        subtotalColumnEnd,
-        currentY,
-        { align: "right" }
-      );
-    }
-
     // Total - alineado con la columna Subtotal de la tabla
     currentY += 8;
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL A PAGAR:", 14, currentY);
     doc.text(
-      `$${Number(pedido.total || 0).toLocaleString("es-AR", {
+      `$${Number(totalFinal).toLocaleString("es-AR", {
         minimumFractionDigits: 2,
       })}`,
       subtotalColumnEnd,

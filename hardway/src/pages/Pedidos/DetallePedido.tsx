@@ -33,6 +33,7 @@ import { exportarPDFDetallePedido, handleCancelarPedido, cargarPedidos } from ".
 import { obtenerHistorialModificaciones } from "../../utils/pedidosUtils";
 import { obtenerNotificacionesPedido, resolverNotificacion } from "../../utils/pickingUtils";
 import { obtenerIndumentariaPaginada } from "../../utils/indumentariaUtils";
+import { obtenerPresentaciones } from "../../services/presentacionesService";
 import { useAuth } from "../../context/AuthContext";
 
 const DetallePedido: React.FC = () => {
@@ -70,44 +71,112 @@ const DetallePedido: React.FC = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
 
-  // Calcular descuentos por presentación
+  // Estados para generación de PDF
+  const [showAlertPDF, setShowAlertPDF] = useState(false);
+  const [alertMsgPDF, setAlertMsgPDF] = useState("");
+  const [alertTypePDF, setAlertTypePDF] = useState<"success" | "error">("success");
+
+  // Estado para descuentos por presentación
+  const [presentacionesConDescuento, setPresentacionesConDescuento] = useState<
+    Map<number, number>
+  >(new Map());
+
+  // Calcular descuentos por presentación usando valores guardados en el pedido
   const calcularDescuentosPresentacion = () => {
+    console.log('🔍 ===== INICIANDO CÁLCULO DE DESCUENTOS =====');
+    console.log('📦 Total de prendas:', prendas.length);
+    
     let descuentoPacks = 0;
     let descuentoCajasCerradas = 0;
     let subtotalOriginal = 0;
+    let subtotalPacks = 0;
+    let subtotalCajasCerradas = 0;
 
-    prendas.forEach((prenda) => {
+    prendas.forEach((prenda, index) => {
       const precioUnitario = Number(prenda.precio_unitario) || 0;
       const cantidad = Number(prenda.cantidad) || 0;
       const subtotalPrendaOriginal = precioUnitario * cantidad;
       
+      console.log(`\n📦 Prenda ${index + 1}:`, {
+        nombre: prenda.nombre_producto,
+        precioUnitario,
+        cantidad,
+        subtotalPrenda: subtotalPrendaOriginal,
+        idPresentacion: prenda.idPresentacion,
+        nombrePresentacion: prenda.nombrePresentacion,
+        descuento_por_item: prenda.descuento_por_item,
+        descuentoGuardado: Number(prenda.descuento_por_item) || 0
+      });
+      
       // Acumular subtotal original (sin descuentos de presentación)
       subtotalOriginal += subtotalPrendaOriginal;
       
-      // Aplicar descuentos según idPresentacion
-      // idPresentacion: 1=Unidad, 2=Caja Cerrada, 3=Pack
+      // USAR EL DESCUENTO GUARDADO en el pedido (no recalcular con porcentajes actuales)
+      // Esto preserva los descuentos que estaban vigentes al momento de crear el pedido
+      const descuentoGuardado = Number(prenda.descuento_por_item) || 0;
       const idPres = prenda.idPresentacion || 1;
       
+      // Acumular subtotales por presentación (siempre, no solo cuando hay descuento)
       if (idPres === 3) {
-        // Pack: 5% de descuento
-        const descuento = subtotalPrendaOriginal * 0.05;
-        descuentoPacks += descuento;
+        console.log('✅ Es PACK - Acumulando...');
+        subtotalPacks += subtotalPrendaOriginal;
+        if (descuentoGuardado > 0) {
+          descuentoPacks += descuentoGuardado;
+          console.log('💰 Descuento Pack acumulado:', descuentoGuardado);
+        } else {
+          console.log('⚠️ No hay descuento guardado para este Pack');
+        }
       } else if (idPres === 2) {
-        // Caja Cerrada: 10% de descuento
-        const descuento = subtotalPrendaOriginal * 0.10;
-        descuentoCajasCerradas += descuento;
+        console.log('✅ Es CAJA CERRADA - Acumulando...');
+        subtotalCajasCerradas += subtotalPrendaOriginal;
+        if (descuentoGuardado > 0) {
+          descuentoCajasCerradas += descuentoGuardado;
+          console.log('💰 Descuento Caja acumulado:', descuentoGuardado);
+        } else {
+          console.log('⚠️ No hay descuento guardado para esta Caja');
+        }
+      } else {
+        console.log('ℹ️ Es UNIDAD - No aplica descuento por presentación');
       }
     });
+
+    // Calcular porcentajes históricos desde los descuentos guardados
+    const porcentajePacksHistorico = subtotalPacks > 0 
+      ? Math.round((descuentoPacks / subtotalPacks) * 100) 
+      : 0;
+    const porcentajeCajasHistorico = subtotalCajasCerradas > 0 
+      ? Math.round((descuentoCajasCerradas / subtotalCajasCerradas) * 100) 
+      : 0;
+
+    const totalConDescuentosPresentacion = subtotalOriginal - descuentoPacks - descuentoCajasCerradas;
+    const descuentoVIP = pedido?.descuentoOrden ? Number(pedido.descuentoOrden) : 0;
+    const totalFinal = totalConDescuentosPresentacion - descuentoVIP;
+
+    console.log('\n📊 ===== RESUMEN DE CÁLCULOS =====');
+    console.log('Subtotal Original:', subtotalOriginal);
+    console.log('Subtotal Packs:', subtotalPacks);
+    console.log('Descuento Packs:', descuentoPacks);
+    console.log('Porcentaje Packs:', porcentajePacksHistorico + '%');
+    console.log('Subtotal Cajas:', subtotalCajasCerradas);
+    console.log('Descuento Cajas:', descuentoCajasCerradas);
+    console.log('Porcentaje Cajas:', porcentajeCajasHistorico + '%');
+    console.log('Total con descuentos presentación:', totalConDescuentosPresentacion);
+    console.log('Descuento VIP:', descuentoVIP);
+    console.log('Total Final:', totalFinal);
+    console.log('===============================\n');
 
     return { 
       descuentoPacks, 
       descuentoCajasCerradas, 
       subtotalOriginal,
-      totalConDescuentosPresentacion: subtotalOriginal - descuentoPacks - descuentoCajasCerradas
+      totalConDescuentosPresentacion,
+      totalFinal,
+      porcentajePacksHistorico,
+      porcentajeCajasHistorico
     };
   };
 
-  const { descuentoPacks, descuentoCajasCerradas, subtotalOriginal, totalConDescuentosPresentacion } = calcularDescuentosPresentacion();
+  const { descuentoPacks, descuentoCajasCerradas, subtotalOriginal, totalConDescuentosPresentacion, totalFinal, porcentajePacksHistorico, porcentajeCajasHistorico } = calcularDescuentosPresentacion();
 
   // Función reutilizable para cargar el pedido
   const cargarPedido = async () => {
@@ -120,6 +189,19 @@ const DetallePedido: React.FC = () => {
       console.log("📦 Datos del pedido recibidos:", res.data.pedido);
       console.log("🚚 Empresa de envío:", res.data.pedido?.empresaEnvio);
       console.log("📋 Número de seguimiento:", res.data.pedido?.numeroSeguimiento);
+      
+      // Debug: verificar descuentos por presentación
+      console.log("🛋️ Items del pedido:", res.data.items);
+      if (res.data.items && res.data.items.length > 0) {
+        console.log("🔍 Primer item de ejemplo:", res.data.items[0]);
+        const itemsConDescuento = res.data.items.filter((item: any) => 
+          Number(item.descuento_por_item) > 0
+        );
+        console.log(`💰 Items con descuento: ${itemsConDescuento.length}/${res.data.items.length}`);
+        if (itemsConDescuento.length > 0) {
+          console.log("✅ Items con descuento:", itemsConDescuento);
+        }
+      }
 
       // Cargar historial de modificaciones si el pedido existe
       if (res.data.pedido?.numeroPedido) {
@@ -307,6 +389,25 @@ const DetallePedido: React.FC = () => {
     // eslint-disable-next-line
   }, [id]);
 
+  // Cargar presentaciones con descuentos al montar el componente
+  useEffect(() => {
+    const cargarDescuentos = async () => {
+      try {
+        const presentaciones = await obtenerPresentaciones();
+        const mapDescuentos = new Map<number, number>();
+        presentaciones.forEach(p => {
+          mapDescuentos.set(p.idPresentacion, p.porcentajeDescuento || 0);
+        });
+        setPresentacionesConDescuento(mapDescuentos);
+      } catch (error) {
+        console.error('Error al cargar descuentos de presentaciones:', error);
+        // Valores por defecto en caso de error
+        setPresentacionesConDescuento(new Map([[1, 0], [2, 10], [3, 5]]));
+      }
+    };
+    cargarDescuentos();
+  }, []);
+
   // Función para mostrar valores amigables
   const mostrar = (valor: any) => {
     if (valor === null || valor === undefined || valor === "") return "-";
@@ -390,9 +491,13 @@ const DetallePedido: React.FC = () => {
     setGenerandoPDF(true);
     try {
       await exportarPDFDetallePedido(id);
-      alert("PDF generado exitosamente");
+      setAlertTypePDF("success");
+      setAlertMsgPDF("PDF generado exitosamente");
+      setShowAlertPDF(true);
     } catch (error) {
-      alert("Error al generar el PDF");
+      setAlertTypePDF("error");
+      setAlertMsgPDF("Error al generar el PDF. Por favor, intente nuevamente.");
+      setShowAlertPDF(true);
       console.error("Error:", error);
     } finally {
       setGenerandoPDF(false);
@@ -1113,11 +1218,49 @@ const DetallePedido: React.FC = () => {
               </span>
             </div>
 
-            {/* Descuento VIP - Se muestra primero porque se aplica sobre el subtotal */}
+            {/* Descuentos por presentación */}
+            {descuentoPacks > 0 && (
+              <div className="tabla-resumen-row" style={{ color: '#2196F3', fontSize: '0.95em', marginTop: '4px' }}>
+                <span className="tabla-resumen-label">
+                  📦 Descuento por Packs ({porcentajePacksHistorico}%):
+                </span>
+                <span className="tabla-resumen-valor">
+                  -{mostrarPrecio(descuentoPacks)}
+                </span>
+              </div>
+            )}
+            {descuentoCajasCerradas > 0 && (
+              <div className="tabla-resumen-row" style={{ color: '#4CAF50', fontSize: '0.95em', marginTop: '4px' }}>
+                <span className="tabla-resumen-label">
+                  📦 Descuento por Cajas ({porcentajeCajasHistorico}%):
+                </span>
+                <span className="tabla-resumen-valor">
+                  -{mostrarPrecio(descuentoCajasCerradas)}
+                </span>
+              </div>
+            )}
+
+            {/* Subtotal después de descuentos de presentación */}
+            {(descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
+              <div className="tabla-resumen-row" style={{ 
+                marginTop: '8px', 
+                paddingTop: '8px', 
+                borderTop: '1px dashed #ddd',
+                fontSize: '0.95em',
+                color: '#666'
+              }}>
+                <span className="tabla-resumen-label">Subtotal con descuentos de presentación:</span>
+                <span className="tabla-resumen-valor">
+                  {mostrarPrecio(totalConDescuentosPresentacion)}
+                </span>
+              </div>
+            )}
+
+            {/* Descuento VIP - Se aplica después de los descuentos de presentación */}
             {pedido &&
               pedido.descuentoOrden &&
               Number(pedido.descuentoOrden) > 0 && (
-                <div className="tabla-resumen-row tabla-resumen-row-descuento" style={{ marginTop: '4px' }}>
+                <div className="tabla-resumen-row tabla-resumen-row-descuento" style={{ marginTop: '8px' }}>
                   <span className="tabla-resumen-label">
                     👑 Cliente VIP - 10% de descuento:
                   </span>
@@ -1127,44 +1270,12 @@ const DetallePedido: React.FC = () => {
                 </div>
               )}
 
-            {/* Separador visual entre descuento VIP y descuentos de presentación */}
-            {pedido && pedido.descuentoOrden && Number(pedido.descuentoOrden) > 0 && 
-             (descuentoPacks > 0 || descuentoCajasCerradas > 0) && (
-              <div style={{ 
-                borderTop: '1px dashed #ddd', 
-                margin: '8px 0',
-                paddingTop: '8px'
-              }}></div>
-            )}
-
-            {/* Descuentos por presentación */}
-            {descuentoPacks > 0 && (
-              <div className="tabla-resumen-row" style={{ color: '#2196F3', fontSize: '0.95em' }}>
-                <span className="tabla-resumen-label">
-                  📦 Descuento por Packs (5%):
-                </span>
-                <span className="tabla-resumen-valor">
-                  -{mostrarPrecio(descuentoPacks)}
-                </span>
-              </div>
-            )}
-            {descuentoCajasCerradas > 0 && (
-              <div className="tabla-resumen-row" style={{ color: '#4CAF50', fontSize: '0.95em' }}>
-                <span className="tabla-resumen-label">
-                  📦 Descuento por Cajas (10%):
-                </span>
-                <span className="tabla-resumen-valor">
-                  -{mostrarPrecio(descuentoCajasCerradas)}
-                </span>
-              </div>
-            )}
-
             {/* Total */}
             {pedido && (
               <div className="tabla-resumen-row tabla-resumen-row-total" style={{ marginTop: '12px', fontSize: '1.1em', paddingTop: '8px', borderTop: '2px solid #fdb40b' }}>
                 <span className="tabla-resumen-label">💰 Total a pagar:</span>
                 <span className="tabla-resumen-valor">
-                  {mostrarPrecio(Number(pedido.total))}
+                  {mostrarPrecio(totalFinal)}
                 </span>
               </div>
             )}
@@ -1555,6 +1666,15 @@ const DetallePedido: React.FC = () => {
           onDidDismiss={() => setShowAlert(false)}
           header="Advertencia"
           message={alertMsg}
+          buttons={["Aceptar"]}
+        />
+
+        {/* Alerta de generación de PDF */}
+        <IonAlert
+          isOpen={showAlertPDF}
+          onDidDismiss={() => setShowAlertPDF(false)}
+          header={alertTypePDF === "success" ? "" : "Error"}
+          message={alertMsgPDF}
           buttons={["Aceptar"]}
         />
       </IonContent>

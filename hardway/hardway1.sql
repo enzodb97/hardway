@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 01-03-2026 a las 07:27:34
+-- Tiempo de generación: 01-03-2026 a las 21:16:22
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -3842,17 +3842,18 @@ INSERT INTO `precioindumentaria` (`idPrecio`, `precio`) VALUES
 CREATE TABLE `presentacion_producto` (
   `idPresentacion` int(11) NOT NULL,
   `nombrePresentacion` varchar(100) NOT NULL,
-  `descripcion` varchar(255) DEFAULT NULL
+  `descripcion` varchar(255) DEFAULT NULL,
+  `porcentajeDescuento` int(11) NOT NULL DEFAULT 0 COMMENT 'Porcentaje de descuento aplicado a esta presentación (0-100, solo enteros)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `presentacion_producto`
 --
 
-INSERT INTO `presentacion_producto` (`idPresentacion`, `nombrePresentacion`, `descripcion`) VALUES
-(1, 'Unidad', 'Venta individual'),
-(2, 'Caja Cerrada', 'Bulto sin abrir'),
-(3, 'Pack', 'Conjunto de unidades');
+INSERT INTO `presentacion_producto` (`idPresentacion`, `nombrePresentacion`, `descripcion`, `porcentajeDescuento`) VALUES
+(1, 'Unidad', 'Venta individual', 0),
+(2, 'Caja Cerrada', 'Bulto sin abrir', 10),
+(3, 'Pack', 'Conjunto de unidades', 5);
 
 -- --------------------------------------------------------
 
