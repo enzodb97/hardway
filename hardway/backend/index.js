@@ -33,6 +33,10 @@ app.post("/api/envios/consulta-invitado", consultaInvitadoHandler);
 const detallePedidoPublicoHandler = require("./routes/detallePedidoPublico");
 app.post("/api/pedidos/detalle-publico", detallePedidoPublicoHandler);
 
+// Registrar rutas públicas de recuperación de contraseña
+const recuperacionPasswordPublicoRoutes = require("./routes/recuperacionPassword");
+app.use("/api/recuperacion-password", recuperacionPasswordPublicoRoutes);
+
 // Importar rutas
 const authRoutes = require("./routes/auth");
 const usuariosRoutes = require("./routes/usuarios");
@@ -45,6 +49,7 @@ const pickingRoutes = require("./routes/picking");
 const ubicacionRoutes = require("./routes/ubicacion");
 const clientesVipRoutes = require("./routes/clientesVip");
 const presentacionesRoutes = require("./routes/presentaciones");
+const recuperacionPasswordRoutes = require("./routes/recuperacionPassword");
 
 // Usar rutas
 

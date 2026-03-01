@@ -490,3 +490,790 @@ ion-select::part(text) {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
 }
+
+/* ========================================
+   ESTILOS PARA SOLICITUDES DE RECUPERACIÓN
+   ======================================== */
+
+.recuperacion-solicitud-item {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  margin-bottom: 1rem;
+}
+
+.recuperacion-solicitud-card {
+  width: 100%;
+  background: linear-gradient(135deg, #fef9f3 0%, #ffffff 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid #fbbf24;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.recuperacion-solicitud-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.recuperacion-solicitud-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recuperacion-solicitud-card:hover::before {
+  opacity: 0.5;
+}
+
+.recuperacion-solicitud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recuperacion-solicitud-usuario {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recuperacion-solicitud-usuario-icon {
+  font-size: 2rem;
+  color: #fbbf24;
+  transition: color 0.3s ease;
+}
+
+.recuperacion-solicitud-usuario-nombre {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.recuperacion-solicitud-badge {
+  --background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  --color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(251, 191, 36, 0.25);
+}
+
+.recuperacion-solicitud-info {
+  background: rgba(254, 252, 247, 0.8);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  transition: all 0.3s ease;
+}
+
+.recuperacion-solicitud-fecha {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.recuperacion-solicitud-fecha-icon {
+  color: #fbbf24;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.recuperacion-solicitud-fecha-label {
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.recuperacion-solicitud-fecha-valor {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.recuperacion-solicitud-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.recuperacion-btn-aprobar {
+  --background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  --background-hover: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --color: white;
+  font-weight: 600;
+  text-transform: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(52, 211, 153, 0.25);
+  transition: all 0.3s ease;
+}
+
+.recuperacion-btn-aprobar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(52, 211, 153, 0.35);
+}
+
+.recuperacion-btn-rechazar {
+  --background: transparent;
+  --background-hover: rgba(248, 113, 113, 0.1);
+  --color: #f87171;
+  --border-color: #f87171;
+  --border-width: 2px;
+  font-weight: 600;
+  text-transform: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.recuperacion-btn-rechazar:hover {
+  --background: rgba(248, 113, 113, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Dark mode support para solicitudes */
+@media (prefers-color-scheme: dark) {
+  .recuperacion-solicitud-card {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  }
+  
+  .recuperacion-solicitud-card--pendiente {
+    background: linear-gradient(135deg, #3d3420 0%, #2d2816 100%);
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+  
+  .recuperacion-solicitud-card--aprobada {
+    background: linear-gradient(135deg, #1e3a5f 0%, #172d4a 100%);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  
+  .recuperacion-solicitud-card--finalizada {
+    background: linear-gradient(135deg, #1e4d3b 0%, #163828 100%);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  
+  .recuperacion-solicitud-card--rechazada {
+    background: linear-gradient(135deg, #4d1e1e 0%, #381616 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  
+  
+  .recuperacion-solicitud-info {
+    background: rgba(45, 55, 72, 0.7);
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+  
+  .recuperacion-solicitud-card--aprobada .recuperacion-solicitud-info {
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  
+  .recuperacion-solicitud-card--finalizada .recuperacion-solicitud-info {
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  
+  .recuperacion-solicitud-card--rechazada .recuperacion-solicitud-info {
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  
+  .recuperacion-solicitud-fecha-valor {
+    font-weight: 600;
+  }
+  
+  .recuperacion-solicitud-fecha-label {
+    font-weight: 600;
+  }
+  
+  .recuperacion-solicitud-motivo-valor {
+    font-weight: 600;
+  }
+  
+  
+  /* Textos de estado en modo oscuro */
+  .recuperacion-solicitud-card--aprobada .recuperacion-solicitud-actions ion-text,
+  .recuperacion-solicitud-card--aprobada .recuperacion-solicitud-actions ion-text p {
+    color: #93c5fd !important;
+  }
+  
+  .recuperacion-solicitud-card--finalizada .recuperacion-solicitud-actions ion-text,
+  .recuperacion-solicitud-card--finalizada .recuperacion-solicitud-actions ion-text p {
+    color: #86efac !important;
+  }
+  
+  .recuperacion-solicitud-card--rechazada .recuperacion-solicitud-actions ion-text,
+  .recuperacion-solicitud-card--rechazada .recuperacion-solicitud-actions ion-text p {
+    color: #fca5a5 !important;
+  }
+}
+/* ========================================
+   ESTILOS PARA FILTROS DE HISTORIAL
+   ======================================== */
+
+.recuperacion-filtros-historial {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.recuperacion-toggle-item {
+  --background: transparent;
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-end: 0;
+  --min-height: 40px;
+}
+
+.recuperacion-toggle-item ion-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.recuperacion-toggle-item ion-icon {
+  font-size: 1.3rem;
+  margin-right: 8px;
+}
+
+/* ========================================
+   ESTILOS PARA MOTIVO DE SOLICITUD
+   ======================================== */
+
+.recuperacion-solicitud-motivo {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.recuperacion-solicitud-card--pendiente .recuperacion-solicitud-motivo {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left-color: #996e23;
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-motivo {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-left-color: #3b82f6;
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-motivo-icon {
+  color: #1d4ed8;
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-motivo-label {
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-motivo-valor {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-motivo {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-left-color: #10b981;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-motivo-icon {
+  color: #047857;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-motivo-label {
+  color: #065f46;
+  font-weight: 700;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-motivo-valor {
+  color: #064e3b;
+  font-weight: 600;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-motivo {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-left-color: #ef4444;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-motivo-icon {
+  color: #b91c1c;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-motivo-label {
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-motivo-valor {
+  color: #7f1d1d;
+  font-weight: 600;
+}
+
+.recuperacion-solicitud-motivo-icon {
+  font-size: 1.2rem;
+  color: #b45309;
+  flex-shrink: 0;
+}
+
+.recuperacion-solicitud-motivo-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #78350f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.recuperacion-solicitud-motivo-valor {
+  font-size: 0.95rem;
+  color: #78350f;
+  font-weight: 600;
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* ========================================
+   VARIANTES DE COLOR PARA ESTADOS
+   ======================================== */
+
+/* Card con estado PENDIENTE (amarillo/warning) */
+.recuperacion-solicitud-card--pendiente {
+  border-left-color: #fbbf24;
+  background: linear-gradient(135deg, #fef9f3 0%, #ffffff 100%);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-left: 4px solid #dfa40e;
+  border-right: 2px solid #dfa40e;
+}
+
+.recuperacion-solicitud-card--pendiente::before {
+  color: #fbbf24;
+}
+
+.recuperacion-solicitud-card--pendiente .recuperacion-solicitud-usuario-icon {
+  color: #fbbf24;
+}
+
+.recuperacion-solicitud-card--pendiente .recuperacion-solicitud-info {
+  background: rgba(254, 252, 247, 0.8);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+/* Card con estado APROBADA (azul/primary) */
+.recuperacion-solicitud-card--aprobada {
+  border-left-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-left: 4px solid #3b82f6;
+}
+
+.recuperacion-solicitud-card--aprobada::before {
+  color: #3b82f6;
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-usuario-icon {
+  color: #3b82f6;
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-info {
+  background: rgba(239, 246, 255, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-fecha-icon {
+  color: #3b82f6;
+}
+
+/* Card con estado FINALIZADA (verde/success) */
+.recuperacion-solicitud-card--finalizada {
+  border-left-color: #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-left: 4px solid #10b981;
+}
+
+.recuperacion-solicitud-card--finalizada::before {
+  color: #10b981;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-usuario-icon {
+  color: #10b981;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-info {
+  background: rgba(240, 253, 244, 0.8);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-fecha-icon {
+  color: #10b981;
+}
+
+/* Card con estado RECHAZADA (rojo/danger) */
+.recuperacion-solicitud-card--rechazada {
+  border-left-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-left: 4px solid #ef4444;
+  border-right: 2px solid #ef4444;
+}
+
+.recuperacion-solicitud-card--rechazada::before {
+  color: #ef4444;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-usuario-icon {
+  color: #ef4444;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-info {
+  background: rgba(254, 242, 242, 0.8);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-fecha-icon {
+  color: #ef4444;
+}
+
+/* ========================================
+   MEJORAS VISUALES POR ESTADO
+   ======================================== */
+
+/* Efecto de sombra coloreada según estado */
+.recuperacion-solicitud-card--pendiente:hover {
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.15);
+}
+
+.recuperacion-solicitud-card--aprobada:hover {
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+}
+
+.recuperacion-solicitud-card--finalizada:hover {
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+}
+
+.recuperacion-solicitud-card--rechazada:hover {
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+}
+
+/* Badges con mejor contraste y animación */
+.recuperacion-solicitud-badge {
+  --background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  --color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.recuperacion-solicitud-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Texto de estado para APROBADA */
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-actions ion-text p {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+  color: #1e3a8a !important;
+  font-weight: 600 !important;
+}
+
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-actions ion-text {
+  color: #1e3a8a !important;
+}
+
+/* Texto de estado para FINALIZADA */
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-actions ion-text p {
+  background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #10b981;
+  color: #065f46 !important;
+  font-weight: 600 !important;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-actions ion-text {
+  color: #065f46 !important;
+}
+
+/* Texto de estado para RECHAZADA */
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-actions ion-text p {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #ef4444;
+  color: #991b1b !important;
+  font-weight: 600 !important;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-actions ion-text {
+  color: #991b1b !important;
+}
+
+/* Iconos dentro de los textos de estado */
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-actions ion-icon {
+  color: #1e3a8a !important;
+}
+
+.recuperacion-solicitud-card--finalizada .recuperacion-solicitud-actions ion-icon {
+  color: #065f46 !important;
+}
+
+.recuperacion-solicitud-card--rechazada .recuperacion-solicitud-actions ion-icon {
+  color: #991b1b !important;
+}
+
+/* Animación de entrada para las cards */
+@keyframes recuperacion-card-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recuperacion-solicitud-card {
+  animation: recuperacion-card-fade-in 0.3s ease-out;
+}
+
+/* Efecto de código destacado para estado APROBADA */
+.recuperacion-solicitud-card--aprobada .recuperacion-solicitud-fecha-valor[style*="letterSpacing"] {
+  color: #1e3a8a !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(30, 58, 138, 0.2);
+  animation: recuperacion-pulse-code 2s ease-in-out infinite;
+}
+
+@keyframes recuperacion-pulse-code {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ========================================
+   RESPONSIVE PARA FILTROS
+   ======================================== */
+
+@media (min-width: 768px) {
+  .recuperacion-filtros-historial {
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 1.25rem;
+  }
+
+  .recuperacion-toggle-item {
+    flex: 0 1 auto;
+  }
+}
+
+/* ========================================
+   ESTILOS PARA MODAL DE CÓDIGO GENERADO
+   ======================================== */
+
+.modal-codigo-recuperacion {
+  --width: 90%;
+  --max-width: 500px;
+  --height: 700px;
+}
+
+.modal-codigo-content {
+  --background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  --padding-top: 2rem;
+  --padding-bottom: 2rem;
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+}
+
+.modal-codigo-card {
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+}
+
+.modal-codigo-card-content {
+  --background: #ffffff;
+  background: #ffffff;
+  padding: 2rem 1.5rem;
+}
+
+.modal-codigo-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.modal-codigo-icon-success {
+  font-size: 4rem;
+  color: var(--ion-color-success);
+  margin-bottom: 1.5rem;
+  animation: modal-codigo-bounce 0.6s ease;
+}
+
+@keyframes modal-codigo-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.modal-codigo-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0 0 1rem;
+}
+
+.modal-codigo-usuario {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0 0 2rem;
+}
+
+.modal-codigo-usuario strong {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.modal-codigo-box {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-shadow: inset 0 2px 4px rgba(59, 130, 246, 0.1);
+  border: 2px solid #93c5fd;
+}
+
+.modal-codigo-label {
+  font-size: 0.9rem;
+  color: #1e3a8a;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-codigo-numero {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 1rem;
+  color: #1e40af;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);
+}
+
+@keyframes modal-codigo-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.modal-codigo-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.15);
+}
+
+.modal-codigo-warning-icon {
+  font-size: 1.5rem;
+  color: #d97706;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.modal-codigo-warning-text {
+  font-size: 0.9rem;
+  color: #78350f;
+  font-weight: 500;
+  margin: 0;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.modal-codigo-btn {
+  --border-radius: 8px;
+  font-weight: 600;
+  margin-top: 0;
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.25);
+  transition: all 0.3s ease;
+}
+
+.modal-codigo-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.35);
+}
+
+/* Responsive para modal de código */
+@media (max-width: 576px) {
+  .modal-codigo-recuperacion {
+    --width: 95%;
+  }
+
+  .modal-codigo-card-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .modal-codigo-icon-success {
+    font-size: 3rem;
+  }
+
+  .modal-codigo-title {
+    font-size: 1.5rem;
+  }
+
+  .modal-codigo-numero {
+    font-size: 2.5rem;
+    letter-spacing: 0.75rem;
+  }
+
+  .modal-codigo-box {
+    padding: 1.5rem;
+  }
+}

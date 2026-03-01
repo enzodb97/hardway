@@ -121,6 +121,7 @@ const Indumentaria: React.FC = () => {
   const [showAgregarStockAlert, setShowAgregarStockAlert] = useState(false);
   const [cantidadAgregar, setCantidadAgregar] = useState<number>(0);
   const [motivoStock, setMotivoStock] = useState<string>("");
+  const [alertAgregarStockKey, setAlertAgregarStockKey] = useState<number>(0);
 
   // Estados para reingreso
   const [showReingresoAlert, setShowReingresoAlert] = useState(false);
@@ -176,6 +177,8 @@ const Indumentaria: React.FC = () => {
   // Manejar agregar stock
   const handleAgregarStock = async (id: string) => {
     console.log('Iniciando proceso de agregar stock para:', id);
+    // Incrementar key para forzar recreación del alert y limpiar valores anteriores
+    setAlertAgregarStockKey(prev => prev + 1);
     setSelectedItem(id);
     setShowAgregarStockAlert(true);
   };
@@ -1124,6 +1127,7 @@ const Indumentaria: React.FC = () => {
 
       {/* Alert para agregar stock */}
       <IonAlert
+        key={`agregar-stock-${alertAgregarStockKey}`}
         isOpen={showAgregarStockAlert}
         header="Agregar Stock"
         subHeader={selectedItem ? `Indumentaria: ${selectedItem}` : ''}

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Usuario, TipoRol, sequelize, EncargadoPicker, Persona, MotivoInactivacionUsuario } = require('../models'); // ✅ Agregado MotivoInactivacionUsuario
+const { Usuario, TipoRol, sequelize, EncargadoPicker, Persona, MotivoInactivacionUsuario, SolicitudRecuperacionPassword, MotivoRecuperacionPassword } = require('../models'); // ✅ Agregado MotivoRecuperacionPassword
 const { Domicilio } = require('../models/Ubicacion'); // ✅ Importar Domicilio
 const { verificarAccesoPedidos } = require('../middleware/auth'); // ✅ Importar middleware de autenticación
 const { Op } = require('sequelize'); // ✅ Importar operadores de Sequelize
@@ -1158,6 +1158,196 @@ router.get("/:id/historial", async (req, res) => {
     console.error("❌ Error al obtener historial de usuario:", error);
     res.status(500).json({ 
       error: "Error al obtener historial de usuario", 
+      detalle: error.message 
+    });
+  }
+});
+
+// =====================================
+// ENDPOINTS DE RECUPERACIÓN DE CONTRASEÑA (ADMIN)
+// =====================================
+
+// Obtener todas las solicitudes de recuperación pendientes y aprobadas
+router.get("/solicitudes-recuperacion", verificarAccesoPedidos, async (req, res) => {
+  const { incluirFinalizadas, incluirRechazadas } = req.query;
+  console.log('📋 Obteniendo solicitudes de recuperación...');
+  console.log('   - Incluir finalizadas:', incluirFinalizadas);
+  console.log('   - Incluir rechazadas:', incluirRechazadas);
+  
+  try {
+    // Construir array de estados dinámicamente
+    const estados = ['PENDIENTE', 'APROBADA'];
+    
+    if (incluirFinalizadas === 'true') {
+      estados.push('FINALIZADA');
+    }
+    
+    if (incluirRechazadas === 'true') {
+      estados.push('RECHAZADA');
+    }
+    
+    console.log('   - Estados a filtrar:', estados);
+    
+    const solicitudes = await SolicitudRecuperacionPassword.findAll({
+      where: {
+        estado: estados,
+        fechaExpiracion: {
+          [Op.gt]: new Date() // Solo solicitudes no expiradas
+        }
+      },
+      include: [
+        {
+          model: Usuario,
+          as: 'Usuario',
+          attributes: ['idUsuario', 'nombreUsuario'],
+          include: [
+            {
+              model: Persona,
+              attributes: ['nombre', 'apellido']
+            }
+          ]
+        },
+        {
+          model: MotivoRecuperacionPassword,
+          as: 'Motivo',
+          attributes: ['idMotivo', 'descripcion'],
+          required: false
+        }
+      ],
+      order: [['fechaSolicitud', 'DESC']]
+    });
+
+    console.log(`✅ ${solicitudes.length} solicitudes encontradas`);
+    res.json(solicitudes);
+    
+  } catch (error) {
+    console.error('❌ Error al obtener solicitudes:', error);
+    res.status(500).json({ 
+      error: 'Error al obtener solicitudes de recuperación',
+      detalle: error.message 
+    });
+  }
+});
+
+// Aprobar solicitud y generar código de 4 dígitos
+router.post("/aprobar-recuperacion/:idSolicitud", verificarAccesoPedidos, async (req, res) => {
+  const { idSolicitud } = req.params;
+  console.log(`✅ Aprobando solicitud de recuperación ID: ${idSolicitud}`);
+  
+  try {
+    const solicitud = await SolicitudRecuperacionPassword.findByPk(idSolicitud, {
+      include: [
+        {
+          model: Usuario,
+          as: 'Usuario',
+          attributes: ['idUsuario', 'nombreUsuario']
+        }
+      ]
+    });
+
+    if (!solicitud) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    if (solicitud.estado !== 'PENDIENTE') {
+      return res.status(400).json({ 
+        error: 'La solicitud ya fue procesada',
+        estadoActual: solicitud.estado
+      });
+    }
+
+    // Verificar que no haya expirado
+    if (new Date() > new Date(solicitud.fechaExpiracion)) {
+      await solicitud.update({ estado: 'EXPIRADA' });
+      return res.status(400).json({ error: 'La solicitud ha expirado' });
+    }
+
+    // Generar código aleatorio de 4 dígitos
+    const codigo = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    console.log(`🔐 Código generado: ${codigo} (tipo: ${typeof codigo}, longitud: ${codigo.length})`);
+    
+    // Actualizar solicitud
+    await solicitud.update({
+      codigo: codigo,
+      estado: 'APROBADA',
+      fechaAprobacion: new Date()
+    });
+
+    // Verificar que se guardó correctamente
+    await solicitud.reload();
+    console.log(`✅ Código guardado en DB: ${solicitud.codigo} (tipo: ${typeof solicitud.codigo}, coincide: ${solicitud.codigo === codigo})`);
+
+    // 🔒 BORRAR contraseña del usuario - debe usar el código obligatoriamente
+    const usuario = await Usuario.findByPk(solicitud.idUsuario);
+    if (usuario) {
+      await usuario.update({ contrasena: null });
+      console.log(`🔒 Contraseña borrada para usuario: ${solicitud.Usuario.nombreUsuario} - Debe usar código para restablecer`);
+    }
+
+    console.log(`✅ Solicitud aprobada. Código generado: ${codigo} para usuario: ${solicitud.Usuario.nombreUsuario}`);
+    
+    res.json({
+      success: true,
+      message: 'Solicitud aprobada correctamente',
+      codigo: codigo,
+      nombreUsuario: solicitud.Usuario.nombreUsuario
+    });
+    
+  } catch (error) {
+    console.error('❌ Error al aprobar solicitud:', error);
+    res.status(500).json({ 
+      error: 'Error al aprobar solicitud',
+      detalle: error.message 
+    });
+  }
+});
+
+// Rechazar solicitud de recuperación
+router.post("/rechazar-recuperacion/:idSolicitud", verificarAccesoPedidos, async (req, res) => {
+  const { idSolicitud } = req.params;
+  const { motivo } = req.body;
+  
+  console.log(`❌ Rechazando solicitud de recuperación ID: ${idSolicitud}`);
+  
+  try {
+    const solicitud = await SolicitudRecuperacionPassword.findByPk(idSolicitud, {
+      include: [
+        {
+          model: Usuario,
+          as: 'Usuario',
+          attributes: ['nombreUsuario']
+        }
+      ]
+    });
+
+    if (!solicitud) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    if (solicitud.estado !== 'PENDIENTE') {
+      return res.status(400).json({ 
+        error: 'La solicitud ya fue procesada',
+        estadoActual: solicitud.estado
+      });
+    }
+
+    await solicitud.update({
+      estado: 'RECHAZADA',
+      motivoRechazo: motivo || 'Rechazada por el administrador'
+    });
+
+    console.log(`✅ Solicitud rechazada para usuario: ${solicitud.Usuario.nombreUsuario}`);
+    
+    res.json({
+      success: true,
+      message: 'Solicitud rechazada correctamente'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error al rechazar solicitud:', error);
+    res.status(500).json({ 
+      error: 'Error al rechazar solicitud',
       detalle: error.message 
     });
   }

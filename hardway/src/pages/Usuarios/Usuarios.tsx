@@ -20,6 +20,11 @@ import {
   UsuarioPorRol,
   MotivoInactivacion,
 } from "../../utils/usuariosUtils";
+import { 
+  obtenerSolicitudesPendientes, 
+  aprobarSolicitud, 
+  rechazarSolicitud 
+} from "../../services/recuperacionPasswordService";
 import { obtenerClaseDeEstado } from "../../utils/pedidosUtils";
 import {
   IonPage,
@@ -59,6 +64,7 @@ import {
   ribbonOutline,
   checkmarkCircle,
   closeCircleOutline,
+  close,
   pencilOutline,
   trashOutline,
   searchOutline,
@@ -79,6 +85,25 @@ import { useAuth } from "../../context/AuthContext";
 import zepelin from "../../assets/images/zepelin.png";
 import axiosInstance from "../../config/axios";
 import HistorialUsuario from "./HistorialUsuario";
+
+// ✅ Función helper para formatear fecha a 12hs am/pm
+const formatearFecha12h = (fecha: string | Date): string => {
+  const date = new Date(fecha);
+  const dia = date.getDate().toString().padStart(2, '0');
+  const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+  const anio = date.getFullYear();
+  
+  let horas = date.getHours();
+  const minutos = date.getMinutes().toString().padStart(2, '0');
+  const segundos = date.getSeconds().toString().padStart(2, '0');
+  const periodo = horas >= 12 ? 'PM' : 'AM';
+  
+  horas = horas % 12;
+  horas = horas ? horas : 12; // 0 debe ser 12
+  const horasStr = horas.toString().padStart(2, '0');
+  
+  return `${dia}/${mes}/${anio}, ${horasStr}:${minutos}:${segundos} ${periodo}`;
+};
 
 const Usuarios: React.FC = () => {
   const { roles, hasRole, userId } = useAuth(); // ✅ Usar roles, hasRole y userId
@@ -124,6 +149,18 @@ const Usuarios: React.FC = () => {
     id: number;
     username: string;
   } | null>(null);
+
+  // ✅ NUEVO: Estados para recuperación de contraseña
+  const [solicitudesRecuperacion, setSolicitudesRecuperacion] = useState<any[]>([]);
+  const [showCodigoModal, setShowCodigoModal] = useState(false);
+  const [codigoGenerado, setCodigoGenerado] = useState<string>("");
+  const [nombreUsuarioCodigo, setNombreUsuarioCodigo] = useState<string>("");
+  const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
+  const [showAprobarAlert, setShowAprobarAlert] = useState(false);
+  const [solicitudAprobar, setSolicitudAprobar] = useState<number | null>(null);
+  const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
+  const [mostrarFinalizadas, setMostrarFinalizadas] = useState(false);
+  const [mostrarRechazadas, setMostrarRechazadas] = useState(false);
 
   // Validar si el formulario de nuevo usuario es válido
   const esFormularioValido = useMemo(() => {
@@ -283,7 +320,18 @@ const Usuarios: React.FC = () => {
     }).catch((error) => {
       console.error("Usuarios.tsx: Error al cargar usuarios:", error);
     });
+
+    // Cargar solicitudes de recuperación pendientes
+    cargarSolicitudesRecuperacion();
   });
+
+  // Recargar solicitudes cuando cambien los toggles de filtrado
+  useEffect(() => {
+    if (hasRole("Administrador")) {
+      cargarSolicitudesRecuperacion();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mostrarFinalizadas, mostrarRechazadas]);
 
   // Crear usuario
   const handleCrear = async (e: React.FormEvent) => {
@@ -520,6 +568,64 @@ const Usuarios: React.FC = () => {
     }
   };
 
+  // ✅ NUEVO: Funciones para recuperación de contraseña
+  const cargarSolicitudesRecuperacion = async () => {
+    setLoadingSolicitudes(true);
+    try {
+      const solicitudes = await obtenerSolicitudesPendientes(
+        mostrarFinalizadas,
+        mostrarRechazadas
+      );
+      setSolicitudesRecuperacion(solicitudes);
+    } catch (error) {
+      console.error('Error al cargar solicitudes de recuperación:', error);
+    } finally {
+      setLoadingSolicitudes(false);
+    }
+  };
+
+  const handleAprobarSolicitud = (idSolicitud: number) => {
+    setSolicitudAprobar(idSolicitud);
+    setShowAprobarAlert(true);
+  };
+
+  const confirmAprobarSolicitud = async () => {
+    if (!solicitudAprobar) return;
+    
+    try {
+      const resultado = await aprobarSolicitud(solicitudAprobar);
+      setCodigoGenerado(resultado.codigo);
+      setNombreUsuarioCodigo(resultado.nombreUsuario);
+      setShowCodigoModal(true);
+      setShowAprobarAlert(false);
+      setSolicitudAprobar(null);
+      
+      // Recargar solicitudes
+      cargarSolicitudesRecuperacion();
+    } catch (error: any) {
+      console.error('Error al aprobar solicitud:', error);
+      setAlertMsg(error.response?.data?.error || 'Error al aprobar solicitud');
+      setShowAlert(true);
+      setShowAprobarAlert(false);
+      setSolicitudAprobar(null);
+    }
+  };
+
+  const handleRechazarSolicitud = async (idSolicitud: number) => {
+    try {
+      await rechazarSolicitud(idSolicitud, 'Rechazada por el administrador');
+      setAlertMsg('Solicitud rechazada correctamente');
+      setShowAlert(true);
+      
+      // Recargar solicitudes
+      cargarSolicitudesRecuperacion();
+    } catch (error: any) {
+      console.error('Error al rechazar solicitud:', error);
+      setAlertMsg(error.response?.data?.error || 'Error al rechazar solicitud');
+      setShowAlert(true);
+    }
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -642,6 +748,226 @@ const Usuarios: React.FC = () => {
               </form>
             </div>
           )}
+
+          {/* ✅ NUEVA SECCIÓN: Solicitudes de recuperación de contraseña */}
+            <div className="usuarios-section usuarios-recuperacion-section">
+              <div className="encb">
+                <h2 className="usuarios-section-title">
+                  <IonIcon 
+                    icon={keyOutline} 
+                    style={{ 
+                      marginRight: '10px',
+                      fontSize: '1.5rem',
+                      verticalAlign: 'middle'
+                    }}
+                  />
+                  Historial de Recuperación de Contraseñas
+                  <IonChip color="warning" style={{ marginLeft: '10px' }}>
+                    <IonLabel>{solicitudesRecuperacion.length}</IonLabel>
+                  </IonChip>
+                </h2>
+              </div>
+              
+              <IonButton
+                expand="block"
+                onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}
+                className="ver-usuarios-btn"
+                color={mostrarSolicitudes ? "medium" : "warning"}
+              >
+                <IonIcon 
+                  slot="start" 
+                  icon={mostrarSolicitudes ? closeCircleOutline : keyOutline} 
+                />
+                {mostrarSolicitudes ? "Ocultar Solicitudes" : "Ver Solicitudes"}
+              </IonButton>
+
+              {mostrarSolicitudes && (
+                <>
+                  {/* Toggles para filtrar historial */}
+                  <div className="recuperacion-filtros-historial">
+                    <IonItem lines="none" className="recuperacion-toggle-item">
+                      <IonIcon icon={checkmarkCircle} slot="start" color="success" />
+                      <IonLabel>Mostrar Finalizadas</IonLabel>
+                      <IonToggle
+                        checked={mostrarFinalizadas}
+                        onIonChange={(e) => setMostrarFinalizadas(e.detail.checked)}
+                        color="success"
+                      />
+                    </IonItem>
+                    <IonItem lines="none" className="recuperacion-toggle-item">
+                      <IonIcon icon={closeCircleOutline} slot="start" color="danger" />
+                      <IonLabel>Mostrar Rechazadas</IonLabel>
+                      <IonToggle
+                        checked={mostrarRechazadas}
+                        onIonChange={(e) => setMostrarRechazadas(e.detail.checked)}
+                        color="danger"
+                      />
+                    </IonItem>
+                  </div>
+
+                  <IonList className="usuarios-list usuarios-list-animate" lines="none">
+                  {solicitudesRecuperacion.map((solicitud) => {
+                    // Función helper para obtener color del badge según estado
+                    const getBadgeColor = () => {
+                      switch (solicitud.estado) {
+                        case 'PENDIENTE': return 'warning';
+                        case 'APROBADA': return 'primary';
+                        case 'FINALIZADA': return 'success';
+                        case 'RECHAZADA': return 'danger';
+                        default: return 'medium';
+                      }
+                    };
+
+                    // Función helper para obtener icono del badge
+                    const getBadgeIcon = () => {
+                      switch (solicitud.estado) {
+                        case 'PENDIENTE': return time;
+                        case 'APROBADA': return keyOutline;
+                        case 'FINALIZADA': return checkmarkCircle;
+                        case 'RECHAZADA': return closeCircleOutline;
+                        default: return time;
+                      }
+                    };
+
+                    // Función helper para obtener texto del badge
+                    const getBadgeText = () => {
+                      switch (solicitud.estado) {
+                        case 'PENDIENTE': return 'Pendiente';
+                        case 'APROBADA': return 'Código Generado';
+                        case 'FINALIZADA': return 'Finalizada';
+                        case 'RECHAZADA': return 'Rechazada';
+                        default: return solicitud.estado;
+                      }
+                    };
+
+                    return (
+                    <IonItem key={solicitud.idSolicitud} className="recuperacion-solicitud-item" lines="none">
+                      <div className={`recuperacion-solicitud-card recuperacion-solicitud-card--${solicitud.estado.toLowerCase()}`}>
+                        <div className="recuperacion-solicitud-header">
+                          <div className="recuperacion-solicitud-usuario">
+                            <IonIcon 
+                              icon={personCircleOutline} 
+                              className="recuperacion-solicitud-usuario-icon"
+                            />
+                            <h3 className="recuperacion-solicitud-usuario-nombre">
+                              {solicitud.Usuario?.nombreUsuario || 'Usuario desconocido'}
+                            </h3>
+                          </div>
+                          <IonChip 
+                            className="recuperacion-solicitud-badge"
+                            color={getBadgeColor()}
+                          >
+                            <IonIcon icon={getBadgeIcon()} />
+                            <IonLabel>{getBadgeText()}</IonLabel>
+                          </IonChip>
+                        </div>
+                        
+                        {/* Motivo de la solicitud */}
+                        {(solicitud.motivoSolicitud || solicitud.Motivo) && (
+                          <div className="recuperacion-solicitud-motivo">
+                            <IonIcon icon={alertCircleOutline} className="recuperacion-solicitud-motivo-icon" />
+                            <span className="recuperacion-solicitud-motivo-label">Motivo:</span>
+                            <span className="recuperacion-solicitud-motivo-valor">
+                              {solicitud.Motivo?.descripcion || solicitud.motivoSolicitud}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="recuperacion-solicitud-info">
+                          <div className="recuperacion-solicitud-fecha">
+                            <IonIcon icon={time} className="recuperacion-solicitud-fecha-icon" />
+                            <span className="recuperacion-solicitud-fecha-label">Solicitado:</span>
+                            <span className="recuperacion-solicitud-fecha-valor">
+                              {formatearFecha12h(solicitud.fechaSolicitud)}
+                            </span>
+                          </div>
+                          {solicitud.estado === 'APROBADA' && solicitud.codigo && (
+                            <div className="recuperacion-solicitud-fecha" style={{ marginTop: '0.5rem' }}>
+                              <IonIcon icon={keyOutline} className="recuperacion-solicitud-fecha-icon" />
+                              <span className="recuperacion-solicitud-fecha-label">Código:</span>
+                              <span className="recuperacion-solicitud-fecha-valor" style={{ 
+                                fontWeight: 'bold', 
+                                fontSize: '1.1rem',
+                                letterSpacing: '3px',
+                                color: 'var(--ion-color-primary)'
+                              }}>
+                                {solicitud.codigo}
+                              </span>
+                            </div>
+                          )}
+                          {solicitud.estado === 'FINALIZADA' && solicitud.fechaFinalizacion && (
+                            <div className="recuperacion-solicitud-fecha" style={{ marginTop: '0.5rem' }}>
+                              <IonIcon icon={checkmarkCircle} className="recuperacion-solicitud-fecha-icon" />
+                              <span className="recuperacion-solicitud-fecha-label">Finalizada:</span>
+                              <span className="recuperacion-solicitud-fecha-valor">
+                                {formatearFecha12h(solicitud.fechaFinalizacion)}
+                              </span>
+                            </div>
+                          )}
+                          {solicitud.estado === 'RECHAZADA' && solicitud.motivoRechazo && (
+                            <div className="recuperacion-solicitud-fecha" style={{ marginTop: '0.5rem' }}>
+                              <IonIcon icon={closeCircleOutline} className="recuperacion-solicitud-fecha-icon" />
+                              <span className="recuperacion-solicitud-fecha-label">Motivo rechazo:</span>
+                              <span className="recuperacion-solicitud-fecha-valor" style={{ color: 'var(--ion-color-danger)' }}>
+                                {solicitud.motivoRechazo}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="recuperacion-solicitud-actions">
+                          {solicitud.estado === 'PENDIENTE' ? (
+                            <>
+                              <IonButton
+                                size="default"
+                                className="recuperacion-btn-aprobar"
+                                onClick={() => handleAprobarSolicitud(solicitud.idSolicitud)}
+                              >
+                                <IonIcon icon={checkmarkCircle} slot="start" />
+                                Aprobar y Generar Código
+                              </IonButton>
+                              <IonButton
+                                size="default"
+                                className="recuperacion-btn-rechazar"
+                                fill="outline"
+                                onClick={() => handleRechazarSolicitud(solicitud.idSolicitud)}
+                              >
+                                <IonIcon icon={closeCircleOutline} slot="start" />
+                                Rechazar
+                              </IonButton>
+                            </>
+                          ) : solicitud.estado === 'APROBADA' ? (
+                            <IonText color="primary">
+                              <p style={{ margin: 0, fontWeight: 500 }}>
+                                <IonIcon icon={keyOutline} style={{ verticalAlign: 'middle', marginRight: '5px' }} />
+                                Esperando que el usuario use el código para restablecer su contraseña
+                              </p>
+                            </IonText>
+                          ) : solicitud.estado === 'FINALIZADA' ? (
+                            <IonText color="success">
+                              <p style={{ margin: 0, fontWeight: 500 }}>
+                                <IonIcon icon={checkmarkCircle} style={{ verticalAlign: 'middle', marginRight: '5px' }} />
+                                Contraseña restablecida exitosamente
+                              </p>
+                            </IonText>
+                          ) : solicitud.estado === 'RECHAZADA' ? (
+                            <IonText color="danger">
+                              <p style={{ margin: 0, fontWeight: 500 }}>
+                                <IonIcon icon={closeCircleOutline} style={{ verticalAlign: 'middle', marginRight: '5px' }} />
+                                Solicitud rechazada por el administrador
+                              </p>
+                            </IonText>
+                          ) : null}
+                        </div>
+                      </div>
+                    </IonItem>
+                    );
+                  })}
+                </IonList>
+                </>
+              )}
+            </div>
+
           <div className="usuarios-section usuarios-list-section">
             <div className="encb">
               <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
@@ -916,6 +1242,29 @@ const Usuarios: React.FC = () => {
               }
             ]}
             cssClass="delete-alert"
+          />
+          
+          {/* Alert de confirmación para aprobar solicitud de recuperación */}
+          <IonAlert
+            isOpen={showAprobarAlert}
+            header="⚠️ Confirmar Aprobación"
+            message="IMPORTANTE: Al aprobar esta solicitud, la contraseña actual del usuario será ELIMINADA inmediatamente. El usuario NO podrá acceder al sistema hasta que use el código de 4 dígitos para establecer una nueva contraseña. ¿Desea continuar?"
+            buttons={[
+              {
+                text: 'Cancelar',
+                role: 'cancel',
+                cssClass: 'secondary',
+                handler: () => {
+                  setShowAprobarAlert(false);
+                  setSolicitudAprobar(null);
+                }
+              },
+              {
+                text: 'Aprobar y Generar Código',
+                cssClass: 'primary',
+                handler: () => confirmAprobarSolicitud()
+              }
+            ]}
           />
           {/* Modal para cambiar contraseña */}
           <IonAlert
@@ -1200,6 +1549,62 @@ const Usuarios: React.FC = () => {
               usuarioNombre={usuarioHistorial.username}
             />
           )}
+
+          {/* ✅ NUEVO: Modal para mostrar código generado */}
+          <IonModal isOpen={showCodigoModal} onDidDismiss={() => setShowCodigoModal(false)} className="modal-codigo-recuperacion">
+            <IonHeader>
+              <IonToolbar color="success">
+                <IonTitle>Código de Recuperación Generado</IonTitle>
+                <IonButtons slot="end">
+                  <IonButton onClick={() => setShowCodigoModal(false)}>
+                    <IonIcon icon={close} />
+                  </IonButton>
+                </IonButtons>
+              </IonToolbar>
+            </IonHeader>
+            <IonContent className="modal-codigo-content">
+              <IonCard className="modal-codigo-card">
+                <IonCardContent className="modal-codigo-card-content">
+                  <div className="modal-codigo-body">
+                    <IonIcon 
+                      icon={checkmarkCircle} 
+                      className="modal-codigo-icon-success"
+                    />
+                    <h2 className="modal-codigo-title">Solicitud Aprobada</h2>
+                    <p className="modal-codigo-usuario">
+                      Usuario: <strong>{nombreUsuarioCodigo}</strong>
+                    </p>
+                    
+                    <div className="modal-codigo-box">
+                      <p className="modal-codigo-label">
+                        Código de 4 dígitos:
+                      </p>
+                      <h1 className="modal-codigo-numero">
+                        {codigoGenerado}
+                      </h1>
+                    </div>
+                    
+                    <div className="modal-codigo-warning">
+                      <IonIcon icon={alertCircleOutline} className="modal-codigo-warning-icon" />
+                      <p className="modal-codigo-warning-text">
+                        Este código debe ser comunicado al usuario. 
+                        Expira en 24 horas y tiene un máximo de 5 intentos.
+                      </p>
+                    </div>
+                  </div>
+                </IonCardContent>
+              </IonCard>
+              
+              <IonButton 
+                expand="block" 
+                onClick={() => setShowCodigoModal(false)}
+                className="modal-codigo-btn"
+                color="success"
+              >
+                Entendido
+              </IonButton>
+            </IonContent>
+          </IonModal>
         </div>
       </IonContent>
     </IonPage>

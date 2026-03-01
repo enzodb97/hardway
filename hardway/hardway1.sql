@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-02-2026 a las 07:46:28
+-- Tiempo de generación: 01-03-2026 a las 07:27:34
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -2564,6 +2564,28 @@ INSERT INTO `indumentaria` (`codigoIndumentaria`, `idDetalle`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `motivos_recuperacion_password`
+--
+
+CREATE TABLE `motivos_recuperacion_password` (
+  `idMotivo` int(11) NOT NULL,
+  `descripcion` varchar(255) NOT NULL COMMENT 'Descripción del motivo',
+  `activo` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=Activo, 0=Inactivo',
+  `orden` int(11) NOT NULL DEFAULT 0 COMMENT 'Orden de visualización en el frontend'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catálogo de motivos predefinidos para solicitud de recuperación de contraseña';
+
+--
+-- Volcado de datos para la tabla `motivos_recuperacion_password`
+--
+
+INSERT INTO `motivos_recuperacion_password` (`idMotivo`, `descripcion`, `activo`, `orden`) VALUES
+(1, 'Olvidé mi contraseña', 1, 1),
+(2, 'Creo que mi cuenta fue comprometida', 1, 2),
+(3, 'Quiero cambiar por seguridad', 1, 3);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `motivo_baja_cliente`
 --
 
@@ -3864,6 +3886,29 @@ INSERT INTO `rack` (`idRack`, `numeroRack`, `descripcion`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `solicitudes_recuperacion_password`
+--
+
+CREATE TABLE `solicitudes_recuperacion_password` (
+  `idSolicitud` int(11) NOT NULL,
+  `idUsuario` int(11) NOT NULL,
+  `idMotivo` int(11) DEFAULT NULL COMMENT 'Referencia al motivo predefinido del catálogo',
+  `motivoSolicitud` varchar(500) DEFAULT NULL COMMENT 'Motivo por el cual el usuario solicita la recuperación de contraseña',
+  `codigo` varchar(4) NOT NULL DEFAULT '0000',
+  `estado` enum('PENDIENTE','APROBADA','FINALIZADA','RECHAZADA','EXPIRADA') NOT NULL DEFAULT 'PENDIENTE',
+  `fechaSolicitud` datetime NOT NULL DEFAULT current_timestamp(),
+  `fechaExpiracion` datetime NOT NULL,
+  `fechaAprobacion` datetime DEFAULT NULL,
+  `fechaFinalizacion` datetime DEFAULT NULL COMMENT 'Fecha y hora cuando el usuario finalizó el restablecimiento',
+  `idAdminAprobador` int(11) DEFAULT NULL,
+  `motivoRechazo` text DEFAULT NULL,
+  `ipOrigen` varchar(45) DEFAULT NULL,
+  `intentosErroneos` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `stock`
 --
 
@@ -4391,6 +4436,13 @@ ALTER TABLE `indumentaria`
   ADD KEY `idDetalle` (`idDetalle`);
 
 --
+-- Indices de la tabla `motivos_recuperacion_password`
+--
+ALTER TABLE `motivos_recuperacion_password`
+  ADD PRIMARY KEY (`idMotivo`),
+  ADD KEY `idx_activo` (`activo`);
+
+--
 -- Indices de la tabla `motivo_baja_cliente`
 --
 ALTER TABLE `motivo_baja_cliente`
@@ -4483,6 +4535,20 @@ ALTER TABLE `presentacion_producto`
 ALTER TABLE `rack`
   ADD PRIMARY KEY (`idRack`),
   ADD UNIQUE KEY `idx_numeroRack` (`numeroRack`);
+
+--
+-- Indices de la tabla `solicitudes_recuperacion_password`
+--
+ALTER TABLE `solicitudes_recuperacion_password`
+  ADD PRIMARY KEY (`idSolicitud`),
+  ADD KEY `idx_usuario` (`idUsuario`),
+  ADD KEY `idx_codigo` (`codigo`),
+  ADD KEY `idx_fecha_expiracion` (`fechaExpiracion`),
+  ADD KEY `idx_usuario_estado` (`idUsuario`),
+  ADD KEY `idx_codigo_estado` (`codigo`),
+  ADD KEY `fk_solicitud_admin` (`idAdminAprobador`),
+  ADD KEY `idx_id_motivo` (`idMotivo`),
+  ADD KEY `idx_estado` (`estado`);
 
 --
 -- Indices de la tabla `stock`
@@ -4642,6 +4708,12 @@ ALTER TABLE `historial_modificacion_pedido`
   MODIFY `idHistorial` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `motivos_recuperacion_password`
+--
+ALTER TABLE `motivos_recuperacion_password`
+  MODIFY `idMotivo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT de la tabla `motivo_baja_cliente`
 --
 ALTER TABLE `motivo_baja_cliente`
@@ -4706,6 +4778,12 @@ ALTER TABLE `presentacion_producto`
 --
 ALTER TABLE `rack`
   MODIFY `idRack` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+
+--
+-- AUTO_INCREMENT de la tabla `solicitudes_recuperacion_password`
+--
+ALTER TABLE `solicitudes_recuperacion_password`
+  MODIFY `idSolicitud` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `stock_registro_fallo`
@@ -4892,6 +4970,14 @@ ALTER TABLE `pedido`
 --
 ALTER TABLE `persona`
   ADD CONSTRAINT `persona_ibfk_1` FOREIGN KEY (`idDomicilio`) REFERENCES `domicilio` (`idDomicilio`);
+
+--
+-- Filtros para la tabla `solicitudes_recuperacion_password`
+--
+ALTER TABLE `solicitudes_recuperacion_password`
+  ADD CONSTRAINT `fk_solicitud_admin` FOREIGN KEY (`idAdminAprobador`) REFERENCES `usuario` (`idUsuario`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_solicitud_motivo` FOREIGN KEY (`idMotivo`) REFERENCES `motivos_recuperacion_password` (`idMotivo`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_solicitud_usuario` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `stock`

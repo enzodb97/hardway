@@ -263,7 +263,7 @@ const AppRouter = () => {
         isOpen={showWelcome}
         onDidDismiss={() => setShowWelcome(false)}
         header="¡Bienvenido!"
-        message={`Bienvenido ${username || ""} al Sistema Pegasus`}
+        message={`Bienvenido ${username || ""} al Sistema Hardway de Gestion Integral`}
         buttons={["Aceptar"]}
       />
     </IonReactRouter>

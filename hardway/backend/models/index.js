@@ -21,6 +21,8 @@ const MotivoInactivacionUsuario = require('./MotivoInactivacionUsuario'); // Nue
 const NotificacionPedido = require('./NotificacionPedido'); // Modelo para notificaciones de picking
 const PresentacionProducto = require('./PresentacionProducto'); // Modelo para presentaciones
 const ConfiguracionPresentacion = require('./ConfiguracionPresentacion'); // Modelo para configuración
+const SolicitudRecuperacionPassword = require('./SolicitudRecuperacionPassword'); // Modelo para recuperación de contraseña
+const MotivoRecuperacionPassword = require('./MotivoRecuperacionPassword'); // Catálogo de motivos de recuperación
 const { Domicilio, Barrio, Ciudad } = require('./Ubicacion');
 const {
   Color,
@@ -265,6 +267,26 @@ const setupAssociations = () => {
   
   Pedido.hasMany(HistorialModificacionPedido, { foreignKey: "numeroPedido" });
 
+  // Relaciones de SolicitudRecuperacionPassword
+  SolicitudRecuperacionPassword.belongsTo(Usuario, { 
+    foreignKey: "idUsuario",
+    as: "Usuario"
+  });
+  Usuario.hasMany(SolicitudRecuperacionPassword, { 
+    foreignKey: "idUsuario",
+    as: "SolicitudesRecuperacion"
+  });
+
+  // Relaciones con MotivoRecuperacionPassword
+  SolicitudRecuperacionPassword.belongsTo(MotivoRecuperacionPassword, { 
+    foreignKey: "idMotivo",
+    as: "Motivo"
+  });
+  MotivoRecuperacionPassword.hasMany(SolicitudRecuperacionPassword, { 
+    foreignKey: "idMotivo",
+    as: "Solicitudes"
+  });
+
   console.log("⚙️  Configurando relaciones entre modelos...");
   console.log("✅ Relaciones de modelos configuradas correctamente");
 };
@@ -326,6 +348,10 @@ module.exports = {
   // Modelos de presentaciones de producto
   PresentacionProducto,
   ConfiguracionPresentacion,
+  
+  // Modelos de recuperación de contraseña
+  SolicitudRecuperacionPassword,
+  MotivoRecuperacionPassword,
   
   // Función para configurar relaciones
   setupAssociations,

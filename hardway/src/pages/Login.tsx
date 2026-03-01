@@ -2,6 +2,7 @@ import { IonContent, IonPage } from "@ionic/react";
 import { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ModalRecuperacionPassword from "../components/ModalRecuperacionPassword/ModalRecuperacionPassword";
 import zepelin from "../assets/images/zepelin.png";
 import "./Login.css";
 
@@ -15,6 +16,7 @@ const Login: React.FC = () => {
   console.log("🔑 Login component montándose...");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showModalRecuperacion, setShowModalRecuperacion] = useState(false);
   
   const history = useHistory();
   const location = useLocation<LocationState>();
@@ -45,7 +47,7 @@ const Login: React.FC = () => {
     <IonPage className="login-page">
       <IonContent className="login-content">
         <div className="main-container">
-          <div className="form-container">
+          <div className="form-container" style={{ width: "450px" }}>
             <h1 className="brand-title">
               <img src={zepelin} alt="Ícono Hardway" className="brand-logo" />
               HARDWAY
@@ -102,12 +104,24 @@ const Login: React.FC = () => {
             </div>
 
             <div className="password-section">
-              <a href="/reset" className="password-link">
+              <button 
+                type="button"
+                className="password-link" 
+                onClick={() => setShowModalRecuperacion(true)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
                 ¿Olvidó su contraseña? <span>Restablecer contraseña</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
+        
+        {/* Modal de recuperación de contraseña */}
+        <ModalRecuperacionPassword
+          isOpen={showModalRecuperacion}
+          onDidDismiss={() => setShowModalRecuperacion(false)}
+        />
+        
         {/* El formulario de invitado ahora vive en la ruta /invitado */}
       </IonContent>
     </IonPage>
