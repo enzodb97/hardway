@@ -60,6 +60,7 @@ app.use("/api/auxiliares", auxiliaresRoutes);
 app.use("/api", ubicacionRoutes);
 app.use("/api/reportes", reportesRoutes);
 app.use("/api/picking", pickingRoutes);
+app.use("/api/presentaciones", presentacionesRoutes);
 // (La ruta pública de envíos ya fue registrada arriba)
 
 const { verificarAccesoEnvios } = require("./middleware/auth");

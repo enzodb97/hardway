@@ -93,7 +93,8 @@ const Login: React.FC = () => {
               <button
                 type="button"
                 className="secondary-button"
-                style={{ marginTop: 16, width: "100%", fontFamily: "Poppins, sans-serif", fontWeight: 600 }}
+                style={{ marginTop: 16, height: 42,
+                   width: "100%", fontFamily: "Poppins, sans-serif", fontWeight: 600 }}
                 onClick={() => history.push('/chatbot')}
               >
                 🤖 Asistente de Pedidos para Clientes 🤖

@@ -133,7 +133,7 @@ const GuestQueryForm: React.FC = () => {
       return (
         <div className="chatbot-progress">
           <IonProgressBar type="indeterminate"></IonProgressBar>
-          <div style={{ marginTop: 8, textAlign: 'center' }} className="muted">Estado no disponible — mostrando actividad</div>
+          <div style={{ marginTop: 8, textAlign: 'center' }} className="chatbot-muted">Estado no disponible — mostrando actividad</div>
         </div>
       );
     }
@@ -569,12 +569,12 @@ const GuestQueryForm: React.FC = () => {
     <div>
       <div className="chat-window" ref={chatRef}>
         {messages.map((m, i) => (
-          <div key={i} className={`message-row ${m.from === 'bot' ? 'bot' : 'user'}`}>
-            {m.from === 'bot' && <div className="avatar bot">🤖</div>}
+          <div key={i} className={`chatbot-message-row ${m.from === 'bot' ? 'bot' : 'user'}`}>
+            {m.from === 'bot' && <div className="chatbot-avatar bot">🤖</div>}
             <div className={m.from === 'bot' ? 'chat-bubble-bot' : 'chat-bubble-user'}>
               {m.text}
             </div>
-            {m.from === 'user' && <div className="avatar user">U</div>}
+            {m.from === 'user' && <div className="chatbot-avatar user">U</div>}
           </div>
         ))}
       </div>
@@ -582,30 +582,30 @@ const GuestQueryForm: React.FC = () => {
       <div style={{ marginTop: 12 }}>
         {step === 'intro' && (
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" className="primary-button" onClick={startConsulta}>Consultar pedido</button>
-            {/*<button type="button" className="secondary-button" onClick={() => { pushUser('Otra consulta'); pushBot('Actualmente solo puedo ayudar con consultas de pedido.'); }}>Otra</button>*/}
+            <button type="button" className="chatbot-primary-button" onClick={startConsulta}>Consultar pedido</button>
+            {/*<button type="button" className="chatbot-secondary-button" onClick={() => { pushUser('Otra consulta'); pushBot('Actualmente solo puedo ayudar con consultas de pedido.'); }}>Otra</button>*/}
           </div>
         )}
 
         {step !== 'intro' && (
           <>
-            <div className="chat-input-row">
-              <div className="input-field">
+            <div className="chatbot-chat-input-row">
+              <div className="chatbot-input-field">
                 <input
-                  className="input-field-element"
+                  className="chatbot-input-field-element"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSend(); } }}
                   placeholder={step === 'askPedido' ? 'Número de pedido' : step === 'askValidate' ? 'DNI o email' : 'Escribe aquí...'}
                 />
               </div>
-              <button className="send-button" onClick={handleSend} disabled={loading} aria-label="Enviar">{loading ? '...' : '➤'}</button>
+              <button className="chatbot-send-button" onClick={handleSend} disabled={loading} aria-label="Enviar">{loading ? '...' : '➤'}</button>
             </div>
 
             {result && (
               <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                <button className="primary-button" onClick={handleConsultarOtro}>Consultar otro pedido</button>
-                <button className="secondary-button" onClick={handleCerrarChat}>Cerrar chat</button>
+                <button className="chatbot-primary-button" onClick={handleConsultarOtro}>Consultar otro pedido</button>
+                <button className="chatbot-secondary-button" onClick={handleCerrarChat}>Cerrar chat</button>
               </div>
             )}
           </>
@@ -616,10 +616,10 @@ const GuestQueryForm: React.FC = () => {
         {result && (
           <>
             <ProgressBar respuesta={result} />
-            <div className="chat-result fade-in">
-              <div className="result-header" style={{ justifyContent: 'space-between' }}>
+            <div className="chatbot-chat-result chatbot-fade-in">
+              <div className="chatbot-result-header" style={{ justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div className="result-icon">📦</div>
+                  <div className="chatbot-result-icon">📦</div>
                   <div>
                     <h4 style={{ margin: 0 }}>Resultado</h4>
                  </div>
@@ -629,7 +629,7 @@ const GuestQueryForm: React.FC = () => {
                     const badgeColor = getBadgeColor(result);
                     const textColor = '#ffffff';
                     return (
-                      <div className="status-badge" style={{ backgroundColor: badgeColor, color: textColor }}>
+                      <div className="chatbot-status-badge" style={{ backgroundColor: badgeColor, color: textColor }}>
                         {mostrar(result.estado)}
                       </div>
                     );
@@ -637,27 +637,27 @@ const GuestQueryForm: React.FC = () => {
                 </div>
               </div>
 
-              <div className="result-grid">
-                <div className="result-row"><div className="label">Número</div><div className="value">{mostrar(result.numeroPedido)}</div></div>
-                <div className="result-row"><div className="label">Fecha del pedido</div><div className="value">{formatDate(result.fechaPedido)}</div></div>
-                <div className="result-row"><div className="label">Empresa de envío</div><div className="value">{mostrar(result.empresaEnvio)}</div></div>
+              <div className="chatbot-result-grid">
+                <div className="chatbot-result-row"><div className="chatbot-label">Número</div><div className="chatbot-value">{mostrar(result.numeroPedido)}</div></div>
+                <div className="chatbot-result-row"><div className="chatbot-label">Fecha del pedido</div><div className="chatbot-value">{formatDate(result.fechaPedido)}</div></div>
+                <div className="chatbot-result-row"><div className="chatbot-label">Empresa de envío</div><div className="chatbot-value">{mostrar(result.empresaEnvio)}</div></div>
                 {trackingCode ? (
-                  <div className="result-row tracking-row">
-                    <div className="label">Código de seguimiento</div>
-                    <div className="value">{mostrar(trackingCode)}</div>
-                    <button className="copy-button" onClick={async () => { try { await navigator.clipboard.writeText(String(trackingCode || '')); pushBot('Código de seguimiento copiado al portapapeles.'); } catch { pushBot('No se pudo copiar el código.'); } }}>Copiar</button>
+                  <div className="chatbot-result-row chatbot-tracking-row">
+                    <div className="chatbot-label">Código de seguimiento</div>
+                    <div className="chatbot-value">{mostrar(trackingCode)}</div>
+                    <button className="chatbot-copy-button" onClick={async () => { try { await navigator.clipboard.writeText(String(trackingCode || '')); pushBot('Código de seguimiento copiado al portapapeles.'); } catch { pushBot('No se pudo copiar el código.'); } }}>Copiar</button>
                   </div>
                 ) : (
-                  <div className="result-row tracking-row">
-                    <div className="label">Código de seguimiento</div>
-                    <div className="value">Codigo de seguimiento aun no asignado</div>
+                  <div className="chatbot-result-row chatbot-tracking-row">
+                    <div className="chatbot-label">Código de seguimiento</div>
+                    <div className="chatbot-value">Codigo de seguimiento aun no asignado</div>
                   </div>
                 )}
                 {trackingLink && trackingCode && (
-                  <div className="tracking-links" style={{ marginTop: 10 }}>
-                    <div className="label" style={{ width: 'auto', minWidth: 0 }}>Seguir envío en</div>
+                  <div className="chatbot-tracking-links" style={{ marginTop: 10 }}>
+                    <div className="chatbot-label" style={{ width: 'auto', minWidth: 0 }}>Seguir envío en</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <a className="track-link" href={trackingLink.url} target="_blank" rel="noopener noreferrer">{trackingLink.label}</a>
+                      <a className="chatbot-track-link" href={trackingLink.url} target="_blank" rel="noopener noreferrer">{trackingLink.label}</a>
                     </div>
                   </div>
                 )}
