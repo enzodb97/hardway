@@ -1266,7 +1266,7 @@ const AltaPedido: React.FC = () => {
                 )}
                 {descuentoCajasCerradas > 0 && (
                   <div style={{ color: "#4CAF50", fontSize: "0.95em" }}>
-                    📦 Descuento por Cajas Cerradas ({presentacionesConDescuento.get(2) || 10}%): -${descuentoCajasCerradas.toFixed(2)}
+                    📦 Descuento por Cajas ({presentacionesConDescuento.get(2) || 10}%): -${descuentoCajasCerradas.toFixed(2)}
                   </div>
                 )}
                 

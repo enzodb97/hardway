@@ -4103,9 +4103,7 @@ CREATE TABLE `unidad_medida` (
 
 INSERT INTO `unidad_medida` (`idUnidadMedida`, `nombreUnidad`, `abreviatura`) VALUES
 (1, 'Unidad', 'un.'),
-(2, 'Par', 'par'),
-(3, 'Set', 'set'),
-(4, 'Pack', 'pack');
+(2, 'Par', 'par');
 
 -- --------------------------------------------------------
 

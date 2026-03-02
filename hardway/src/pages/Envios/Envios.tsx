@@ -511,7 +511,7 @@ const Envios: React.FC = () => {
         ) : pedidosPaginados.length === 0 ? (
           <IonCard className="empty-state">
             <IonCardContent>
-              <IonIcon icon={cubeOutline} className="empty-icon" />
+              <IonIcon icon={cubeOutline} className="empty-icon-2" />
               <h3>No hay pedidos</h3>
               <p>
                 {searchTerm || filtroEstado !== "todos"

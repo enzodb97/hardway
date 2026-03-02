@@ -37,6 +37,27 @@ const capitalizar = (texto: string): string => {
     .join(' ');
 };
 
+// Función para validar que solo contenga letras y espacios
+const soloLetras = (texto: string): string => {
+  if (!texto) return texto;
+  // Permitir solo letras (incluyendo acentuadas y ñ) y espacios
+  return texto.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+};
+
+// Función para validar que solo contenga letras y números (sin caracteres especiales)
+const soloLetrasYNumeros = (texto: string): string => {
+  if (!texto) return texto;
+  // Permitir solo letras (incluyendo acentuadas y ñ) y números
+  return texto.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '');
+};
+
+// Función para validar que solo contenga letras, números y espacios (sin caracteres especiales)
+const soloLetrasNumerosYEspacios = (texto: string): string => {
+  if (!texto) return texto;
+  // Permitir solo letras (incluyendo acentuadas y ñ), números y espacios
+  return texto.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '');
+};
+
 const AltaCliente: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const { clientes, agregarCliente, modificarCliente } = useClientes();
@@ -63,6 +84,7 @@ const AltaCliente: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [previousNumeroDocumento, setPreviousNumeroDocumento] = useState("");
   const [previousTelefono, setPreviousTelefono] = useState("");
+  const [previousAltura, setPreviousAltura] = useState("");
   const [showSuccess, setShowSuccess] = useState(false); // NUEVO
 
   useEffect(() => {
@@ -73,6 +95,7 @@ const AltaCliente: React.FC = () => {
         setEsEdicion(true);
         setPreviousNumeroDocumento(clienteExistente.numeroDocumento || "");
         setPreviousTelefono(clienteExistente.telefono || "");
+        setPreviousAltura(clienteExistente.altura || "");
       } else {
         console.log("❌ Cliente no encontrado con ID:", id);
       }
@@ -108,6 +131,103 @@ const AltaCliente: React.FC = () => {
     
     setFormData({ ...formData, telefono: nuevoValor });
     setPreviousTelefono(nuevoValor);
+  };
+
+  const handleAlturaChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloNumeros(value, previousAltura);
+    
+    // Validar longitud máxima de 6 dígitos
+    if (nuevoValor.length > 6) {
+      nuevoValor = nuevoValor.substring(0, 6);
+    }
+    
+    setFormData({ ...formData, altura: nuevoValor });
+    setPreviousAltura(nuevoValor);
+  };
+
+  const handleCodigoPostalChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloLetrasYNumeros(value);
+    
+    // Validar longitud máxima de 10 caracteres
+    if (nuevoValor.length > 10) {
+      nuevoValor = nuevoValor.substring(0, 10);
+    }
+    
+    setFormData({ ...formData, cp: nuevoValor.toUpperCase() });
+  };
+
+  const handlePisoChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloLetrasYNumeros(value);
+    
+    // Validar longitud máxima de 10 caracteres
+    if (nuevoValor.length > 10) {
+      nuevoValor = nuevoValor.substring(0, 10);
+    }
+    
+    setFormData({ ...formData, piso: nuevoValor.toUpperCase() });
+  };
+
+  const handleNumeroDepartamentoChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloLetrasYNumeros(value);
+    
+    // Validar longitud máxima de 10 caracteres
+    if (nuevoValor.length > 10) {
+      nuevoValor = nuevoValor.substring(0, 10);
+    }
+    
+    setFormData({ ...formData, numeroDepartamento: nuevoValor.toUpperCase() });
+  };
+
+  const handleLocalidadChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloLetrasNumerosYEspacios(value);
+    
+    // Validar longitud máxima de 40 caracteres
+    if (nuevoValor.length > 40) {
+      nuevoValor = nuevoValor.substring(0, 40);
+    }
+    
+    setFormData({ ...formData, localidad: capitalizar(nuevoValor) });
+  };
+
+  const handleBarrioChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloLetrasNumerosYEspacios(value);
+    
+    // Validar longitud máxima de 40 caracteres
+    if (nuevoValor.length > 40) {
+      nuevoValor = nuevoValor.substring(0, 40);
+    }
+    
+    setFormData({ ...formData, barrio: capitalizar(nuevoValor) });
+  };
+
+  const handleCalleChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloLetrasNumerosYEspacios(value);
+    
+    // Validar longitud máxima de 40 caracteres
+    if (nuevoValor.length > 40) {
+      nuevoValor = nuevoValor.substring(0, 40);
+    }
+    
+    setFormData({ ...formData, calle: capitalizar(nuevoValor) });
+  };
+
+  const handleDomicilioChange = (e: any) => {
+    const value = e.detail.value;
+    let nuevoValor = soloLetrasNumerosYEspacios(value);
+    
+    // Validar longitud máxima de 40 caracteres
+    if (nuevoValor.length > 40) {
+      nuevoValor = nuevoValor.substring(0, 40);
+    }
+    
+    setFormData({ ...formData, domicilio: capitalizar(nuevoValor) });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,6 +323,7 @@ const AltaCliente: React.FC = () => {
         });
         setPreviousNumeroDocumento("");
         setPreviousTelefono("");
+        setPreviousAltura("");
         setShowSuccess(true);
       }
     } catch (error: any) {
@@ -306,9 +427,14 @@ const AltaCliente: React.FC = () => {
                   <IonInput
                     type="text"
                     value={formData.nombre}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, nombre: capitalizar(e.detail.value!) })
-                    }
+                    onIonChange={(e) => {
+                      const valor = e.detail.value!;
+                      // Si es CUIT, permitir números; si no, solo letras
+                      const textoValidado = formData.tipoDocumento === 'CUIT' 
+                        ? valor 
+                        : soloLetras(valor);
+                      setFormData({ ...formData, nombre: capitalizar(textoValidado) });
+                    }}
                     placeholder={
                       esEdicion && !formData.nombre 
                         ? "Dato obligatorio." 
@@ -330,9 +456,12 @@ const AltaCliente: React.FC = () => {
                     <IonInput
                       type="text"
                       value={formData.apellido}
-                      onIonChange={(e) =>
-                        setFormData({ ...formData, apellido: capitalizar(e.detail.value!) })
-                      }
+                      onIonChange={(e) => {
+                        const valor = e.detail.value!;
+                        // Solo permitir letras para apellido
+                        const textoValidado = soloLetras(valor);
+                        setFormData({ ...formData, apellido: capitalizar(textoValidado) });
+                      }}
                       placeholder={
                         esEdicion && !formData.apellido ? "Dato obligatorio." : ""
                       }
@@ -360,10 +489,11 @@ const AltaCliente: React.FC = () => {
                     <span className="required">*</span>
                   </IonLabel>
                   <IonInput
+                    type="text"
+                    maxlength={40}
                     value={formData.localidad}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, localidad: capitalizar(e.detail.value!) })
-                    }
+                    onIonChange={handleLocalidadChange}
+                    placeholder="Ej: Buenos Aires(máx: 40)"
                   />
                 </IonItem>
 
@@ -372,20 +502,22 @@ const AltaCliente: React.FC = () => {
                     Barrio <span className="required">*</span>
                   </IonLabel>
                   <IonInput
+                    type="text"
+                    maxlength={40}
                     value={formData.barrio}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, barrio: capitalizar(e.detail.value!) })
-                    }
+                    onIonChange={handleBarrioChange}
+                    placeholder="Ej: Barrio Norte (máx: 40)"
                   />
                 </IonItem>
 
                 <IonItem className="form-item">
                   <IonLabel position="floating">Calle</IonLabel>
                   <IonInput
+                    type="text"
+                    maxlength={40}
                     value={formData.calle}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, calle: capitalizar(e.detail.value!) })
-                    }
+                    onIonChange={handleCalleChange}
+                    placeholder="Ej: Av San Martin (máx: 40)"
                   />
                 </IonItem>
 
@@ -394,10 +526,11 @@ const AltaCliente: React.FC = () => {
                     Domicilio (Alternativo)
                   </IonLabel>
                   <IonInput
+                    type="text"
+                    maxlength={40}
                     value={formData.domicilio}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, domicilio: capitalizar(e.detail.value!) })
-                    }
+                    onIonChange={handleDomicilioChange}
+                    placeholder="Ej: Calle 9 de Julio (máx: 40)"
                   />
                 </IonItem>
               </div>
@@ -409,34 +542,33 @@ const AltaCliente: React.FC = () => {
                     type="number"
                     inputmode="numeric"
                     pattern="[0-9]*"
+                    maxlength={6}
                     value={formData.altura}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, altura: e.detail.value! })
-                    }
+                    onIonChange={handleAlturaChange}
                     onWheel={(e: any) => e.target.blur()}
+                    placeholder="Máx: 6 dígitos"
                   />
                 </IonItem>
 
                 <IonItem className="form-item">
                   <IonLabel position="floating">Piso</IonLabel>
                   <IonInput
+                    type="text"
+                    maxlength={10}
                     value={formData.piso}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, piso: e.detail.value! })
-                    }
+                    onIonChange={handlePisoChange}
+                    placeholder="Ej: 1, 2A, PB (máx: 10)"
                   />
                 </IonItem>
 
                 <IonItem className="form-item">
                   <IonLabel position="floating">N° Departamento</IonLabel>
                   <IonInput
+                    type="text"
+                    maxlength={10}
                     value={formData.numeroDepartamento}
-                    onIonChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        numeroDepartamento: e.detail.value!,
-                      })
-                    }
+                    onIonChange={handleNumeroDepartamentoChange}
+                    placeholder="Ej: A, 101, 2B (máx: 10)"
                   />
                 </IonItem>
 
@@ -444,11 +576,10 @@ const AltaCliente: React.FC = () => {
                   <IonLabel position="floating">Código Postal</IonLabel>
                   <IonInput
                     type="text"
+                    maxlength={10}
                     value={formData.cp}
-                    onIonChange={(e) =>
-                      setFormData({ ...formData, cp: e.detail.value! })
-                    }
-                    placeholder="Ej: C1000, X5000, 1234"
+                    onIonChange={handleCodigoPostalChange}
+                    placeholder="Ej: C1000, X5000, 1234 (máx: 10)"
                   />
                 </IonItem>
               </div>

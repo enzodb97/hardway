@@ -382,6 +382,12 @@ const Indumentaria: React.FC = () => {
       return;
     }
 
+    if (nuevaPresentacion.cantidadUnidades > 100) {
+      setAlertMsg('La cantidad máxima permitida es 100 unidades');
+      setShowAlert(true);
+      return;
+    }
+
     // Verificar que no esté ya configurada
     const yaExiste = configuracionPresentaciones.some(
       c => c.idPresentacion === nuevaPresentacion.idPresentacion && c.estaActivo
@@ -478,6 +484,12 @@ const Indumentaria: React.FC = () => {
   const handleGuardarEdicion = async (config: ConfiguracionPresentacion) => {
     if (presentacionEditada.cantidadUnidades <= 0) {
       setAlertMsg('La cantidad debe ser mayor a 0');
+      setShowAlert(true);
+      return;
+    }
+
+    if (presentacionEditada.cantidadUnidades > 100) {
+      setAlertMsg('La cantidad máxima permitida es 100 unidades');
       setShowAlert(true);
       return;
     }
@@ -1179,8 +1191,9 @@ const Indumentaria: React.FC = () => {
           {
             name: 'cantidad',
             type: 'number',
-            placeholder: 'Cantidad a agregar',
-            min: 1
+            placeholder: 'Cantidad a agregar (máx: 1000)',
+            min: 1,
+            max: 1000
           },
           {
             name: 'motivo',
@@ -1212,6 +1225,12 @@ const Indumentaria: React.FC = () => {
               const cantidad = Number(data.cantidad);
               if (cantidad <= 0) {
                 setAlertMsg("La cantidad debe ser mayor a 0");
+                setShowAlert(true);
+                return false;
+              }
+              
+              if (cantidad > 1000) {
+                setAlertMsg("⚠️ La cantidad máxima permitida para incremento de stock es 1000 unidades");
                 setShowAlert(true);
                 return false;
               }
@@ -1744,7 +1763,7 @@ const Indumentaria: React.FC = () => {
                 </h3>
               </div>
               <p className="modal-reingreso-header-description">
-                Configure cómo se venderá esta indumentaria (por unidad, pack, caja cerrada)
+                Configure cómo se venderá esta indumentaria (por unidad, pack, caja)
               </p>
             </div>
 
@@ -1794,11 +1813,24 @@ const Indumentaria: React.FC = () => {
                                 <IonInput
                                   type="number"
                                   min={1}
+                                  max={100}
                                   value={presentacionEditada.cantidadUnidades}
-                                  onIonChange={(e) => setPresentacionEditada({
-                                    ...presentacionEditada,
-                                    cantidadUnidades: Number(e.detail.value)
-                                  })}
+                                  onIonChange={(e) => {
+                                    const valor = Number(e.detail.value);
+                                    if (valor > 100) {
+                                      setAlertMsg("⚠️ La cantidad máxima permitida es 100 unidades");
+                                      setShowAlert(true);
+                                      setPresentacionEditada({
+                                        ...presentacionEditada,
+                                        cantidadUnidades: 100
+                                      });
+                                      return;
+                                    }
+                                    setPresentacionEditada({
+                                      ...presentacionEditada,
+                                      cantidadUnidades: valor
+                                    });
+                                  }}
                                   style={{
                                     '--background': 'white',
                                     '--padding-start': '8px',
@@ -1922,13 +1954,26 @@ const Indumentaria: React.FC = () => {
                 </IonLabel>
                 <IonInput
                   type="number"
-                  placeholder="Ej: 5 para pack de 5"
+                  placeholder="Ej: 5 para pack de 5 (máx: 100)"
                   min={1}
+                  max={100}
                   value={nuevaPresentacion.cantidadUnidades}
-                  onIonChange={(e) => setNuevaPresentacion({
-                    ...nuevaPresentacion,
-                    cantidadUnidades: Number(e.detail.value)
-                  })}
+                  onIonChange={(e) => {
+                    const valor = Number(e.detail.value);
+                    if (valor > 100) {
+                      setAlertMsg("⚠️ La cantidad máxima permitida es 100 unidades");
+                      setShowAlert(true);
+                      setNuevaPresentacion({
+                        ...nuevaPresentacion,
+                        cantidadUnidades: 100
+                      });
+                      return;
+                    }
+                    setNuevaPresentacion({
+                      ...nuevaPresentacion,
+                      cantidadUnidades: valor
+                    });
+                  }}
                   className="modal-no-apta-input"
                 />
               </IonItem>

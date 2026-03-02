@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { downloadOutline } from "ionicons/icons";
 import React, { useEffect, useState, useRef } from "react";
+import { useHistory } from "react-router-dom";
 import {
   IonPage,
   IonHeader,
@@ -48,6 +49,7 @@ interface StockActual {
 const PAGE_SIZE = 10;
 
 const StockActual: React.FC = () => {
+  const history = useHistory();
   const [stock, setStock] = useState<StockActual[]>([]);
   const [pagina, setPagina] = useState(1);
   const [mostrarTodos, setMostrarTodos] = useState(false);
@@ -442,7 +444,7 @@ const StockActual: React.FC = () => {
                 <IonButton
                   className="stock-btn-back"
                   size="small"
-                  routerLink="/reportes"
+                  onClick={() => history.goBack()}
                 >
                   Volver
                 </IonButton>

@@ -568,7 +568,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.empty-icon {
+.empty-icon-3 {
   font-size: 5rem;
   color: #fdb40b;
   margin-bottom: 1.5rem;
@@ -1891,4 +1891,31 @@ ion-button[color="primary"] {
   }
 }
 
+/* ====================================
+   Estilos de Barra de Búsqueda
+   ==================================== */
+
+/* Filters Card - Estilo consistente con Envios */
+.picking-page .filters-card {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Searchbar - Estilo profesional con tema oscuro */
+.picking-page .custom-searchbar {
+  --background: rgba(255, 255, 255, 0.2);
+  --border-radius: 12px;
+  --color: #ffffff;
+  --placeholder-color: rgba(255, 255, 255, 0.8);
+  --icon-color: #ffffff;
+}
+
+/* Hover effect para searchbar */
+.picking-page .custom-searchbar:hover {
+  --background: rgba(255, 255, 255, 0.25);
+}
 

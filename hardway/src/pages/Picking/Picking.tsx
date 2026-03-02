@@ -28,6 +28,7 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
+  IonSearchbar,
   useIonViewWillEnter,
 } from "@ionic/react";
 import {
@@ -96,6 +97,9 @@ const Picking: React.FC = () => {
   // Estados de paginación
   const [page, setPage] = useState(1);
   const [showPageDropdown, setShowPageDropdown] = useState(false);
+  
+  // Estado para búsqueda
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Función para mapear idPresentacion a nombrePresentacion
   const obtenerNombrePresentacion = (idPresentacion: number | null | undefined): string => {
@@ -264,30 +268,62 @@ const Picking: React.FC = () => {
     }
   };
 
+  // Función para normalizar texto (eliminar acentos, mayúsculas y caracteres especiales)
+  const normalizar = (str: string) =>
+    (str || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Eliminar diacríticos (acentos)
+      .replace(/[^a-z0-9\s]/g, "") // Mantener letras, números y espacios
+      .replace(/\s+/g, " ") // Normalizar espacios múltiples a uno solo
+      .trim();
+
   // Función para filtrar tareas
   const filtrarTareas = (tipo: string) => {
     setFiltroActivo(tipo);
     setPage(1); // Resetear a la primera página al filtrar
     
+    let tareasFiltradas = [...tareas];
+    
     // Estados completados: Pendiente de Pago (2), Abonado (3), Despachado (4), Finalizado (5), Cancelado (6)
     const estadosCompletados = [2, 3, 4, 5, 6];
     
+    // Filtrar por término de búsqueda
+    if (searchTerm.trim()) {
+      const terminoNormalizado = normalizar(searchTerm);
+      
+      tareasFiltradas = tareasFiltradas.filter((tarea) => {
+        const numeroPedido = normalizar(tarea.numeroPedido?.toString() || "");
+        const nombreCliente = normalizar(tarea.nombreCliente || "");
+        const picker = normalizar(tarea.nombrePicker || "");
+        const estado = normalizar(tarea.estadoDescripcion || "");
+        
+        return (
+          numeroPedido.includes(terminoNormalizado) ||
+          nombreCliente.includes(terminoNormalizado) ||
+          picker.includes(terminoNormalizado) ||
+          estado.includes(terminoNormalizado)
+        );
+      });
+    }
+    
+    // Filtrar por tipo
     switch (tipo) {
       case 'todos':
-        setTareasFiltradas(tareas);
+        setTareasFiltradas(tareasFiltradas);
         break;
       case 'pendientes':
         // Tareas con estado "En Curso" (1) Y que no estén marcadas como completadas
-        setTareasFiltradas(tareas.filter(tarea => tarea.idEstado === 1 && !tarea.completado));
+        setTareasFiltradas(tareasFiltradas.filter(tarea => tarea.idEstado === 1 && !tarea.completado));
         break;
       case 'completadas':
         // Tareas completadas: pueden tener completado=1 O estar en estados finales
-        setTareasFiltradas(tareas.filter(tarea => 
+        setTareasFiltradas(tareasFiltradas.filter(tarea => 
           tarea.completado === 1 || estadosCompletados.includes(tarea.idEstado)
         ));
         break;
       default:
-        setTareasFiltradas(tareas);
+        setTareasFiltradas(tareasFiltradas);
     }
   };
 
@@ -312,11 +348,11 @@ const Picking: React.FC = () => {
     }
   };
 
-  // Actualizar tareas filtradas cuando cambian las tareas
+  // Actualizar tareas filtradas cuando cambian las tareas o el término de búsqueda
   useEffect(() => {
     filtrarTareas(filtroActivo);
     // eslint-disable-next-line
-  }, [tareas]);
+  }, [tareas, searchTerm]);
 
   const handleVerPickingList = async (numeroPedido: string) => {
     try {
@@ -636,6 +672,25 @@ const Picking: React.FC = () => {
           </IonGrid>
         </div>
 
+        {/* Barra de búsqueda */}
+        <IonCard className="filters-card" style={{ margin: '16px', marginTop: '8px' }}>
+          <IonCardContent style={{ padding: '12px' }}>
+            <IonGrid>
+              <IonRow>
+                <IonCol size="12" sizeMd="8">
+                  <IonSearchbar
+                    value={searchTerm}
+                    onIonInput={(e) => setSearchTerm(e.detail.value!)}
+                    placeholder="Buscar por N° de pedido o cliente"
+                    showClearButton="focus"
+                    className="custom-searchbar"
+                  />
+                </IonCol>
+              </IonRow>
+            </IonGrid>
+          </IonCardContent>
+        </IonCard>
+
         {/* Contenido Principal */}
         {loading ? (
           <div className="loading-container">
@@ -650,7 +705,7 @@ const Picking: React.FC = () => {
                   
                   {tareasFiltradas.length === 0 ? (
                     <div className="empty-state">
-                      <IonIcon icon={clipboardOutline} className="empty-icon" />
+                      <IonIcon icon={clipboardOutline} className="empty-icon-3" />
                       <h2>
                         {filtroActivo === 'todos' ? 'No hay tareas disponibles' : 
                          `No hay tareas ${

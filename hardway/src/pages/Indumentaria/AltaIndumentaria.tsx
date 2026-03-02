@@ -22,7 +22,8 @@ import {
   IonCardContent,
   IonLoading,
   IonToast,
-  IonIcon
+  IonIcon,
+  useIonViewWillEnter
 } from "@ionic/react";
 import {
   shirtOutline,
@@ -50,7 +51,22 @@ import {
   Rack
 } from "../../utils/indumentariaUtils";
 
+// Función para validar que solo contenga letras, números y espacios (sin caracteres especiales)
+const soloLetrasNumerosYEspacios = (texto: string): string => {
+  if (!texto) return texto;
+  // Permitir solo letras (incluyendo acentuadas y ñ), números y espacios
+  return texto.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '');
+};
 
+// Función para capitalizar la primera letra de cada palabra
+const capitalizar = (texto: string): string => {
+  if (!texto) return texto;
+  return texto
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
 
 const AltaIndumentaria: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -85,6 +101,8 @@ const AltaIndumentaria: React.FC = () => {
   const [nombresIndumentaria, setNombresIndumentaria] = useState<any[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<UnidadMedida[]>([]);
   const [racks, setRacks] = useState<Rack[]>([]);
+  const [datosAuxiliaresCargados, setDatosAuxiliaresCargados] = useState(false);
+  const [necesitaInicializacion, setNecesitaInicializacion] = useState(false);
 
   useEffect(() => {
     const inicializarDatos = async () => {
@@ -99,18 +117,7 @@ const AltaIndumentaria: React.FC = () => {
         setNombresIndumentaria(datos.nombresIndumentaria);
         setUnidadesMedida(datos.unidadesMedida);
         setRacks(datos.racks);
-
-        // Solo generar código automático si no es edición
-        if (!esEdicion) {
-          const siguienteCodigo = await obtenerSiguienteCodigoIndumentaria();
-          // Buscar el estado "Apta" y establecerlo por defecto
-          const estadoApta = datos.estados.find((e: Estado) => e.estadoIndumentaria.toLowerCase() === 'apta');
-          setForm(prev => ({ 
-            ...prev, 
-            codigoIndumentaria: siguienteCodigo,
-            idEstado: estadoApta ? String(estadoApta.idEstado) : ""
-          }));
-        }
+        setDatosAuxiliaresCargados(true);
       } catch (error) {
         if (error instanceof Error) {
           setAlertMsg(error.message);
@@ -121,7 +128,65 @@ const AltaIndumentaria: React.FC = () => {
       }
     };
     inicializarDatos();
-  }, [esEdicion]);
+  }, []);
+
+  // Hook de ciclo de vida de Ionic para limpiar el formulario al entrar a la página
+  useIonViewWillEnter(() => {
+    if (!esEdicion) {
+      // Resetear el formulario completamente cuando no es edición
+      const formularioLimpio = {
+        codigoIndumentaria: "",
+        nombre: "",
+        idColor: "",
+        idTalle: "",
+        idTela: "",
+        idCategoria: "",
+        idEstado: "",
+        idUnidadMedida: "",
+        idRack: "",
+        precio: "",
+        cantidad: "",
+        idPrecio: "",
+        idDetalle: "",
+        cantidadAnterior: ""
+      };
+      setForm(formularioLimpio);
+      setFormOriginal(formularioLimpio);
+      setHasUnsavedChanges(false);
+      setNecesitaInicializacion(true);
+    }
+  });
+
+  // Inicializar formulario cuando los datos auxiliares estén disponibles
+  useEffect(() => {
+    if (!esEdicion && datosAuxiliaresCargados && necesitaInicializacion && estados.length > 0) {
+      const inicializarFormularioNuevo = async () => {
+        try {
+          const siguienteCodigo = await obtenerSiguienteCodigoIndumentaria();
+          const estadoApta = estados.find((e: Estado) => e.estadoIndumentaria.toLowerCase() === 'apta');
+          
+          if (!estadoApta) {
+            console.error("No se encontró el estado 'Apta' en los datos");
+            setAlertMsg("Error: No se pudo encontrar el estado 'Apta' en el sistema. Por favor, contacte al administrador.");
+            setShowAlert(true);
+            return;
+          }
+          
+          setForm(prev => ({ 
+            ...prev, 
+            codigoIndumentaria: siguienteCodigo,
+            idEstado: String(estadoApta.idEstado)
+          }));
+          setNecesitaInicializacion(false);
+        } catch (error) {
+          console.error("Error al inicializar formulario:", error);
+          setAlertMsg("Error al inicializar el formulario. Por favor, recargue la página.");
+          setShowAlert(true);
+        }
+      };
+      inicializarFormularioNuevo();
+    }
+  }, [esEdicion, datosAuxiliaresCargados, necesitaInicializacion, estados]);
 
   useEffect(() => {
     if (esEdicion && id) {
@@ -141,10 +206,6 @@ const AltaIndumentaria: React.FC = () => {
         }
       };
       cargarPrendaExistente();
-    } else {
-      setForm(camposIniciales);
-      setFormOriginal(camposIniciales);
-      setHasUnsavedChanges(false);
     }
   }, [id, esEdicion]);
 
@@ -184,6 +245,18 @@ const AltaIndumentaria: React.FC = () => {
       
       // Convertir de vuelta a formato español (punto por coma) para mostrar en el input
       valor = valorNormalizado.replace(/\./g, ',');
+    }
+    
+    // Validación y formato para nombre
+    if (campo === "nombre" && valor) {
+      let valorValidado = soloLetrasNumerosYEspacios(valor);
+      
+      // Validar longitud máxima de 20 caracteres
+      if (valorValidado.length > 20) {
+        valorValidado = valorValidado.substring(0, 20);
+      }
+      
+      valor = capitalizar(valorValidado);
     }
     
     const newForm = { ...form, [campo]: valor };
@@ -356,10 +429,12 @@ Todos los campos marcados son obligatorios para registrar la indumentaria correc
                           <IonItem>
                             <IonLabel position="floating" class="titulo">Nombre</IonLabel>
                             <IonInput
+                              type="text"
+                              maxlength={20}
                               value={form.nombre}
                               onIonChange={(e) => handleChange("nombre", e.detail.value!)}
                               readonly={esEdicion}
-                              placeholder={esEdicion ? "No modificable en edición" : "Ej: Camisa Oxford"}
+                              placeholder={esEdicion ? "No modificable en edición" : "Ej: Camisa Oxford (máx: 20)"}
                               className={esEdicion ? "readonly-input" : ""}
                             />
                           </IonItem>
