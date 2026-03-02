@@ -4,6 +4,7 @@
   --ion-color-primary-rgb: 254, 181, 20; /* RGB del color #feb514 */
 }
 
+
 .menu-container {
   height: 100%;
   display: flex;
@@ -89,6 +90,7 @@
   margin-top: auto;
   border-top: 1px solid var(--ion-color-medium-tint);
   padding: 15px 0;
+  width: 190px;
 }
 
 .logout-item {

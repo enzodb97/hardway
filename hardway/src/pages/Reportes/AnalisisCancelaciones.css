@@ -195,6 +195,50 @@
   background: rgba(255, 107, 107, 0.15);
 }
 
+/* Fila expandible (clickeable) */
+.analisis-table-row-expandable {
+  cursor: pointer;
+  position: relative;
+}
+
+.analisis-table-row-expandable:hover {
+  background: rgba(255, 107, 107, 0.2) !important;
+  border-left: 4px solid #ff6b6b;
+}
+
+/* Filas de detalle (observaciones específicas) */
+.analisis-table-row-detalle {
+  background: rgba(20, 20, 20, 0.6) !important;
+  border-left: 3px solid rgba(255, 107, 107, 0.4);
+  min-height: 48px !important;
+  animation: slideDown 0.3s ease-out;
+}
+
+.analisis-table-row-detalle:hover {
+  background: rgba(30, 30, 30, 0.7) !important;
+  border-left-color: rgba(255, 107, 107, 0.6);
+}
+
+.analisis-table-row-detalle ion-col {
+  font-size: 0.85rem !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  padding: 0.5rem 0.5rem !important;
+}
+
+.analisis-detalle-indent {
+  padding-left: 1.5rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Ícono de expansión */
+.analisis-expand-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+  color: #ff6b6b;
+}
+
 .analisis-table-row ion-col {
   display: flex;
   align-items: center;
@@ -269,6 +313,25 @@
 .analisis-actions-container ion-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(255, 107, 107, 0.4);
+}
+
+.analisis-btn-graph {
+  --background: transparent;
+  --background-hover: rgba(255, 107, 107, 0.1);
+  --color: #ff6b6b;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #ff6b6b;
+}
+
+.analisis-btn-graph:hover {
+  --background: rgba(255, 107, 107, 0.2);
+}
+
+.analisis-btn-graph-active {
+  --background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  --background-hover: linear-gradient(135deg, #ee5a24, #d65019);
+  --color: white;
 }
 
 .analisis-btn-export {
@@ -356,6 +419,19 @@
   }
   100% {
     transform: translateX(100%);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 100px;
+    transform: translateY(0);
   }
 }
 

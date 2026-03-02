@@ -362,8 +362,29 @@ router.get("/cancelaciones-motivo", async (req, res) => {
       GROUP BY mc.idMotivo, mc.descripcion
       ORDER BY porcentaje DESC;
     `);
+
+    // Obtener detalles de "Otro motivo (especificar en observaciones)"
+    // Solo para pedidos con idMotivoCancelacion = 6
+    const [otrosMotivos] = await sequelize.query(`
+      WITH TotalOtros AS (
+        SELECT COUNT(*) AS total_otros
+        FROM pedido
+        WHERE idMotivoCancelacion = 6
+      )
+      SELECT
+        COALESCE(NULLIF(TRIM(observacionCancelacion), ''), 'Sin especificar') AS observacion,
+        COUNT(*) AS cantidad,
+        ROUND((COUNT(*) * 100.0 / (SELECT total_otros FROM TotalOtros)), 2) AS porcentaje
+      FROM pedido
+      WHERE idMotivoCancelacion = 6
+      GROUP BY observacionCancelacion
+      ORDER BY cantidad DESC;
+    `);
     
-    res.json(result);
+    res.json({
+      resumen: result,
+      otrosMotivos: otrosMotivos
+    });
   } catch (error) {
     console.error("Error en cancelaciones-motivo:", error);
     res

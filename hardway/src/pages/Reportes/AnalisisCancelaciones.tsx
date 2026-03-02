@@ -15,12 +15,13 @@ import {
   IonCardContent,
   IonIcon,
   IonToast,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { documentText, checkmarkCircle } from "ionicons/icons";
+import { documentText, checkmarkCircle, chevronForward, chevronDown } from "ionicons/icons";
 import { Pie } from "react-chartjs-2";
 import {
   Chart,
@@ -48,6 +49,12 @@ Chart.register(
   ChartDataLabels
 );
 
+interface MotivoCancelacionDetalle {
+  observacion: string;
+  cantidad: number;
+  porcentaje: number;
+}
+
 interface MotivoCancelacion {
   motivo: string;
   cantidad_de_pedidos: number;
@@ -56,6 +63,8 @@ interface MotivoCancelacion {
 
 const AnalisisCancelaciones: React.FC = () => {
   const [data, setData] = useState<MotivoCancelacion[]>([]);
+  const [otrosMotivos, setOtrosMotivos] = useState<MotivoCancelacionDetalle[]>([]);
+  const [expandido, setExpandido] = useState(false);
   const [toastExcel, setToastExcel] = useState(false);
   const [toastPDF, setToastPDF] = useState(false);
   const [incluirGrafico, setIncluirGrafico] = useState(false);
@@ -67,9 +76,10 @@ const AnalisisCancelaciones: React.FC = () => {
   const totalCancelaciones = data.reduce((sum, item) => sum + item.cantidad_de_pedidos, 0);
   const motivoMasComun = data.length > 0 ? data[0].motivo : "N/A";
 
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     axiosInstance.get("/api/reportes/cancelaciones-motivo").then((res) => {
-      setData(res.data);
+      setData(res.data.resumen || res.data);
+      setOtrosMotivos(res.data.otrosMotivos || []);
     });
   }, []);
 
@@ -138,10 +148,12 @@ const AnalisisCancelaciones: React.FC = () => {
       };
     }
     data.forEach((row) => {
+      const esOtroMotivo = row.motivo === "Otro motivo (especificar en observaciones)";
+      
       const r = sheet.addRow([
         row.motivo,
         row.cantidad_de_pedidos,
-        Number(row.porcentaje) / 100, // <-- Aquí divides por 100
+        Number(row.porcentaje) / 100,
       ]);
       for (let i = 1; i <= 3; i++) {
         r.getCell(i).alignment = { horizontal: "center", vertical: "middle" };
@@ -153,6 +165,39 @@ const AnalisisCancelaciones: React.FC = () => {
         };
       }
       r.getCell(3).numFmt = "0.00%";
+      
+      // Agregar filas de detalle si es "Otro motivo"
+      if (esOtroMotivo && otrosMotivos.length > 0) {
+        otrosMotivos.forEach((detalle) => {
+          const detalleRow = sheet.addRow([
+            `  • ${detalle.observacion}`,
+            detalle.cantidad,
+            Number(detalle.porcentaje) / 100,
+          ]);
+          
+          // Estilo para filas de detalle
+          detalleRow.getCell(1).font = { size: 10, italic: true };
+          detalleRow.getCell(1).alignment = { horizontal: "left", vertical: "middle", indent: 1 };
+          detalleRow.getCell(2).alignment = { horizontal: "center", vertical: "middle" };
+          detalleRow.getCell(3).alignment = { horizontal: "center", vertical: "middle" };
+          detalleRow.getCell(3).numFmt = "0.00%";
+          
+          // Fondo más claro para detalles
+          for (let i = 1; i <= 3; i++) {
+            detalleRow.getCell(i).fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFF5F5F5" },
+            };
+            detalleRow.getCell(i).border = {
+              top: { style: "thin", color: { argb: "FFEEEEEE" } },
+              left: { style: "thin", color: { argb: "FFEEEEEE" } },
+              bottom: { style: "thin", color: { argb: "FFEEEEEE" } },
+              right: { style: "thin", color: { argb: "FFEEEEEE" } },
+            };
+          }
+        });
+      }
     });
     [30, 20, 15].forEach((w, i) => {
       sheet.getColumn(i + 1).width = w;
@@ -177,7 +222,7 @@ const AnalisisCancelaciones: React.FC = () => {
           extension: "png",
         });
         sheet.addImage(imageId, {
-          tl: { col: 0, row: data.length + 3 },
+          tl: { col: 0, row: data.length + 7 },
           ext: { width: 600, height: 400 },
         });
       }
@@ -213,16 +258,49 @@ const AnalisisCancelaciones: React.FC = () => {
     doc.text(title, x, 18);
     doc.setFontSize(10);
     doc.text(`Fecha de emisión: ${fechaEmision}`, x, 25);
-    autoTable(doc, {
-      head: [["Motivo", "Cantidad de Pedidos", "% de Cancelaciones"]],
-      body: data.map((row) => [
+    
+    // Preparar datos con filas de detalle expandidas
+    const bodyData: any[] = [];
+    data.forEach((row) => {
+      const esOtroMotivo = row.motivo === "Otro motivo (especificar en observaciones)";
+      
+      // Agregar fila principal
+      bodyData.push([
         row.motivo,
         row.cantidad_de_pedidos,
         row.porcentaje + "%",
-      ]),
+      ]);
+      
+      // Agregar filas de detalle si es "Otro motivo"
+      if (esOtroMotivo && otrosMotivos.length > 0) {
+        otrosMotivos.forEach((detalle) => {
+          bodyData.push([
+            `  • ${detalle.observacion}`,
+            detalle.cantidad,
+            detalle.porcentaje + "%",
+          ]);
+        });
+      }
+    });
+    
+    autoTable(doc, {
+      head: [["Motivo", "Cantidad de Pedidos", "% de Cancelaciones"]],
+      body: bodyData,
       startY: 32,
       styles: { fontSize: 10, halign: "center" },
       headStyles: { fillColor: [254, 175, 0], halign: "center" },
+      didParseCell: function(data) {
+        // Aplicar estilo especial a filas de detalle (las que empiezan con "  •")
+        if (data.section === 'body' && data.column.index === 0) {
+          const cellText = data.cell.text[0];
+          if (cellText && cellText.startsWith('  •')) {
+            data.cell.styles.fontSize = 9;
+            data.cell.styles.fillColor = [245, 245, 245];
+            data.cell.styles.halign = 'left';
+            data.cell.styles.fontStyle = 'italic';
+          }
+        }
+      },
     });
 
     // Agregar gráfico debajo de la tabla si está incluido
@@ -369,19 +447,50 @@ const AnalisisCancelaciones: React.FC = () => {
                     </IonRow>
                     
                     {/* Datos */}
-                    {data.map((row, idx) => (
-                      <IonRow key={row.motivo + idx} className="analisis-table-row">
-                        <IonCol size="4" className="analisis-table-cell">
-                          {row.motivo}
-                        </IonCol>
-                        <IonCol size="4" className="analisis-table-cell">
-                          {row.cantidad_de_pedidos}
-                        </IonCol>
-                        <IonCol size="4" className="analisis-table-cell analisis-percentage-high">
-                          {row.porcentaje}%
-                        </IonCol>
-                      </IonRow>
-                    ))}
+                    {data.map((row, idx) => {
+                      const esOtroMotivo = row.motivo === "Otro motivo (especificar en observaciones)";
+                      const tieneDetalles = esOtroMotivo && otrosMotivos.length > 0;
+                      
+                      return (
+                        <React.Fragment key={row.motivo + idx}>
+                          <IonRow 
+                            className={`analisis-table-row ${tieneDetalles ? 'analisis-table-row-expandable' : ''}`}
+                            onClick={() => tieneDetalles && setExpandido(!expandido)}
+                          >
+                            <IonCol size="4" className="analisis-table-cell">
+                              {tieneDetalles && (
+                                <IonIcon 
+                                  icon={expandido ? chevronDown : chevronForward} 
+                                  className="analisis-expand-icon"
+                                />
+                              )}
+                              {row.motivo}
+                            </IonCol>
+                            <IonCol size="4" className="analisis-table-cell">
+                              {row.cantidad_de_pedidos}
+                            </IonCol>
+                            <IonCol size="4" className="analisis-table-cell analisis-percentage-high">
+                              {row.porcentaje}%
+                            </IonCol>
+                          </IonRow>
+                          
+                          {/* Filas de detalle expandidas */}
+                          {esOtroMotivo && expandido && otrosMotivos.map((detalle, detalleIdx) => (
+                            <IonRow key={`detalle-${detalleIdx}`} className="analisis-table-row analisis-table-row-detalle">
+                              <IonCol size="4" className="analisis-table-cell">
+                                <span className="analisis-detalle-indent">• {detalle.observacion}</span>
+                              </IonCol>
+                              <IonCol size="4" className="analisis-table-cell">
+                                {detalle.cantidad}
+                              </IonCol>
+                              <IonCol size="4" className="analisis-table-cell">
+                                {detalle.porcentaje}%
+                              </IonCol>
+                            </IonRow>
+                          ))}
+                        </React.Fragment>
+                      );
+                    })}
                   </IonGrid>
                 </IonCardContent>
               </IonCard>

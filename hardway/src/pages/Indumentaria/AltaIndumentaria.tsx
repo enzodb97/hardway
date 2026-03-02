@@ -210,22 +210,61 @@ const AltaIndumentaria: React.FC = () => {
   }, [id, esEdicion]);
 
   const handleChange = (campo: string, valor: string) => {
-    // Validación inmediata para cantidad - solo validar si se intenta establecer 0 manualmente
-    if (campo === "cantidad" && valor && parseInt(valor) < 0) {
-      setAlertMsg("La cantidad no puede ser negativa. Por favor, ingresa un valor válido de stock.");
-      setShowAlert(true);
-      return;
+    // Validación para cantidad - solo números enteros positivos
+    if (campo === "cantidad") {
+      if (valor) {
+        // Filtrar solo dígitos (eliminar letras y caracteres especiales)
+        const soloNumeros = valor.replace(/[^0-9]/g, '');
+        if (soloNumeros !== valor) {
+          // Si había caracteres no permitidos, mostrar alerta
+          setAlertMsg("La cantidad solo puede contener números enteros positivos.");
+          setShowAlert(true);
+          return;
+        }
+        
+        const numeroValor = parseInt(soloNumeros);
+        if (numeroValor < 0) {
+          setAlertMsg("La cantidad no puede ser negativa. Por favor, ingresa un valor válido de stock.");
+          setShowAlert(true);
+          return;
+        }
+        
+        // Validar máximo de 10000
+        if (numeroValor > 10000) {
+          setAlertMsg("La cantidad no puede superar las 10.000 unidades. Por favor, ingresa un valor válido.");
+          setShowAlert(true);
+          return;
+        }
+        
+        valor = soloNumeros;
+      }
     }
     
     // Validación y formato para precio
     if (campo === "precio" && valor) {
+      // Filtrar solo números, comas y puntos (eliminar letras y otros caracteres)
+      let valorFiltrado = valor.replace(/[^0-9.,]/g, '');
+      
       // Reemplazar comas por puntos para normalizar y validar
-      let valorNormalizado = valor.replace(/,/g, '.');
+      let valorNormalizado = valorFiltrado.replace(/,/g, '.');
       
       // Validar que sea un número válido
       const numeroValor = parseFloat(valorNormalizado);
-      if (isNaN(numeroValor) || numeroValor <= 0) {
+      if (isNaN(numeroValor)) {
+        setAlertMsg("El precio debe ser un número válido.");
+        setShowAlert(true);
+        return;
+      }
+      
+      if (numeroValor <= 0) {
         setAlertMsg("El precio debe ser mayor a 0. Por favor, ingresa un valor válido.");
+        setShowAlert(true);
+        return;
+      }
+      
+      // Validar máximo de 100000
+      if (numeroValor > 100000) {
+        setAlertMsg("El precio no puede superar los $100.000. Por favor, ingresa un valor válido.");
         setShowAlert(true);
         return;
       }

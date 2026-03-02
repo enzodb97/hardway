@@ -102,7 +102,7 @@ const StockActual: React.FC = () => {
     };
 
     sheet.mergeCells("A3:G3");
-    sheet.getCell("A3").value = `Productos con Stock menor a 30: ${
+    sheet.getCell("A3").value = `Productos con Stock menor o igual 30: ${
       stock.filter((s) => s.stock_actual <= 30).length
     }`;
     sheet.getCell("A3").alignment = { horizontal: "center" };
@@ -255,7 +255,7 @@ const StockActual: React.FC = () => {
     doc.text(title, x, 18);
     doc.setFontSize(10);
     doc.text(`Fecha de emisión: ${fechaEmision}`, x, 25);
-    doc.text(`Productos con Stock menor a 30: ${bajoStock.length}`, x, 31);
+    doc.text(`Productos con Stock menor o igual 30: ${bajoStock.length}`, x, 31);
     doc.text(`Total de ítems: ${stock.length}`, x, 37);
 
     autoTable(doc, {

@@ -15,6 +15,7 @@ import {
   IonCardContent,
   IonIcon,
   IonToast,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../config/axios";
@@ -130,7 +131,7 @@ const ProductosMasPedidos: React.FC = () => {
   const history = useHistory();
 
   // Cargar datos de tendencias por categorías
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     const cargarTendencias = async () => {
       try {
         const response = await axiosInstance.get(`/api/reportes/tendencias-categorias?meses=${periodoAnalisis}`);
@@ -418,18 +419,18 @@ const ProductosMasPedidos: React.FC = () => {
     };
     wsTendencias.getRow(2).height = 20;
 
-    // Definir columnas para tendencias
+    // Definir columnas para tendencias (sin header para evitar sobrescribir el título)
     wsTendencias.columns = [
-      { header: "Categoría", key: "categoria", width: 20 },
-      { header: "Periodo", key: "periodo", width: 12 },
-      { header: "Ventas", key: "ventas", width: 12, style: { numFmt: "#,##0" } },
-      { header: "Pedidos", key: "pedidos", width: 12, style: { numFmt: "#,##0" } },
-      { header: "Productos", key: "productos", width: 12, style: { numFmt: "#,##0" } },
-      { header: "Precio Prom.", key: "precio", width: 15, style: { numFmt: "$#,##0.00" } },
-      { header: "Valor Total", key: "valor", width: 15, style: { numFmt: "$#,##0.00" } },
-      { header: "Participación %", key: "participacion", width: 15, style: { numFmt: "0.00%" } },
-      { header: "Tendencia %", key: "tendencia", width: 15, style: { numFmt: "0.00%" } },
-      { header: "Dirección", key: "direccion", width: 15 },
+      { key: "categoria", width: 20 },
+      { key: "periodo", width: 12 },
+      { key: "ventas", width: 12, style: { numFmt: "#,##0" } },
+      { key: "pedidos", width: 12, style: { numFmt: "#,##0" } },
+      { key: "productos", width: 12, style: { numFmt: "#,##0" } },
+      { key: "precio", width: 15, style: { numFmt: "$#,##0.00" } },
+      { key: "valor", width: 15, style: { numFmt: "$#,##0.00" } },
+      { key: "participacion", width: 15, style: { numFmt: "0.00%" } },
+      { key: "tendencia", width: 15, style: { numFmt: "0.00%" } },
+      { key: "direccion", width: 15 },
     ];
 
     // Forzar la fila de encabezado manualmente

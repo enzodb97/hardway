@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   obtenerPedidosAbonados,
   despacharPedido,
@@ -86,17 +86,41 @@ const Envios: React.FC = () => {
   // Paginación
   const [pagina, setPagina] = useState(1);
   const porPagina = 6;
-  const totalPaginas = Math.ceil(pedidosFiltrados.length / porPagina);
-  const pedidosPaginados = pedidosFiltrados.slice(
-    (pagina - 1) * porPagina,
-    pagina * porPagina
-  );
+  
+  // Memoizar cálculos de paginación para mejor rendimiento
+  const totalPaginas = useMemo(() => {
+    return Math.ceil(pedidosFiltrados.length / porPagina);
+  }, [pedidosFiltrados.length, porPagina]);
+
+  const pedidosPaginados = useMemo(() => {
+    const inicio = (pagina - 1) * porPagina;
+    const fin = pagina * porPagina;
+    return pedidosFiltrados.slice(inicio, fin);
+  }, [pedidosFiltrados, pagina, porPagina]);
 
   // Funciones de navegación de página
   const goToFirstPage = () => setPagina(1);
-  const goToLastPage = () => setPagina(totalPaginas);
+  const goToLastPage = () => {
+    const ultimaPagina = Math.ceil(pedidosFiltrados.length / porPagina);
+    setPagina(ultimaPagina > 0 ? ultimaPagina : 1);
+  };
   const goToPreviousPage = () => setPagina(Math.max(1, pagina - 1));
-  const goToNextPage = () => setPagina(Math.min(totalPaginas, pagina + 1));
+  const goToNextPage = () => {
+    const ultimaPagina = Math.ceil(pedidosFiltrados.length / porPagina);
+    setPagina(Math.min(ultimaPagina, pagina + 1));
+  };
+
+  // Validar que la página actual es válida cuando cambian los pedidos filtrados
+  useEffect(() => {
+    if (pedidosFiltrados.length > 0) {
+      const paginasValidas = Math.ceil(pedidosFiltrados.length / porPagina);
+      if (pagina > paginasValidas) {
+        setPagina(paginasValidas);
+      }
+    } else {
+      setPagina(1);
+    }
+  }, [pedidosFiltrados.length, porPagina]); // Removido 'pagina' para evitar loop
 
   useEffect(() => {
     filtrarPedidos();
@@ -222,13 +246,20 @@ const Envios: React.FC = () => {
     }
 
     setPedidosFiltrados(pedidosFiltrados);
-    setPagina(1); // Resetear a la primera página
+    // Solo resetear a la primera página si los filtros afectan el total
+    const nuevasTotalPaginas = Math.ceil(pedidosFiltrados.length / porPagina);
+    if (pagina > nuevasTotalPaginas && nuevasTotalPaginas > 0) {
+      setPagina(nuevasTotalPaginas);
+    } else if (pedidosFiltrados.length === 0) {
+      setPagina(1);
+    }
   };
 
   // Función para filtrar por estadísticas
   const filtrarPorEstadisticas = (tipo: string) => {
     setFiltroActivo(tipo);
     setSearchTerm(""); // Limpiar búsqueda
+    setPagina(1); // Resetear a la primera página al cambiar filtro
     
     switch (tipo) {
       case 'pendientes':

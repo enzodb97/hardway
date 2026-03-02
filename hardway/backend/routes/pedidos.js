@@ -638,7 +638,7 @@ router.put("/notificaciones/:idNotificacion/resolver", async (req, res) => {
           }
         );
         
-        mensajeParaPicker = `✅ Resolución: El vendedor autorizó CONTINUAR con el pedido ${numeroPedido} a pesar del problema reportado. Procede con la preparación normal. ${observacionesResolucion ? `Instrucciones: ${observacionesResolucion}` : ''}`;
+        mensajeParaPicker = `✅ Resolución: El vendedor autorizó CONTINUAR con el pedido ${numeroPedido}. Procede con la preparación normal. ${observacionesResolucion ? `Instrucciones: ${observacionesResolucion}` : ''}`;
         break;
         
       // ------------------------------------------
